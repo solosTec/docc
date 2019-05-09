@@ -1,0 +1,5 @@
+.list(type:unordered , style: 'disc'
+ , items: [(item one), (item two), (and item number .i 3)])
+
+ .set(name:DocScript, language:C++)
+

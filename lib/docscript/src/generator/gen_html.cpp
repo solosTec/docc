@@ -1,0 +1,756 @@
+/*
+ * The MIT License (MIT)
+ * 
+ * Copyright (c) 2019 Sylko Olzscher 
+ * 
+ */ 
+
+#include <docscript/generator/gen_html.h>
+#include "filter/json_to_html.h"
+#include "filter/cpp_to_html.h"
+#include "filter/docscript_to_html.h"
+#include "filter/text_to_html.h"
+#include "filter/binary_to_html.h"
+#include "filter/html_to_html.h"
+#include <html/node.hpp>
+
+#include <cyng/vm/generator.h>
+#include <cyng/io/serializer.h>
+#include <cyng/value_cast.hpp>
+#include <cyng/numeric_cast.hpp>
+#include <cyng/dom/reader.h>
+#include <cyng/crypto/base64.h>
+
+#include <boost/algorithm/string.hpp>
+#include <boost/uuid/uuid_io.hpp>
+
+namespace docscript
+{
+
+	gen_html::gen_html(std::vector< boost::filesystem::path > const& inc, bool body_only)
+		: generator(inc)
+		, footnotes_()
+		, body_only_(body_only)
+	{
+		register_this();
+	}
+
+	void gen_html::register_this()
+	{
+		generator::register_this();
+
+		vm_.register_function("demo", 0, std::bind(&gen_html::demo, this, std::placeholders::_1));
+
+		vm_.register_function("generate.file", 1, std::bind(&gen_html::generate_file, this, std::placeholders::_1));
+		vm_.register_function("generate.meta", 1, std::bind(&gen_html::generate_meta, this, std::placeholders::_1));
+
+		vm_.register_function("convert.numeric", 1, std::bind(&gen_html::convert_numeric, this, std::placeholders::_1));
+		vm_.register_function("convert.alpha", 1, std::bind(&gen_html::convert_alpha, this, std::placeholders::_1));
+
+		vm_.register_function("paragraph", 1, std::bind(&gen_html::paragraph, this, std::placeholders::_1));
+		vm_.register_function("quote", 1, std::bind(&gen_html::quote, this, std::placeholders::_1));
+		vm_.register_function("list", 1, std::bind(&gen_html::list, this, std::placeholders::_1));
+		vm_.register_function("link", 1, std::bind(&gen_html::link, this, std::placeholders::_1));
+		vm_.register_function("figure", 1, std::bind(&gen_html::figure, this, std::placeholders::_1));
+		vm_.register_function("code", 1, std::bind(&gen_html::code, this, std::placeholders::_1));
+		vm_.register_function("def", 1, std::bind(&gen_html::def, this, std::placeholders::_1));
+
+		vm_.register_function("i", 1, std::bind(&gen_html::format_italic, this, std::placeholders::_1));
+		vm_.register_function("b", 1, std::bind(&gen_html::format_bold, this, std::placeholders::_1));
+		vm_.register_function("bold", 1, std::bind(&gen_html::format_bold, this, std::placeholders::_1));
+		vm_.register_function("color", 1, std::bind(&gen_html::format_color, this, std::placeholders::_1));
+
+		vm_.register_function("header", 1, std::bind(&gen_html::header, this, std::placeholders::_1));
+		vm_.register_function("h1", 1, std::bind(&gen_html::section, this, 1, std::placeholders::_1));
+		vm_.register_function("h2", 1, std::bind(&gen_html::section, this, 2, std::placeholders::_1));
+		vm_.register_function("h3", 1, std::bind(&gen_html::section, this, 3, std::placeholders::_1));
+		vm_.register_function("h4", 1, std::bind(&gen_html::section, this, 4, std::placeholders::_1));
+		vm_.register_function("h5", 1, std::bind(&gen_html::section, this, 5, std::placeholders::_1));
+		vm_.register_function("h6", 1, std::bind(&gen_html::section, this, 6, std::placeholders::_1));
+		vm_.register_function("footnote", 1, std::bind(&gen_html::make_footnote, this, std::placeholders::_1));
+
+	}
+
+	void gen_html::generate_file(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+
+		auto const p = cyng::value_cast(frame.at(0), boost::filesystem::path());
+		std::ofstream ofs(p.string(), std::ios::out | std::ios::trunc);
+		if (!ofs.is_open())
+		{
+			std::cerr
+				<< "***error cannot open output file ["
+				<< p
+				<< ']'
+				<< std::endl;
+		}
+		else
+		{
+			//
+			//	provide a slug if not defined yet.
+			//
+			//slug();
+
+			//
+			//	write output file
+			//
+			auto pos = frame.begin();
+			auto end = frame.end();
+			//emit_file(ofs, pos, end);
+			emit_file(ofs, std::next(pos), end);
+		}
+	}
+
+	std::ofstream& gen_html::emit_file(std::ofstream& ofs, cyng::vector_t::const_iterator pos, cyng::vector_t::const_iterator end) const
+	{
+		if (!body_only_) {
+			emit_doctype(ofs);
+			emit_head(ofs);
+		}
+		emit_body(ofs, pos, end);
+		if (!body_only_) {
+			ofs
+				<< "</html>"
+				<< std::endl
+				;
+		}
+		return ofs;
+
+	}
+
+	std::ofstream& gen_html::emit_doctype(std::ofstream& ofs) const
+	{
+		ofs
+			<< "<!doctype html>"
+			<< std::endl
+			<< "<html lang=\""
+			<< language_
+			<< "\">"
+			<< std::endl
+			;
+		return ofs;
+	}
+
+	std::ofstream& gen_html::emit_head(std::ofstream& ofs) const
+	{
+		ofs
+			<< "<head>"
+			<< std::endl
+			<< "\t<meta charset=\"utf-8\" />"
+			<< std::endl
+			;
+
+		emit_meta(ofs);
+		emit_styles(ofs);
+
+		ofs
+			<< "</head>"
+			<< std::endl
+			;
+
+		return ofs;
+	}
+
+	std::ofstream& gen_html::emit_meta(std::ofstream& ofs) const
+	{
+		//	ToDo: 
+		return ofs;
+	}
+
+	std::ofstream& gen_html::emit_styles(std::ofstream& ofs) const
+	{
+		ofs
+			<< "\t<style>"
+			<< std::endl
+			<< "\t\tbody { "
+			<< "\t\t\tfont-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; "
+			<< std::endl
+			//	https://jrl.ninja/etc/1/
+			<< "\t\t\tmax-width: 52rem; "
+			<< std::endl
+			<< "\t\t\tpadding: 2rem; "
+			<< std::endl
+			<< "\t\t\tmargin: auto; "
+			<< std::endl
+			<< "\t\t}"
+			<< std::endl
+			<< "\t\tblockquote > p { margin-bottom: 1px; }"
+			<< std::endl
+			<< "\t\tpre { background-color: #fafafa; }"
+			<< std::endl
+
+			<< "\t\tpre > code:hover {"
+			<< std::endl
+			<< "\t\t\tbackground-color: orange;"
+			<< std::endl
+			<< "\t\t}"
+			<< std::endl
+
+			<< "\t\tblockquote {"
+			<< std::endl
+			<< "\t\t\tborder-left: 4px solid #eee;"
+			<< std::endl
+			<< "\t\t\tpadding-left: 10px;"
+			<< std::endl
+			<< "\t\t\tcolor: #777;"
+			<< std::endl
+			<< "\t\t\tmargin: 16px 20px;"
+			<< std::endl
+			<< "\t\t}"
+			<< std::endl
+
+			<< "\t\timg {"
+			<< std::endl
+			<< "\t\t\tmax-width: 95%;"
+			<< std::endl
+			<< "\t\t\tborder: 2px solid #777;"
+			<< std::endl
+			<< "\t\t}"
+			<< std::endl
+
+			//	definition lists with flexbox
+			<< "\t\tdl {"
+			<< std::endl
+			<< "\t\t\tdisplay: flex;"
+			<< std::endl
+			<< "\t\t\tflex-flow: row wrap;"
+			<< std::endl
+			<< "\t\t}"
+			<< std::endl
+			<< "\t\tdt {"
+			<< std::endl
+			<< "\t\t\tfont-weight: bold;"
+			<< std::endl
+			<< "\t\t\tflex-basis: 20% ;"
+			<< std::endl
+			<< "\t\t}"
+			<< std::endl
+			<< "\t\tdt::after {"
+			<< std::endl
+			<< "\t\t\tcontent: \":\";"
+			<< std::endl
+			<< "\t\t}"
+			<< std::endl
+			<< "\t\tdd {"
+			<< std::endl
+			<< "\t\t\tflex-basis: 70%;"
+			<< std::endl
+			<< "\t\t\tflex-grow: 1;"
+			<< std::endl
+			<< "\t\t}"
+			<< std::endl
+			<< "\t</style>"
+			<< std::endl
+			;
+		return ofs;
+	}
+
+	std::ofstream& gen_html::emit_body(std::ofstream& ofs, cyng::vector_t::const_iterator pos, cyng::vector_t::const_iterator end) const
+	{
+		ofs
+			<< "<body>"
+			<< std::endl
+			;
+
+		while (pos != end) {
+			emit_body(ofs, *pos);
+			++pos;
+		}
+
+		emit_footnotes(ofs);
+
+		ofs
+			<< "</body>"
+			<< std::endl
+			;
+		return ofs;
+	}
+
+	std::ofstream& gen_html::emit_body(std::ofstream& ofs, cyng::object obj) const
+	{
+		ofs
+			<< cyng::io::to_str(obj)
+			<< std::endl
+			;
+		return ofs;
+	}
+
+	std::ofstream& gen_html::emit_footnotes(std::ofstream& ofs) const
+	{
+		if (!footnotes_.empty()) {
+
+			//
+			//	horizontal line
+			//
+			ofs 
+				<< html::hr().to_str()
+				<< std::endl;
+
+			//
+			//	footnotes
+			//
+			std::size_t idx{ 0 };
+			std::stringstream ss;
+			for (auto const& note : footnotes_) {
+
+				++idx;
+
+				ss
+					<< '['
+					<< idx
+					<< ']'
+					<< ' '
+					<< note.get_note()
+					;
+
+				ofs 
+					<< html::p(html::id_(note.get_tag()), ss.str()).to_str()
+					<< std::endl;
+
+				ss.str("");
+			}
+		}
+		return ofs;
+	}
+
+	void gen_html::generate_meta(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+
+		auto const p = cyng::value_cast(frame.at(0), boost::filesystem::path());
+	}
+
+	void gen_html::convert_numeric(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+
+		ctx.push(frame.at(0));
+	}
+
+	void gen_html::convert_alpha(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+//		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+
+		auto str = cyng::value_cast<std::string>(frame.at(0), "");
+
+		//
+		//	escape HTML entities
+		//
+		replace_all(str, "&", "&amp;");
+		replace_all(str, "<", "&lt;");
+		replace_all(str, ">", "&gt;");
+		replace_all(str, "\"", "&quot;");
+		replace_all(str, "'", "&apos;");
+		//replace_all(str, "*", "&ast;");
+		//replace_all(str, "#", "&num;");
+		ctx.push(cyng::make_object(str));
+	}
+
+	void gen_html::paragraph(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+//		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		std::string par = accumulate_plain_text(frame);
+//		for (auto obj : frame) {
+//			par.append(cyng::io::to_str(obj));
+//			par.append(" ");
+//		}
+		auto el = html::p(par);
+		ctx.push(cyng::make_object(el.to_str()));
+	}
+
+	void gen_html::quote(cyng::context& ctx)
+	{
+		//	[%(("q":{1,2,3}),("source":Earl Wilson),("url":https://www.brainyquote.com/quotes/quotes/e/earlwilson385998.html))]
+		auto const frame = ctx.get_frame();
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		auto const reader = cyng::make_reader(frame.at(0));
+
+		//	Attribution for the quotation, if any, must be placed outside the blockquote element.
+		//	structure:
+		//	<figure>
+		//		<blockquote cite=[CITE]>
+		//			<p>[QUOTE]</p>
+		//		</blockquote>
+		//		<figcaption>
+		//			<cite>[SOURCE]</cite>
+		//		</figcaption>
+		//	</figure>
+		//
+		auto const cite = cyng::value_cast<std::string>(reader.get("url"), "");
+		auto const source = cyng::value_cast<std::string>(reader.get("source"), "");
+		auto const quote = accumulate_plain_text(reader.get("q"));
+		auto const el = html::figure(html::blockquote(html::cite_(cite), quote), html::figcaption(html::cite(source)));
+		ctx.push(cyng::make_object(el.to_str()));
+	}
+
+	void gen_html::list(cyng::context& ctx)
+	{
+		//	[%(("items":[<p>one </p>,<p>two </p>,<p>three </p>]),("style":{lower-roman}),("type":ordered))]
+		auto const frame = ctx.get_frame();
+		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+
+		auto const reader = cyng::make_reader(frame.at(0));
+		auto const type = cyng::value_cast<std::string>(reader.get("type"), "ordered");
+		auto const style = cyng::value_cast<std::string>(reader.get("style"), "disc");
+		cyng::vector_t items;
+		items = cyng::value_cast(reader.get("items"), items);
+
+		auto el = (boost::algorithm::equals(type, "ordered") || boost::algorithm::equals(type, "ol"))
+			? html::ol(html::style_("list-style-type:" + style))
+			: html::ul(html::style_("list-style-type:" + style));
+
+		for (auto const& item : items) {
+			el += html::li(accumulate_plain_text(item));
+		}
+
+		ctx.push(cyng::make_object(el.to_str()));
+	}
+
+	void gen_html::link(cyng::context& ctx)
+	{
+		//	[%(("text":{LaTeX}),("url":{https,:,//www,.,latex-project,.,org/}))]
+		auto const frame = ctx.get_frame();
+		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		auto const reader = cyng::make_reader(frame.at(0));
+		auto const text = accumulate_plain_text(reader.get("text"));
+		auto const url = cyng::io::to_str(reader.get("url"));
+		auto const title = accumulate_plain_text(reader.get("title"));
+
+		auto const el = html::a(html::href_(url), html::title_(title), text);
+		ctx.push(cyng::make_object(el.to_str()));
+	}
+
+	void gen_html::figure(cyng::context& ctx)
+	{
+		//	  [%(("alt":{Giovanni,Bellini,,,Man,wearing,a,turban}),("caption":{Giovanni,Bellini,,,Man,wearing,a,turban}),("source":LogoSmall.jpg),("tag":{338d542a-a4e3-4a4c-9efe-b8d3032306c3}))]
+		auto const frame = ctx.get_frame();
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+
+		auto const reader = cyng::make_reader(frame.at(0));
+		auto const alt = accumulate_plain_text(reader.get("alt"));
+		auto const caption = accumulate_plain_text(reader.get("caption"));
+		auto const source = cyng::io::to_str(reader.get("source"));
+		auto const tag = cyng::io::to_str(reader.get("tag"));
+
+		const boost::filesystem::path p = resolve_path(source);
+		std::ifstream file(p.string(), std::ios::binary | std::ios::ate);
+		if (!file.is_open())
+		{
+			std::cerr
+				<< "***error cannot open figure file ["
+				<< source
+				<< "]"
+				<< std::endl;
+			ctx.push(cyng::make_object("cannot open file [" + source + "]"));
+		}
+		else 
+		{
+			//
+			//	do not skip 
+			//
+			file.unsetf(std::ios::skipws);
+
+			//
+			//	get file size
+			//
+			std::streamsize size = file.tellg();
+			file.seekg(0, std::ios::beg);
+
+			//
+			//	read into buffer
+			//
+			cyng::buffer_t buffer(size);
+			file.read(buffer.data(), size);
+			BOOST_ASSERT(file.gcount() == size);
+
+			//<figure>
+			//  <img src="SOURCE" alt="ALT">
+			//  <figcaption>CAPTION</figcaption>
+			//</figure>
+				
+			//
+			//	encode image as base 64
+			//
+			//"data:image/" + get_extension(p) + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size())
+
+			auto const el = html::figure(html::id_(tag), html::img(html::alt_(alt), html::src_("data:image/" + get_extension(p) + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size()))), html::figcaption(caption));
+			ctx.push(cyng::make_object(el.to_str()));
+
+		}
+	}
+
+	void gen_html::code(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		auto const reader = cyng::make_reader(frame.at(0));
+		auto const caption = accumulate_plain_text(reader.get("caption"));
+		auto const line_numbers = value_cast(reader.get("linenumbers"), false);
+
+		auto const source = cyng::value_cast<std::string>(reader.get("source"), "source.txt");
+		auto const p = resolve_path(source);
+		auto const language = cyng::value_cast(reader.get("language"), get_extension(p));
+
+		if (boost::filesystem::exists(p) && boost::filesystem::is_regular(p)) {
+
+			std::stringstream ss;
+			if (boost::algorithm::iequals(language, "json")) {
+
+				std::ifstream  ifs(p.string());
+
+				ss << "<pre>";
+				std::string const inp(static_cast<std::stringstream const&>(std::stringstream() << ifs.rdbuf()).str());
+				json_to_html filter(line_numbers, uuid_gen_());
+				filter.convert(ss, inp);
+				ss << "</pre>" << std::endl;
+
+			}
+			else if (boost::algorithm::equals(language, "C++") || boost::algorithm::iequals(language, "cpp")) {
+
+				std::ifstream  ifs(p.string());
+				ss << "<pre>" << std::endl;
+				std::string const inp(static_cast<std::stringstream const&>(std::stringstream() << ifs.rdbuf()).str());
+				cpp_to_html filter(line_numbers, uuid_gen_());
+				filter.convert(ss, inp);
+				ss << "</code></pre>" << std::endl;
+			}
+			else if (boost::algorithm::iequals(language, "docscript")) {
+
+				std::ifstream  ifs(p.string());
+				ss << "<pre>";
+				std::string const inp(static_cast<std::stringstream const&>(std::stringstream() << ifs.rdbuf()).str());
+				docscript_to_html filter(line_numbers, uuid_gen_());
+				filter.convert(ss, inp);
+				ss << "</code></pre>" << std::endl;
+			}
+			else if (boost::algorithm::equals(language, "txt") || boost::algorithm::iequals(language, "text")) {
+
+				std::ifstream  ifs(p.string());
+				ss << "<pre>" << std::endl;
+				std::string const inp(static_cast<std::stringstream const&>(std::stringstream() << ifs.rdbuf()).str());
+				text_to_html filter(line_numbers, uuid_gen_());
+				filter.convert(ss, inp);
+				ss << "</code></pre>" << std::endl;
+			}
+			else if (boost::algorithm::equals(language, "bin") || boost::algorithm::iequals(language, "binary")) {
+
+				// binary mode required
+				std::ifstream  ifs(p.string(), std::ios::binary);
+				ifs.unsetf(std::ios::skipws);
+				ss << "<pre>" << std::endl;
+				cyng::buffer_t const inp((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+				//cyng::buffer_t const inp(static_cast<std::stringstream const&>(std::stringstream() << ifs.rdbuf()).str());
+				binary_to_html filter(line_numbers, uuid_gen_());
+				filter.convert(ss, inp);
+				ss << "</code></pre>" << std::endl;
+			}
+			else if (boost::algorithm::equals(language, "html") || boost::algorithm::iequals(language, "htm")) {
+
+				std::ifstream  ifs(p.string());
+				ss << "<pre>" << std::endl;
+				std::string const inp(static_cast<std::stringstream const&>(std::stringstream() << ifs.rdbuf()).str());
+				html_to_html filter(line_numbers, uuid_gen_());
+				filter.convert(ss, inp);
+				ss << "</code></pre>" << std::endl;
+			}
+			else {
+				std::ifstream  ifs(p.string());
+				ss
+					<< "<pre><code>"
+					<< std::endl
+					<< ifs.rdbuf()
+					<< std::endl
+					<< "</code></pre>"
+					<< std::endl
+					;
+			}
+
+			ctx.push(cyng::make_object(ss.str()));
+		}
+		else {
+
+			std::cerr
+				<< "***error ["
+				<< p
+				<< "] does not exist or is not a regular file"
+				<< std::endl;
+				auto const el = html::strong(p.string());
+				ctx.push(cyng::make_object(el.to_str()));
+
+		}
+	}
+
+	void gen_html::def(cyng::context& ctx)
+	{
+		//	[%(("abstract syntax":[Specification,of,a,structure]),("big endian":[A,byte,order,sequence]))]
+		auto const frame = ctx.get_frame();
+		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+
+		std::stringstream ss;
+		ss
+			<< "<dl>"
+			<< std::endl
+			;
+
+		cyng::param_map_t defs;
+		defs = cyng::value_cast(frame.at(0), defs);
+		for (auto const& def : defs) {
+			ss
+				<< html::dt(def.first).to_str()
+				<< '\t'
+				<< html::dd(accumulate_plain_text(def.second)).to_str()
+				<< std::endl
+				;
+		}
+
+		ss
+			<< "</dl>"
+			<< std::endl
+			;
+		ctx.push(cyng::make_object(ss.str()));
+	}
+
+	void gen_html::format_italic(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		auto el = html::em(accumulate_plain_text(frame));
+		ctx.push(cyng::make_object(el.to_str()));
+	}
+
+	void gen_html::format_bold(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		auto el = html::b(accumulate_plain_text(frame));
+		ctx.push(cyng::make_object(el.to_str()));
+	}
+
+	void gen_html::format_color(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+
+		auto const reader = cyng::make_reader(frame);
+		const auto map = cyng::value_cast(reader.get(0), cyng::param_map_t());
+
+		if (!map.empty()) {
+			auto const color = map.begin()->first;
+			auto const str = accumulate_plain_text(map.begin()->second);
+			auto el = html::span(html::style_("color:" + color), str);
+			ctx.push(cyng::make_object(el.to_str()));
+		}
+		else {
+
+			ctx.push(cyng::make_object("***error in COLOR definition"));
+		}
+	}
+
+	void gen_html::header(cyng::context& ctx)
+	{
+		//	[%(("level":1),("tag":{79bf3ba0-2362-4ea5-bcb5-ed93844ac59a}),("title":{Basics}))]
+		auto const frame = ctx.get_frame();
+		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+
+		auto const reader = cyng::make_reader(frame.at(0));
+		auto const title = accumulate_plain_text(reader.get("title"));
+		auto const tag = cyng::io::to_str(reader.get("tag"));
+		auto const level = cyng::numeric_cast<std::size_t>(reader.get("level"), 0ul);
+
+		auto const number = content_table_.add(level, uuid_gen_(), title);
+		auto const header = create_section(level, tag, number + " " + title);
+		std::cout << header << std::endl;
+		ctx.push(cyng::make_object(header));
+	}
+
+	std::string gen_html::create_section(std::size_t level, std::string tag, std::string title)
+	{
+		switch (level) {
+		case 1:	return html::h1(html::id_(tag), title).to_str();
+		case 2: return html::h2(html::id_(tag), title).to_str();
+		case 3: return html::h3(html::id_(tag), title).to_str();
+		case 4: return html::h4(html::id_(tag), title).to_str();
+		case 5: return html::h5(html::id_(tag), title).to_str();
+		case 6: return html::h6(html::id_(tag), title).to_str();
+		default:
+			break;
+		}
+		return title;
+	}
+
+	void gen_html::section(int level, cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+
+		auto const title = accumulate_plain_text(frame);
+		auto const tag = uuid_gen_();
+		auto const number = content_table_.add(level, tag, title);
+		auto const header = create_section(level, boost::uuids::to_string(tag), number + " " + title);
+		std::cout << header << std::endl;
+		ctx.push(cyng::make_object(header));
+	}
+
+	void gen_html::make_footnote(cyng::context& ctx)
+	{
+		//	[This,is,a,footnote,.]
+		auto const frame = ctx.get_frame();
+		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+
+		auto const note = accumulate_plain_text(frame);
+		auto const tag = uuid_gen_();
+		footnotes_.emplace_back(footnote(tag, note));
+		auto const idx = footnotes_.size();
+
+		std::stringstream ss;
+		ss
+			<< '['
+			<< idx
+			<< ']'
+			;
+		auto const el = html::sup(html::a(html::href_("#" + boost::uuids::to_string(tag)), ss.str()));
+
+		ctx.push(cyng::make_object(el.to_str()));
+	}
+
+	void gen_html::print_symbol(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		auto const symbol = cyng::value_cast<std::string>(frame.at(0), "");
+		if (boost::algorithm::equals(symbol, "pilgrow")) {
+			ctx.push(cyng::make_object("&para;"));
+		}
+		else if (boost::algorithm::equals(symbol, "copyright")) {
+			ctx.push(cyng::make_object("&copy;"));
+		}
+		else if (boost::algorithm::equals(symbol, "registered")) {
+			ctx.push(cyng::make_object("&reg;"));
+		}
+		else {
+			ctx.push(cyng::make_object(symbol));
+		}
+	}
+
+	void gen_html::demo(cyng::context& ctx)
+	{
+		//	 [%(("red":{spiced,up}))]
+		auto const frame = ctx.get_frame();
+		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+
+		auto const reader = cyng::make_reader(frame);
+		auto const map = cyng::value_cast(reader.get(0), cyng::param_map_t());
+
+		ctx.push(cyng::make_object("DEMO"));
+	}
+
+
+}
+
+
