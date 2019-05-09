@@ -1,0 +1,2 @@
+# docScript
+Extensible document generator
