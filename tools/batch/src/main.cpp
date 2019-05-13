@@ -11,6 +11,7 @@
 #include <boost/predef.h>
 #include <fstream>
 #include <iostream>
+#include <DOCC_project_info.h>
 #include <CYNG_project_info.h>
 #include "batch.h"
 #if BOOST_OS_WINDOWS
@@ -23,7 +24,8 @@
  *
  * Start with
  * @code
- * build/docc -V9 C:\projects\cyng\tools\docc\doc
+ * build/docc -V9 ~/projects/docc/src/main/examples
+ * build/docc -V9 C:\projects\docc\src\main\examples
  * @endcode
  */
 int main(int argc, char* argv[]) {
@@ -94,7 +96,7 @@ int main(int argc, char* argv[]) {
 		{
 			std::cout
 				<< "batch v"
-				<< CYNG_VERSION
+				<< DOCC_VERSION
 				<< " (based on cyng v"
 				<< CYNG_VERSION
 				<< ")"
@@ -107,12 +109,10 @@ int main(int argc, char* argv[]) {
 		{
 			std::cout
 				<< "last built at : "
-				<< __DATE__
-				<< " "
-				<< __TIME__
+				<< DOCC_BUILD_DATE
 				<< std::endl
 				<< "Platform      : "
-				<< CYNG_PLATFORM
+				<< DOCC_PLATFORM
 				<< std::endl
 				<< "Compiler      : "
 				<< BOOST_COMPILER

@@ -24,40 +24,12 @@
  *
  * Start with
  * @code
- * build/docc -V9 C:\projects\cyng\tools\docc\doc\intro
+ * build/docc -V9 ~/projects/docc/src/main/examples/readme
+ * build/docc -V9 C:\projects\docc\src\main\examples\readme
  * @endcode
  */
 
 int main(int argc, char* argv[]) {
-
-	//auto el = html::h1("Hello,World!");
-	//std::cout << el.to_str() << std::endl;
-
-	//auto a1 = html::charset_("utf-8");
-	//auto b = std::is_base_of<html::attr, typename std::decay<decltype(a1)>::type>::value;
-	//std::cout << a1.to_str() << std::endl;
-
-
-	//auto el2 = html::meta(html::charset_("utf-8"));
-	//std::cout << el2.to_str() << std::endl;
-
-	//auto page = html::html(
-	//	html::lang_("en"),
-	//	html::head(
-	//		html::meta(html::charset_("utf-8")),
-	//		html::meta(html::http_equiv_("X-UA-Compatible"), html::content_("IE=EDGE")),
-	//		html::meta(html::name_("viewport"), html::content_("width=device-width, initial-scale=1")),
-	//		html::title("Test Page")
-	//	),
-	//	html::body(
-	//		html::div(
-	//			html::h1("hello, world!")
-	//		),
-	//		html::p(html::class_("myClass"), "paragraph-1", html::a(html::href_("#top"), "LINK"), "paragraph-2")
-	//	)
-	//);
-	//std::cout << page.to_str() << std::endl;
-
 
 	try
 	{
@@ -135,9 +107,7 @@ int main(int argc, char* argv[]) {
 		{
 			std::cout
 				<< "last built at : "
-				<< __DATE__
-				<< " "
-				<< __TIME__
+				<< DOCC_BUILD_DATE
 				<< std::endl
 				<< "Platform      : "
 				<< DOCC_PLATFORM
