@@ -20,7 +20,7 @@ namespace docscript
 	class parser
 	{
 	public:
-		parser(typename symbol_reader::symbol_list_t&);
+		parser(typename symbol_reader::symbol_list_t&, int verbosity);
 
 
 		/**
@@ -47,14 +47,14 @@ namespace docscript
 		std::pair<std::string, node> generate_parameter(std::size_t);
 		//void generate_key(std::size_t, std::string);
 		node generate_quote();
-		node generate_paragraph(std::size_t);
+		node generate_paragraph(std::size_t, node::d_args& args);
 		node generate_content(std::size_t);	//!< compare to paragraph but enclosed in ()
 		node generate_vector(std::size_t);
 
 		/**
 		 * produce next / look ahead symbol
 		 */
-		void match(symbol_type);
+		bool match(symbol_type);
 		void match();
 
 		void print_error(cyng::logging::severity level, std::string msg);

@@ -141,7 +141,7 @@ namespace docscript
 	{
 		cyng::vector_t vec;
 
-		std::cout << "serialize " << std::string(depth, '.' ) << ": " << p->title_ << std::endl;
+		//std::cout << "serialize " << std::string(depth, '.' ) << ": " << p->title_ << std::endl;
 
 		if (p->sub_) {
 			auto params = cyng::param_map_factory("tag", p->tag_)("title", p->title_)("depth", depth)("sub", serialize(depth + 1, p->sub_.get()))();

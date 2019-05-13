@@ -24,10 +24,10 @@ namespace docscript
 
 		tokenizer _tokenizer([&](symbol&& sym) {
 
-			std::cout
-				<< "SYMBOL  "
-				<< sym
-				<< std::endl;
+			//std::cout
+			//	<< "SYMBOL  "
+			//	<< sym
+			//	<< std::endl;
 			//
 			//	save in stream
 			//
@@ -58,7 +58,7 @@ namespace docscript
 		//
 		//	create parser
 		//
-		parser p(stream);
+		parser p(stream, 0);
 
 		//
 		//	generate parse tree (AST)

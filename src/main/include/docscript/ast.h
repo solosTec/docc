@@ -59,6 +59,8 @@ namespace docscript
 		void generate_html_list(std::size_t depth, node::s_args const*, std::ostream&, bool) const;
 		void generate_html_vector(std::size_t depth, node::v_args const*, std::ostream&, bool) const;
 
+		bool verify_param_range(std::string const& cmd, std::string const& name, node const& val) const;
+
 	private:
 		bool const log_;	//!< logging on/off
 		node	root_;
@@ -72,7 +74,7 @@ namespace docscript
 
 	};
 
-
+	bool is_valid_list_style(std::string);
 }
 
 #endif

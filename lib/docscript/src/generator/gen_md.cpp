@@ -6,6 +6,7 @@
  */ 
 
 #include <docscript/generator/gen_md.h>
+#include "filter/binary_to_md.h"
 
 #include <cyng/vm/generator.h>
 #include <cyng/io/serializer.h>
@@ -33,6 +34,8 @@ namespace docscript
 		vm_.register_function("generate.file", 1, std::bind(&gen_md::generate_file, this, std::placeholders::_1));
 		vm_.register_function("generate.meta", 1, std::bind(&gen_md::generate_meta, this, std::placeholders::_1));
 
+		vm_.register_function("hline", 0, std::bind(&gen_md::print_hline, this, std::placeholders::_1));
+
 		vm_.register_function("convert.numeric", 1, std::bind(&gen_md::convert_numeric, this, std::placeholders::_1));
 		vm_.register_function("convert.alpha", 1, std::bind(&gen_md::convert_alpha, this, std::placeholders::_1));
 
@@ -57,6 +60,8 @@ namespace docscript
 		vm_.register_function("b", 1, std::bind(&gen_md::format_bold, this, std::placeholders::_1));
 		vm_.register_function("bold", 1, std::bind(&gen_md::format_bold, this, std::placeholders::_1));
 		vm_.register_function("color", 1, std::bind(&gen_md::format_color, this, std::placeholders::_1));
+		vm_.register_function("sub", 1, std::bind(&gen_md::format_sub, this, std::placeholders::_1));
+		vm_.register_function("sup", 1, std::bind(&gen_md::format_sup, this, std::placeholders::_1));
 	}
 
 	void gen_md::generate_file(cyng::context& ctx)
@@ -92,6 +97,7 @@ namespace docscript
 
 	std::ofstream& gen_md::emit_file(std::ofstream& ofs, cyng::vector_t::const_iterator pos, cyng::vector_t::const_iterator end) const
 	{
+		emit_meta(ofs);
 		while (pos != end) {
 			emit_obj(ofs, *pos);
 			++pos;
@@ -106,6 +112,24 @@ namespace docscript
 			<< cyng::io::to_str(obj)
 			<< std::endl
 			;
+		return ofs;
+	}
+
+	std::ofstream& gen_md::emit_meta(std::ofstream& ofs) const
+	{
+		//	meta data nor supported by github
+		for (auto const& e : meta_) {
+			ofs
+				<< "<!-- "
+				<< e.first
+				<< ":\t"
+				<< cyng::io::to_str(e.second)
+				<< " -->"
+				<< std::endl
+				;
+		}
+
+		ofs << std::endl;
 		return ofs;
 	}
 
@@ -165,10 +189,18 @@ namespace docscript
 		}
 	}
 
+	void gen_md::print_hline(cyng::context& ctx)
+	{
+		//auto const frame = ctx.get_frame();
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+
+		ctx.push(cyng::make_object("\n" + std::string(3, '-')));
+	}
+
 	void gen_md::convert_numeric(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		ctx.push(frame.at(0));
 	}
@@ -176,9 +208,9 @@ namespace docscript
 	void gen_md::convert_alpha(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
-		auto str = cyng::value_cast<std::string>(frame.at(0), "");
+		auto const str = cyng::value_cast<std::string>(frame.at(0), "");
 
 		//
 		//	Special characters are:
@@ -195,51 +227,73 @@ namespace docscript
 		//	. dot
 		//	! exclamation mark
 		//
-		replace_all(str, "\\", "\\\\");
-		replace_all(str, "`", "\\`");
-		replace_all(str, "*", "\\*");
-		replace_all(str, "!", "\\!");
-		replace_all(str, "{", "\\{");
-		replace_all(str, "}", "\\}");
-		replace_all(str, "[", "\\[");
-		replace_all(str, "]", "\\]");
-		ctx.push(cyng::make_object(str));
+		ctx.push(cyng::make_object(replace_md_entities(str)));
+	}
+
+	void gen_md::print_symbol(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		std::string r;
+		for (auto obj : frame) {
+			auto const symbol = cyng::value_cast<std::string>(obj, "");
+			if (boost::algorithm::equals(symbol, "pilgrow")) {
+				r.append("&#182;");
+			}
+			else if (boost::algorithm::equals(symbol, "copyright")) {
+				r.append("&#169;"); 
+			}
+			else if (boost::algorithm::equals(symbol, "registered")) {
+				r.append("&#174;");
+			}
+			else if (boost::algorithm::iequals(symbol, "latex")) {
+				r += "L";
+				r += "^A^";
+				r += "T";
+				r += "~E~";
+				r += "X";
+			}
+			else if (boost::algorithm::iequals(symbol, "celsius")) {
+				r.append("&#8451;");
+			}
+			else if (boost::algorithm::equals(symbol, "micro")) {
+				r.append("&#181;");
+			}
+			else if (boost::algorithm::iequals(symbol, "ohm")) {
+				r.append("&#8486;");
+			}
+			else if (boost::algorithm::equals(symbol, "degree")) {
+				r.append("&#176;");
+			}
+			else if (boost::algorithm::equals(symbol, "promille")) {
+				r.append("&#8240;");
+			}
+			else if (boost::algorithm::iequals(symbol, "lambda")) {
+				r.append("&#8257;");
+			}
+			else {
+				r += symbol;
+			}
+		}
+		ctx.push(cyng::make_object(r));
+
 	}
 
 	void gen_md::paragraph(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
-		std::stringstream ss;
-		ss << std::endl;
-		for (auto obj : frame) {
-			ss
-				<< cyng::io::to_str(obj)
-				<< ' '
-				;
-		}
-		ss << std::endl;
-		ctx.push(cyng::make_object(ss.str()));
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		std::string par = accumulate_plain_text(frame);
+		ctx.push(cyng::make_object(par));
 	}
 
 	void gen_md::quote(cyng::context& ctx)
 	{
 		//	[%(("q":{1,2,3}),("source":Earl Wilson),("url":https://www.brainyquote.com/quotes/quotes/e/earlwilson385998.html))]
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 		auto const reader = cyng::make_reader(frame.at(0));
 
-		//	Attribution for the quotation, if any, must be placed outside the blockquote element.
-		//	structure:
-		//	<figure>
-		//		<blockquote cite=[CITE]>
-		//			<p>[QUOTE]</p>
-		//		</blockquote>
-		//		<figcaption>
-		//			<cite>[SOURCE]</cite>
-		//		</figcaption>
-		//	</figure>
-		//
 		auto const cite = cyng::value_cast<std::string>(reader.get("url"), "");
 		auto const source = cyng::value_cast<std::string>(reader.get("source"), "");
 		auto const quote = accumulate_plain_text(reader.get("q"));
@@ -251,7 +305,7 @@ namespace docscript
 	{
 		//	[%(("items":[<p>one </p>,<p>two </p>,<p>three </p>]),("style":{lower-roman}),("type":ordered))]
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		auto const reader = cyng::make_reader(frame.at(0));
 		auto const type = cyng::value_cast<std::string>(reader.get("type"), "ordered");
@@ -285,14 +339,22 @@ namespace docscript
 	{
 		//	[%(("text":{LaTeX}),("url":{https,:,//www,.,latex-project,.,org/}))]
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 		auto const reader = cyng::make_reader(frame.at(0));
+		auto const text = accumulate_plain_text(reader.get("text"));
+		auto const url = cyng::io::to_str(reader.get("url"));
+		auto const title = accumulate_plain_text(reader.get("title"));
+
 		std::stringstream ss;
 		ss
 			<< '['
-			<< accumulate_plain_text(reader.get("text"))
+			<< text
 			<< "]("
-			<< cyng::io::to_str(reader.get("url"))
+			<< url
+			<< ' '
+			<< '"'
+			<< title
+			<< '"'
 			<< ')'
 			;
 		ctx.push(cyng::make_object(ss.str()));
@@ -326,47 +388,57 @@ namespace docscript
 	void gen_md::code(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		auto const reader = cyng::make_reader(frame.at(0));
 		auto const caption = accumulate_plain_text(reader.get("caption"));
+		auto const line_numbers = value_cast(reader.get("linenumbers"), false);
 
 		auto const source = cyng::value_cast<std::string>(reader.get("source"), "source.txt");
 		auto const p = resolve_path(source);
+		auto const language = cyng::value_cast(reader.get("language"), get_extension(p));
 
-		std::ifstream  ifs(p.string()/*, std::ios::binary*/);
-		if (!ifs.is_open())
-		{
-			std::cerr
-				<< "***error cannot open source file ["
-				<< p
-				<< ']'
-				<< std::endl;
-			ctx.push(cyng::make_object(p));
-		}
-		else {
-
-			auto const language = cyng::value_cast(reader.get("language"), get_extension(p));
+		if (boost::filesystem::exists(p) && boost::filesystem::is_regular(p)) {
 
 			std::stringstream ss;
-			ss
-				<< "```"
-				<< language
-				<< std::endl
-				<< ifs.rdbuf()
-				<< std::endl
-				<< "```"
-				<< std::endl
-				;
-			ifs.close();
+			if (boost::algorithm::equals(language, "bin") || boost::algorithm::iequals(language, "binary")) {
+				// binary mode required
+				std::ifstream  ifs(p.string(), std::ios::binary);
+				ifs.unsetf(std::ios::skipws);
+				cyng::buffer_t const inp((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+				binary_to_md filter(line_numbers, uuid_gen_());
+				filter.convert(ss, inp);
+			}
+			else {
+				std::ifstream  ifs(p.string());
+				ss
+					<< std::string(3, '`')
+					<< language
+					<< std::endl
+					<< ifs.rdbuf()
+					<< std::endl
+					<< std::string(3, '`')
+					<< std::endl
+					;
+			}
 			ctx.push(cyng::make_object(ss.str()));
+
+		}
+		else {
+			std::cerr
+				<< "***error ["
+				<< p
+				<< "] does not exist or is not a regular file"
+				<< std::endl;
+			ctx.push(cyng::make_object(p));
+
 		}
 	}
 
 	void gen_md::def(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		//
 		//	Markdown lacks support for a definition list. But some implementations
@@ -380,13 +452,15 @@ namespace docscript
 		cyng::param_map_t defs;
 		defs = cyng::value_cast(frame.at(0), defs);
 		for (auto const& def : defs) {
+
+			auto const text = accumulate_plain_text(def.second);
 			ss
 				<< std::endl	//	required to detect the definition at all
-				<< def.first
+				<< replace_md_entities(def.first)
 				<< std::endl
 				<< ':'
 				<< ' '
-				<< accumulate_plain_text(def.second)
+				<< replace_md_entities(text)
 				<< std::endl
 				;
 		}
@@ -429,6 +503,22 @@ namespace docscript
 
 			ctx.push(cyng::make_object("***error in COLOR definition"));
 		}
+	}
+
+	void gen_md::format_sub(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//	pandoc style
+		ctx.push(cyng::make_object("~" + accumulate_plain_text(frame) + "~"));
+	}
+
+	void gen_md::format_sup(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//	pandoc style
+		ctx.push(cyng::make_object("^" + accumulate_plain_text(frame) + "^"));
 	}
 
 	void gen_md::header(cyng::context& ctx)
@@ -500,6 +590,200 @@ namespace docscript
 		auto const map = cyng::value_cast(reader.get(0), cyng::param_map_t());
 
 		ctx.push(cyng::make_object("DEMO"));
+	}
+
+	std::string replace_md_entities(std::string const& str)
+	{
+		//
+		//	Special characters are:
+		//	\ backslash itself
+		//	` backtick
+		//	* asterisk
+		//	_ underscore
+		//	{} curly braces
+		//	[] square brackets
+		//	() parentheses
+		//	# hash mark
+		//	+ plus sign
+		//	- minus sign(hyphen)
+		//	. dot
+		//	! exclamation mark
+		//
+
+		//	simple state engine
+		enum {
+			STATE_DEFAULT,
+			STATE_LT,
+			STATE_GT,
+			STATE_EQ,
+			STATE_MINUS,
+			STATE_EXCL,	//!<	"!"
+			STATE_COL,	//!<	":"
+		} state = STATE_DEFAULT;
+
+		std::string r;
+
+		//	small optimization
+		r.reserve(str.length());
+
+		for (auto const c : str) {
+			switch (state) {
+
+			case STATE_LT:
+				switch (c) {
+				case '=':	//	<=
+					r.append("&#8804;");
+					break;
+				case '-':	//	<-
+					r.append("&#10229;");
+					break;
+				case '<':	//	<<
+					r.append("&#8810;");
+					break;
+				default:
+					r += '<';
+					r += c;
+					break;
+				}
+				state = STATE_DEFAULT;
+				break;
+
+			case STATE_GT:
+				switch (c) {
+				case '=':	//	>=
+					r.append("&#8805;");
+					break;
+				case '>':	//	>>
+					r.append("&#8811;");
+					break;
+				default:
+					r.append("\\>");
+					r += c;
+					break;
+				}
+				state = STATE_DEFAULT;
+				break;
+
+			case STATE_EQ:
+				switch (c) {
+				case '>':	//	=>
+					r.append("&#10233;");
+					break;
+				case '=':	//	==
+					r.append("&#8801;");
+					break;
+				default:
+					r += '=';
+					r += c;
+					break;
+				}
+				state = STATE_DEFAULT;
+				break;
+
+			case STATE_MINUS:
+				switch (c) {
+				case '>':	//	->
+					r.append("&#10230;");
+					break;
+				default:
+					r += '-';
+					r += c;
+					break;
+				}
+				state = STATE_DEFAULT;
+				break;
+
+			case STATE_EXCL:
+				switch (c) {
+				case '=':	//	!=
+					r.append("&#8800;");
+					break;
+				default:
+					r.append("\\!");
+					r += c;
+					break;
+				}
+				state = STATE_DEFAULT;
+				break;
+
+			case STATE_COL:
+				switch (c) {
+				case ':':	//	::
+					r.append("&#8759;");
+					break;
+				case '=':	//	:=
+					r.append("&#8788;");
+					break;
+				default:
+					r += ':';
+					r += c;
+					break;
+				}
+				state = STATE_DEFAULT;
+				break;
+
+			default:
+				switch (c) {
+				case '<':
+					state = STATE_LT;
+					break;
+				case '>':
+					state = STATE_GT;
+					break;
+				case '=':
+					state = STATE_EQ;
+					break;
+				case '-':
+					state = STATE_MINUS;
+					break;
+				case '!':
+					state = STATE_EXCL;
+					break;
+				case ':':
+					state = STATE_COL;
+					break;
+				case '\\':
+					r.append("\\\\");
+					break;
+				case '`':
+					r.append("\\`");
+					break;
+				case '*':
+					r.append("\\*");
+					break;
+				case '{':
+					r.append("\\{");
+					break;
+				case '}':
+					r.append("\\}");
+					break;
+				case '[':
+					r.append("\\[");
+					break;
+				case ']':
+					r.append("\\]");
+					break;
+				default:
+					r += c;
+					break;
+				}
+				break;
+			}
+		}
+
+		switch (state) {
+
+		case STATE_LT:		r += '<';	break;
+		case STATE_GT:		r.append("\\>");	break;
+		case STATE_EQ:		r += '=';	break;
+		case STATE_MINUS:	r += '-';	break;
+		case STATE_EXCL:	r.append("\\!");	break;
+		case STATE_COL:		r += ':';	break;
+		default:
+			break;
+		}
+
+		return r;
 	}
 
 }

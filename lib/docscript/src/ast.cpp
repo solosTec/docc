@@ -222,6 +222,7 @@ namespace docscript
 				print_n(depth, '.');
 				std::cout << "param(" << name << ": " << arg.first << ")" << std::endl;
 			}
+			verify_param_range(name, arg.first, arg.second);
 			prg
 				<< cyng::unwind(generate(depth + 1, arg.second))
 				<< arg.first
@@ -297,8 +298,15 @@ namespace docscript
 			try {
 				//
 				//	convert to numeric data type
+				//	only integers are supported
 				//
-				prg << static_cast<std::uint64_t>(std::stoull(sp->value_));
+				if (sp->value_.find('.') != std::string::npos) {
+					prg << sp->value_;
+					//prg << static_cast<std::uint64_t>(std::stold(sp->value_));
+				}
+				else {
+					prg << static_cast<std::uint64_t>(std::stoull(sp->value_));
+				}
 			}
 			catch (std::exception const& ex) {
 				std::cerr
@@ -695,6 +703,48 @@ namespace docscript
 		}
 
 		os << ']';
+	}
+
+	bool ast::verify_param_range(std::string const& cmd, std::string const& name, node const& n) const
+	{
+		if (boost::algorithm::equals(cmd, "list") && boost::algorithm::equals(name, "style")) {
+
+			//
+			//	valid list style types are
+			//
+			auto const style = get_name(n);
+			if (!is_valid_list_style(style)) {
+				std::cerr << "*** unknown list style: " << style << std::endl;
+			}
+		}
+		return true;
+	}
+
+	bool is_valid_list_style(std::string style) {
+
+		if (boost::algorithm::iequals(style, "disk"))	return true;	//	Default value.The marker is a filled circle
+		if (boost::algorithm::iequals(style, "armenian"))	return true;	//	The marker is traditional Armenian numbering
+		if (boost::algorithm::iequals(style, "circle"))	return true;	//	The marker is a circle
+		if (boost::algorithm::iequals(style, "cjk"))	return true;	// - ideographic	The marker is plain ideographic numbers
+		if (boost::algorithm::iequals(style, "decimal"))	return true;	//	The marker is a number
+		if (boost::algorithm::iequals(style, "decimal-leading-zero"))	return true;	//	The marker is a number with leading zeros(01, 02, 03, etc.)
+		if (boost::algorithm::iequals(style, "georgian"))	return true;	//	The marker is traditional Georgian numbering
+		if (boost::algorithm::iequals(style, "hebrew"))	return true;	//	The marker is traditional Hebrew numbering
+		if (boost::algorithm::iequals(style, "hiragana"))	return true;	//	The marker is traditional Hiragana numbering
+		if (boost::algorithm::iequals(style, "hiragana"))	return true;	// - iroha	The marker is traditional Hiragana iroha numbering
+		if (boost::algorithm::iequals(style, "katakana"))	return true;	//	The marker is traditional Katakana numbering
+		if (boost::algorithm::iequals(style, "katakana-iroha"))	return true;	//	The marker is traditional Katakana iroha numbering
+		if (boost::algorithm::iequals(style, "lower-alpha"))	return true;	//	The marker is lower - alpha(a, b, c, d, e, etc.)
+		if (boost::algorithm::iequals(style, "lower-greek"))	return true;	//	The marker is lower - greek
+		if (boost::algorithm::iequals(style, "lower-latin"))	return true;	//	The marker is lower - latin(a, b, c, d, e, etc.)
+		if (boost::algorithm::iequals(style, "lower-roman"))	return true;	//	The marker is lower - roman(i, ii, iii, iv, v, etc.)
+		if (boost::algorithm::iequals(style, "none"))	return true;	//	No marker is shown
+		if (boost::algorithm::iequals(style, "square"))	return true;	//	The marker is a square
+		if (boost::algorithm::iequals(style, "upper"))	return true;	// - alpha	The marker is upper - alpha(A, B, C, D, E, etc.)
+		if (boost::algorithm::iequals(style, "upper-greek"))	return true;	//	The marker is upper - greek
+		if (boost::algorithm::iequals(style, "upper-latin"))	return true;	//	The marker is upper - latin(A, B, C, D, E, etc.)
+		if (boost::algorithm::iequals(style, "upper-roman"))	return true;	//	The marker is upper - roman(I, II, III, IV, V, etc.)
+		return false;
 	}
 
 	void print_n(std::size_t n, char c)

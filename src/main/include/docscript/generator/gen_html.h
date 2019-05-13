@@ -10,7 +10,6 @@
 
 #include <docscript/generator/generator.h>
 #include <docscript/generator/numbering.h>
-//#include <list>
 
 namespace docscript
 {
@@ -28,7 +27,7 @@ namespace docscript
 		void demo(cyng::context& ctx);
 
 		virtual void print_symbol(cyng::context& ctx) override;
-
+		virtual void print_hline(cyng::context& ctx) override;	//!<	ruler
 
 		virtual void generate_file(cyng::context& ctx) override;
 		virtual void generate_meta(cyng::context& ctx) override;
@@ -52,6 +51,8 @@ namespace docscript
 		virtual void format_italic(cyng::context& ctx) override;
 		virtual void format_bold(cyng::context& ctx) override;
 		virtual void format_color(cyng::context& ctx) override;
+		virtual void format_sub(cyng::context& ctx) override;
+		virtual void format_sup(cyng::context& ctx) override;
 
 		std::ofstream& emit_file(std::ofstream&, cyng::vector_t::const_iterator, cyng::vector_t::const_iterator) const;
 		std::ofstream& emit_doctype(std::ofstream&) const;
@@ -70,6 +71,12 @@ namespace docscript
 		 */
 		bool const body_only_;
 	};
+
+	/**
+	 * Substitute HTML entities
+	 */
+	std::string replace_html_entities(std::string const& str);
+
 }
 
 #endif

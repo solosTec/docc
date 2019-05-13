@@ -23,6 +23,10 @@ namespace docscript
 		void convert(std::ostream&, std::string const&);
 
 	private:
+		void convert(std::ostream& os, std::string::const_iterator begin, std::string::const_iterator end);
+		void write_nl(std::size_t linenumber, std::ostream& os);
+
+	private:
 
 		bool const linenumbers_;
 		boost::uuids::uuid const tag_;

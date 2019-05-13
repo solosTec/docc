@@ -58,6 +58,8 @@ namespace docscript
 		friend s_args const* access_node_list(node const&);
 		friend v_args const* access_node_vector(node const&);
 
+		friend std::string get_name(node const&);
+
 	public:
 		enum type {
 			NODE_ROOT,
@@ -78,13 +80,6 @@ namespace docscript
 		node(node const&);
 		node(node&&); // = default;
 
-		node(std::deque<docscript::node>&& children);
-		node(symbol sym);
-		node(std::vector<symbol>&& list);
-		node(std::string name, docscript::node::p_args&& args);
-		node(std::string name, docscript::node::v_args&& args);
-		node(bool b, docscript::node::d_args&& args);
-		node(docscript::node::v_args&& args);
 
 		virtual ~node();
 		node& operator=(node&&); // = default;
@@ -94,6 +89,14 @@ namespace docscript
 		//
 		type get_type() const;
 
+	private:
+		node(std::deque<docscript::node>&& children);
+		node(symbol sym);
+		node(std::vector<symbol>&& list);
+		node(std::string name, docscript::node::p_args&& args);
+		node(std::string name, docscript::node::v_args&& args);
+		node(bool b, docscript::node::d_args&& args);
+		node(docscript::node::v_args&& args);
 
 	private:
 		docscript::node::type const type_;
@@ -132,6 +135,8 @@ namespace docscript
 	node::d_args const* access_node_paragraph(node const&);
 	node::d_args const* access_node_content(node const&);
 	node::v_args const* access_node_vector(node const&);
+
+	std::string get_name(node const&);
 
 }
 

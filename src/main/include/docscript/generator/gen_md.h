@@ -30,8 +30,9 @@ namespace docscript
 		virtual void convert_numeric(cyng::context& ctx) override;
 		virtual void convert_alpha(cyng::context& ctx) override;
 
-		//virtual void print_symbol(cyng::context& ctx) override;
+		virtual void print_symbol(cyng::context& ctx) override;
 		//virtual void print_currency(cyng::context& ctx) override;
+		virtual void print_hline(cyng::context& ctx) override;	//!<	ruler
 
 		virtual void paragraph(cyng::context& ctx) override;
 		virtual void quote(cyng::context& ctx) override;
@@ -48,8 +49,11 @@ namespace docscript
 		virtual void format_italic(cyng::context& ctx) override;
 		virtual void format_bold(cyng::context& ctx) override;
 		virtual void format_color(cyng::context& ctx) override;
+		virtual void format_sub(cyng::context& ctx) override;
+		virtual void format_sup(cyng::context& ctx) override;
 
 		std::ofstream& emit_file(std::ofstream&, cyng::vector_t::const_iterator, cyng::vector_t::const_iterator) const;
+		std::ofstream& emit_meta(std::ofstream&) const;
 		std::ofstream& emit_obj(std::ofstream&, cyng::object) const;
 		std::ofstream& emit_footnotes(std::ofstream&) const;
 
@@ -57,6 +61,11 @@ namespace docscript
 	private:
 		footnotes_t footnotes_;
 	};
+
+	/**
+	 * Substitute markdown entities
+	 */
+	std::string replace_md_entities(std::string const& str);
 
 }
 

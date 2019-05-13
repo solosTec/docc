@@ -31,6 +31,8 @@ namespace docscript
 		 */
 		void register_this();
 
+		void init_meta_data(cyng::context& ctx);
+		void meta(cyng::context& ctx);
 		void var_set(cyng::context& ctx);
 		void var_get(cyng::context& ctx);
 
@@ -38,6 +40,7 @@ namespace docscript
 
 		virtual void print_symbol(cyng::context& ctx);
 		virtual void print_currency(cyng::context& ctx);
+		virtual void print_hline(cyng::context& ctx) = 0;	//!<	ruler
 
 		virtual void generate_file(cyng::context& ctx) = 0;
 		virtual void generate_meta(cyng::context& ctx) = 0;
@@ -59,6 +62,8 @@ namespace docscript
 		virtual void format_italic(cyng::context& ctx) = 0;
 		virtual void format_bold(cyng::context& ctx) = 0;
 		virtual void format_color(cyng::context& ctx) = 0;
+		virtual void format_sub(cyng::context& ctx) = 0;
+		virtual void format_sup(cyng::context& ctx) = 0;
 
 		boost::filesystem::path resolve_path(std::string const& s) const;
 
@@ -79,6 +84,12 @@ namespace docscript
 
 		std::vector< boost::filesystem::path > const includes_;
 		numbering content_table_;
+
+		/**
+		 * meta data
+		 */
+		cyng::param_map_t meta_;
+
 	};
 
 	std::string get_extension(boost::filesystem::path const& p);

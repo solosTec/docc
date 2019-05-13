@@ -44,6 +44,8 @@ namespace docscript
 		vm_.register_function("generate.file", 1, std::bind(&gen_html::generate_file, this, std::placeholders::_1));
 		vm_.register_function("generate.meta", 1, std::bind(&gen_html::generate_meta, this, std::placeholders::_1));
 
+		vm_.register_function("hline", 0, std::bind(&gen_html::print_hline, this, std::placeholders::_1));
+
 		vm_.register_function("convert.numeric", 1, std::bind(&gen_html::convert_numeric, this, std::placeholders::_1));
 		vm_.register_function("convert.alpha", 1, std::bind(&gen_html::convert_alpha, this, std::placeholders::_1));
 
@@ -59,6 +61,8 @@ namespace docscript
 		vm_.register_function("b", 1, std::bind(&gen_html::format_bold, this, std::placeholders::_1));
 		vm_.register_function("bold", 1, std::bind(&gen_html::format_bold, this, std::placeholders::_1));
 		vm_.register_function("color", 1, std::bind(&gen_html::format_color, this, std::placeholders::_1));
+		vm_.register_function("sub", 1, std::bind(&gen_html::format_sub, this, std::placeholders::_1));
+		vm_.register_function("sup", 1, std::bind(&gen_html::format_sup, this, std::placeholders::_1));
 
 		vm_.register_function("header", 1, std::bind(&gen_html::header, this, std::placeholders::_1));
 		vm_.register_function("h1", 1, std::bind(&gen_html::section, this, 1, std::placeholders::_1));
@@ -74,7 +78,7 @@ namespace docscript
 	void gen_html::generate_file(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		auto const p = cyng::value_cast(frame.at(0), boost::filesystem::path());
 		std::ofstream ofs(p.string(), std::ios::out | std::ios::trunc);
@@ -155,7 +159,35 @@ namespace docscript
 
 	std::ofstream& gen_html::emit_meta(std::ofstream& ofs) const
 	{
-		//	ToDo: 
+		//	emit meta data
+		for (auto const& e : meta_) {
+			if (boost::algorithm::equals(e.first, "title"))
+			{ 
+				ofs
+					<< "\t<title>"
+					<< cyng::io::to_str(e.second)
+					<< "</title>"
+					<< std::endl
+					//	@see http://ogp.me/
+					<< "\t<meta name=\"og:title\" content=\""
+					<< cyng::io::to_str(e.second)
+					<< "\" />"
+					<< std::endl
+					<< "\t<meta name=\"og:type\" content=\"article\" />"
+					<< std::endl
+					;
+			}
+			else {
+				ofs
+					<< "\t<meta name=\""
+					<< e.first
+					<< "\" content=\""
+					<< cyng::io::to_str(e.second)
+					<< "\" />"
+					<< std::endl
+					;
+			}
+		}
 		return ofs;
 	}
 
@@ -165,7 +197,9 @@ namespace docscript
 			<< "\t<style>"
 			<< std::endl
 			<< "\t\tbody { "
-			<< "\t\t\tfont-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; "
+			<< std::endl
+			//	Georgia,Cambria,serif;
+			<< "\t\t\tfont-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"	
 			<< std::endl
 			//	https://jrl.ninja/etc/1/
 			<< "\t\t\tmax-width: 52rem; "
@@ -241,8 +275,28 @@ namespace docscript
 			<< std::endl
 			<< "\t\t}"
 			<< std::endl
+
+			//	formatting sub and supscript
+			<< "\t\tsup { top: -.5em; }"
+			<< std::endl
+			<< "\t\tsub { bottom: -.25em; }"
+			<< std::endl
+			<< "\t\tsub, sup {"
+			<< std::endl
+			<< "\t\t\tfont-size: 75%;"
+			<< std::endl
+			<< "\t\t\tline-height: 0;"
+			<< std::endl
+			<< "\t\t\tposition: relative;"
+			<< std::endl
+			<< "\t\t\tvertical-align: baseline;"
+			<< std::endl
+			<< "\t\t}"
+			<< std::endl
+
 			<< "\t</style>"
 			<< std::endl
+
 			;
 		return ofs;
 	}
@@ -318,7 +372,7 @@ namespace docscript
 	void gen_html::generate_meta(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		auto const p = cyng::value_cast(frame.at(0), boost::filesystem::path());
 	}
@@ -326,7 +380,7 @@ namespace docscript
 	void gen_html::convert_numeric(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		ctx.push(frame.at(0));
 	}
@@ -336,25 +390,18 @@ namespace docscript
 		auto const frame = ctx.get_frame();
 //		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
-		auto str = cyng::value_cast<std::string>(frame.at(0), "");
+		auto const str = cyng::value_cast<std::string>(frame.at(0), "");
 
 		//
 		//	escape HTML entities
 		//
-		replace_all(str, "&", "&amp;");
-		replace_all(str, "<", "&lt;");
-		replace_all(str, ">", "&gt;");
-		replace_all(str, "\"", "&quot;");
-		replace_all(str, "'", "&apos;");
-		//replace_all(str, "*", "&ast;");
-		//replace_all(str, "#", "&num;");
-		ctx.push(cyng::make_object(str));
+		ctx.push(cyng::make_object(replace_html_entities(str)));
 	}
 
 	void gen_html::paragraph(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-//		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 		std::string par = accumulate_plain_text(frame);
 //		for (auto obj : frame) {
 //			par.append(cyng::io::to_str(obj));
@@ -393,7 +440,7 @@ namespace docscript
 	{
 		//	[%(("items":[<p>one </p>,<p>two </p>,<p>three </p>]),("style":{lower-roman}),("type":ordered))]
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		auto const reader = cyng::make_reader(frame.at(0));
 		auto const type = cyng::value_cast<std::string>(reader.get("type"), "ordered");
@@ -416,7 +463,7 @@ namespace docscript
 	{
 		//	[%(("text":{LaTeX}),("url":{https,:,//www,.,latex-project,.,org/}))]
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 		auto const reader = cyng::make_reader(frame.at(0));
 		auto const text = accumulate_plain_text(reader.get("text"));
 		auto const url = cyng::io::to_str(reader.get("url"));
@@ -488,7 +535,7 @@ namespace docscript
 	void gen_html::code(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 		auto const reader = cyng::make_reader(frame.at(0));
 		auto const caption = accumulate_plain_text(reader.get("caption"));
 		auto const line_numbers = value_cast(reader.get("linenumbers"), false);
@@ -529,7 +576,7 @@ namespace docscript
 				filter.convert(ss, inp);
 				ss << "</code></pre>" << std::endl;
 			}
-			else if (boost::algorithm::equals(language, "txt") || boost::algorithm::iequals(language, "text")) {
+			else if (boost::algorithm::equals(language, "txt") || boost::algorithm::iequals(language, "text") || boost::algorithm::iequals(language, "verbatim")) {
 
 				std::ifstream  ifs(p.string());
 				ss << "<pre>" << std::endl;
@@ -590,7 +637,7 @@ namespace docscript
 	{
 		//	[%(("abstract syntax":[Specification,of,a,structure]),("big endian":[A,byte,order,sequence]))]
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		std::stringstream ss;
 		ss
@@ -635,7 +682,7 @@ namespace docscript
 	void gen_html::format_color(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		auto const reader = cyng::make_reader(frame);
 		const auto map = cyng::value_cast(reader.get(0), cyng::param_map_t());
@@ -652,11 +699,33 @@ namespace docscript
 		}
 	}
 
+	void gen_html::format_sub(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		auto const el = html::sub(accumulate_plain_text(frame));
+		ctx.push(cyng::make_object(el.to_str()));
+	}
+
+	void gen_html::format_sup(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		auto const el = html::sup(accumulate_plain_text(frame));
+		ctx.push(cyng::make_object(el.to_str()));
+	}
+
+	void gen_html::print_hline(cyng::context& ctx)
+	{
+		auto const el = html::hr();
+		ctx.push(cyng::make_object(el.to_str()));
+	}
+
 	void gen_html::header(cyng::context& ctx)
 	{
 		//	[%(("level":1),("tag":{79bf3ba0-2362-4ea5-bcb5-ed93844ac59a}),("title":{Basics}))]
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		auto const reader = cyng::make_reader(frame.at(0));
 		auto const title = accumulate_plain_text(reader.get("title"));
@@ -665,7 +734,7 @@ namespace docscript
 
 		auto const number = content_table_.add(level, uuid_gen_(), title);
 		auto const header = create_section(level, tag, number + " " + title);
-		std::cout << header << std::endl;
+		//std::cout << header << std::endl;
 		ctx.push(cyng::make_object(header));
 	}
 
@@ -687,13 +756,13 @@ namespace docscript
 	void gen_html::section(int level, cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		auto const title = accumulate_plain_text(frame);
 		auto const tag = uuid_gen_();
 		auto const number = content_table_.add(level, tag, title);
 		auto const header = create_section(level, boost::uuids::to_string(tag), number + " " + title);
-		std::cout << header << std::endl;
+		//std::cout << header << std::endl;
 		ctx.push(cyng::make_object(header));
 	}
 
@@ -701,7 +770,7 @@ namespace docscript
 	{
 		//	[This,is,a,footnote,.]
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		auto const note = accumulate_plain_text(frame);
 		auto const tag = uuid_gen_();
@@ -722,27 +791,54 @@ namespace docscript
 	void gen_html::print_symbol(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
-		auto const symbol = cyng::value_cast<std::string>(frame.at(0), "");
-		if (boost::algorithm::equals(symbol, "pilgrow")) {
-			ctx.push(cyng::make_object("&para;"));
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		std::string r;
+		for (auto obj : frame) {
+			auto const symbol = cyng::value_cast<std::string>(obj, "");
+			if (boost::algorithm::equals(symbol, "pilgrow")) {
+				r.append("&para;");
+			}
+			else if (boost::algorithm::equals(symbol, "copyright")) {
+				r.append("&copy;");
+			}
+			else if (boost::algorithm::equals(symbol, "registered")) {
+				r.append("&reg;");
+			}
+			else if (boost::algorithm::iequals(symbol, "latex")) {
+				auto const el = html::span("L", html::sup("A"), "T", html::sub("E"), "X");
+				r += el.to_str();
+			}
+			else if (boost::algorithm::iequals(symbol, "celsius")) {
+				r.append("&#8451;");
+			}
+			else if (boost::algorithm::equals(symbol, "micro")) {
+				r.append("&micro;");
+			}
+			else if (boost::algorithm::iequals(symbol, "ohm")) {
+				r.append("&ohm;");
+			}
+			else if (boost::algorithm::equals(symbol, "degree")) {
+				r.append("&deg;");
+			}
+			else if (boost::algorithm::equals(symbol, "promille")) {
+				r.append("&permil;");
+			}
+			else if (boost::algorithm::iequals(symbol, "lambda")) {
+				r.append("&caret;");
+			}
+			else {
+				r += symbol;
+			}
 		}
-		else if (boost::algorithm::equals(symbol, "copyright")) {
-			ctx.push(cyng::make_object("&copy;"));
-		}
-		else if (boost::algorithm::equals(symbol, "registered")) {
-			ctx.push(cyng::make_object("&reg;"));
-		}
-		else {
-			ctx.push(cyng::make_object(symbol));
-		}
+		auto const el = html::span(html::style_("font-family:Georgia, Cambria, serif;"), r);
+		ctx.push(cyng::make_object(el.to_str()));
 	}
 
 	void gen_html::demo(cyng::context& ctx)
 	{
 		//	 [%(("red":{spiced,up}))]
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		auto const reader = cyng::make_reader(frame);
 		auto const map = cyng::value_cast(reader.get(0), cyng::param_map_t());
@@ -750,6 +846,171 @@ namespace docscript
 		ctx.push(cyng::make_object("DEMO"));
 	}
 
+	std::string replace_html_entities(std::string const& str)
+	{
+		//	simple state engine
+		enum  {
+			STATE_DEFAULT,
+			STATE_LT,
+			STATE_GT,
+			STATE_EQ,
+			STATE_MINUS,
+			STATE_EXCL,	//!<	"!"
+			STATE_COL,	//!<	":"
+		} state = STATE_DEFAULT;
+
+		std::string r;
+
+		//	small optimization
+		r.reserve(str.length());
+
+		for (auto const c : str) {
+			switch (state) {
+
+			case STATE_LT:
+				switch (c) {
+				case '=':
+					r.append("&leq;");
+					break;
+				case '-':
+					r.append("&xlarr;");
+					break;
+				case '<':
+					r.append("&Lt;");
+					break;
+				default:
+					r.append("&lt;");
+					r += c;
+					break;
+				}
+				state = STATE_DEFAULT;
+				break;
+
+			case STATE_GT:
+				switch (c) {
+				case '=':
+					r.append("&ge;");
+					break;
+				case '>':
+					r.append("&Gt;");
+					break;
+				default:
+					r.append("&gt;");
+					r += c;
+					break;
+				}
+				state = STATE_DEFAULT;
+				break;
+
+			case STATE_EQ:
+				switch (c) {
+				case '>':
+					r.append("&xrArr;");
+					break;
+				case '=':
+					r.append("&equiv;");
+					break;
+				default:
+					r += '=';
+					r += c;
+					break;
+				}
+				state = STATE_DEFAULT;
+				break;
+
+			case STATE_MINUS:
+				switch (c) {
+				case '>':
+					r.append("&xrarr;");
+					break;
+				default:
+					r += '-';
+					r += c;
+					break;
+				}
+				state = STATE_DEFAULT;
+				break;
+
+			case STATE_EXCL:
+				switch (c) {
+				case '=':
+					r.append("&ne;");
+					break;
+				default:
+					r += '!';
+					r += c;
+					break;
+				}
+				state = STATE_DEFAULT;
+				break;
+
+			case STATE_COL:
+				switch (c) {
+				case ':':
+					r.append("&Colon;");
+					break;
+				case '=':	//	:=
+					r.append("&Assign;");
+					break;
+				default:
+					r += ':';
+					r += c;
+					break;
+				}
+				state = STATE_DEFAULT;
+				break;
+
+			default:
+				switch (c) {
+				case '<':
+					state = STATE_LT;
+					break;
+				case '>':
+					state = STATE_GT;
+					break;
+				case '=':
+					state = STATE_EQ;
+					break;
+				case '-':
+					state = STATE_MINUS;
+					break;
+				case '!':
+					state = STATE_EXCL;
+					break;
+				case ':':
+					state = STATE_COL;
+					break;
+				case '&':
+					r.append("&amp;");
+					break;
+				case '"':
+					r.append("&quot;");
+					break;
+				case '\'':
+					r.append("&apos;");
+					break;
+				default:
+					r += c;
+					break;
+				}
+				break;
+			}
+		}
+
+		switch (state) {
+
+		case STATE_LT:		r += '<';	break;
+		case STATE_GT:		r += '>';	break;
+		case STATE_EQ:		r += '=';	break;
+		case STATE_MINUS:	r += '-';	break;
+		case STATE_EXCL:	r += '!';	break;
+		case STATE_COL:		r += ':';	break;
+		default:
+			break;
+		}
+
+		return r;
+	}
 
 }
 

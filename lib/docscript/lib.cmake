@@ -50,18 +50,20 @@ set (docscript_generator
 
 set (docscript_filter
 	lib/docscript/src/generator/filter/text_to_html.h
-	lib/docscript/src/generator/filter/cpp_to_html.h
-	lib/docscript/src/generator/filter/json_to_html.h
-	lib/docscript/src/generator/filter/html_to_html.h
-	lib/docscript/src/generator/filter/docscript_to_html.h
-	lib/docscript/src/generator/filter/binary_to_html.h
-
 	lib/docscript/src/generator/filter/text_to_html.cpp
+	lib/docscript/src/generator/filter/cpp_to_html.h
 	lib/docscript/src/generator/filter/cpp_to_html.cpp
+	lib/docscript/src/generator/filter/json_to_html.h
 	lib/docscript/src/generator/filter/json_to_html.cpp
+	lib/docscript/src/generator/filter/html_to_html.h
 	lib/docscript/src/generator/filter/html_to_html.cpp
+	lib/docscript/src/generator/filter/docscript_to_html.h
 	lib/docscript/src/generator/filter/docscript_to_html.cpp
+	lib/docscript/src/generator/filter/binary_to_html.h
 	lib/docscript/src/generator/filter/binary_to_html.cpp
+
+	lib/docscript/src/generator/filter/binary_to_md.h
+	lib/docscript/src/generator/filter/binary_to_md.cpp
 )
 
 source_group("generator" FILES ${docscript_generator})

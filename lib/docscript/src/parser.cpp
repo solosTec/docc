@@ -10,12 +10,13 @@
 
 #include <iomanip>
 #include <algorithm>
+#include <sstream>
 
 namespace docscript
 {
-	parser::parser(typename symbol_reader::symbol_list_t& sl)
+	parser::parser(typename symbol_reader::symbol_list_t& sl, int verbosity)
 		: producer_(sl)
-		, ast_(true)
+		, ast_(verbosity > 4)
 	{}
 
 	ast const& parser::get_ast() const
@@ -41,7 +42,16 @@ namespace docscript
 			case SYM_UNKNOWN:	return;
 
 			case SYM_TOKEN:
-				args->push_back(generate_function(depth));
+				if (lookup::is_standalone(producer_.get().value_)) {
+					args->push_back(generate_function(depth));
+				}
+				else {
+					//	new paragraph
+					print_error(cyng::logging::severity::LEVEL_WARNING, "missing paragraph");
+					node::d_args dargs;
+					dargs.push_back(generate_function(depth));
+					args->push_back(generate_paragraph(depth, dargs));
+				}
 				break;
 
 			case SYM_TEXT:
@@ -58,10 +68,13 @@ namespace docscript
 			case SYM_END:
 				//	missing paragraph
 				print_error(cyng::logging::severity::LEVEL_WARNING, "missing paragraph");
-
-				//
-				//	fall through
-				//
+				{
+					node::d_args dargs;
+					dargs.push_back(make_node_symbol(producer_.get()));
+					match();
+					args->push_back(generate_paragraph(depth, dargs));
+				}
+				break;
 
 			case SYM_PAR:
 				//
@@ -69,12 +82,13 @@ namespace docscript
 				//	In some cases this could be part of the new paragraph (e.g. formatting). In other cases this could
 				//	be a single function call (e.g. new header). It depends on the function name.
 				//
-				if (producer_.look_ahead().is_type(SYM_TOKEN) && lookup::is_standalone(producer_.look_ahead().value_)) {
-					match(SYM_PAR);
+				match(SYM_PAR);
+				if (producer_.get().is_type(SYM_TOKEN) && lookup::is_standalone(producer_.get().value_)) {
 					args->push_back(generate_function(depth));
 				}
 				else {
-					args->push_back(generate_paragraph(depth));
+					node::d_args dargs;
+					args->push_back(generate_paragraph(depth, dargs));
 				}
 				break;
 
@@ -85,14 +99,11 @@ namespace docscript
 		}
 	}
 
-	node parser::generate_paragraph(std::size_t depth)
+	node parser::generate_paragraph(std::size_t depth, node::d_args& args)
 	{
-		match(SYM_PAR);
-
 		//
 		//	generate paragraph
 		//
-		node::d_args args;
 
 		while (!producer_.is_eof() && !producer_.get().is_type(SYM_PAR)) {
 
@@ -119,7 +130,8 @@ namespace docscript
 
 			case SYM_TOKEN:
 				if (lookup::is_standalone(producer_.get().value_)) {
-					print_error(cyng::logging::severity::LEVEL_ERROR, "standalone function in paragraph");
+					print_error(cyng::logging::severity::LEVEL_WARNING, "standalone function in paragraph");
+					return make_node_paragraph(std::move(args));
 				}
 				args.push_back(generate_function(depth));
 				break;
@@ -446,7 +458,7 @@ namespace docscript
 				break;
 
 			case SYM_TOKEN:
-				print_error(cyng::logging::severity::LEVEL_WARNING, "key name cannot be calculated");
+				print_error(cyng::logging::severity::LEVEL_ERROR, "key name cannot be calculated");
 				match(SYM_TOKEN);
 				break;
 			case SYM_PAR:
@@ -460,8 +472,25 @@ namespace docscript
 			//
 			//	parameters are separated by ","
 			//
-			if (!producer_.get().is_type(SYM_CLOSE)) {
-				match(SYM_SEP);
+			if (!producer_.is_eof() && !producer_.get().is_type(SYM_CLOSE)) {
+				if (!producer_.get().is_type(SYM_SEP)) {
+					print_error(cyng::logging::severity::LEVEL_ERROR, "parameters have to be separated by commas, but get ");
+
+					//
+					//	try to recover from error
+					//
+					while (!producer_.is_eof() && !producer_.get().is_type(SYM_CLOSE) && !producer_.get().is_type(SYM_SEP)) {
+						print_error(cyng::logging::severity::LEVEL_INFO, "try to recover from error");
+						match();
+					}
+					if (!producer_.is_eof() && !producer_.get().is_type(SYM_CLOSE)) {
+						match(SYM_SEP);
+					}
+
+				}
+				else {
+					match(SYM_SEP);
+				}
 			}
 
 			//
@@ -503,9 +532,6 @@ namespace docscript
 
 				args->push_back(make_node_symbol(producer_.get()));
 				match();
-				//if (!producer_.get().is_type(SYM_CLOSE)) {
-				//	match(SYM_SEP);
-				//}
 				break;
 
 			case SYM_TOKEN:
@@ -514,11 +540,6 @@ namespace docscript
 				//
 				args->push_back(generate_function(depth + 1));
 				break;
-
-			//case SYM_SEP:
-			//	print_error(cyng::logging::severity::LEVEL_WARNING, "key:value expected - but get \",\"");
-			//	match(SYM_SEP);
-			//	break;
 
 			case SYM_PAR:
 				print_error(cyng::logging::severity::LEVEL_WARNING, "key:value expected - but get a new paragraph");
@@ -572,7 +593,7 @@ namespace docscript
 			//	function
 			//
 			if (lookup::is_standalone(key.value_)) {
-				print_error(cyng::logging::severity::LEVEL_WARNING, "standalone function as parameter");
+				print_error(cyng::logging::severity::LEVEL_ERROR, "standalone function as parameter");
 			}
 			return std::make_pair(key.value_, generate_function(depth + 1));
 
@@ -636,13 +657,23 @@ namespace docscript
 		return make_node_list(std::move(args));
 	}
 
-	void parser::match(symbol_type st)
+	bool parser::match(symbol_type st)
 	{
 		if (producer_.get().type_ != st) {
-			print_error(cyng::logging::severity::LEVEL_WARNING, "wrong lookahead");
+			std::stringstream ss;
+			ss
+				<< "wrong lookahead - "
+				<< name(st)
+				<< " expected"
+				;
+
+			print_error(cyng::logging::severity::LEVEL_WARNING, ss.str());
+			producer_.next();
+			return false;
 		}
 
 		producer_.next();
+		return true;
 	}
 
 	void parser::match()

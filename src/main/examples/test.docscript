@@ -7,13 +7,14 @@
 ;.emit(hello, world!)
 
 .h1(chap<T>er)
+
+Write Docscript inside of Docscript:
 .code(caption:'docScript example', source:'example.docscript', linenumbers:true)
 
 .h2(section_1)
 .code(language:C++, caption:'C++ example', source:'example.cpp', linenumbers:true)
 
 .h3(subsection*1)
-
 Binary dump:
 .code(language:binary, caption:'hex dump', source:'example.bin', linenumbers:true)
 
@@ -48,12 +49,6 @@ Binary dump:
 .h3(subsection-3)
 .h2(section)
 
-Write Docscript inside of Docscript:
-
-..list(type:ordered
- , style: 'lower-roman'
- , items: [(item one), (item two), (and item number ..b three)])
-
 
 .h3(subsection-1)
 .h3(subsection-2)
@@ -73,9 +68,9 @@ On the other hand, Το λάθος είναι ανθρώπινο.
 
 .h1(chapter)
 
-.h1(chapter)
+.h1(Render a paragraph)
 
-DocScript .b.i is intended for C++ programmers to write documentation, blog posts and any other kinds of reports and papers. .get(name) is designed in the spirit of .link(text: "LaTeX", url: 'https://www.latex-project.org/') and .link(text: "troff/nroff", url: 'https://en.wikipedia.org/wiki/Troff', title: "text-formatting program from the 1960") an ancient document processing system with roots back to the first UNIX systems. The main idea .footnote(This is a .b footnote.) is to write the content .b .color(#808000: "spiced up") with some semantic hints. The typesetting system transforms this into a proper document. And since the underlying markup language is Turing complete you do not write the text, you .bold(program it). If required you can use functions, recursion, loops and all kinds of algorithm. And this is the reason it's the perfect fit for programmers like you. With .b this versatile instrument in your hand you have a tool that gives you more power.
+.get(name) .b.i is intended for C++ programmers to write documentation, blog posts and any other kinds of reports and papers. .get(name) is designed in the spirit of .link(text: "LaTeX", url: 'https://www.latex-project.org/') and .link(text: "troff/nroff", url: 'https://en.wikipedia.org/wiki/Troff', title: "text-formatting program from the 1960") an ancient document processing system with roots back to the first UNIX systems. The main idea .footnote(This is a .b footnote.) is to write the content .b .color(#808000: "spiced up") with some semantic hints. The typesetting system transforms this into a proper document. And since the underlying markup language is Turing complete you do not write the text, you .bold(program it). If required you can use functions, recursion, loops and all kinds of algorithm. And this is the reason it's the perfect fit for programmers like you. With .b this versatile instrument in your hand you have a tool that gives you more power.
 
 ;.now()
 ;.demo(key1:'value', key2: .now(), key3: &)

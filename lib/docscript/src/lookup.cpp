@@ -21,10 +21,12 @@ namespace docscript
 			if (boost::algorithm::equals(name, "b"))	return false;
 			if (boost::algorithm::equals(name, "bold"))	return false;
 			if (boost::algorithm::equals(name, "color"))	return false;
+			if (boost::algorithm::equals(name, "sub"))	return false;
+			if (boost::algorithm::equals(name, "sup"))	return false;
 			if (boost::algorithm::equals(name, "link"))	return false;
 			if (boost::algorithm::equals(name, "now"))	return false;
 			//if (boost::algorithm::equals(name, "set"))	return false;
-			//if (boost::algorithm::equals(name, "get"))	return false;
+			if (boost::algorithm::equals(name, "get"))	return false;
 			if (boost::algorithm::equals(name, "footnote"))	return false;
 			if (boost::algorithm::equals(name, "symbol"))	return false;
 			if (boost::algorithm::equals(name, "currency"))	return false;

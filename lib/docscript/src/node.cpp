@@ -173,7 +173,10 @@ namespace docscript
 
 	std::string get_function_par_name(node const& n)
 	{
-		return n.name_;
+		return (node::NODE_FUNCTION_PAR == n.type_)
+			? n.name_
+			: ""
+			;
 	}
 
 	node::v_args* access_function_vector(node& n)
@@ -203,6 +206,14 @@ namespace docscript
 	}
 
 	std::string get_function_vec_name(docscript::node const& n)
+	{
+		return (node::NODE_FUNCTION_VEC == n.type_)
+			? n.name_
+			: ""
+			;
+	}
+
+	std::string get_name(node const& n)
 	{
 		return n.name_;
 	}

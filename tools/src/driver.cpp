@@ -17,8 +17,9 @@
 #include <cyng/io/parser/parser.h>
 #include <cyng/io/io_chrono.hpp>
 #include <cyng/traits.h>
-//#include <cyng/core/class_interface.h>
 #include <cyng/factory.h>
+#include <cyng/vm/manip.h>
+#include <cyng/vm/generator.h>
 
 #include <iostream>
 #include <boost/algorithm/string.hpp>
@@ -48,7 +49,7 @@ namespace docscript
 			while (!tokenizer_.next(tok))
 			{
 #ifdef _DEBUG
-				if (verbose_ > 4)
+				if (verbose_ > 9)
 				{
 					std::cout
 						<< "***info: repeat"
@@ -64,7 +65,7 @@ namespace docscript
 		//
 		, tokenizer_([this](symbol&& sym) {
 
-			if (verbose_ > 3)
+			if (verbose_ > 5)
 			{ 
 				std::cout 
 					<< "SYMBOL  " 
@@ -169,12 +170,26 @@ namespace docscript
 					//
 					std::chrono::system_clock::time_point last_write_time;
 					uintmax_t file_size;
+					//std::uint64_t file_size;
 
 					std::tie(last_write_time, file_size) = read_meta_data(dir / p);
 
 					meta_["last-write-time"] = cyng::make_object(last_write_time);
 					meta_["file-size"] = cyng::make_object(file_size);
-					meta_["file-name"] = cyng::make_object((dir / p).string());
+					meta_["total-file-size"] = cyng::make_object(file_size);
+					meta_["file-name"] = cyng::make_object(p.filename().string());
+
+				}
+				else {
+
+					//
+					//	update total file size
+					//
+					std::chrono::system_clock::time_point last_write_time;
+					uintmax_t file_size;
+					std::tie(last_write_time, file_size) = read_meta_data(dir / p);
+					file_size += cyng::value_cast(meta_.at("total-file-size"), file_size);
+					meta_["total-file-size"] = cyng::make_object(file_size);
 
 				}
 				return run(dir / p, std::get<1>(inp), std::get<2>(inp), depth);
@@ -217,7 +232,7 @@ namespace docscript
 		else
 		{
 			
-			if (verbose_ > 0)
+			if (verbose_ > 1)
 			{
 				std::cout
 					<< "***info: start parser with "
@@ -228,28 +243,13 @@ namespace docscript
 			}
 
 			//
-			//	create parser
-			//
-			parser p(stream_);
-
-			//
-			//	generate parse tree (AST)
-			//
-			p.parse();
-
-			//
-			//	generate code
-			//
-			auto prg = p.get_ast().generate(out, meta, index);
-
-			//
 			//	calculated entropy
 			//
 			auto const entropy = calculate_entropy(stats_);
 			auto const size = calculate_size(stats_);	//	symbol count
 
 			meta_["text-entropy"] = cyng::make_object(entropy);
-			meta_["input-symbols"] = cyng::make_object(size);
+			meta_["token-count"] = cyng::make_object(size);
 			if (verbose_ > 2)
 			{
 				//
@@ -271,6 +271,30 @@ namespace docscript
 					<< std::endl
 					;
 			}
+
+			//
+			//	serialize meta data
+			//
+			auto meta_prg = cyng::generate_invoke("init.meta.data", meta_);
+			for (auto obj : meta_prg) {
+				cyng::io::serialize_binary(file, obj);
+			}
+
+			//
+			//	create parser
+			//
+			parser p(stream_, verbose_);
+
+			//
+			//	generate parse tree (AST)
+			//
+			p.parse();
+
+			//
+			//	generate code
+			//
+			auto const prg = p.get_ast().generate(out, meta, index);
+
 			//
 			//	serialize as program not as data (reverse on stack)
 			//
@@ -330,17 +354,14 @@ namespace docscript
 			if (boost::algorithm::iequals(extension, ".html")) {
 				gen_html g(this->includes_, body_only);
 				g.run(std::move(prg));
-				std::this_thread::sleep_for(std::chrono::minutes(10));
 			}
 			else if (boost::algorithm::iequals(extension, ".md")) {
 				gen_md g(this->includes_);
 				g.run(std::move(prg));
-				std::this_thread::sleep_for(std::chrono::minutes(10));
 			}
 			else if (boost::algorithm::iequals(extension, ".tex")) {
 				gen_latex g(this->includes_);
 				g.run(std::move(prg));
-				std::this_thread::sleep_for(std::chrono::minutes(10));
 			}
 			else {
 				std::cerr
@@ -350,7 +371,6 @@ namespace docscript
 					<< extension
 					<< "]"
 					;
-
 			}
 		}
 	}

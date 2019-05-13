@@ -1,0 +1,200 @@
+.meta(title:readme, author:"solosTec")
+.set(name:docc, language:C++)
+
+;
+; Overview
+;
+.h1 Overview
+
+Generate HTML, Markdown and .symbol(LaTeX) files from one single source file written in .i docScript. 
+.get(name) is a compiler for the docScript language to generate documents. It is positioned between Markdown and LaTex. 
+
+.h2 Features
+
+Since you have one source file for different target formats, you don't have to memorize all the tiny syntactic quirks of LaTeX, Markdown or HTML.
+
+.list(type:ordered
+ , style: 'lower-roman'
+ , items: [
+	(syntax as simple as markdown, but with more features),
+	(docScript - allows to .b program your document (Turing complete)),
+	(documents can be compiled from different sources),
+	(UTF-8 support),
+	(pretty fast),
+	(auto generate numbering),
+	(auto generate meta data),
+	(pre-rendering of other sources - e.g. binary data as hexdump),
+	(comprehensive error messages),
+	(extensible)
+ ])
+
+;
+; Toolchain, platforms
+;
+.h1 Usage
+.h2 Building
+
+Dependencies:
+
+.list(type:unordered
+ , style: 'circle'
+ , items: [
+	(CMake >= 3.13),	
+	(recent C++ compiler),
+	(Boost > 1.67), 
+	(OpenSSL), 
+	(.link(text:'cyng', url:'https://github.com/solosTec/cyng', title:'VM with dynamic data types') library)])
+
+.h3(Linux)
+
+.code(language:sh, caption:'Linux build', source:'build-linux.txt', linenumbers:false)
+
+.h3(Windows)
+
+.code(language:cmd, caption:'Windows build', source:'build-windows.txt', linenumbers:none)
+
+.h2(Usage)
+
+.code(language:verbatim, caption:'Help', source:'help.txt', linenumbers:false)
+
+;
+; short introduction into docScript
+;
+.h1 DocScript
+
+Writing in .i docScript is as simple as Markdown but with a more formalized syntax. One of the main objectives of .i docScript
+is to make as less syntactic noise as possible. It exploits the fact, that a word never starts with a dot. So every literal
+that starts with a dot is a potential docScript keyword. In case you really want a word with leading point, simply write two consecutive points.
+This is possible since the dot is also the escape sign.
+
+.h2(Special Characters)
+
+.def(dot:'.', 'round brackets':"()", colon:":", 'square backets':"[]")
+
+That's all. 
+
+.h2(Basic Rules)
+
+To generate a paragraph simple write a text. To separate paragraphs, insert a .b blank line.
+
+To avoid any processing put your text into ''single quotation '' marks. 
+
+
+.h2(Parameters)
+
+Parameters can be a simple list of words, numbers and symbols or key value pairs separated by a comma. Key vlaue pairs consist of a key and a value
+separated by colon: .b('key:value'). Values can be the results of a function call, but keys cannot.
+
+.h2(Commands)
+
+Commands start with a dot. If the command has only one parameter no brackets are required. In case the command has no parameters
+an opening and closing bracket without contents is necessary.
+
+Example: .b '.now()'
+
+.h3(Formatting)
+
+.h4(bold)
+
+Example: '.b bold' => .b bold
+
+.h4(italic)
+
+Example: '.i(emphasized)' => .i(emphasized)
+
+.h4(sup, sub)
+
+;Example: '.sup(sup) X .sub(sub)' => .sup(sup) X .sub(sub)
+Super and subscript is not supported by Github Markdown.
+
+.h4(color)
+
+Colors are not supported by Markdown. 
+
+.h3(Header)
+
+A header has the following options:
+
+.def(level:"indentation depth", 
+	title:"caption title", 
+	tag:"unique identifier")
+
+Example:
+.code(language:docscript, caption:'Header', source:'example-header.docscript', linenumbers:true)
+
+To simplify writing headers the shortcuts .b h1 up to .b h6 are defined.
+
+.h3(Lists)
+
+A list has the following options:
+
+.def(type:"available options are ordered and unordered", 
+	style:"list style", 
+	items:"a list of items as [vector]")
+
+Example:
+.code(language:docscript, caption:'Header', source:'example-list.docscript', linenumbers:true)
+
+.h3(Definitions)
+
+.h3(Code Listings)
+
+The command is .b '.code'. A listing has the following options:
+
+.def(caption:"Optional title", 
+	line_numbers:"[bool] print line numbers", 
+	source:"source file",
+	language:"programming language")
+
+The following languages are strongly supported:
+
+.list(type:unordered
+ , style: 'circle'
+ , items: [
+	(C++),	
+	(JSON),
+	(txt), 
+	(binary data as hexdump), 
+	(docScript)])
+
+In case of dubt choose .i txt format.
+
+.h3(Link)
+
+.def(title:"optional tooltip", 
+	url:"URL that the hyperlink points to", 
+	text:"Text to display")
+
+.h3(Figure)
+
+The specified image will be embedded into the HTML file as base64 encoded string.
+
+.def(alt:"alternative text", 
+	caption:"Title below the image", 
+	source:"path of source/image file",
+	tag:"label")
+
+
+.h3(Quote)
+
+.def(cite:"text below the quote", 
+	source:"source of quote", 
+	quote:"the quote itself")
+
+.h3(Set)
+
+Define one or more variables.
+
+Example: .b '.set(name:docc, language:C++)'
+
+.h3(Get)
+
+Get value of a variable.
+
+Example: .b '.get(name)'
+
+.h3(Meta)
+
+Define a set of document meta data.
+
+Example: .b '.meta(title:readme, author:solosTec)'

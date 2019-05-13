@@ -28,6 +28,7 @@ namespace docscript
 		, language_("en")
 		, includes_(inc)
 		, content_table_()
+		, meta_()
 	{
 		register_this();
 	}
@@ -35,6 +36,8 @@ namespace docscript
 	void generator::run(cyng::vector_t&& prg)
 	{
 		vm_.async_run(std::move(prg));
+		vm_.halt();
+		scheduler_.stop();
 	}
 
 	void generator::register_this()
@@ -49,7 +52,9 @@ namespace docscript
 
 		//vm_.register_function("generate.meta", 1, std::bind(&gen_md::generate_meta, this, std::placeholders::_1));
 		vm_.register_function("generate.index", 1, std::bind(&generator::generate_index, this, std::placeholders::_1));
+		vm_.register_function("init.meta.data", 1, std::bind(&generator::init_meta_data, this, std::placeholders::_1));
 
+		vm_.register_function("meta", 1, std::bind(&generator::meta, this, std::placeholders::_1));
 		vm_.register_function("set", 1, std::bind(&generator::var_set, this, std::placeholders::_1));
 		vm_.register_function("get", 1, std::bind(&generator::var_get, this, std::placeholders::_1));
 		vm_.register_function("symbol", 1, std::bind(&generator::print_symbol, this, std::placeholders::_1));
@@ -57,14 +62,28 @@ namespace docscript
 
 	}
 
+	void generator::init_meta_data(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		meta_ = cyng::value_cast(frame.at(0), meta_);
+	}
 
+	void generator::meta(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		cyng::param_map_t m;
+		m = cyng::value_cast(frame.at(0), m);
+		meta_.insert(m.begin(), m.end());	//	merge
+	}
 
 	void generator::var_set(cyng::context& ctx)
 	{
 		//	example
 		//	[%(("language":C++),("name":DocScript))]
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		cyng::param_map_t tmp;
 		tmp = cyng::value_cast(frame.at(0), tmp);
@@ -82,7 +101,7 @@ namespace docscript
 	void generator::var_get(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		auto const name = cyng::value_cast<std::string>(frame.at(0), "");
 		auto const pos = vars_.find(name);
@@ -121,7 +140,7 @@ namespace docscript
 	void generator::print_symbol(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 		auto const symbol = cyng::value_cast<std::string>(frame.at(0), "");
 		if (boost::algorithm::equals(symbol, "pilgrow")) {
 			ctx.push(cyng::make_object(u8"¶"));
@@ -140,7 +159,7 @@ namespace docscript
 	void generator::print_currency(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 		auto const currency = cyng::value_cast<std::string>(frame.at(0), "");
 
 		if (boost::algorithm::equals(currency, "euro")) {
@@ -201,7 +220,7 @@ namespace docscript
 		std::string text;
 		for (auto const& obj : tpl) {
 			std::string const s = accumulate_plain_text(obj);
-			if (!text.empty() && !(s == "." || s == "," || s == ":" || s == "?" || s == "!")) {
+			if (!text.empty() && !(s == "." || s == "," || s == ":" || s == "?" || s == "!" || s == ")" || s == "]" || s == "}")) {
 				text.append(1, ' ');
 			}
 			text.append(s);
@@ -214,7 +233,7 @@ namespace docscript
 		std::string text;
 		for (auto const& obj : vec) {
 			std::string const s = accumulate_plain_text(obj);
-			if (!text.empty() && !(s == "." || s == "," || s == ":" || s == "?" || s == "!")) {
+			if (!text.empty() && !(s == "." || s == "," || s == ":" || s == "?" || s == "!" || s == ")" || s == "]" || s == "}")) {
 				text.append(1, ' ');
 			}
 			text.append(s);

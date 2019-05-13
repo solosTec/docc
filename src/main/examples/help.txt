@@ -1,0 +1,19 @@
+$ docc -h
+
+Generic options:
+  -h [ --help ]                         print usage message
+  -v [ --version ]                      print version string
+  -b [ --build ]                        last built timestamp and platform
+  -C [ --config ] arg (=docscript.cfg)  configuration file
+
+compiler:
+  -S [ --source ] arg (=main.docscript) main source file
+  -O [ --output ] arg (=/home/sol/projects/docc/out.html)
+                                        output file
+  -I [ --include-path ] arg (=/home/sol/projects/docc)
+                                        include path
+  -V [ --verbose ] [=arg(=1)] (=0)      verbose level
+  --body                                generate only HTML body
+  --meta                                generate a JSON file with meta data
+  --index                               generate an index file "index.json"
+
