@@ -7,6 +7,8 @@
 <!-- token-count:	4696 -->
 <!-- total-file-size:	5037 -->
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/d4494601ebc84a2da2057f76652624df)](https://www.codacy.com/app/solosTec/docc?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=solosTec/docc&amp;utm_campaign=Badge_Grade)
+
 # 1 Overview
 Generate HTML, Markdown and L^A^T~E~X files from one single source file written in _docScript_. docc is a compiler for the docScript language to generate documents. It is positioned between Markdown and LaTex.
 ## 1.1 Features
