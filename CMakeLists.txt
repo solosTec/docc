@@ -177,6 +177,16 @@ message(STATUS "** CMake modules      : ${CMAKE_MODULE_PATH}")
 include(CPPFeatureSupport)
 
 #
+# libpugixml-dev (v1.9)
+#
+# Included as 3party software
+#
+set(PUGIXML_INCLUDE_DIR "${CYNG_ROOT}/3party/pugixml-190")
+message(STATUS "** PugiXML Include   : ${PUGIXML_INCLUDE_DIR}")
+add_definitions(-D${PROJECT_NAME}_PUGIXML_INSTALLED)
+include_directories(${PUGIXML_INCLUDE_DIR})
+
+#
 #	setup C++ compiler
 #
 if (CMAKE_COMPILER_IS_GNUCXX)
@@ -316,7 +326,7 @@ target_link_libraries(docscript
 #
 include (tools/docc/prg.cmake)
 add_executable(docc ${docc})
-set(docc_link_libs cyng_io cyng_vm cyng_async cyng_crypto cyng_log cyng_crypto cyng_json cyng_parser docscript lib_html ${OPENSSL_LIBRARIES})
+set(docc_link_libs cyng_io cyng_vm cyng_async cyng_crypto cyng_log cyng_crypto cyng_json cyng_parser cyng_xml docscript lib_html ${OPENSSL_LIBRARIES})
 if (${GLOBAL_LIBRARY_TYPE} STREQUAL "SHARED")
     if (UNIX)
         list(APPEND docc_link_libs pthread "${Boost_LIBRARIES}")

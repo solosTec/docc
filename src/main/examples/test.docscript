@@ -61,6 +61,7 @@ On the other hand, Το λάθος είναι ανθρώπινο.
 
 .h1(chapter)
 
+.figure(source: 'logo.svg', caption: "solosTec Logo", alt: "solosTec Logi", tag: '9d0dd0fd-de54-49cc-86b0-64fe35b6d5a5')
 .figure(source: 'example.jpg', caption: "Daisies in the rain", alt: "Giovanni Bellini, Man wearing a turban", tag: '338d542a-a4e3-4a4c-9efe-b8d3032306c3')
 
 .h1(chapter)

@@ -20,13 +20,14 @@
 #include <cyng/numeric_cast.hpp>
 #include <cyng/dom/reader.h>
 #include <cyng/crypto/base64.h>
+//#include <cyng/xml.h>
+#include <pugixml.hpp>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
 namespace docscript
 {
-
 	gen_html::gen_html(std::vector< boost::filesystem::path > const& inc, bool body_only)
 		: generator(inc)
 		, footnotes_()
@@ -485,50 +486,91 @@ namespace docscript
 		auto const source = cyng::io::to_str(reader.get("source"));
 		auto const tag = cyng::io::to_str(reader.get("tag"));
 
-		const boost::filesystem::path p = resolve_path(source);
-		std::ifstream file(p.string(), std::ios::binary | std::ios::ate);
-		if (!file.is_open())
-		{
+		auto const p = resolve_path(source);
+		if (boost::filesystem::exists(p) && boost::filesystem::is_regular(p)) {
+
+			auto const ext = get_extension(p);
+			if (boost::algorithm::iequals(ext, "svg")) {
+
+				//
+				//	embedding SVG 
+				//	<figure>
+				//		<svg>...</svg>
+				//		<figcaption>CAPTION</figcaption>
+				//	</figure>
+				//
+				//	* remove <XML> trailer 
+				//	* add title info (aria-labelledby="title")
+
+				//
+				//	read into buffer
+				//
+				pugi::xml_document doc;
+				pugi::xml_parse_result result = doc.load_file(p.string().c_str());
+				if (result) {
+					
+					pugi::xml_node svg = doc.child("svg");
+					if (svg) {
+						svg.prepend_attribute("aria-labelledby") = "title";
+						auto node = svg.prepend_child("title");
+						node.append_child(pugi::node_pcdata).set_value(caption.c_str());
+					}
+
+					std::stringstream ss;
+					ss << std::endl;
+					doc.save(ss, "\t", pugi::format_default | pugi::format_no_declaration);
+					auto const el = html::figure(html::id_(tag), ss.str(), html::figcaption(caption));
+					ctx.push(cyng::make_object(el.to_str()));
+				}
+				else {
+					std::cerr << "SVG [" << p << "] parsed with errors, attr value: [" << doc.child("node").attribute("attr").value() << "]\n";
+					std::cerr << "Error description: " << result.description() << "\n";
+					std::cerr << "Error offset: " << result.offset << " (error at [..." << result.offset << "]\n\n";
+					ctx.push(cyng::make_object(result.description()));
+				}
+			}
+			else {
+				std::ifstream ifs(p.string(), std::ios::binary | std::ios::ate);
+				//
+				//	do not skip 
+				//
+				ifs.unsetf(std::ios::skipws);
+
+				//
+				//	get file size
+				//
+				std::streamsize size = ifs.tellg();
+				ifs.seekg(0, std::ios::beg);
+
+				//
+				//	read into buffer
+				//
+				cyng::buffer_t buffer(size);
+				ifs.read(buffer.data(), size);
+				BOOST_ASSERT(ifs.gcount() == size);
+
+				//<figure>
+				//  <img src="SOURCE" alt="ALT">
+				//  <figcaption>CAPTION</figcaption>
+				//</figure>
+
+				//
+				//	encode image as base 64
+				//
+				//"data:image/" + get_extension(p) + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size())
+
+				auto const el = html::figure(html::id_(tag), html::img(html::alt_(alt), html::title_(caption), html::src_("data:image/" + ext + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size()))), html::figcaption(caption));
+				ctx.push(cyng::make_object(el.to_str()));
+			}
+		}
+		else {
+
 			std::cerr
 				<< "***error cannot open figure file ["
 				<< source
 				<< "]"
 				<< std::endl;
 			ctx.push(cyng::make_object("cannot open file [" + source + "]"));
-		}
-		else 
-		{
-			//
-			//	do not skip 
-			//
-			file.unsetf(std::ios::skipws);
-
-			//
-			//	get file size
-			//
-			std::streamsize size = file.tellg();
-			file.seekg(0, std::ios::beg);
-
-			//
-			//	read into buffer
-			//
-			cyng::buffer_t buffer(size);
-			file.read(buffer.data(), size);
-			BOOST_ASSERT(file.gcount() == size);
-
-			//<figure>
-			//  <img src="SOURCE" alt="ALT">
-			//  <figcaption>CAPTION</figcaption>
-			//</figure>
-				
-			//
-			//	encode image as base 64
-			//
-			//"data:image/" + get_extension(p) + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size())
-
-			auto const el = html::figure(html::id_(tag), html::img(html::alt_(alt), html::src_("data:image/" + get_extension(p) + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size()))), html::figcaption(caption));
-			ctx.push(cyng::make_object(el.to_str()));
-
 		}
 	}
 
