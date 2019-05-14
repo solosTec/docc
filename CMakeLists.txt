@@ -313,20 +313,22 @@ add_library(lib_html ${GLOBAL_LIBRARY_TYPE} ${html_lib})
 #	docscript library
 #
 include (lib/docscript/lib.cmake)
-add_library(docscript ${GLOBAL_LIBRARY_TYPE} ${docscript_lib})
-target_link_libraries(docscript
+add_library(docscript_core ${GLOBAL_LIBRARY_TYPE} ${docscript_lib})
+target_link_libraries(docscript_core
 	cyng_core
 	cyng_async
 	cyng_crypto
 	cyng_vm
 	cyng_json)
-
+install(TARGETS docscript_core
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib/static)
 #
 # docscript compiler
 #
 include (tools/docc/prg.cmake)
 add_executable(docc ${docc})
-set(docc_link_libs cyng_io cyng_vm cyng_async cyng_crypto cyng_log cyng_crypto cyng_json cyng_parser cyng_xml docscript lib_html ${OPENSSL_LIBRARIES})
+set(docc_link_libs cyng_io cyng_vm cyng_async cyng_crypto cyng_log cyng_crypto cyng_json cyng_parser cyng_xml docscript_core lib_html ${OPENSSL_LIBRARIES})
 if (${GLOBAL_LIBRARY_TYPE} STREQUAL "SHARED")
     if (UNIX)
         list(APPEND docc_link_libs pthread "${Boost_LIBRARIES}" cyng_table)
@@ -350,13 +352,16 @@ if (${GLOBAL_LIBRARY_TYPE} STREQUAL "SHARED")
     endif()
 endif()
 target_link_libraries(batch ${batch_link_libs})
+install(TARGETS batch
+    RUNTIME
+    DESTINATION bin)
 
 #
 # plog server
 #
 #include (tools/plog/prg.cmake)
 #add_executable(plog ${plog})
-#set(plog_link_libs cyng_io cyng_vm cyng_async cyng_crypto cyng_log docscript)
+#set(plog_link_libs cyng_io cyng_vm cyng_async cyng_crypto cyng_log docscript_core)
 #if (${GLOBAL_LIBRARY_TYPE} STREQUAL "SHARED")
 #    if (UNIX)
 #        list(APPEND docc_link_libs pthread "${Boost_LIBRARIES}")
