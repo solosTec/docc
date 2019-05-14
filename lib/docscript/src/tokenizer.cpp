@@ -162,6 +162,7 @@ namespace docscript
 			return std::make_pair(STATE_START_, false);
 
 		case '(': case ')':
+		case '[': case ']':
 		case '?': case '!':
 		case ',': case ':': case ';':
 			//

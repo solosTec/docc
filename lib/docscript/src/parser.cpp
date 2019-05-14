@@ -14,9 +14,15 @@
 
 namespace docscript
 {
+	/**
+	 * Only visible in this compilation unit
+	 */
+	void print_parser_n(std::size_t, char);
+
 	parser::parser(typename symbol_reader::symbol_list_t& sl, int verbosity)
 		: producer_(sl)
 		, ast_(verbosity > 4)
+		, verbosity_(verbosity)
 	{}
 
 	ast const& parser::get_ast() const
@@ -104,7 +110,13 @@ namespace docscript
 		//
 		//	generate paragraph
 		//
+		if (verbosity_ > 5) {
+			print_parser_n(depth, '*');
+			std::cout
+				<< "parser(paragraph)"
+				<< std::endl;
 
+		}
 		while (!producer_.is_eof() && !producer_.get().is_type(SYM_PAR)) {
 
 #ifdef _DEBUG
@@ -133,7 +145,7 @@ namespace docscript
 					print_error(cyng::logging::severity::LEVEL_WARNING, "standalone function in paragraph");
 					return make_node_paragraph(std::move(args));
 				}
-				args.push_back(generate_function(depth));
+				args.push_back(generate_function(depth + 1));
 				break;
 
 			case SYM_PAR:
@@ -153,6 +165,14 @@ namespace docscript
 
 	node parser::generate_content(std::size_t depth)
 	{
+		if (verbosity_ > 5) {
+			print_parser_n(depth, '*');
+			std::cout
+				<< "parser(content)"
+				<< std::endl;
+
+		}
+
 		match(SYM_OPEN);
 		std::size_t open_counter{ 1 };
 
@@ -223,6 +243,13 @@ namespace docscript
 
 	node parser::generate_vector(std::size_t depth)
 	{
+		if (verbosity_ > 5) {
+			print_parser_n(depth, '*');
+			std::cout
+				<< "parser(vector)"
+				<< std::endl;
+		}
+
 		match(SYM_BEGIN);
 
 		node::v_args args;
@@ -271,6 +298,15 @@ namespace docscript
 		//	preserve function name
 		//
 		auto const sym = producer_.get();
+
+		if (verbosity_ > 5) {
+			print_parser_n(depth, '*');
+			std::cout
+				<< "parser(function: "
+				<< sym.value_
+				<< ")"
+				<< std::endl;
+		}
 
 		//
 		//	next token
@@ -352,6 +388,13 @@ namespace docscript
 
 	void parser::generate_arg(std::size_t depth, node::v_args* args)
 	{
+		if (verbosity_ > 5) {
+			print_parser_n(depth, '*');
+			std::cout
+				<< "parser(arg-v)"
+				<< std::endl;
+		}
+
 		//
 		//	function with a vector list
 		//
@@ -393,6 +436,14 @@ namespace docscript
 
 	void parser::generate_arg(std::size_t depth, node::p_args* args)
 	{
+		if (verbosity_ > 5) {
+			print_parser_n(depth, '*');
+			std::cout
+				<< "parser(arg-p)"
+				<< std::endl;
+		}
+
+
 		//
 		//	function with a parameter list
 		//
@@ -433,6 +484,13 @@ namespace docscript
 	std::size_t parser::generate_list(std::size_t depth, node::p_args* args)
 	{
 		BOOST_ASSERT(args != nullptr);
+
+		if (verbosity_ > 5) {
+			print_parser_n(depth, '*');
+			std::cout
+				<< "parser(list-p)"
+				<< std::endl;
+		}
 
 		std::size_t counter{ 0 };
 		while (!producer_.is_eof() && !producer_.get().is_type(SYM_CLOSE)) {
@@ -505,6 +563,13 @@ namespace docscript
 
 	std::size_t parser::generate_list(std::size_t depth, node::v_args* args)
 	{
+		if (verbosity_ > 5) {
+			print_parser_n(depth, '*');
+			std::cout
+				<< "parser(list-v)"
+				<< std::endl;
+		}
+
 		std::size_t counter{ 0 };
 		while (!producer_.is_eof() && !producer_.get().is_type(SYM_CLOSE)) {
 
@@ -529,6 +594,17 @@ namespace docscript
 			case SYM_BEGIN:
 			case SYM_END:
 			case SYM_SEP:	//	in a vector the "," separator is treated like normal character
+
+				if (verbosity_ > 6) {
+					print_parser_n(depth, '*');
+					std::cout
+						<< "parser(list-v #"
+						<< counter
+						<< ' '
+						<< producer_.get()
+						<< ")"
+						<< std::endl;
+				}
 
 				args->push_back(make_node_symbol(producer_.get()));
 				match();
@@ -558,6 +634,15 @@ namespace docscript
 	{
 		symbol const key = producer_.get();
 
+		if (verbosity_ > 5) {
+			print_parser_n(depth, '*');
+			std::cout
+				<< "parser(param: "
+				<< key.value_
+				<< ")"
+				<< std::endl;
+		}
+
 		//
 		//	next token
 		//
@@ -586,13 +671,13 @@ namespace docscript
 			//
 			//	"quote" vector
 			//
-			return std::make_pair(key.value_, generate_quote());
+			return std::make_pair(key.value_, generate_quote(depth));
 
 		case SYM_TOKEN:
 			//
 			//	function
 			//
-			if (lookup::is_standalone(key.value_)) {
+			if (lookup::is_standalone(value.value_)) {
 				print_error(cyng::logging::severity::LEVEL_ERROR, "standalone function as parameter");
 			}
 			return std::make_pair(key.value_, generate_function(depth + 1));
@@ -635,8 +720,15 @@ namespace docscript
 		return std::make_pair(key.value_, make_node());
 	}
 
-	node parser::generate_quote()
+	node parser::generate_quote(std::size_t depth)
 	{
+		if (verbosity_ > 5) {
+			print_parser_n(depth, '*');
+			std::cout
+				<< "parser(quote)"
+				<< std::endl;
+		}
+
 		match(SYM_DQUOTE);
 
 		node::s_args args;
@@ -649,6 +741,16 @@ namespace docscript
 				print_error(cyng::logging::severity::LEVEL_WARNING, "function will be ignored");
 			}
 			args.push_back(producer_.get());
+
+			if (verbosity_ > 6) {
+				print_parser_n(depth, '*');
+				std::cout
+					<< "parser(quote: "
+					<< producer_.get()
+					<< ")"
+					<< std::endl;
+			}
+
 			match();
 		}
 
@@ -673,6 +775,10 @@ namespace docscript
 		}
 
 		producer_.next();
+		//if (verbosity_ > 7) {
+		//	print_parser_n(depth, '*');
+		//}
+
 		return true;
 	}
 
@@ -698,6 +804,13 @@ namespace docscript
 			<< producer_.get_current_file()
 			<< std::endl
 			;
+	}
+
+	void print_parser_n(std::size_t n, char c)
+	{
+		std::cout
+			<< std::string(n, c)
+			<< '>';
 	}
 
 }

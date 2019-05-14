@@ -14,6 +14,7 @@
 
 namespace docscript
 {
+
 	/**
 	 * Parse tree of an docscript document
 	 */

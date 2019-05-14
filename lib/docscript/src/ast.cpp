@@ -18,7 +18,7 @@ namespace docscript
 	/**
 	 * Only visible in this compilation unit
 	 */
-	void print_n(std::size_t, char);
+	void print_ast_n(std::size_t, char);
 
 	ast::ast(bool log)
 		: log_(log)
@@ -131,7 +131,7 @@ namespace docscript
 	cyng::vector_t ast::generate_paragraph(std::size_t depth, node::d_args const* args) const
 	{
 		if (log_) {
-			print_n(depth, '.');
+			print_ast_n(depth, '.');
 			std::cout 
 				<< "generate_paragraph(" 
 				<< args->size() 
@@ -172,7 +172,7 @@ namespace docscript
 	cyng::vector_t ast::generate_content(std::size_t depth, node::d_args const* args) const
 	{
 		if (log_) {
-			print_n(depth, '.');
+			print_ast_n(depth, '.');
 			std::cout
 				<< "generate_content("
 				<< args->size()
@@ -198,7 +198,7 @@ namespace docscript
 	cyng::vector_t ast::generate_function_par(std::size_t depth, node::p_args const* args, std::string name) const
 	{
 		if (log_) {
-			print_n(depth, '.');
+			print_ast_n(depth, '.');
 			std::cout << "generate_function_par(" << name << ": " << args->size() << ")" << std::endl;
 		}
 		auto const rcount = lookup::rcount(name);
@@ -219,7 +219,7 @@ namespace docscript
 		for (auto const& arg : *args) {
 
 			if (log_) {
-				print_n(depth, '.');
+				print_ast_n(depth, '.');
 				std::cout << "param(" << name << ": " << arg.first << ")" << std::endl;
 			}
 			verify_param_range(name, arg.first, arg.second);
@@ -248,7 +248,7 @@ namespace docscript
 	cyng::vector_t ast::generate_function_vec(std::size_t depth, node::v_args const* args, std::string name) const
 	{
 		if (log_) {
-			print_n(depth, '.');
+			print_ast_n(depth, '.');
 			std::cout << "generate_function_vec(" << name << ": " << args->size() << ")" << std::endl;
 		}
 		auto const rcount = lookup::rcount(name);
@@ -287,7 +287,7 @@ namespace docscript
 		cyng::vector_t prg;
 
 		if (log_) {
-			print_n(depth, '.');
+			print_ast_n(depth, '.');
 			std::cout << "generate_symbol(" << *sp << ")" << std::endl;
 		}
 		//
@@ -358,7 +358,7 @@ namespace docscript
 		cyng::vector_t prg;
 
 		if (log_) {
-			print_n(depth, '.');
+			print_ast_n(depth, '.');
 			std::cout << "generate_list(" << args->size() << ")" << std::endl;
 		}
 
@@ -379,7 +379,7 @@ namespace docscript
 		cyng::vector_t prg;
 
 		if (log_) {
-			print_n(depth, '.');
+			print_ast_n(depth, '.');
 			std::cout << "generate_vector(" << args->size() << ")" << std::endl;
 		}
 
@@ -445,7 +445,7 @@ namespace docscript
 	void ast::generate_html_function_par(std::size_t depth, node::p_args const* args, std::string name, std::ostream& os, bool linenumber) const
 	{
 		if (log_) {
-			print_n(depth, '.');
+			print_ast_n(depth, '.');
 			std::cout << "generate_function_par(" << name << ": " << args->size() << ")" << std::endl;
 		}
 
@@ -482,7 +482,7 @@ namespace docscript
 		for (auto const& arg : *args) {
 
 			if (log_) {
-				print_n(depth, '.');
+				print_ast_n(depth, '.');
 				std::cout << "param(" << name << ": " << arg.first << ")" << std::endl;
 			}
 
@@ -517,7 +517,7 @@ namespace docscript
 	void ast::generate_html_paragraph(std::size_t depth, node::d_args const* args, std::ostream& os, bool linenumber) const
 	{
 		if (log_) {
-			print_n(depth, '.');
+			print_ast_n(depth, '.');
 			std::cout
 				<< "generate_paragraph("
 				<< args->size()
@@ -539,7 +539,7 @@ namespace docscript
 	void ast::generate_html_content(std::size_t depth, node::d_args const* args, std::ostream& os, bool linenumber) const
 	{
 		if (log_) {
-			print_n(depth, '.');
+			print_ast_n(depth, '.');
 			std::cout
 				<< "generate_content("
 				<< args->size()
@@ -565,7 +565,7 @@ namespace docscript
 	void ast::generate_html_function_vec(std::size_t depth, node::v_args const* args, std::string name, std::ostream& os, bool linenumber) const
 	{
 		if (log_) {
-			print_n(depth, '.');
+			print_ast_n(depth, '.');
 			std::cout << "generate_function_vec(" << name << ": " << args->size() << ")" << std::endl;
 		}
 
@@ -614,7 +614,7 @@ namespace docscript
 	{
 
 		if (log_) {
-			print_n(depth, '.');
+			print_ast_n(depth, '.');
 			std::cout << "generate_symbol(" << *sp << ")" << std::endl;
 		}
 		//
@@ -671,7 +671,7 @@ namespace docscript
 	void ast::generate_html_list(std::size_t depth, node::s_args const* args, std::ostream& os, bool linenumber) const
 	{
 		if (log_) {
-			print_n(depth, '.');
+			print_ast_n(depth, '.');
 			std::cout << "generate_list(" << args->size() << ")" << std::endl;
 		}
 
@@ -683,7 +683,7 @@ namespace docscript
 	void ast::generate_html_vector(std::size_t depth, node::v_args const* args, std::ostream& os, bool linenumber) const
 	{
 		if (log_) {
-			print_n(depth, '.');
+			print_ast_n(depth, '.');
 			std::cout << "generate_vector(" << args->size() << ")" << std::endl;
 		}
 
@@ -747,7 +747,7 @@ namespace docscript
 		return false;
 	}
 
-	void print_n(std::size_t n, char c)
+	void print_ast_n(std::size_t n, char c)
 	{
 		std::cout 
 			<< std::string(n, c)

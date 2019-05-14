@@ -25,7 +25,7 @@ Since you have one source file for different target formats, you don't have to m
 	(auto generate meta data),
 	(pre-rendering of other sources - e.g. binary data as hexdump),
 	(comprehensive error messages),
-	(extensible)
+	(hackable)
  ])
 
 ;

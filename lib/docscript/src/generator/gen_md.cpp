@@ -641,7 +641,7 @@ namespace docscript
 					r.append("&#8810;");
 					break;
 				default:
-					r += '<';
+					r += "\\>";
 					r += c;
 					break;
 				}

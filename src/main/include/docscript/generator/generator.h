@@ -98,7 +98,7 @@ namespace docscript
 	std::string accumulate_plain_text(cyng::tuple_t);
 	std::string accumulate_plain_text(cyng::vector_t);
 
-	void replace_all(std::string&, std::string, std::string);
+	//void replace_all(std::string&, std::string, std::string);
 
 	/**
 	 * @brief generate_slug

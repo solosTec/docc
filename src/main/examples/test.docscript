@@ -1,4 +1,5 @@
-﻿;.set(chaper:(one))
+﻿.meta(date:.now(), author:"solosTec")
+;.set(chaper:(one))
 ;.set age:42
 ;.set flag:true
 .set(name:DocScript, language:C++)
@@ -7,6 +8,8 @@
 ;.emit(hello, world!)
 
 .h1(chap<T>er)
+
+solos[T]ec, solos(T)ec and solos{T}ec.
 
 Write Docscript inside of Docscript:
 .code(caption:'docScript example', source:'example.docscript', linenumbers:true)

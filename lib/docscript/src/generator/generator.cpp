@@ -220,7 +220,9 @@ namespace docscript
 		std::string text;
 		for (auto const& obj : tpl) {
 			std::string const s = accumulate_plain_text(obj);
-			if (!text.empty() && !(s == "." || s == "," || s == ":" || s == "?" || s == "!" || s == ")" || s == "]" || s == "}")) {
+			if (!text.empty() 
+				&& !(s == "." || s == "," || s == ":" || s == "?" || s == "!" || s == ")" || s == "]" || s == "}")
+				&& !(text.back() == '(' || text.back() == '[' || text.back() == '{')) {
 				text.append(1, ' ');
 			}
 			text.append(s);
@@ -233,22 +235,14 @@ namespace docscript
 		std::string text;
 		for (auto const& obj : vec) {
 			std::string const s = accumulate_plain_text(obj);
-			if (!text.empty() && !(s == "." || s == "," || s == ":" || s == "?" || s == "!" || s == ")" || s == "]" || s == "}")) {
+			if (!text.empty() 
+				&& !(s == "." || s == "," || s == ":" || s == "?" || s == "!" || s == ")" || s == "]" || s == "}")
+				&& !(text.back() == '(' || text.back() == '[' || text.back() == '{')) {
 				text.append(1, ' ');
 			}
 			text.append(s);
 		}
 		return text;
-	}
-
-	void replace_all(std::string& str, std::string old, std::string rep)
-	{
-		for (int pos = 0;
-			(pos = str.find(old, pos)) != std::string::npos;
-			pos += rep.length())
-		{
-			str.replace(pos, old.length(), rep);
-		}
 	}
 
 	std::string generate_slug(std::string title)
