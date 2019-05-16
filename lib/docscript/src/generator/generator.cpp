@@ -72,7 +72,7 @@ namespace docscript
 	void generator::meta(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 		cyng::param_map_t m;
 		m = cyng::value_cast(frame.at(0), m);
 		meta_.insert(m.begin(), m.end());	//	merge
@@ -143,13 +143,13 @@ namespace docscript
 		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 		auto const symbol = cyng::value_cast<std::string>(frame.at(0), "");
 		if (boost::algorithm::equals(symbol, "pilgrow")) {
-			ctx.push(cyng::make_object(u8"Â¶"));
+			ctx.push(cyng::make_object(u8"¶"));
 		}
 		else if (boost::algorithm::equals(symbol, "copyright")) {
-			ctx.push(cyng::make_object(u8"Â©"));
+			ctx.push(cyng::make_object(u8"©"));
 		}
 		else if (boost::algorithm::equals(symbol, "registered")) {
-			ctx.push(cyng::make_object(u8"Â®"));
+			ctx.push(cyng::make_object(u8"®"));
 		}
 		else {
 			ctx.push(cyng::make_object(symbol));
@@ -163,13 +163,13 @@ namespace docscript
 		auto const currency = cyng::value_cast<std::string>(frame.at(0), "");
 
 		if (boost::algorithm::equals(currency, "euro")) {
-			ctx.push(cyng::make_object(u8"Â€"));
+			ctx.push(cyng::make_object(u8"€"));
 		}
 		else if (boost::algorithm::equals(currency, "yen")) {
-			ctx.push(cyng::make_object(u8"Â¥"));
+			ctx.push(cyng::make_object(u8"¥"));
 		}
 		else if (boost::algorithm::equals(currency, "pound")) {
-			ctx.push(cyng::make_object(u8"Â£"));
+			ctx.push(cyng::make_object(u8"£"));
 		}
 		else {
 			ctx.push(cyng::make_object(currency));

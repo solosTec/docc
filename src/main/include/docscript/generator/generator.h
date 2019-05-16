@@ -48,6 +48,7 @@ namespace docscript
 		virtual void convert_alpha(cyng::context& ctx) = 0;
 
 		virtual void paragraph(cyng::context& ctx) = 0;
+		virtual void abstract(cyng::context& ctx) = 0;
 		virtual void quote(cyng::context& ctx) = 0;
 		virtual void list(cyng::context& ctx) = 0;
 		virtual void link(cyng::context& ctx) = 0;

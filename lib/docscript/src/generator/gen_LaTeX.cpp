@@ -39,6 +39,7 @@ namespace docscript
 		vm_.register_function("convert.alpha", 1, std::bind(&gen_latex::convert_alpha, this, std::placeholders::_1));
 
 		vm_.register_function("paragraph", 1, std::bind(&gen_latex::paragraph, this, std::placeholders::_1));
+		vm_.register_function("abstract", 1, std::bind(&gen_latex::abstract, this, std::placeholders::_1));
 		vm_.register_function("quote", 1, std::bind(&gen_latex::quote, this, std::placeholders::_1));
 		vm_.register_function("list", 1, std::bind(&gen_latex::list, this, std::placeholders::_1));
 		vm_.register_function("link", 1, std::bind(&gen_latex::link, this, std::placeholders::_1));
@@ -118,7 +119,9 @@ namespace docscript
 			<< std::endl
 			<< build_cmd("usepackage", "hyperref")
 			<< std::endl
-			<< build_cmd("hypersetup", "colorlinks=true, linkcolor=RoyalBlue, filecolor=magenta, urlcolor=blue")
+			<< build_cmd("usepackage", "graphicx")	// Required for including images
+			<< std::endl
+			<< build_cmd("hypersetup", "colorlinks=true, linkcolor=blue, filecolor=magenta, urlcolor=brown")
 			<< std::endl
 			<< build_cmd("usepackage", "listings")
 			<< std::endl
@@ -132,15 +135,18 @@ namespace docscript
 	std::ofstream& gen_latex::emit_title(std::ofstream& ofs) const
 	{
 		auto const reader = cyng::make_reader(meta_);
-
+// 		std::cout << "META: " << cyng::io::to_str(meta_) << std::endl;
+		
+		auto const title = accumulate_plain_text(reader.get("title"));
+		auto const author = accumulate_plain_text(reader.get("author"));
 		
 		ofs
 			<< "\\title{"
-			<< cyng::value_cast<std::string>(reader.get("title"), "no title")
+			<< title
 			<< "}"
 			<< std::endl
 			<< "\\author{"
-			<< cyng::value_cast<std::string>(reader.get("author"), "no author")
+			<< author
 			<< "}"
 			<< std::endl
 			<< "\\date{"
@@ -308,18 +314,33 @@ namespace docscript
 		auto const frame = ctx.get_frame();
 		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 		std::string par = accumulate_plain_text(frame);
-		//std::stringstream ss;
-		//ss << std::endl;
-		//for (auto obj : frame) {
-		//	ss
-		//		<< cyng::io::to_str(obj)
-		//		<< ' '
-		//		;
-		//}
-		//ss << std::endl;
 		ctx.push(cyng::make_object(par));
 	}
 
+	void gen_latex::abstract(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+// 		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		auto const reader = cyng::make_reader(frame.at(0));
+
+		auto const title = cyng::value_cast<std::string>(reader.get("title"), "Abstract");
+		auto const text = accumulate_plain_text(reader.get("text"));
+		
+		std::stringstream ss;
+		ss
+			<< std::endl
+			//	This section will not appear in the table of contents due to the star 
+			<< build_cmd("section*", "Abstract")
+			<< std::endl
+			<< text
+			<< std::endl
+			<< "\\newpage"
+			<< std::endl
+			;
+		ctx.push(cyng::make_object(ss.str()));
+
+	}
+	
 	void gen_latex::quote(cyng::context& ctx)
 	{
 		//	[%(("q":{1,2,3}),("source":Earl Wilson),("url":https://www.brainyquote.com/quotes/quotes/e/earlwilson385998.html))]
@@ -423,6 +444,7 @@ namespace docscript
 
 		std::stringstream ss;
 		ss
+			<< std::endl
 			<< "\\begin{figure}[hbtp]"
 			<< std::endl
 			<< "%\\centering"

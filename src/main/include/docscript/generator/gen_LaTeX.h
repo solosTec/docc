@@ -36,6 +36,7 @@ namespace docscript
 
 		virtual void paragraph(cyng::context& ctx) override;
 		virtual void quote(cyng::context& ctx) override;
+		virtual void abstract(cyng::context& ctx) override;
 		virtual void list(cyng::context& ctx) override;
 		virtual void link(cyng::context& ctx) override;
 		virtual void figure(cyng::context& ctx) override;
