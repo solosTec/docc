@@ -25,13 +25,15 @@ namespace docscript
 		, vm_(scheduler_.get_io_service(), uuid_gen_(), std::cout, std::cerr)
 		, vars_()
 		, const_()
-		, language_("en")
 		, includes_(inc)
 		, content_table_()
 		, meta_()
 	{
 		register_this();
 	}
+
+	generator::~generator()
+	{}
 
 	void generator::run(cyng::vector_t&& prg)
 	{
@@ -200,6 +202,116 @@ namespace docscript
 	{
 		auto const type = get_type();
 		return boost::algorithm::equals(type, "report");
+	}
+
+	std::string generator::get_language() const
+	{
+		auto const reader = cyng::make_reader(meta_);
+		auto const lang = cyng::value_cast<std::string>(reader.get("language"), "en");
+		return (lang.size() == 2)
+			? boost::algorithm::to_lower_copy(lang)
+			: "en"
+			;
+	}
+
+	cyng::io::language_codes generator::get_language_code() const
+	{
+		auto const lang = get_language();
+		return (lang.size() == 2)
+			? cyng::io::get_language_code(lang.at(0), lang.at(1))
+			: cyng::io::LC_EN
+			;
+	}
+
+	std::string generator::get_name(i18n::word_id id) const
+	{
+		switch(id) {
+		case i18n::WID_FIGURE:
+			switch(get_language_code()) {
+			case cyng::io::LC_ES: return "gráfica";
+			case cyng::io::LC_SV: return "illustration";
+			case cyng::io::LC_PT: return "ilustração";
+			case cyng::io::LC_DE: return "Abbildung";
+			case cyng::io::LC_BG: return "илюстрация";
+			case cyng::io::LC_RU: return "картинка";
+			case cyng::io::LC_UK: return "ілюстрація";
+//			case cyng::io::LC_CS: return "czech";
+			case cyng::io::LC_FI: return "kuva";
+			case cyng::io::LC_FR: return "illustration";
+			case cyng::io::LC_EL: return "εικόνα";
+//			case cyng::io::LC_HU: return "magyar";
+			case cyng::io::LC_IS: return "útskýring";
+			case cyng::io::LC_IT: return "figura";
+			case cyng::io::LC_NN: return "illustrasjon";
+			case cyng::io::LC_JA: return "イラスト";
+			case cyng::io::LC_KO: return "그림";
+			case cyng::io::LC_FA: return "تصویر";
+			case cyng::io::LC_PL: return "rysunek";
+			case cyng::io::LC_SK: return "ilustrácie";
+			case cyng::io::LC_HE: return "איור";
+			case cyng::io::LC_NL: return "afbeelding";
+			case cyng::io::LC_EU: return "ilustrazioa";
+//			case cyng::io::LC_BR: return "breton";
+//			case cyng::io::LC_CA: return "catalan";
+			case cyng::io::LC_HR: return "ilustracija";
+			case cyng::io::LC_ET: return "näide";
+			case cyng::io::LC_GL: return "ilustración";
+			case cyng::io::LC_GA: return "léaráid";
+			case cyng::io::LC_LA: return "illustratio";
+//			case cyng::io::LC_SE: return "samin";
+			case cyng::io::LC_RO: return "ilustrare";
+			case cyng::io::LC_GD: return "dealbh";
+			case cyng::io::LC_TR: return "resim";
+			case cyng::io::LC_CY: return "darlunio";
+			default:
+				break;
+			}
+			return "figure";
+		case i18n::WID_TABLE:
+			switch(get_language_code()) {
+			case cyng::io::LC_ES: return "mesa";
+			case cyng::io::LC_SV: return "bord";
+			case cyng::io::LC_PT: return "mesa";
+			case cyng::io::LC_DE: return "Tabelle";
+			case cyng::io::LC_BG: return "маса";
+			case cyng::io::LC_RU: return "стол";
+			case cyng::io::LC_UK: return "стіл";
+//			case cyng::io::LC_CS: return "czech";
+			case cyng::io::LC_FI: return "pöytä";
+			case cyng::io::LC_FR: return "table";
+			case cyng::io::LC_EL: return "τραπέζι";
+			case cyng::io::LC_HU: return "táblázat";
+			case cyng::io::LC_IS: return "Taflan";
+			case cyng::io::LC_IT: return "tavolo";
+			case cyng::io::LC_NN: return "bord";
+			case cyng::io::LC_JA: return "テーブル";
+			case cyng::io::LC_KO: return "테이블";
+			case cyng::io::LC_FA: return "جدول";
+			case cyng::io::LC_PL: return "stół";
+			case cyng::io::LC_SK: return "stôl";
+			case cyng::io::LC_HE: return "שולחן";
+			case cyng::io::LC_NL: return "tafel";
+			case cyng::io::LC_EU: return "taula";
+//			case cyng::io::LC_BR: return "breton";
+//			case cyng::io::LC_CA: return "catalan";
+			case cyng::io::LC_HR: return "stol";
+			case cyng::io::LC_ET: return "tabel";
+			case cyng::io::LC_GL: return "mesa";
+			case cyng::io::LC_GA: return "tábla";
+			case cyng::io::LC_LA: return "mensam";
+//			case cyng::io::LC_SE: return "samin";
+			case cyng::io::LC_RO: return "tabel";
+			case cyng::io::LC_GD: return "Clàr";
+			case cyng::io::LC_TR: return "tablo";
+			case cyng::io::LC_CY: return "tabl";
+			default:
+				break;
+			}
+			return "table";
+		default:
+			break;
+		}
+		return "";
 	}
 
 	std::string get_extension(boost::filesystem::path const& p)

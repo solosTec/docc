@@ -13,16 +13,29 @@
 #include <cyng/intrinsics/sets.h>
 #include <cyng/vm/controller.h>
 #include <cyng/async/scheduler.h>
+#include <cyng/io/iso_639_1.h>
 
 #include <boost/uuid/name_generator.hpp>
 #include <boost/uuid/random_generator.hpp>
 
 namespace docscript
 {
+	namespace i18n {
+		enum word_id {
+			WID_FIGURE,
+			WID_TABLE,
+		};
+	}
+
+	/**
+	 * @brief The generator case class
+	 */
 	class generator
 	{
 	public:
 		generator(std::vector< boost::filesystem::path > const&);
+		virtual ~generator();
+
 		void run(cyng::vector_t&&);
 
 	protected:
@@ -80,6 +93,21 @@ namespace docscript
 		 */
 		bool is_report() const;
 
+		/**
+		 * Default value is "en"
+		 *
+		 * @return language as defined in meta data
+		 */
+		std::string get_language() const;
+
+		cyng::io::language_codes get_language_code() const;
+
+		/*
+		 * @return name in current language
+		 */
+		std::string get_name(i18n::word_id) const;
+
+
 	protected:
 		boost::uuids::random_generator	uuid_gen_;	//	basic_random_generator<mt19937>
 		boost::uuids::name_generator name_gen_;
@@ -92,8 +120,6 @@ namespace docscript
 		 */
 		cyng::param_map_t	vars_;
 		cyng::param_map_t	const_;
-
-		std::string language_;	//!< document language
 
 		std::vector< boost::filesystem::path > const includes_;
 		numbering content_table_;
@@ -119,6 +145,7 @@ namespace docscript
 	 * @return cleaned up string that can be used in an URL or filesystem
 	 */
 	std::string generate_slug(std::string title);
+
 }
 
 #endif

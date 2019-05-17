@@ -66,6 +66,7 @@ namespace docscript
 
 	private:
 		footnotes_t footnotes_;
+		figures_t figures_;
 
 		/**
 		 * @brief generate only the HTML <body>...</body>

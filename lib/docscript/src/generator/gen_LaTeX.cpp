@@ -113,6 +113,8 @@ namespace docscript
 			 : "scrartcl"
 			 ;
 
+//		\usepackage[ngerman]{babel}
+//		\usepackage[english]{babel}
 		ofs
 			<< "\\documentclass[10pt,a4paper]{"
 			<< type
@@ -121,6 +123,8 @@ namespace docscript
 			<< "%\tmeta"
 			<< std::endl
 			<< build_cmd("usepackage", "utf8", "inputenc")
+			<< std::endl
+			<< build_cmd("usepackage", get_babel_language(), "babel")
 			<< std::endl
 			<< build_cmd("usepackage", "official", "eurosym")
 			<< std::endl
@@ -683,6 +687,50 @@ namespace docscript
 		auto const map = cyng::value_cast(reader.get(0), cyng::param_map_t());
 
 		ctx.push(cyng::make_object("DEMO"));
+	}
+
+	std::string gen_latex::get_babel_language() const
+	{
+		switch(get_language_code()) {
+		case cyng::io::LC_ES: return "spanish";
+		case cyng::io::LC_SV: return "swedish";
+		case cyng::io::LC_PT: return "portugese";
+		case cyng::io::LC_DE: return "ngerman";
+		case cyng::io::LC_BG: return "bulgarian";
+		case cyng::io::LC_RU: return "russian";
+		case cyng::io::LC_UK: return "ukrainian";
+		case cyng::io::LC_CS: return "czech";
+		case cyng::io::LC_FI: return "finnish";
+		case cyng::io::LC_FR: return "french";
+		case cyng::io::LC_EL: return "greek";
+		case cyng::io::LC_HU: return "magyar";
+		case cyng::io::LC_IS: return "icelandic";
+		case cyng::io::LC_IT: return "italian";
+		case cyng::io::LC_NN: return "norsk";
+		case cyng::io::LC_JA: return "japanese";
+		case cyng::io::LC_KO: return "hangul";
+		case cyng::io::LC_FA: return "xepersian";
+		case cyng::io::LC_PL: return "polish";
+		case cyng::io::LC_SK: return "slovak";
+		case cyng::io::LC_HE: return "hebrew";
+		case cyng::io::LC_NL: return "dutch";
+		case cyng::io::LC_EU: return "basque";
+		case cyng::io::LC_BR: return "breton";
+		case cyng::io::LC_CA: return "catalan";
+		case cyng::io::LC_HR: return "croatian";
+		case cyng::io::LC_ET: return "estonian";
+		case cyng::io::LC_GL: return "galician";
+		case cyng::io::LC_GA: return "irish";
+		case cyng::io::LC_LA: return "latin";
+		case cyng::io::LC_SE: return "samin";
+		case cyng::io::LC_RO: return "romanian";
+		case cyng::io::LC_GD: return "scottish";
+		case cyng::io::LC_TR: return "turkish";
+		case cyng::io::LC_CY: return "welsh";
+		default:
+			break;
+		}
+		return "english";
 	}
 
 	std::string build_cmd(std::string cmd, std::string param)

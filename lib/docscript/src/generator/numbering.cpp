@@ -175,6 +175,20 @@ namespace docscript
 		return note_;
 	}
 
+	figure::figure(boost::uuids::uuid tag, std::string title)
+		: tag_(tag)
+		, title_(title)
+	{}
+
+	std::string figure::get_tag() const
+	{
+		return boost::uuids::to_string(tag_);
+	}
+
+	std::string const& figure::get_title() const
+	{
+		return title_;
+	}
 }
 
 

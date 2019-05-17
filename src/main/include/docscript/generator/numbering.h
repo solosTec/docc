@@ -20,6 +20,8 @@ namespace docscript
 {
 	/**
 	 * content table as hierarchical structure.
+	 * Each node has an optional sibbling (next_) and
+	 * one child (sub_) optionally.
 	 */
 	class numbering
 	{
@@ -43,6 +45,12 @@ namespace docscript
 	private:
 		boost::uuids::uuid const tag_;
 		std::string const title_;
+
+		/**
+		 * @brief next_ We have to work with pointers since
+		 * std::optional<> requires complete types and no recursive
+		 * declarations are possible.
+		 */
 		std::unique_ptr<numbering> next_;
 		std::unique_ptr<numbering> sub_;
 	};
@@ -68,10 +76,28 @@ namespace docscript
 		std::string const& get_note() const;
 	private:
 		boost::uuids::uuid const tag_;
-		std::string note_;
+		std::string const note_;
 	};
 
 	using footnotes_t = std::list<footnote>;
+
+	/**
+	 * Simple list of figures
+	 */
+	class figure
+	{
+	public:
+		figure(boost::uuids::uuid, std::string);
+
+		std::string get_tag() const;
+		std::string const& get_title() const;
+	private:
+		boost::uuids::uuid const tag_;
+		std::string const title_;
+	};
+
+	using figures_t = std::list<footnote>;
+
 }
 
 #endif

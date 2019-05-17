@@ -31,6 +31,7 @@ namespace docscript
 	gen_html::gen_html(std::vector< boost::filesystem::path > const& inc, bool body_only)
 		: generator(inc)
 		, footnotes_()
+		, figures_()
 		, body_only_(body_only)
 	{
 		register_this();
@@ -132,7 +133,7 @@ namespace docscript
 			<< "<!doctype html>"
 			<< std::endl
 			<< "<html lang=\""
-			<< language_
+			<< get_language()
 			<< "\">"
 			<< std::endl
 			;
@@ -500,10 +501,28 @@ namespace docscript
 		auto const alt = accumulate_plain_text(reader.get("alt"));
 		auto const caption = accumulate_plain_text(reader.get("caption"));
 		auto const source = cyng::io::to_str(reader.get("source"));
-		auto const tag = cyng::io::to_str(reader.get("tag"));
+		auto const tag = cyng::value_cast(reader.get("tag"), source);
 
 		auto const p = resolve_path(source);
 		if (boost::filesystem::exists(p) && boost::filesystem::is_regular(p)) {
+
+			//
+			// append to figure list
+			//
+			figures_.emplace_back(name_gen_(tag), caption);
+
+			auto const idx = figures_.size();
+
+			std::stringstream ss;
+			ss
+				<< get_name(i18n::WID_FIGURE)
+				<< ": "
+				<< idx
+				<< " - "
+				<< caption
+				;
+			auto const title = ss.str();
+
 
 			auto const ext = get_extension(p);
 			if (boost::algorithm::iequals(ext, "svg")) {
@@ -535,7 +554,7 @@ namespace docscript
 					std::stringstream ss;
 					ss << std::endl;
 					doc.save(ss, "\t", pugi::format_default | pugi::format_no_declaration);
-					auto const el = html::figure(html::id_(tag), ss.str(), html::figcaption(caption));
+					auto const el = html::figure(html::id_(tag), ss.str(), html::figcaption(title));
 					ctx.push(cyng::make_object(el.to_str()));
 				}
 				else {
@@ -575,7 +594,7 @@ namespace docscript
 				//
 				//"data:image/" + get_extension(p) + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size())
 
-				auto const el = html::figure(html::id_(tag), html::img(html::alt_(alt), html::title_(caption), html::src_("data:image/" + ext + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size()))), html::figcaption(caption));
+				auto const el = html::figure(html::id_(tag), html::img(html::alt_(alt), html::title_(caption), html::src_("data:image/" + ext + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size()))), html::figcaption(title));
 				ctx.push(cyng::make_object(el.to_str()));
 			}
 		}
@@ -831,8 +850,8 @@ namespace docscript
 		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		auto const note = accumulate_plain_text(frame);
-		auto const tag = uuid_gen_();
-		footnotes_.emplace_back(footnote(tag, note));
+		auto const tag = name_gen_(note);
+		footnotes_.emplace_back(tag, note);
 		auto const idx = footnotes_.size();
 
 		std::stringstream ss;

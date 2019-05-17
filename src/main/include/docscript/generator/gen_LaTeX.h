@@ -61,6 +61,11 @@ namespace docscript
 
 		std::string create_section(std::size_t level, std::string tag, std::string title);
 
+		/**
+		 * get language from meta data and select
+		 * a matching babel language.
+		 */
+		std::string get_babel_language() const;
 	};
 
 	/**
