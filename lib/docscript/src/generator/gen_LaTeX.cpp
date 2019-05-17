@@ -14,6 +14,7 @@
 #include <cyng/dom/reader.h>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 namespace docscript
 {
@@ -106,8 +107,16 @@ namespace docscript
 
 	std::ofstream& gen_latex::emit_class(std::ofstream& ofs) const
 	{
+//		"og:type"
+		std::string const type = (is_report())
+			? "scrreprt"
+			 : "scrartcl"
+			 ;
+
 		ofs
-			<< "\\documentclass[10pt,a4paper]{scrreprt}"
+			<< "\\documentclass[10pt,a4paper]{"
+			<< type
+			<< "}"
 			<< std::endl
 			<< "%\tmeta"
 			<< std::endl
@@ -285,7 +294,7 @@ namespace docscript
 			ctx.push(cyng::make_object("\\euro"));
 		}
 		else if (boost::algorithm::equals(currency, "yen")) {
-			ctx.push(cyng::make_object(u8"¥"));
+			ctx.push(cyng::make_object(u8"ï¿½"));
 		}
 		else if (boost::algorithm::equals(currency, "pound")) {
 			ctx.push(cyng::make_object("\\pounds"));
@@ -517,36 +526,6 @@ namespace docscript
 			ctx.push(cyng::make_object(p));
 
 		}
-
-
-		//std::ifstream  ifs(p.string());
-		//if (!ifs.is_open())
-		//{
-		//	std::cerr
-		//		<< "***error cannot open source file ["
-		//		<< p
-		//		<< ']'
-		//		<< std::endl;
-		//	ctx.push(cyng::make_object(p));
-		//}
-		//else {
-
-		//	auto const language = cyng::value_cast(reader.get("language"), get_extension(p));
-
-		//	//\begin{ lstlisting }[language = Python]
-		//	//	numbers=left, numbers=none
-		//	std::stringstream ss;
-		//	ss
-		//		<< build_cmd_alt("begin", "lstlisting", ("language=" + language + ", caption=" + caption + ", numbers=" + (line_numbers ? "left" : "none")))
-		//		<< std::endl
-		//		<< ifs.rdbuf()
-		//		<< std::endl
-		//		<< build_cmd("end", "lstlisting")
-		//		<< std::endl
-		//		;
-		//	ifs.close();
-		//	ctx.push(cyng::make_object(ss.str()));
-		//}
 	}
 
 	void gen_latex::def(cyng::context& ctx)
@@ -645,17 +624,35 @@ namespace docscript
 
 	std::string gen_latex::create_section(std::size_t level, std::string tag, std::string title)
 	{
-		//	chapter is not supported by documentclass scrartcl
-		switch (level) {
-		case 1:	return build_cmd("chapter", title);
-		case 2: return build_cmd("section", title);
-		case 3: return build_cmd("subsection", title);
-		case 4: return build_cmd("subsubsection", title);
-		default:
-			break;
+		auto const label = build_cmd("label", boost::uuids::to_string(name_gen_(tag)));
+
+		if (is_report()) {
+			switch (level) {
+			case 1:	return build_cmd("chapter", title) + label;
+			case 2: return build_cmd("section", title) + label;
+			case 3: return build_cmd("subsection", title) + label;
+			case 4: return build_cmd("subsubsection", title) + label;
+			case 5: return build_cmd("paragraph", title) + label;
+			case 6: return build_cmd("subparagraph", title) + label;
+			default:
+				break;
+			}
+		}
+		else {
+
+			//	chapter is not supported by documentclass scrartcl
+			switch (level) {
+			case 1:	return build_cmd("section", title) + label;
+			case 2: return build_cmd("subsection", title) + label;
+			case 3: return build_cmd("subsubsection", title) + label;
+			case 4: return build_cmd("paragraph", title) + label;
+			case 5: return build_cmd("subparagraph", title) + label;
+			default:
+				break;
+			}
 		}
 
-		return title;
+		return title + label;
 	}
 
 	void gen_latex::section(int level, cyng::context& ctx)
@@ -663,7 +660,8 @@ namespace docscript
 		auto const frame = ctx.get_frame();
 		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
-		auto const header = create_section(level, "TAG", accumulate_plain_text(frame));
+		auto const title = accumulate_plain_text(frame);
+		auto const header = create_section(level, title, title);
 		ctx.push(cyng::make_object(header));
 	}
 

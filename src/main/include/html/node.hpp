@@ -108,6 +108,8 @@ namespace html
 		DEFINE_NODE(article)
 		DEFINE_NODE(aside)
 		DEFINE_NODE(audio)
+		DEFINE_NODE(autocomplete)
+		DEFINE_NODE(autofocus)
 		DEFINE_NODE(b)
 		DEFINE_NODE(base)
 		DEFINE_NODE(basefont)

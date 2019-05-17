@@ -92,17 +92,29 @@ namespace docscript
 		 * @param body_only generate only HTML body (ignored for other output formats)
 		 * @param meta generate a file with meta data
 		 * @param index generate an index file in JSON format
+		 * @param type article/report
 		 */
 		int run(boost::filesystem::path const& master
 			, boost::filesystem::path const& tmp
 			, boost::filesystem::path const& out
 			, bool body_only
 			, bool meta
-			, bool index);
+			, bool index
+			, std::string type);
 
 	private:
 		int run(boost::filesystem::path const& inp, std::size_t start, std::size_t count, std::size_t depth);
 		int open_and_run(incl_t inp, std::size_t);
+
+		/**
+		 * @brief finish
+		 * @param body
+		 * @param out output file (html, tex, or md)
+		 * @param body_only generate only HTML body (ignored for other output formats)
+		 * @param meta generate a file with meta data
+		 * @param index generate an index file in JSON format
+		 * @param type article/report
+		 */
 		void finish(boost::filesystem::path const& body
 			, boost::filesystem::path const& out
 			, bool body_only

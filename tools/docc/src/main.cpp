@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
 	{
 		const boost::filesystem::path cwd = boost::filesystem::current_path();
 
-		std::string config_file;
+		std::string config_file = "docc_" + std::string(DOCC_SUFFIX) + ".cfg";
 		std::string inp_file = "main.docscript";
 		std::string out_file = (cwd / "out.html").string();
 
@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
 			("help,h", "print usage message")
 			("version,v", "print version string")
 			("build,b", "last built timestamp and platform")
-			("config,C", boost::program_options::value<std::string>(&config_file)->default_value("docscript.cfg"), "configuration file")
+			("config,C", boost::program_options::value<std::string>(&config_file)->default_value(config_file), "configuration file")
 
 			;
 
@@ -63,16 +63,21 @@ int main(int argc, char* argv[]) {
 			("include-path,I", boost::program_options::value< std::vector<std::string> >()->default_value(std::vector<std::string>(1, cwd.string()), cwd.string()), "include path")
 			//	verbose level
 			("verbose,V", boost::program_options::value<int>()->default_value(0)->implicit_value(1), "verbose level")
-			("body", boost::program_options::bool_switch()->default_value(false), "generate only HTML body")
-			("meta", boost::program_options::bool_switch()->default_value(true), "generate a JSON file with meta data")
-			("index", boost::program_options::bool_switch()->default_value(true), "generate an index file \"index.json\"")
+			;
+
+		boost::program_options::options_description gen("generator");
+		gen.add_options()
+			("generator.body", boost::program_options::bool_switch()->default_value(false), "generate (HTML) body only")
+			("generator.meta", boost::program_options::bool_switch()->default_value(true), "generate a JSON file with meta data")
+			("generator.index", boost::program_options::bool_switch()->default_value(true), "generate an index file \"index.json\"")
+			("generator.type,T", boost::program_options::value<std::string>()->default_value("report"), "og:type (article/report)")
 			;
 
 		//
 		//	all you can grab from the command line
 		//
 		boost::program_options::options_description cmdline_options;
-		cmdline_options.add(generic).add(compiler);
+		cmdline_options.add(generic).add(compiler).add(gen);
 
 		//
 		//	positional arguments
@@ -157,7 +162,13 @@ int main(int argc, char* argv[]) {
 		}
 		else
 		{
-			boost::program_options::store(boost::program_options::parse_config_file(ifs, compiler), vm);
+			//
+			//	options available from config file
+			//
+			boost::program_options::options_description file_options;
+			file_options.add(compiler).add(gen);
+
+			boost::program_options::store(boost::program_options::parse_config_file(ifs, file_options), vm);
 			boost::program_options::notify(vm);
 		}
 
@@ -230,9 +241,10 @@ int main(int argc, char* argv[]) {
  		return d.run(boost::filesystem::path(inp_file).filename()
  			, tmp
  			, docscript::verify_extension(out_file, "html")
- 			, vm["body"].as< bool >()
-			, vm["meta"].as< bool >()
-			, vm["index"].as< bool >());
+			, vm["generator.body"].as< bool >()
+			, vm["generator.meta"].as< bool >()
+			, vm["generator.index"].as< bool >()
+			, vm["generator.type"].as< std::string >());
 
 	}
 	catch (std::exception& e)

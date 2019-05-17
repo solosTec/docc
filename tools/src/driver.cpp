@@ -90,12 +90,18 @@ namespace docscript
 		, boost::filesystem::path const& out
 		, bool generate_body_only
 		, bool generate_meta
-		, bool generate_index)
+		, bool generate_index
+		, std::string type)
 	{
 		//
 		//	get a timestamp to measure performance
 		//
 		auto const now = std::chrono::system_clock::now();
+
+		//
+		// update meta data
+		//
+		meta_["og:type"] = cyng::make_object(type);
 
 		//
 		//	read and tokenize file recursive

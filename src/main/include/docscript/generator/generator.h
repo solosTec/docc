@@ -68,6 +68,18 @@ namespace docscript
 
 		boost::filesystem::path resolve_path(std::string const& s) const;
 
+		/**
+		 * Default value is report
+		 *
+		 * @return "og:type" report/article
+		 */
+		std::string get_type() const;
+
+		/**
+		 * @return true of "og:type" is report
+		 */
+		bool is_report() const;
+
 	protected:
 		boost::uuids::random_generator	uuid_gen_;	//	basic_random_generator<mt19937>
 		boost::uuids::name_generator name_gen_;

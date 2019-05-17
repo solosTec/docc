@@ -60,6 +60,7 @@ namespace docscript
 		std::ofstream& emit_document(std::ofstream&, cyng::object) const;
 
 		std::string create_section(std::size_t level, std::string tag, std::string title);
+
 	};
 
 	/**
