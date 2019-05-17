@@ -35,6 +35,7 @@ namespace docscript
 		virtual void print_hline(cyng::context& ctx) override;	//!<	ruler
 
 		virtual void paragraph(cyng::context& ctx) override;
+		virtual void abstract(cyng::context& ctx) override;
 		virtual void quote(cyng::context& ctx) override;
 		virtual void list(cyng::context& ctx) override;
 		virtual void link(cyng::context& ctx) override;

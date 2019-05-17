@@ -40,6 +40,7 @@ namespace docscript
 		vm_.register_function("convert.alpha", 1, std::bind(&gen_md::convert_alpha, this, std::placeholders::_1));
 
 		vm_.register_function("paragraph", 1, std::bind(&gen_md::paragraph, this, std::placeholders::_1));
+		vm_.register_function("abstract", 1, std::bind(&gen_md::abstract, this, std::placeholders::_1));
 		vm_.register_function("quote", 1, std::bind(&gen_md::quote, this, std::placeholders::_1));
 		vm_.register_function("list", 1, std::bind(&gen_md::list, this, std::placeholders::_1));
 		vm_.register_function("link", 1, std::bind(&gen_md::link, this, std::placeholders::_1));
@@ -287,6 +288,31 @@ namespace docscript
 		ctx.push(cyng::make_object(par));
 	}
 
+	void gen_md::abstract(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+// 		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		auto const reader = cyng::make_reader(frame.at(0));
+
+		auto const title = cyng::value_cast<std::string>(reader.get("title"), "Abstract");
+		auto const text = accumulate_plain_text(reader.get("text"));
+
+		//
+		// simulate an abstract a header with highest level
+		//
+		std::stringstream ss;
+		ss
+			<< std::endl
+			<< "# "
+			<< title
+			<< std::endl
+			<< text
+			<< std::endl
+			;
+		ctx.push(cyng::make_object(ss.str()));
+		
+	}
+	
 	void gen_md::quote(cyng::context& ctx)
 	{
 		//	[%(("q":{1,2,3}),("source":Earl Wilson),("url":https://www.brainyquote.com/quotes/quotes/e/earlwilson385998.html))]
@@ -533,7 +559,7 @@ namespace docscript
 
 		auto const number = content_table_.add(level, uuid_gen_(), title);
 
-		std::cout << std::string(level, '#') << " " << number << " " << title << std::endl;
+// 		std::cout << std::string(level, '#') << " " << number << " " << title << std::endl;
 
 		ctx.push(cyng::make_object(std::string(level, '#') + " " + number + " " + title));
 	}

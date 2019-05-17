@@ -51,6 +51,7 @@ namespace docscript
 		vm_.register_function("convert.alpha", 1, std::bind(&gen_html::convert_alpha, this, std::placeholders::_1));
 
 		vm_.register_function("paragraph", 1, std::bind(&gen_html::paragraph, this, std::placeholders::_1));
+		vm_.register_function("abstract", 1, std::bind(&gen_html::abstract, this, std::placeholders::_1));
 		vm_.register_function("quote", 1, std::bind(&gen_html::quote, this, std::placeholders::_1));
 		vm_.register_function("list", 1, std::bind(&gen_html::list, this, std::placeholders::_1));
 		vm_.register_function("link", 1, std::bind(&gen_html::link, this, std::placeholders::_1));
@@ -412,6 +413,19 @@ namespace docscript
 		ctx.push(cyng::make_object(el.to_str()));
 	}
 
+	void gen_html::abstract(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+// 		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		auto const reader = cyng::make_reader(frame.at(0));
+
+		auto const title = cyng::value_cast<std::string>(reader.get("title"), "Abstract");
+		auto const text = accumulate_plain_text(reader.get("text"));
+		
+		auto const el = html::details(html::summary(title), html::p(text));
+		ctx.push(cyng::make_object(el.to_str()));
+	}
+	
 	void gen_html::quote(cyng::context& ctx)
 	{
 		//	[%(("q":{1,2,3}),("source":Earl Wilson),("url":https://www.brainyquote.com/quotes/quotes/e/earlwilson385998.html))]
