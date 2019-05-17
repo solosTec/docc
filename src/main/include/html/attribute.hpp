@@ -65,7 +65,10 @@ namespace html
 
 	protected:
 		std::function<std::string()> value_f_;
+
 	};
+
+	bool is_property(std::string const&);
 }
 
 #endif

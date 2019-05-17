@@ -421,8 +421,10 @@ namespace docscript
 
 		auto const title = cyng::value_cast<std::string>(reader.get("title"), "Abstract");
 		auto const text = accumulate_plain_text(reader.get("text"));
-		
-		auto const el = html::details(html::summary(title), html::p(text));
+
+
+		// default state is: open
+		auto const el = html::details(html::open_(std::string()), html::summary(title), html::p(text));
 		ctx.push(cyng::make_object(el.to_str()));
 	}
 	

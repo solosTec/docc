@@ -6,6 +6,8 @@
  */
 
 #include <html/attribute.hpp>
+#include <boost/algorithm/string.hpp>
+#include <iostream>
 
 namespace html
 {
@@ -14,24 +16,37 @@ namespace html
 		if (value_f_)
 		{
 			std::string value = value_f_();
-			std::string res = tag_.get() + "=\"";
-			for (std::string::size_type i = 0; i < value.length(); ++i)
-			{
-				if ('\"' == value.at(i) && (i == 0 || value.at(i - 1) != '\\'))
-				{
-					res.push_back('\\');
-					res.push_back('\"');
-				}
-				else
-				{
-					res.push_back(value.at(i));
-				}
-			}
+			if (!is_property(tag_)) {
 
-			res += "\"";
-			return std::move(res);
+				std::string res = tag_.get() + "=\"";
+				for (std::string::size_type i = 0; i < value.length(); ++i)
+				{
+					if ('\"' == value.at(i) && (i == 0 || value.at(i - 1) != '\\'))
+					{
+						res.push_back('\\');
+						res.push_back('\"');
+					}
+					else
+					{
+						res.push_back(value.at(i));
+					}
+				}
+
+				res += "\"";
+				return res;
+			}
 		}
 		return tag_.get();
+	}
+
+	bool is_property(std::string const& name)
+	{
+		return boost::algorithm::equals(name, "open")
+			|| boost::algorithm::equals(name, "closed")
+			|| boost::algorithm::equals(name, "disabled")
+			|| boost::algorithm::equals(name, "hidden")
+			|| boost::algorithm::equals(name, "autofocus")
+				;
 	}
 
 

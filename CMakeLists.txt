@@ -35,7 +35,7 @@ string(TIMESTAMP TWEAK_LEVEL "%j")	# day of the year
 # set project name/properties
 #
 project(DOCC 
-	VERSION 0.8.${THIS_YEAR}.${TWEAK_LEVEL}
+	VERSION 0.1.${THIS_YEAR}.${TWEAK_LEVEL}
 	LANGUAGES CXX C
 	DESCRIPTION "Document Generator"
 	HOMEPAGE_URL "https://solostec.ch")
@@ -367,6 +367,26 @@ target_link_libraries(batch ${batch_link_libs})
 #    RUNTIME
 #    DESTINATION bin)
 
+#
+#   Generate configuration files
+#   Place service files in /etc/systemd/system/
+#
+#   some usefull commands:
+#   systemctl list-unit-files --state=enabled
+#   sudo systemctl daemon-reload
+#   journalctl -f -u node-http
+#
+if(UNIX)
+
+	# docc
+	configure_file (
+		  "${PROJECT_SOURCE_DIR}/tools/docc/templates/docc.linux.cgf.in"
+		  "${PROJECT_BINARY_DIR}/docc_v${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.cfg")
+  else()
+	  configure_file (
+			"${PROJECT_SOURCE_DIR}/tools/docc/templates/docc.linux.cgf.in"
+			"${PROJECT_BINARY_DIR}/docc_v${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.cfg")
+  endif()
 #
 # CPack configuration
 #
