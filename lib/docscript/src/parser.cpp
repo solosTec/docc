@@ -571,7 +571,8 @@ namespace docscript
 		}
 
 		std::size_t counter{ 0 };
-		while (!producer_.is_eof() && !producer_.get().is_type(SYM_CLOSE)) {
+		std::size_t open_counter{ 1 };
+		while (!producer_.is_eof() && (open_counter != 0u)) {
 
 			//
 			//	update vector size
@@ -582,14 +583,16 @@ namespace docscript
 			case SYM_EOF:	return counter;
 			case SYM_UNKNOWN:	return counter;
 
+			case SYM_OPEN:
+				++open_counter;
+				//fall through
+				[[fallthrough]];
 			case SYM_TEXT:
 			case SYM_VERBATIM:
 			case SYM_NUMBER:
 
 			case SYM_DQUOTE:
 			case SYM_SQUOTE:
-			case SYM_OPEN:
-			case SYM_CLOSE:
 			case SYM_KEY:
 			case SYM_BEGIN:
 			case SYM_END:
@@ -608,6 +611,25 @@ namespace docscript
 
 				args->push_back(make_node_symbol(producer_.get()));
 				match();
+				break;
+
+			case SYM_CLOSE:
+				--open_counter;
+				if (open_counter != 0u) {
+					if (verbosity_ > 6) {
+						print_parser_n(depth, '*');
+						std::cout
+							<< "parser(list-v #"
+							<< counter
+							<< ' '
+							<< producer_.get()
+							<< ")"
+							<< std::endl;
+					}
+
+					args->push_back(make_node_symbol(producer_.get()));
+					match();
+				}
 				break;
 
 			case SYM_TOKEN:

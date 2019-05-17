@@ -722,9 +722,12 @@ namespace docscript
 
 	bool is_valid_list_style(std::string style) {
 
-		if (boost::algorithm::iequals(style, "disk"))	return true;	//	Default value.The marker is a filled circle
-		if (boost::algorithm::iequals(style, "armenian"))	return true;	//	The marker is traditional Armenian numbering
+		if (boost::algorithm::iequals(style, "disc"))	return true;	//	Default value.The marker is a filled circle
 		if (boost::algorithm::iequals(style, "circle"))	return true;	//	The marker is a circle
+		if (boost::algorithm::iequals(style, "none"))	return true;	//	No marker is shown
+		if (boost::algorithm::iequals(style, "square"))	return true;	//	The marker is a square
+
+		if (boost::algorithm::iequals(style, "armenian"))	return true;	//	The marker is traditional Armenian numbering
 		if (boost::algorithm::iequals(style, "cjk"))	return true;	// - ideographic	The marker is plain ideographic numbers
 		if (boost::algorithm::iequals(style, "decimal"))	return true;	//	The marker is a number
 		if (boost::algorithm::iequals(style, "decimal-leading-zero"))	return true;	//	The marker is a number with leading zeros(01, 02, 03, etc.)
@@ -738,8 +741,6 @@ namespace docscript
 		if (boost::algorithm::iequals(style, "lower-greek"))	return true;	//	The marker is lower - greek
 		if (boost::algorithm::iequals(style, "lower-latin"))	return true;	//	The marker is lower - latin(a, b, c, d, e, etc.)
 		if (boost::algorithm::iequals(style, "lower-roman"))	return true;	//	The marker is lower - roman(i, ii, iii, iv, v, etc.)
-		if (boost::algorithm::iequals(style, "none"))	return true;	//	No marker is shown
-		if (boost::algorithm::iequals(style, "square"))	return true;	//	The marker is a square
 		if (boost::algorithm::iequals(style, "upper"))	return true;	// - alpha	The marker is upper - alpha(A, B, C, D, E, etc.)
 		if (boost::algorithm::iequals(style, "upper-greek"))	return true;	//	The marker is upper - greek
 		if (boost::algorithm::iequals(style, "upper-latin"))	return true;	//	The marker is upper - latin(A, B, C, D, E, etc.)
