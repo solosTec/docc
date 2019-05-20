@@ -9,6 +9,7 @@
 #define DOCSCRIPT_GENERATOR_LATEX_H
 
 #include <docscript/generator/generator.h>
+#include <boost/regex/pending/unicode_iterator.hpp>
 
 namespace docscript
 {
@@ -80,6 +81,7 @@ namespace docscript
 	 * Substitute LaTeX entities
 	 */
 	std::string replace_latex_entities(std::string const& str);
+	std::string replace_unicode(boost::u8_to_u32_iterator<std::string::const_iterator>, boost::u8_to_u32_iterator<std::string::const_iterator>);
 
 	/**
 	 * @return true if language is supported by listings package

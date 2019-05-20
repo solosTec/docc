@@ -168,7 +168,7 @@ namespace docscript
 			{ 
 				ofs
 					<< "\t<title>"
-					<< cyng::io::to_str(e.second)
+					<< accumulate_plain_text(e.second)
 					<< "</title>"
 					<< std::endl
 					//	@see http://ogp.me/
@@ -238,11 +238,24 @@ namespace docscript
 			<< "\t\t}"
 			<< std::endl
 
+			<< "\t\tfigure {"
+			<< std::endl
+			<< "\t\t\tmargin: 2%;"
+			<< std::endl
+			<< "\t\t}"
+			<< std::endl
+
 			<< "\t\timg {"
 			<< std::endl
 			<< "\t\t\tmax-width: 95%;"
 			<< std::endl
 			<< "\t\t\tborder: 2px solid #777;"
+			<< std::endl
+			<< "\t\t}"
+			<< std::endl
+			<< "\t\timg:hover {"
+			<< std::endl
+			<< "\t\t\tbox-shadow: 0 0 10px #ccc;"
 			<< std::endl
 			<< "\t\t}"
 			<< std::endl
