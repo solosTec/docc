@@ -107,7 +107,7 @@ namespace docscript
 		//	read and tokenize file recursive
 		//
 		int const r = open_and_run(std::make_tuple(master, 0u, std::numeric_limits<std::size_t>::max()), 0);
-		finish(body, out, generate_body_only, generate_meta, generate_index);
+		finish(body, out, generate_meta, generate_index);
 
 		//
 		//	calculate duration of reading and compilation
@@ -219,7 +219,6 @@ namespace docscript
 
 	void driver::finish(boost::filesystem::path const& body
 		, boost::filesystem::path const& out
-		, bool body_only
 		, bool meta
 		, bool index)
 	{
