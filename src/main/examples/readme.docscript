@@ -19,6 +19,7 @@ Since you have one source file for different target formats, you don't have to m
 	(syntax as simple as markdown, but with more features),
 	(docScript - allows to .b program your document (Turing complete)),
 	(documents can be compiled from different sources),
+	(generate compact HTML files with inline images),
 	(UTF-8 support),
 	(pretty fast),
 	(auto generate numbering),
@@ -180,6 +181,13 @@ The specified image will be embedded into the HTML file as base64 encoded string
 .def(cite:"text below the quote", 
 	source:"source of quote", 
 	quote:"the quote itself")
+
+.h3(Note)
+
+The .b '.node' command generates a side note. LaTeX uses the \marginpar{} command. HTML mimics the behaviour with 
+an absolut position. Markdown simulates this by a blockquote.
+
+.note(This is a marginal note.)
 
 .h3(Set)
 

@@ -47,6 +47,7 @@ namespace docscript
 		vm_.register_function("figure", 1, std::bind(&gen_latex::figure, this, std::placeholders::_1));
 		vm_.register_function("code", 1, std::bind(&gen_latex::code, this, std::placeholders::_1));
 		vm_.register_function("def", 1, std::bind(&gen_latex::def, this, std::placeholders::_1));
+		vm_.register_function("note", 1, std::bind(&gen_latex::annotation, this, std::placeholders::_1));
 
 		vm_.register_function("i", 1, std::bind(&gen_latex::format_italic, this, std::placeholders::_1));
 		vm_.register_function("b", 1, std::bind(&gen_latex::format_bold, this, std::placeholders::_1));
@@ -63,6 +64,7 @@ namespace docscript
 		vm_.register_function("h5", 1, std::bind(&gen_latex::section, this, 5, std::placeholders::_1));
 		vm_.register_function("h6", 1, std::bind(&gen_latex::section, this, 6, std::placeholders::_1));
 		vm_.register_function("footnote", 1, std::bind(&gen_latex::make_footnote, this, std::placeholders::_1));
+		vm_.register_function("ref", 1, std::bind(&gen_latex::make_ref, this, std::placeholders::_1));
 
 	}
 
@@ -575,6 +577,27 @@ namespace docscript
 			<< std::endl
 			;
 		ctx.push(cyng::make_object(ss.str()));
+	}
+
+	void gen_latex::annotation(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+
+		std::stringstream ss;
+		ss
+			<< build_cmd("marginpar", accumulate_plain_text(frame))
+			<< std::endl
+			;
+
+		ctx.push(cyng::make_object(ss.str()));
+	}
+
+	void gen_latex::make_ref(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		ctx.push(cyng::make_object(cyng::io::to_str(frame)));
 	}
 
 	void gen_latex::format_italic(cyng::context& ctx)

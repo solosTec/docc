@@ -68,10 +68,12 @@ namespace docscript
 		virtual void figure(cyng::context& ctx) = 0;
 		virtual void code(cyng::context& ctx) = 0;
 		virtual void def(cyng::context& ctx) = 0;
+		virtual void annotation(cyng::context& ctx) = 0;
 
 		virtual void header(cyng::context& ctx) = 0;
 		virtual void section(int, cyng::context& ctx) = 0;
 		virtual void make_footnote(cyng::context& ctx) = 0;
+		virtual void make_ref(cyng::context& ctx) = 0;
 
 		virtual void format_italic(cyng::context& ctx) = 0;
 		virtual void format_bold(cyng::context& ctx) = 0;

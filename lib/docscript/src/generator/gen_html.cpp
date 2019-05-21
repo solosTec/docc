@@ -59,6 +59,7 @@ namespace docscript
 		vm_.register_function("figure", 1, std::bind(&gen_html::figure, this, std::placeholders::_1));
 		vm_.register_function("code", 1, std::bind(&gen_html::code, this, std::placeholders::_1));
 		vm_.register_function("def", 1, std::bind(&gen_html::def, this, std::placeholders::_1));
+		vm_.register_function("note", 1, std::bind(&gen_html::annotation, this, std::placeholders::_1));
 
 		vm_.register_function("i", 1, std::bind(&gen_html::format_italic, this, std::placeholders::_1));
 		vm_.register_function("b", 1, std::bind(&gen_html::format_bold, this, std::placeholders::_1));
@@ -75,6 +76,7 @@ namespace docscript
 		vm_.register_function("h5", 1, std::bind(&gen_html::section, this, 5, std::placeholders::_1));
 		vm_.register_function("h6", 1, std::bind(&gen_html::section, this, 6, std::placeholders::_1));
 		vm_.register_function("footnote", 1, std::bind(&gen_html::make_footnote, this, std::placeholders::_1));
+		vm_.register_function("ref", 1, std::bind(&gen_html::make_ref, this, std::placeholders::_1));
 
 	}
 
@@ -306,6 +308,21 @@ namespace docscript
 			<< "\t\t\tposition: relative;"
 			<< std::endl
 			<< "\t\t\tvertical-align: baseline;"
+			<< std::endl
+			<< "\t\t}"
+			<< std::endl
+
+			<< "\t\taside {"
+			<< std::endl
+			<< "\t\t\tposition: absolute;"
+			<< std::endl
+			<< "\t\t\tright: 2em;"
+			<< std::endl
+			<< "\t\t\tborder: 1px #D5DBDB solid;"
+			<< std::endl
+			<< "\t\t\tcolor: #9C640C;"
+			<< std::endl
+			<< "\t\t\tpadding: 0.5em;"
 			<< std::endl
 			<< "\t\t}"
 			<< std::endl
@@ -751,6 +768,21 @@ namespace docscript
 			<< std::endl
 			;
 		ctx.push(cyng::make_object(ss.str()));
+	}
+
+	void gen_html::annotation(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		auto const el = html::aside(accumulate_plain_text(frame));
+		ctx.push(cyng::make_object(el.to_str()));
+	}
+
+	void gen_html::make_ref(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		ctx.push(cyng::make_object(cyng::io::to_str(frame)));
 	}
 
 	void gen_html::format_italic(cyng::context& ctx)

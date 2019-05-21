@@ -43,11 +43,13 @@ namespace docscript
 		virtual void figure(cyng::context& ctx) override;
 		virtual void code(cyng::context& ctx) override;
 		virtual void def(cyng::context& ctx) override;
+		virtual void annotation(cyng::context& ctx) override;
 
 		virtual void header(cyng::context& ctx) override;
 		virtual void section(int, cyng::context& ctx) override;
 		std::string create_section(std::size_t level, std::string tag, std::string title);
 		virtual void make_footnote(cyng::context& ctx) override;
+		virtual void make_ref(cyng::context& ctx) override;
 
 		virtual void format_italic(cyng::context& ctx) override;
 		virtual void format_bold(cyng::context& ctx) override;

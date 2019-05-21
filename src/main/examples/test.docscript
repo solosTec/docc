@@ -23,6 +23,9 @@ Binary dump:
 
 
 .h3(subsection#2)
+
+.note(This is a margin note!)
+
 .h4(subsubsection-1)
 .h4(Definition List)
 
