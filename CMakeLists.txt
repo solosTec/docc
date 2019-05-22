@@ -172,6 +172,45 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${cyng_MODULE_PATH}")
 message(STATUS "** CMake modules      : ${CMAKE_MODULE_PATH}")
 
 #
+#	setup node library
+#   -DNODE_ROOT:path=...
+#	assume parallel installation - that is both projects share the same parent directory.
+#
+if(NOT NODE_ROOT)
+    set(NODE_ROOT "${PROJECT_SOURCE_DIR}/../node" CACHE PATH "NODE_ROOT")
+	message(STATUS "** Set NODE_ROOT: ${NODE_ROOT}")
+endif()
+
+get_filename_component(NODE_INCLUDE_DIR "${NODE_ROOT}/src/main/include" REALPATH)
+include_directories("${NODE_INCLUDE_DIR}")
+message(STATUS "** NODE include path  : ${NODE_INCLUDE_DIR}")
+
+#
+#	setup node build directory
+#   -DNODE_BUILD:path=...
+#	assume parallel installation - that is both projects share the same parent directory.
+#
+if (NOT NODE_BUILD)
+    set(NODE_BUILD "${NODE_ROOT}/build" CACHE PATH "NODE_BUILD")
+	message(STATUS "** Set NODE_BUILD: ${NODE_BUILD}")
+endif()
+
+get_filename_component(NODE_LIBRARY_DIR ${NODE_BUILD} REALPATH)
+include_directories(${NODE_LIBRARY_DIR})
+message(STATUS "** NODE include path  : ${NODE_LIBRARY_DIR}")
+
+if (UNIX)
+    link_directories(${NODE_LIBRARY_DIR})
+    message(STATUS "** NODE Libraries     : ${NODE_LIBRARY_DIR}")
+else()
+	#
+	#	$(ConfigurationName) is a variable used by the MS build system
+	#
+	link_directories(${NODE_LIBRARY_DIR}/$(ConfigurationName))
+    message(STATUS "** NODE Libraries     : ${NODE_LIBRARY_DIR}")
+endif()
+
+#
 #	setup compiler features
 #
 include(CPPFeatureSupport)
@@ -277,6 +316,9 @@ endif(Boost_FOUND)
 find_package(OpenSSL)
 if(OPENSSL_FOUND)
 
+	# satisfy definitions for NODE header files
+   add_definitions(-DNODE_SSL_INSTALLED)
+
     message(STATUS "** openSSL Version       : ${OPENSSL_VERSION}")
     message(STATUS "** openSSL Include       : ${OPENSSL_INCLUDE_DIR}")
     message(STATUS "** openSSL crypto library: ${OPENSSL_CRYPTO_LIBRARY}")
@@ -359,18 +401,18 @@ install(TARGETS batch
 #
 # plog server
 #
-#include (tools/plog/prg.cmake)
-#add_executable(plog ${plog})
-#set(plog_link_libs cyng_io cyng_vm cyng_async cyng_crypto cyng_log docscript_core)
-#if (${GLOBAL_LIBRARY_TYPE} STREQUAL "SHARED")
-#    if (UNIX)
-#        list(APPEND docc_link_libs pthread "${Boost_LIBRARIES}")
-#    endif()
-#endif()
-#target_link_libraries(plog ${plog_link_libs})
-#install(TARGETS plog
-#    RUNTIME
-#    DESTINATION bin)
+include (tools/plog/prg.cmake)
+add_executable(plog ${plog})
+set(plog_link_libs cyng_io cyng_vm cyng_async cyng_crypto cyng_log docscript_core cyng_parser smf_http_srv smf_https_srv ${OPENSSL_LIBRARIES})
+if (${GLOBAL_LIBRARY_TYPE} STREQUAL "SHARED")
+    if (UNIX)
+        list(APPEND docc_link_libs pthread "${Boost_LIBRARIES}")
+    endif()
+endif()
+target_link_libraries(plog ${plog_link_libs})
+install(TARGETS plog
+    RUNTIME
+    DESTINATION bin)
 
 #
 #   Generate configuration files

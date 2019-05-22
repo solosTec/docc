@@ -13,7 +13,10 @@
 #include <iostream>
 #include <thread>
 #include <DOCC_project_info.h>
+#include <CYNG_project_info.h>
+#include <NODE_project_info.h>
 //#include "../../src/driver.h"
+#include "controller.h"
 #if BOOST_OS_WINDOWS
 #include <windows.h>
 #endif
@@ -45,8 +48,8 @@ int main(int argc, char **argv) {
 			//	json, XML
 			("default,D", boost::program_options::value<std::string>()->default_value("")->implicit_value("json"), "generate a default configuration and exit. options are json and XML")
 			("ip,N", boost::program_options::bool_switch()->default_value(false), "show local IP address and exit")
-			("show,s", boost::program_options::bool_switch()->default_value(false), "show configuration")
-			("noconsole", boost::program_options::bool_switch()->default_value(false), "do not show console output")
+			//("show,s", boost::program_options::bool_switch()->default_value(false), "show configuration")
+			("console", boost::program_options::bool_switch()->default_value(false), "log (only) to console")
 
 			;
 
@@ -126,11 +129,6 @@ int main(int argc, char **argv) {
 				<< DOCC_BUILD_DATE
 				<< " UTC"
 				<< std::endl
-				<< "last built at: "
-				<< __DATE__
-				<< " "
-				<< __TIME__
-				<< std::endl
 				<< "Platform     : "
 				<< DOCC_PLATFORM
 				<< std::endl
@@ -158,6 +156,12 @@ int main(int argc, char **argv) {
 #else
 				<< DOCC_BUILD_TYPE
 #endif
+				<< std::endl
+				<< "CYNG library : v"
+				<< CYNG_VERSION
+				<< std::endl
+				<< "NODE library : v"
+				<< NODE_VERSION
 				<< std::endl
 				<< "CPU count    : "
 				<< std::thread::hardware_concurrency()
@@ -216,26 +220,26 @@ int main(int argc, char **argv) {
 		//
 		//	create a controller object
 		//
-		//plog::controller ctrl(pool_size, json_path, includes, verbose);
+		plog::controller ctrl(pool_size, json_path);
 
-		//const std::string config_type = vm["default"].as<std::string>();
-		//if (!config_type.empty())
-		//{
-		//	//	write default configuration
-		//	return ctrl.create_config(config_type);
-		//}
+		const std::string config_type = vm["default"].as<std::string>();
+		if (!config_type.empty())
+		{
+			//	write default configuration
+			return ctrl.create_config(config_type);
+		}
 
-	 //   if (vm["ip"].as< bool >())
-	 //   {
-	 //       //	show local IP adresses
-	 //       return ctrl.show_ip();
-	 //   }
+	    //if (vm["ip"].as< bool >())
+	    //{
+	    //    //	show local IP adresses
+	    //    return ctrl.show_ip();
+	    //}
 
-	 //   if (vm["show"].as< bool >())
-	 //   {
-	 //       //	show configuration
-	 //       return ctrl.show_config();
-	 //   }
+	    //if (vm["show"].as< bool >())
+	    //{
+	    //    //	show configuration
+	    //    return ctrl.show_config();
+	    //}
 
 
 #if BOOST_OS_WINDOWS
@@ -254,7 +258,7 @@ int main(int argc, char **argv) {
 #endif
 
 		BOOST_ASSERT_MSG(pool_size != 0, "empty thread pool");
-		//return ctrl.run(!vm["noconsole"].as< bool >());
+		return ctrl.run(vm["console"].as< bool >());
 	}
 	catch (std::exception& e)
 	{
