@@ -240,7 +240,7 @@ int main(int argc, char* argv[]) {
 		//
  		return d.run(boost::filesystem::path(inp_file).filename()
  			, tmp
- 			, docscript::verify_extension(out_file, "html")
+			, out_file
 			, vm["generator.body"].as< bool >()
 			, vm["generator.meta"].as< bool >()
 			, vm["generator.index"].as< bool >()

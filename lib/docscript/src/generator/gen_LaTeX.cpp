@@ -73,7 +73,10 @@ namespace docscript
 		auto const frame = ctx.get_frame();
 		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
-		auto const p = cyng::value_cast(frame.at(0), boost::filesystem::path());
+		auto p = cyng::value_cast(frame.at(0), boost::filesystem::path());
+		if (boost::filesystem::is_directory(p)) {
+			p = p / "out.tex";
+		}
 		std::ofstream ofs(p.string(), std::ios::out | std::ios::trunc);
 		if (!ofs.is_open())
 		{

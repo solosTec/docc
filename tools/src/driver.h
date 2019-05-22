@@ -110,14 +110,12 @@ namespace docscript
 		 * @brief finish
 		 * @param body
 		 * @param out output file (html, tex, or md)
-		 * @param body_only generate only HTML body (ignored for other output formats)
 		 * @param meta generate a file with meta data
 		 * @param index generate an index file in JSON format
 		 * @param type article/report
 		 */
 		void finish(boost::filesystem::path const& body
 			, boost::filesystem::path const& out
-			, bool body_only
 			, bool meta
 			, bool index);
 
