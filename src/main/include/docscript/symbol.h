@@ -49,7 +49,20 @@ namespace docscript
 	{
 		symbol(symbol_type, std::string const&);
 		symbol(symbol_type, std::u32string const&);
-		symbol(symbol_type, std::uint32_t);
+#if defined(__CPP_SUPPORT_P0482R6)
+		template <std::size_t N>
+		symbol(symbol_type t, const char8_t(&sp)[N])
+			: type_(t)
+			, value_((const char*)&sp[0])
+		{}
+#else
+		template <std::size_t N>
+		symbol(symbol_type t, const char(&sp)[N])
+			: type_(t)
+			, value_(sp)
+		{}
+#endif
+		explicit symbol(symbol_type, std::uint32_t);
 		symbol(symbol const&);
 		symbol(symbol&&);
 

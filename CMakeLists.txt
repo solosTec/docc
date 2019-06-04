@@ -349,7 +349,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 #	html library
 #
 include (lib/html/lib.cmake)
-add_library(lib_html ${GLOBAL_LIBRARY_TYPE} ${html_lib})
+add_library(doc_html ${GLOBAL_LIBRARY_TYPE} ${html_lib})
 
 #
 #	docscript library
@@ -370,7 +370,7 @@ install(TARGETS docscript_core
 #
 include (tools/docc/prg.cmake)
 add_executable(docc ${docc})
-set(docc_link_libs cyng_io cyng_vm cyng_async cyng_crypto cyng_log cyng_crypto cyng_json cyng_parser cyng_xml docscript_core lib_html ${OPENSSL_LIBRARIES})
+set(docc_link_libs cyng_io cyng_vm cyng_async cyng_crypto cyng_log cyng_crypto cyng_json cyng_parser cyng_xml docscript_core doc_html ${OPENSSL_LIBRARIES})
 if (${GLOBAL_LIBRARY_TYPE} STREQUAL "SHARED")
     if (UNIX)
         list(APPEND docc_link_libs pthread "${Boost_LIBRARIES}" cyng_table)
@@ -403,10 +403,10 @@ install(TARGETS batch
 #
 include (tools/plog/prg.cmake)
 add_executable(plog ${plog})
-set(plog_link_libs cyng_io cyng_vm cyng_async cyng_crypto cyng_log docscript_core cyng_parser smf_http_srv smf_https_srv ${OPENSSL_LIBRARIES})
+set(plog_link_libs cyng_io cyng_vm cyng_async cyng_crypto cyng_log cyng_parser cyng_xml cyng_table docscript_core doc_html smf_http_srv smf_https_srv ${OPENSSL_LIBRARIES})
 if (${GLOBAL_LIBRARY_TYPE} STREQUAL "SHARED")
     if (UNIX)
-        list(APPEND docc_link_libs pthread "${Boost_LIBRARIES}")
+		list(APPEND plog_link_libs pthread "${Boost_LIBRARIES}")
     endif()
 endif()
 target_link_libraries(plog ${plog_link_libs})

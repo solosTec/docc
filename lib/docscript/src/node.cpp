@@ -17,7 +17,8 @@ namespace docscript
 {
 	node::node()
 		: type_(docscript::node::NODE_EMPTY)
-		, name_(u8"∅")
+		, name_()
+//		, name_(u8"∅")
 		, data_()
 	{}
 
@@ -43,7 +44,8 @@ namespace docscript
 
 	node::node(std::deque<docscript::node>&& children)
 		: type_(docscript::node::NODE_ROOT)
-		, name_(u8"↓")
+		, name_()
+//		, name_(u8"↓")
 		, data_(std::move(children))
 	{}
 
@@ -73,7 +75,8 @@ namespace docscript
 
 	node::node(bool b, docscript::node::d_args&& args)
 		: type_(b ? docscript::node::NODE_PARAGRAPH : docscript::node::NODE_CONTENT)
-		, name_(b ? u8"¶" : u8"•")
+		, name_()
+//		, name_(b ? u8"¶" : u8"•")
 		, data_(std::move(args))
 	{}
 

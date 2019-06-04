@@ -61,7 +61,8 @@ namespace docscript
 
 		case '\n':
 			//	emit a pilcrow
-			if (tok.count_ > 1)	emit(symbol(SYM_PAR, u8"¶"));
+			if (tok.count_ > 1)	emit(symbol(SYM_PAR, 0xB6));
+//			if (tok.count_ > 1)	emit(symbol(SYM_PAR, u8"Â¶"));
 			return std::make_pair(state_, true);
 
 		case ' ': case '\t':
@@ -144,7 +145,8 @@ namespace docscript
 		case '\n':
 			if (tok.count_ > 1) {
 				emit(SYM_TEXT);
-				emit(symbol(SYM_PAR, u8"¶"));
+				emit(symbol(SYM_PAR, 0xB6));
+//				emit(symbol(SYM_PAR, u8"Â¶"));
 				return std::make_pair(STATE_START_, true);
 			}
 
@@ -238,7 +240,8 @@ namespace docscript
 			
 		case '\n':
 			emit(SYM_TOKEN);
-			if (tok.count_ > 1)	emit(symbol(SYM_PAR, u8"¶"));
+			if (tok.count_ > 1)	emit(symbol(SYM_PAR, 0xB6));
+//			if (tok.count_ > 1)	emit(symbol(SYM_PAR, u8"Â¶"));
 			return std::make_pair(STATE_START_, true);
 
 		case ' ': case '\t':
@@ -268,7 +271,8 @@ namespace docscript
 
 		case '\n':
 			emit(SYM_NUMBER);
-			if (tok.count_ > 1)	emit(symbol(SYM_PAR, u8"¶"));
+			if (tok.count_ > 1)	emit(symbol(SYM_PAR, 0xB6));
+//			if (tok.count_ > 1)	emit(symbol(SYM_PAR, u8"Â¶"));
 			return std::make_pair(STATE_START_, true);
 
 		case ' ': case '\t':
@@ -298,7 +302,8 @@ namespace docscript
 			//	multiple lines not allowed
 			err_(cyng::logging::severity::LEVEL_ERROR, "quotes with multiple lines not allowed");
 			emit(SYM_VERBATIM);
-			if (tok.count_ > 1)	emit(symbol(SYM_PAR, u8"¶"));
+			if (tok.count_ > 1)	emit(symbol(SYM_PAR, 0xB6));
+//			if (tok.count_ > 1)	emit(symbol(SYM_PAR, u8"Â¶"));
 			return std::make_pair(STATE_START_, true);
 
 		default:

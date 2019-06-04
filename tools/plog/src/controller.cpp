@@ -312,7 +312,7 @@ namespace plog
 		CYNG_LOG_TRACE(logger, "document root: " << doc_root);
 
 #if BOOST_OS_LINUX
-		const auto doc_root = cyng::value_cast<std::string>(dom["web"].get("document-root"), "/var/www/html/blog");
+		const auto blog_root = cyng::value_cast<std::string>(dom["web"].get("document-root"), "/var/www/html/blog");
 #else
 		const auto blog_root = cyng::value_cast<std::string>(dom["web"].get("blog-root"), (pwd / "htdocs" / "blog").string());
 #endif
