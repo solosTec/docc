@@ -1,4 +1,4 @@
-.meta(title:readme, author:"solosTec")
+.meta(title:README, author:"solosTec", released:.now())
 .set(name:docc, language:C++)
 
 ;
@@ -121,7 +121,7 @@ A header has the following options:
 	tag:"unique identifier")
 
 Example:
-.code(language:docscript, caption:'Header', source:'example-header.docscript', linenumbers:true)
+.code(language:docscript, caption:'Header', source:'inc/example-header.docscript', linenumbers:true)
 
 To simplify writing headers the shortcuts .b h1 up to .b h6 are defined.
 
@@ -134,7 +134,7 @@ A list has the following options:
 	items:"a list of items as [vector]")
 
 Example:
-.code(language:docscript, caption:'Header', source:'example-list.docscript', linenumbers:true)
+.code(language:docscript, caption:'Header', source:'inc/example-list.docscript', linenumbers:true)
 
 .h3(Definitions)
 

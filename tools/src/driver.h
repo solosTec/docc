@@ -102,6 +102,8 @@ namespace docscript
 			, bool index
 			, std::string type);
 
+		cyng::param_map_t const& get_meta() const;
+
 	private:
 		int run(boost::filesystem::path const& inp, std::size_t start, std::size_t count, std::size_t depth);
 		int open_and_run(incl_t inp, std::size_t);

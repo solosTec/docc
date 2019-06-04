@@ -85,6 +85,11 @@ namespace docscript
 	driver::~driver()
 	{}
 
+	cyng::param_map_t const& driver::get_meta() const
+	{
+		return meta_;
+	}
+
 	int driver::run(boost::filesystem::path const& master
 		, boost::filesystem::path const& body
 		, boost::filesystem::path const& out
@@ -181,10 +186,11 @@ namespace docscript
 					std::tie(last_write_time, file_size) = read_meta_data(dir / p);
 
 					meta_["last-write-time"] = cyng::make_object(last_write_time);
+					meta_["released"] = cyng::make_object(last_write_time);
 					meta_["file-size"] = cyng::make_object(file_size);
 					meta_["total-file-size"] = cyng::make_object(file_size);
 					meta_["file-name"] = cyng::make_object(p.filename().string());
-
+					meta_["title"] = cyng::make_object(p.stem().string());
 				}
 				else {
 
@@ -359,14 +365,26 @@ namespace docscript
 			if (boost::algorithm::iequals(extension, ".html")) {
 				gen_html g(this->includes_, body_only);
 				g.run(std::move(prg));
+				auto const m = g.get_meta();
+				for (auto const& i : m) {
+					meta_[i.first] = i.second;
+				}
 			}
 			else if (boost::algorithm::iequals(extension, ".md")) {
 				gen_md g(this->includes_);
 				g.run(std::move(prg));
+				auto const m = g.get_meta();
+				for (auto const& i : m) {
+					meta_[i.first] = i.second;
+				}
 			}
 			else if (boost::algorithm::iequals(extension, ".tex")) {
 				gen_latex g(this->includes_);
 				g.run(std::move(prg));
+				auto const m = g.get_meta();
+				for (auto const& i : m) {
+					meta_[i.first] = i.second;
+				}
 			}
 			else {
 				std::cerr

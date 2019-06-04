@@ -12,7 +12,6 @@
 #include <fstream>
 #include <iostream>
 #include <DOCC_project_info.h>
-#include <CYNG_project_info.h>
 #include "batch.h"
 #if BOOST_OS_WINDOWS
 #include <windows.h>
@@ -95,11 +94,8 @@ int main(int argc, char* argv[]) {
 		if (vm.count("version"))
 		{
 			std::cout
-				<< "batch v"
+				<< "docScript batch compiler v"
 				<< DOCC_VERSION
-				<< " (based on cyng v"
-				<< CYNG_VERSION
-				<< ")"
 				<< std::endl
 				;
 			return EXIT_SUCCESS;
@@ -135,10 +131,17 @@ int main(int argc, char* argv[]) {
 				<< std::endl
 
 				<< "shared mutex  : "
-#if defined(BOOST_NO_CXX14_HDR_SHARED_MUTEX)
+#if defined(__CPP_SUPPORT_N4508)
 				<< "no"
 #else
 				<< "yes"
+#endif
+				<< std::endl
+				<< "uint8_t type  : "
+#if defined(__CPP_SUPPORT_P0482R6)
+				<< "yes"
+#else
+				<< "no"
 #endif
 				<< std::endl
 				<< std::endl
@@ -217,15 +220,15 @@ int main(int argc, char* argv[]) {
 		//
 		//	Construct driver instance
 		//
-  		//cyng::docscript::batch b(inc_paths, verbose);
+  		docscript::batch b(inc_paths, verbose);
 
 		//
 		//	Start driver with the main/input file
 		//
-		//return b.run(inp_dir
-		//	, out_dir
-		//	, vm["robot"].as< bool >()
-		//	, vm["sitemap"].as< bool >());
+		return b.run(inp_dir
+			, out_dir
+			, vm["robot"].as< bool >()
+			, vm["sitemap"].as< bool >());
 
 
 	}

@@ -387,7 +387,7 @@ install(TARGETS docc
 #
 include (tools/batch/prg.cmake)
 add_executable(batch ${batch})
-set(batch_link_libs cyng_io cyng_vm cyng_async cyng_crypto cyng_log cyng_docscript)
+set(batch_link_libs cyng_core cyng_io cyng_vm cyng_async cyng_crypto cyng_log cyng_parser cyng_xml docscript_core doc_html ${OPENSSL_LIBRARIES})
 if (${GLOBAL_LIBRARY_TYPE} STREQUAL "SHARED")
     if (UNIX)
         list(APPEND batch_link_libs pthread "${Boost_LIBRARIES}")

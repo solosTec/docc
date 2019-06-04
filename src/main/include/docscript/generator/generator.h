@@ -38,6 +38,8 @@ namespace docscript
 
 		void run(cyng::vector_t&&);
 
+		cyng::param_map_t const& get_meta() const;
+
 	protected:
 		/**
 		 * register all build-in functions
@@ -109,6 +111,10 @@ namespace docscript
 		 */
 		std::string get_name(i18n::word_id) const;
 
+		/**
+		 * provide a slug if not defined yet
+		 */
+		void slug();
 
 	protected:
 		boost::uuids::random_generator	uuid_gen_;	//	basic_random_generator<mt19937>
@@ -139,14 +145,13 @@ namespace docscript
 	std::string accumulate_plain_text(cyng::tuple_t);
 	std::string accumulate_plain_text(cyng::vector_t);
 
-	//void replace_all(std::string&, std::string, std::string);
-
 	/**
 	 * @brief generate_slug
 	 * @param title
 	 * @return cleaned up string that can be used in an URL or filesystem
 	 */
 	std::string generate_slug(std::string title);
+	cyng::object generate_slug(cyng::object title);
 
 }
 

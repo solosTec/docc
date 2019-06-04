@@ -144,6 +144,13 @@ int main(int argc, char* argv[]) {
 				<< "no"
 #endif
 				<< std::endl
+				<< "uint8_t type  : "
+#if defined(__CPP_SUPPORT_P0482R6)
+				<< "yes"
+#else
+				<< "no"
+#endif
+				<< std::endl
 				<< std::endl
 				;
 			return EXIT_SUCCESS;

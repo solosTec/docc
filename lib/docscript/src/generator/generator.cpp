@@ -1,4 +1,4 @@
-/*
+﻿/*
  * The MIT License (MIT)
  * 
  * Copyright (c) 2019 Sylko Olzscher 
@@ -42,6 +42,11 @@ namespace docscript
 		scheduler_.stop();
 	}
 
+	cyng::param_map_t const& generator::get_meta() const
+	{
+		return meta_;
+	}
+
 	void generator::register_this()
 	{
 		vm_.register_function("now", 0, [](cyng::context& ctx) {
@@ -77,7 +82,32 @@ namespace docscript
 //		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 		cyng::param_map_t m;
 		m = cyng::value_cast(frame.at(0), m);
-		meta_.insert(m.begin(), m.end());	//	merge
+		//meta_.insert(m.begin(), m.end());	//	merge
+		//	overwrite
+		for (auto const& i : m) {
+			meta_[i.first] = i.second;
+		}
+	}
+
+	void generator::slug()
+	{
+		auto pos = meta_.find("slug");
+		if (pos == meta_.end()) {
+
+			//
+			//	no slug found - generate one
+			//
+			pos = meta_.find("title");
+			if (pos != meta_.end()) {
+				meta_.emplace("slug", generate_slug(pos->second));
+			}
+			else {
+				pos = meta_.find("file-name");
+				if (pos != meta_.end()) {
+					meta_.emplace("slug", generate_slug(pos->second));
+				}
+			}
+		}
 	}
 
 	void generator::var_set(cyng::context& ctx)
@@ -145,13 +175,13 @@ namespace docscript
 		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 		auto const symbol = cyng::value_cast<std::string>(frame.at(0), "");
 		if (boost::algorithm::equals(symbol, "pilgrow")) {
-			ctx.push(cyng::make_object(u8"�"));
+			ctx.push(cyng::make_object(u8"¶"));
 		}
 		else if (boost::algorithm::equals(symbol, "copyright")) {
-			ctx.push(cyng::make_object(u8"�"));
+			ctx.push(cyng::make_object(u8"©"));
 		}
 		else if (boost::algorithm::equals(symbol, "registered")) {
-			ctx.push(cyng::make_object(u8"�"));
+			ctx.push(cyng::make_object(u8"®"));
 		}
 		else {
 			ctx.push(cyng::make_object(symbol));
@@ -387,6 +417,13 @@ namespace docscript
 		}
 		return slug;
 	}
+
+	cyng::object generate_slug(cyng::object obj)
+	{
+		auto const title = cyng::value_cast<std::string>(obj, "no-title");
+		return cyng::make_object(generate_slug(title));
+	}
+
 }
 
 

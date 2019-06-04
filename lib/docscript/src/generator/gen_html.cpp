@@ -103,7 +103,7 @@ namespace docscript
 			//
 			//	provide a slug if not defined yet.
 			//
-			//slug();
+			slug();
 
 			//
 			//	write output file
