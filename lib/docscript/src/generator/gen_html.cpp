@@ -120,11 +120,29 @@ namespace docscript
 		if (!body_only_) {
 			emit_doctype(ofs);
 			emit_head(ofs);
+			ofs
+				<< "<body>"
+				<< std::endl
+				;
+		}
+		else {
+			ofs
+				<< "<div>"
+				<< std::endl
+				;
 		}
 		emit_body(ofs, pos, end);
 		if (!body_only_) {
 			ofs
+				<< "</body>"
+				<< std::endl
 				<< "</html>"
+				<< std::endl
+				;
+		}
+		else {
+			ofs
+				<< "</div>"
 				<< std::endl
 				;
 		}
@@ -339,22 +357,12 @@ namespace docscript
 
 	std::ofstream& gen_html::emit_body(std::ofstream& ofs, cyng::vector_t::const_iterator pos, cyng::vector_t::const_iterator end) const
 	{
-		ofs
-			<< "<body>"
-			<< std::endl
-			;
-
 		while (pos != end) {
 			emit_body(ofs, *pos);
 			++pos;
 		}
 
 		emit_footnotes(ofs);
-
-		ofs
-			<< "</body>"
-			<< std::endl
-			;
 		return ofs;
 	}
 

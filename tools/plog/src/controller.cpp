@@ -229,14 +229,14 @@ namespace plog
 							//	user:
 							//	pwd:
 							cyng::tuple_factory(
-								cyng::param_factory("directory", "/"),
+								cyng::param_factory("directory", "/access"),
 								cyng::param_factory("authType", "Basic"),
 								cyng::param_factory("realm", "Restricted Content"),
 								cyng::param_factory("name", "auth@example.com"),
 								cyng::param_factory("pwd", "secret")
 							),
 							cyng::tuple_factory(
-								cyng::param_factory("directory", "/temp"),
+								cyng::param_factory("directory", "/login"),
 								cyng::param_factory("authType", "Basic"),
 								cyng::param_factory("realm", "Restricted Content"),
 								cyng::param_factory("name", "auth@example.com"),
@@ -367,9 +367,10 @@ namespace plog
 		//
 		boost::uuids::random_generator uidgen;
 		cyng::controller http_vm(scheduler.get_io_service(), uidgen(), std::cout, std::cerr);
+		CYNG_LOG_TRACE(logger, "HTTP VM tag: " << http_vm.tag());
 
 		// Create and launch a listening port
-		auto http_srv = std::make_shared<node::http::server>(logger
+		node::http::server http_srv(logger
 			, scheduler.get_io_service()
 			, boost::asio::ip::tcp::endpoint{ http_address, http_port }
 			, doc_root
@@ -381,6 +382,9 @@ namespace plog
 			, http_vm
 			, https_rewrite);
 
+		if (http_enabled) {
+			http_srv.run();
+		}
 
 		//
 		//	get SSL configuration
@@ -389,90 +393,80 @@ namespace plog
 		// The SSL context is required, and holds certificates
 		boost::asio::ssl::context ctx{ boost::asio::ssl::context::sslv23 };
 
-		auto tls_pwd = cyng::value_cast<std::string>(dom["https"].get("tls-pwd"), "test");
-		auto tls_certificate_chain = cyng::value_cast<std::string>(dom["https"].get("tls-certificate-chain"), "fullchain.pem");
-		auto tls_private_key = cyng::value_cast<std::string>(dom["https"].get("tls-private-key"), "privkey.pem");
-		auto tls_dh = cyng::value_cast<std::string>(dom["https"].get("tls-dh"), "dh4096.pem");
-
-		CYNG_LOG_TRACE(logger, "tls-certificate-chain: " << tls_certificate_chain);	
-		CYNG_LOG_TRACE(logger, "tls-private-key: " << tls_private_key);	
-		CYNG_LOG_TRACE(logger, "tls-dh: " << tls_dh);
-
-		//
-		// This holds the self-signed certificate used by the server
-		//
-		if (load_server_certificate(ctx, logger, tls_pwd, tls_certificate_chain, tls_private_key, tls_dh)) {
-
-			//
-			//	create HTTPS VM controller
-			//
-			boost::uuids::random_generator uidgen;
-			cyng::controller https_vm(scheduler.get_io_service(), uidgen(), std::cout, std::cerr);
-
-			CYNG_LOG_TRACE(logger, "VM tag: " << https_vm.tag());
-			
-			const auto https_host = cyng::io::to_str(dom["https"].get("address"));
-			auto const https_address = cyng::make_address(https_host);
-			const auto https_service = cyng::io::to_str(dom["https"].get("service"));
-			const auto https_port = static_cast<unsigned short>(std::stoi(https_service));
-			const auto https_enabled = cyng::value_cast(dom["https"].get("enabled"), false);
-			if (!https_enabled) {
-				CYNG_LOG_WARNING(logger, "HTTP/S is disabled");
-			}
-
-			// Create and launch a listening port
-			auto https_srv = std::make_shared<node::https::server>(logger
-				, scheduler.get_io_service()
-				, ctx
-				, boost::asio::ip::tcp::endpoint{ https_address, https_port }
-				, doc_root
-				, ad
-				, blacklist
-				, https_vm);
-
-			if (https_srv) {
-				CYNG_LOG_TRACE(logger, "HTTPS server established");
-			}
-			else {
-				CYNG_LOG_FATAL(logger, "no HTTPS server instance");
-			}
-			
-			//
-			//	add logic
-			//
-			//https::logic handler(*srv, vm, logger);
-
-			CYNG_LOG_TRACE(logger, "HTTPS server logic initialized - start listening");
-			
-			if (https_srv->run())
-			{
-				//
-				//	wait for system signals
-				//
-				const bool shutdown = wait(logger);
-
-				//
-				//	close acceptor
-				//
-				CYNG_LOG_INFO(logger, "close acceptor");
-				https_srv->close();
-
-				return shutdown;
-			}
-			else 
-			{
-				CYNG_LOG_FATAL(logger, "HTTPS server startup failed");
-			}
+		const auto https_host = cyng::io::to_str(dom["https"].get("address"));
+		auto const https_address = cyng::make_address(https_host);
+		const auto https_service = cyng::io::to_str(dom["https"].get("service"));
+		const auto https_port = static_cast<unsigned short>(std::stoi(https_service));
+		const auto https_enabled = cyng::value_cast(dom["https"].get("enabled"), false);
+		if (!https_enabled) {
+			CYNG_LOG_WARNING(logger, "HTTP/S is disabled");
 		}
 		else {
+
+			auto tls_pwd = cyng::value_cast<std::string>(dom["https"].get("tls-pwd"), "test");
+			auto tls_certificate_chain = cyng::value_cast<std::string>(dom["https"].get("tls-certificate-chain"), "fullchain.pem");
+			auto tls_private_key = cyng::value_cast<std::string>(dom["https"].get("tls-private-key"), "privkey.pem");
+			auto tls_dh = cyng::value_cast<std::string>(dom["https"].get("tls-dh"), "dh4096.pem");
+
+			CYNG_LOG_TRACE(logger, "tls-certificate-chain: " << tls_certificate_chain);
+			CYNG_LOG_TRACE(logger, "tls-private-key: " << tls_private_key);
+			CYNG_LOG_TRACE(logger, "tls-dh: " << tls_dh);
+
+			//
+			// This holds the self-signed certificate used by the server
+			//
+			if (!load_server_certificate(ctx, logger, tls_pwd, tls_certificate_chain, tls_private_key, tls_dh)) {
+
+				CYNG_LOG_FATAL(logger, "loading server certificates failed");
+				return true;
+			}
+		}
+
+		//
+		//	create HTTPS VM controller
+		//
+		cyng::controller https_vm(scheduler.get_io_service(), uidgen(), std::cout, std::cerr);
+		CYNG_LOG_TRACE(logger, "HTTPS VM tag: " << https_vm.tag());
 			
-			CYNG_LOG_FATAL(logger, "loading server certificates failed");
+
+		// Create and launch a listening port
+		node::https::server https_srv(logger
+			, scheduler.get_io_service()
+			, ctx
+			, boost::asio::ip::tcp::endpoint{ https_address, https_port }
+			, doc_root
+			, ad
+			, blacklist
+			, https_vm);
+
+		CYNG_LOG_TRACE(logger, "HTTPS server established");
+			
+		//
+		//	add logic
+		//
+		//https::logic handler(*srv, vm, logger);
+
+		CYNG_LOG_TRACE(logger, "HTTPS server logic initialized - start listening");
+			
+		if (https_enabled)	{
+			https_srv.run();
 		}
 		
 		//
+		//	wait for system signals
+		//
+		const bool shutdown = wait(logger);
+
+		//
+		//	close acceptor
+		//
+		CYNG_LOG_INFO(logger, "close acceptor");
+		https_srv.close();
+
+		//
 		//	shutdown
 		//
-		return true;
+		return shutdown;
 	}
 	
 	

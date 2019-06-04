@@ -12,13 +12,16 @@
 solos[T]ec, solos(T)ec and solos{T}ec.
 
 Write Docscript inside of Docscript:
+
 .code(caption:'docScript example', source:'example.docscript', linenumbers:true)
 
 .h2(section_1)
 .code(language:C++, caption:'C++ example', source:'example.cpp', linenumbers:true)
 
 .h3(subsection*1)
+
 Binary dump:
+
 .code(language:binary, caption:'hex dump', source:'example.bin', linenumbers:true)
 
 
