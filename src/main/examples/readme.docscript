@@ -189,6 +189,14 @@ an absolut position. Markdown simulates this by a blockquote.
 
 .note(This is a marginal note.)
 
+.h3(Abstract)
+
+The specified image will be embedded into the HTML file as base64 encoded string.
+
+.def(title:"Title of abstract", 
+	text:"The statement")
+
+
 .h3(Set)
 
 Define one or more variables.
