@@ -387,7 +387,7 @@ install(TARGETS docc
 #
 include (tools/batch/prg.cmake)
 add_executable(batch ${batch})
-set(batch_link_libs cyng_core cyng_io cyng_vm cyng_async cyng_crypto cyng_log cyng_parser cyng_xml docscript_core doc_html ${OPENSSL_LIBRARIES})
+set(batch_link_libs cyng_core cyng_io cyng_vm cyng_async cyng_crypto cyng_log cyng_parser cyng_xml cyng_table docscript_core doc_html ${OPENSSL_LIBRARIES})
 if (${GLOBAL_LIBRARY_TYPE} STREQUAL "SHARED")
     if (UNIX)
         list(APPEND batch_link_libs pthread "${Boost_LIBRARIES}")
@@ -403,7 +403,7 @@ install(TARGETS batch
 #
 include (tools/plog/prg.cmake)
 add_executable(plog ${plog})
-set(plog_link_libs cyng_io cyng_vm cyng_async cyng_crypto cyng_log cyng_parser cyng_xml cyng_table docscript_core doc_html smf_http_srv smf_https_srv ${OPENSSL_LIBRARIES})
+set(plog_link_libs cyng_io cyng_vm cyng_async cyng_crypto cyng_log cyng_parser cyng_xml cyng_mail cyng_table docscript_core doc_html smf_http_srv smf_https_srv ${OPENSSL_LIBRARIES})
 if (${GLOBAL_LIBRARY_TYPE} STREQUAL "SHARED")
     if (UNIX)
 		list(APPEND plog_link_libs pthread "${Boost_LIBRARIES}")

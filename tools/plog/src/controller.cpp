@@ -383,6 +383,7 @@ namespace plog
 			, https_rewrite);
 
 		if (http_enabled) {
+			CYNG_LOG_INFO(logger, "start HTTP server: " << http_vm.tag());
 			http_srv.run();
 		}
 
@@ -439,16 +440,14 @@ namespace plog
 			, blacklist
 			, https_vm);
 
-		CYNG_LOG_TRACE(logger, "HTTPS server established");
-			
+		
 		//
 		//	add logic
 		//
 		//https::logic handler(*srv, vm, logger);
-
-		CYNG_LOG_TRACE(logger, "HTTPS server logic initialized - start listening");
-			
+		
 		if (https_enabled)	{
+			CYNG_LOG_INFO(logger, "start HTTP/S server: " << https_vm.tag());
 			https_srv.run();
 		}
 		
