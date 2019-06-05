@@ -11,9 +11,10 @@
 #include <smf/http/srv/server.h>
 #include <smf/https/srv/server.h>
 #include <smf/http/srv/mail_config.h>
- //#include "logic.h"
+#include "logic.h"
 
 #include <cyng/log.h>
+#include <cyng/compatibility/io_service.h>
 #include <cyng/async/scheduler.h>
 #include <cyng/async/signal_handler.h>
 #include <cyng/factory/set_factory.h>
@@ -22,8 +23,8 @@
 #include <cyng/dom/tree_walker.h>
 #include <cyng/json.h>
 #include <cyng/value_cast.hpp>
-#include <cyng/compatibility/io_service.h>
 #include <cyng/vector_cast.hpp>
+#include <cyng/set_cast.h>
 #include <cyng/vm/controller.h>
 
 #include <fstream>
@@ -349,6 +350,27 @@ namespace plog
 			}
 		}
 		
+		//
+		//	redirects
+		//
+		cyng::vector_t vec;
+		auto const rv = cyng::value_cast(dom["web"].get("redirect"), vec);
+		auto const rs = cyng::to_param_map(rv);	// cyng::param_map_t
+		CYNG_LOG_INFO(logger, rs.size() << " redirects configured");
+		std::map<std::string, std::string> redirects;
+		for (auto const& redirect : rs) {
+			auto const target = cyng::value_cast<std::string>(redirect.second, "");
+			CYNG_LOG_TRACE(logger, redirect.first
+				<< " ==> "
+				<< target);
+			redirects.emplace(redirect.first, target);
+		}
+
+		//
+		//	add logic
+		//
+		logic handler(logger);
+
 		const auto http_host = cyng::io::to_str(dom["http"].get("address"));
 		auto const http_address = cyng::make_address(http_host);
 		const auto http_service = cyng::io::to_str(dom["http"].get("service"));
@@ -379,10 +401,12 @@ namespace plog
 			, ad
 #endif
 			, blacklist
+			, redirects
 			, http_vm
 			, https_rewrite);
 
 		if (http_enabled) {
+			handler.register_this(http_vm);
 			CYNG_LOG_INFO(logger, "start HTTP server: " << http_vm.tag());
 			http_srv.run();
 		}
@@ -438,15 +462,13 @@ namespace plog
 			, doc_root
 			, ad
 			, blacklist
+			, redirects
 			, https_vm);
 
 		
-		//
-		//	add logic
-		//
-		//https::logic handler(*srv, vm, logger);
 		
 		if (https_enabled)	{
+			handler.register_this(https_vm);
 			CYNG_LOG_INFO(logger, "start HTTP/S server: " << https_vm.tag());
 			https_srv.run();
 		}

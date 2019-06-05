@@ -6,11 +6,13 @@ set (plog)
 set (plog_cpp
 	tools/plog/src/main.cpp
 	tools/plog/src/controller.cpp
+	tools/plog/src/logic.cpp
 )
     
 set (plog_h
-	 "${PROJECT_BINARY_DIR}/DOCC_project_info.h"
+	"${PROJECT_BINARY_DIR}/DOCC_project_info.h"
 	tools/plog/src/controller.h
+	tools/plog/src/logic.h
 )
 
 # define the plog program
