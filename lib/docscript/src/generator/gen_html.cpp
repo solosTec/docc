@@ -236,6 +236,16 @@ namespace docscript
 			<< std::endl
 			<< "\t\t}"
 			<< std::endl
+
+			<< "\t\tp > a {"
+			<< std::endl
+			<< "\t\t\ttext-decoration: none;"
+			<< std::endl
+			<< "\t\t\tcolor: blue;"
+			<< std::endl
+			<< "\t\t}"
+			<< std::endl
+
 			<< "\t\tblockquote > p { margin-bottom: 1px; }"
 			<< std::endl
 			<< "\t\tpre { background-color: #fafafa; }"
@@ -345,6 +355,8 @@ namespace docscript
 			<< std::endl
 			<< "\t\t\tpadding: 0.5em;"
 			<< std::endl
+			<< "\t\t\tz-index: -1;"
+			<< std::endl
 			<< "\t\t}"
 			<< std::endl
 
@@ -404,7 +416,7 @@ namespace docscript
 					;
 
 				ofs 
-					<< html::p(html::id_(note.get_tag()), ss.str()).to_str()
+					<< html::p(html::id_(note.get_tag()), html::class_("docscript-footnote"), ss.str()).to_str()
 					<< std::endl;
 
 				ss.str("");
@@ -491,7 +503,7 @@ namespace docscript
 		auto const cite = cyng::value_cast<std::string>(reader.get("url"), "");
 		auto const source = cyng::value_cast<std::string>(reader.get("source"), "");
 		auto const quote = accumulate_plain_text(reader.get("q"));
-		auto const el = html::figure(html::blockquote(html::cite_(cite), quote), html::figcaption(html::cite(source)));
+		auto const el = html::figure(html::blockquote(html::cite_(cite), html::class_("docscript-quote"), quote), html::figcaption(html::cite(source)));
 		ctx.push(cyng::make_object(el.to_str()));
 	}
 
@@ -508,8 +520,8 @@ namespace docscript
 		items = cyng::value_cast(reader.get("items"), items);
 
 		auto el = (boost::algorithm::equals(type, "ordered") || boost::algorithm::equals(type, "ol"))
-			? html::ol(html::style_("list-style-type:" + style))
-			: html::ul(html::style_("list-style-type:" + style));
+			? html::ol(html::style_("list-style-type:" + style), html::class_("docscript-ol"))
+			: html::ul(html::style_("list-style-type:" + style), html::class_("docscript-ul"));
 
 		for (auto const& item : items) {
 			el += html::li(accumulate_plain_text(item));
@@ -543,6 +555,8 @@ namespace docscript
 		auto const caption = accumulate_plain_text(reader.get("caption"));
 		auto const source = cyng::io::to_str(reader.get("source"));
 		auto const tag = cyng::value_cast(reader.get("tag"), source);
+		//	generate unique tag for SVG
+		auto const id = cyng::value_cast(reader.get("id"), boost::uuids::to_string(uuid_gen_()));
 
 		auto const p = resolve_path(source);
 		if (boost::filesystem::exists(p) && boost::filesystem::is_regular(p)) {
@@ -590,6 +604,44 @@ namespace docscript
 						svg.prepend_attribute("aria-labelledby") = "title";
 						auto node = svg.prepend_child("title");
 						node.append_child(pugi::node_pcdata).set_value(caption.c_str());
+
+						auto id_attr = svg.attribute("id");
+						if (!id_attr) {
+							//
+							//	does not exist
+							//
+							svg.prepend_attribute("id") = id.c_str();
+						}
+						else {
+							//
+							//	update
+							//
+							id_attr.set_value(id.c_str());
+						}
+
+						//
+						//	fix with and height attribute
+						//
+						auto width = svg.attribute("width");
+						if (!width) {
+							svg.prepend_attribute("width") = "100%";
+						}
+						else {
+							width.set_value("100%");
+						}
+
+						auto height = svg.attribute("height");
+						if (!height) {
+							svg.prepend_attribute("width") = "auto";
+						}
+						else {
+							height.set_value("auto");
+						}
+
+						//
+						//	remove private data
+						//
+						svg.remove_attribute("inkscape:export-filename");
 					}
 
 					std::stringstream ss;
@@ -635,7 +687,7 @@ namespace docscript
 				//
 				//"data:image/" + get_extension(p) + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size())
 
-				auto const el = html::figure(html::id_(tag), html::img(html::alt_(alt), html::title_(caption), html::src_("data:image/" + ext + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size()))), html::figcaption(title));
+				auto const el = html::figure(html::id_(tag), html::img(html::alt_(alt), html::title_(caption), html::class_("docscript-img"), html::src_("data:image/" + ext + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size()))), html::figcaption(title));
 				ctx.push(cyng::make_object(el.to_str()));
 			}
 		}
@@ -668,8 +720,7 @@ namespace docscript
 			if (boost::algorithm::iequals(language, "json")) {
 
 				std::ifstream  ifs(p.string());
-
-				ss << "<pre>";
+				ss << "<pre class=\"docscript-pre-json\">" << std::endl;
 				std::string const inp(static_cast<std::stringstream const&>(std::stringstream() << ifs.rdbuf()).str());
 				json_to_html filter(line_numbers, uuid_gen_());
 				filter.convert(ss, inp);
@@ -679,7 +730,7 @@ namespace docscript
 			else if (boost::algorithm::equals(language, "C++") || boost::algorithm::iequals(language, "cpp")) {
 
 				std::ifstream  ifs(p.string());
-				ss << "<pre>" << std::endl;
+				ss << "<pre class=\"docscript-pre\">" << std::endl;
 				std::string const inp(static_cast<std::stringstream const&>(std::stringstream() << ifs.rdbuf()).str());
 				cpp_to_html filter(line_numbers, uuid_gen_());
 				filter.convert(ss, inp);
@@ -688,7 +739,7 @@ namespace docscript
 			else if (boost::algorithm::iequals(language, "docscript")) {
 
 				std::ifstream  ifs(p.string());
-				ss << "<pre>";
+				ss << "<pre class=\"docscript-pre\">" << std::endl;
 				std::string const inp(static_cast<std::stringstream const&>(std::stringstream() << ifs.rdbuf()).str());
 				docscript_to_html filter(line_numbers, uuid_gen_());
 				filter.convert(ss, inp);
@@ -697,7 +748,7 @@ namespace docscript
 			else if (boost::algorithm::equals(language, "txt") || boost::algorithm::iequals(language, "text") || boost::algorithm::iequals(language, "verbatim")) {
 
 				std::ifstream  ifs(p.string());
-				ss << "<pre>" << std::endl;
+				ss << "<pre class=\"docscript-pre-txt\">" << std::endl;
 				std::string const inp(static_cast<std::stringstream const&>(std::stringstream() << ifs.rdbuf()).str());
 				text_to_html filter(line_numbers, uuid_gen_());
 				filter.convert(ss, inp);
@@ -708,7 +759,7 @@ namespace docscript
 				// binary mode required
 				std::ifstream  ifs(p.string(), std::ios::binary);
 				ifs.unsetf(std::ios::skipws);
-				ss << "<pre>" << std::endl;
+				ss << "<pre class=\"docscript-pre-binary\">" << std::endl;
 				cyng::buffer_t const inp((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
 				//cyng::buffer_t const inp(static_cast<std::stringstream const&>(std::stringstream() << ifs.rdbuf()).str());
 				binary_to_html filter(line_numbers, uuid_gen_());
@@ -718,7 +769,7 @@ namespace docscript
 			else if (boost::algorithm::equals(language, "html") || boost::algorithm::iequals(language, "htm")) {
 
 				std::ifstream  ifs(p.string());
-				ss << "<pre>" << std::endl;
+				ss << "<pre class=\"docscript-pre-html\">" << std::endl;
 				std::string const inp(static_cast<std::stringstream const&>(std::stringstream() << ifs.rdbuf()).str());
 				html_to_html filter(line_numbers, uuid_gen_());
 				filter.convert(ss, inp);
@@ -759,7 +810,7 @@ namespace docscript
 
 		std::stringstream ss;
 		ss
-			<< "<dl>"
+			<< "<dl class=\"docscript-dl\">"
 			<< std::endl
 			;
 
@@ -928,7 +979,7 @@ namespace docscript
 		std::string r;
 		for (auto obj : frame) {
 			auto const symbol = cyng::value_cast<std::string>(obj, "");
-			if (boost::algorithm::equals(symbol, "pilgrow")) {
+			if (boost::algorithm::equals(symbol, "pilcrow")) {
 				r.append("&para;");
 			}
 			else if (boost::algorithm::equals(symbol, "copyright")) {
@@ -958,6 +1009,9 @@ namespace docscript
 			}
 			else if (boost::algorithm::iequals(symbol, "lambda")) {
 				r.append("&caret;");
+			}
+			else if (boost::algorithm::equals(symbol, "ellipsis")) {
+				r.append("&hellip;");
 			}
 			else {
 				r += symbol;

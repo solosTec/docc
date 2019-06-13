@@ -266,7 +266,7 @@ namespace docscript
 
 			auto const symbol = cyng::value_cast<std::string>(obj, "");
 
-			if (boost::algorithm::equals(symbol, "pilgrow")) {
+			if (boost::algorithm::equals(symbol, "pilcrow")) {
 				r.append("\\P");
 			}
 			else if (boost::algorithm::equals(symbol, "copyright")) {
@@ -298,6 +298,9 @@ namespace docscript
 			}
 			else if (boost::algorithm::iequals(symbol, "lambda")) {
 				r.append("\\lambda");
+			}
+			else if (boost::algorithm::equals(symbol, "ellipsis")) {
+				r.append("\\ldots");
 			}
 			else {
 				r.append(symbol);

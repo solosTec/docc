@@ -174,7 +174,7 @@ namespace docscript
 		auto const frame = ctx.get_frame();
 		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 		auto const symbol = cyng::value_cast<std::string>(frame.at(0), "");
-		if (boost::algorithm::equals(symbol, "pilgrow")) {
+		if (boost::algorithm::equals(symbol, "pilcrow")) {
 			ctx.push(cyng::make_object(u8"¶"));
 		}
 		else if (boost::algorithm::equals(symbol, "copyright")) {
@@ -182,6 +182,9 @@ namespace docscript
 		}
 		else if (boost::algorithm::equals(symbol, "registered")) {
 			ctx.push(cyng::make_object(u8"®"));
+		}
+		else if (boost::algorithm::equals(symbol, "ellipsis")) {
+			ctx.push(cyng::make_object("..."));
 		}
 		else {
 			ctx.push(cyng::make_object(symbol));
