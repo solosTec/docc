@@ -140,6 +140,11 @@ namespace docscript
 
 	std::pair<tokenizer::state, bool> tokenizer::state_text(token tok)
 	{
+		if (tok.eof_) {
+			emit(SYM_TEXT);
+			return std::make_pair(STATE_START_, true);
+		}
+
 		switch (tok.value_) {
 
 		case '\n':
@@ -196,6 +201,11 @@ namespace docscript
 
 	std::pair<tokenizer::state, bool> tokenizer::state_dot(token tok)
 	{
+		if (tok.eof_) {
+			emit(SYM_TEXT);
+			return std::make_pair(STATE_START_, true);
+		}
+
 		switch (tok.value_) {
 
 		case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g': case 'h': case 'i': case 'j': case 'k': case 'l': case 'm':
@@ -229,6 +239,11 @@ namespace docscript
 
 	std::pair<tokenizer::state, bool> tokenizer::state_token(token tok)
 	{
+		if (tok.eof_) {
+			emit(SYM_TOKEN);
+			return std::make_pair(STATE_START_, true);
+		}
+
 		switch (tok.value_) {
 
 		case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
@@ -241,7 +256,6 @@ namespace docscript
 		case '\n':
 			emit(SYM_TOKEN);
 			if (tok.count_ > 1)	emit(symbol(SYM_PAR, 0xB6));
-//			if (tok.count_ > 1)	emit(symbol(SYM_PAR, u8"¶"));
 			return std::make_pair(STATE_START_, true);
 
 		case ' ': case '\t':
@@ -257,6 +271,11 @@ namespace docscript
 
 	std::pair<tokenizer::state, bool> tokenizer::state_number(token tok)
 	{
+		if (tok.eof_) {
+			emit(SYM_NUMBER);
+			return std::make_pair(STATE_START_, true);
+		}
+
 		switch (tok.value_) {
 		case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
 		case '.':
@@ -279,11 +298,6 @@ namespace docscript
 			emit(SYM_NUMBER);
 			return std::make_pair(STATE_START_, true);
 
-		//case '.':
-		//	emit(SYM_NUMBER);
-		//	//	test "." for escape symbol
-		//	return std::make_pair(STATE_START_, false);
-
 		default:
 			emit(SYM_NUMBER);
 			return std::make_pair(STATE_START_, false);
@@ -293,6 +307,11 @@ namespace docscript
 
 	std::pair<tokenizer::state, bool> tokenizer::state_quote(token tok)
 	{
+		if (tok.eof_) {
+			emit(SYM_VERBATIM);
+			return std::make_pair(STATE_START_, true);
+		}
+
 		switch (tok.value_) {
 		case '\'':
 			emit(SYM_VERBATIM);
@@ -315,6 +334,11 @@ namespace docscript
 
 	std::pair<tokenizer::state, bool> tokenizer::state_detect(token tok)
 	{
+		if (tok.eof_) {
+			emit(SYM_TEXT);
+			return std::make_pair(STATE_START_, true);
+		}
+
 		switch (tok.value_) {
 		case '.':
 			push(tok);
