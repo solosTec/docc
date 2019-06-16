@@ -344,12 +344,14 @@ namespace docscript
 			<< std::endl
 
 			//	There is an alternative styling for aside tag that works
-			//	for bootstrap 4 too: float: right; width: 20%;
+			//	for bootstrap 4 too: float: right;
 			<< "\t\taside {"
 			<< std::endl
 			<< "\t\t\tposition: absolute;"
 			<< std::endl
 			<< "\t\t\tright: 2em;"
+			<< std::endl
+			<< "\t\t\twidth: 20%;"
 			<< std::endl
 			<< "\t\t\tborder: 1px #D5DBDB solid;"
 			<< std::endl

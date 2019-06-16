@@ -125,7 +125,7 @@ namespace docscript
 		generate_index_page(out, chrono_index);
 
 		//
-		//	generate index map
+		//	generate index map - "index.json"
 		//
 		generate_index_map(out, chrono_index);
 
@@ -256,18 +256,21 @@ namespace docscript
 				auto const title = cyng::value_cast<std::string>(reader.get("title"), "title");
 				auto const file_name = cyng::value_cast<std::string>(reader.get("file-name"), "file-name");
 				auto const slug = cyng::value_cast<std::string>(reader.get("slug"), "slug");
-				auto const entropy = reader.get("text-entropy");	// double
-				auto const symbols = reader.get("token-count");	//	size_t
+				auto const entropy = cyng::value_cast(reader.get("text-entropy"), 0.0);	// double
+				auto const symbols = cyng::value_cast<std::size_t>(reader.get("token-count"), 0u);	//	size_t
 				auto const size = reader.get("total-file-size");	//	size_t
 				auto const released = cyng::value_cast(reader.get("released"), std::chrono::system_clock::now());
+				auto const reading_time = symbols * 0.002 / entropy;	//	minutes
 
 				auto map = cyng::param_map_factory("title", title)
-					("file-name", file_name)
+					("fileName", file_name)
 					("slug", slug)
-					("token-count", symbols)
+					("tokenCount", symbols)
 					("size", size)
 					("index", index)
 					("entropy", entropy)
+					("released", released)
+					("readingTime", reading_time)
 					();
 
 				posts.push_back(map);
