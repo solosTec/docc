@@ -442,10 +442,10 @@ namespace plog
             CYNG_LOG_INFO(logger, "HTTP/S service: " << https_port);
             CYNG_LOG_INFO(logger, "HTTP/S timeout: " << https_timeout << " seconds");            
 
-			auto tls_pwd = cyng::value_cast<std::string>(dom["https"].get("tls-pwd"), "test");
-			auto tls_certificate_chain = cyng::value_cast<std::string>(dom["https"].get("tls-certificate-chain"), "fullchain.pem");
-			auto tls_private_key = cyng::value_cast<std::string>(dom["https"].get("tls-private-key"), "privkey.pem");
-			auto tls_dh = cyng::value_cast<std::string>(dom["https"].get("tls-dh"), "dh4096.pem");
+			auto static tls_pwd = cyng::value_cast<std::string>(dom["https"].get("tls-pwd"), "test");
+			auto static tls_certificate_chain = cyng::value_cast<std::string>(dom["https"].get("tls-certificate-chain"), "fullchain.pem");
+			auto static tls_private_key = cyng::value_cast<std::string>(dom["https"].get("tls-private-key"), "privkey.pem");
+			auto static tls_dh = cyng::value_cast<std::string>(dom["https"].get("tls-dh"), "dh4096.pem");
 
 			CYNG_LOG_TRACE(logger, "tls-certificate-chain: " << tls_certificate_chain);
 			CYNG_LOG_TRACE(logger, "tls-private-key: " << tls_private_key);
@@ -562,15 +562,33 @@ namespace plog
 			boost::asio::ssl::context::single_dh_use);
 
 		try {
-			ctx.use_certificate_chain_file(tls_certificate_chain);
-			CYNG_LOG_INFO(logger, tls_certificate_chain << " successfull loaded");	
+			boost::system::error_code ec;
+			ctx.use_certificate_chain_file(tls_certificate_chain, ec);
+			if (!ec) {
+				CYNG_LOG_INFO(logger, tls_certificate_chain << " successfull loaded");
+			}
+			else {
+				CYNG_LOG_ERROR(logger, tls_certificate_chain << " - " << ec.message());
+				return false;
+			}
 			
-			ctx.use_private_key_file(tls_private_key, boost::asio::ssl::context::pem);
-			CYNG_LOG_INFO(logger, tls_private_key << " successfull loaded");	
+			ctx.use_private_key_file(tls_private_key, boost::asio::ssl::context::pem, ec);
+			if (!ec) {
+				CYNG_LOG_INFO(logger, tls_private_key << " successfull loaded");
+			}
+			else {
+				CYNG_LOG_ERROR(logger, tls_private_key << " - " << ec.message());
+				return false;
+			}
 
-			ctx.use_tmp_dh_file(tls_dh);
-			CYNG_LOG_INFO(logger, tls_dh << " successfull loaded");	
-
+			ctx.use_tmp_dh_file(tls_dh, ec);
+			if (!ec) {
+				CYNG_LOG_INFO(logger, tls_dh << " successfull loaded");
+			}
+			else {
+				CYNG_LOG_ERROR(logger, tls_dh << " - " << ec.message());
+				return false;
+			}
 		}
 		catch (std::exception const& ex) {
 			CYNG_LOG_FATAL(logger, ex.what());
