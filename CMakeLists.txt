@@ -1,7 +1,7 @@
 #
 #
 # CMake compatibility issues: don't modify this, please!
-cmake_minimum_required (VERSION 3.13)
+cmake_minimum_required (VERSION 3.10)
 
 
 #
@@ -37,8 +37,8 @@ string(TIMESTAMP TWEAK_LEVEL "%j")	# day of the year
 project(DOCC 
 	VERSION 0.1.${THIS_YEAR}.${TWEAK_LEVEL}
 	LANGUAGES CXX C
-	DESCRIPTION "Document Generator"
-	HOMEPAGE_URL "https://solostec.ch")
+	DESCRIPTION "Document Generator")
+#	HOMEPAGE_URL "https://solostec.ch")
 
 
 set (${PROJECT_NAME}_COPYRIGHT_YEAR ${THIS_YEAR})
@@ -361,7 +361,8 @@ target_link_libraries(docscript_core
 	cyng_async
 	cyng_crypto
 	cyng_vm
-	cyng_json)
+	cyng_json
+	cyng_xml)
 install(TARGETS docscript_core
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib/static)

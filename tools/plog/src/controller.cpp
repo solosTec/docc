@@ -23,6 +23,7 @@
 #include <cyng/dom/tree_walker.h>
 #include <cyng/json.h>
 #include <cyng/value_cast.hpp>
+#include <cyng/numeric_cast.hpp>
 #include <cyng/vector_cast.hpp>
 #include <cyng/set_cast.h>
 #include <cyng/vm/controller.h>
@@ -100,10 +101,10 @@ namespace plog
 						//	initialize logger
 						//
 #if BOOST_OS_LINUX
-						auto logger = cyng::logging::make_sys_logger("HTTPS", true);
-						// 	auto logger = cyng::logging::make_console_logger(ioc, "HTTPS");
+						auto logger = cyng::logging::make_sys_logger("plog", true);
+						// 	auto logger = cyng::logging::make_console_logger(ioc, "plog");
 #else
-						auto logger = cyng::logging::make_console_logger(scheduler.get_io_service(), "HTTPS");
+						auto logger = cyng::logging::make_console_logger(scheduler.get_io_service(), "plog");
 #endif
 
 						CYNG_LOG_TRACE(logger, cyng::io::to_str(config));
@@ -118,7 +119,7 @@ namespace plog
 						//	print uptime
 						//
 						const auto duration = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - tp_start);
-						CYNG_LOG_INFO(logger, "HTTPS uptime " << cyng::io::to_str(cyng::make_object(duration)));
+						CYNG_LOG_INFO(logger, "plog uptime " << cyng::io::to_str(cyng::make_object(duration)));
 					}
 				}
 				else 
@@ -197,6 +198,7 @@ namespace plog
 						cyng::param_factory("enabled", true),
 						cyng::param_factory("address", "0.0.0.0"),
 						cyng::param_factory("service", "8443"),	//	default is 443
+						cyng::param_factory("timeout", "15"),	//	seconds
 						cyng::param_factory("tls-pwd", "test"),
 						cyng::param_factory("tls-certificate-chain", "demo.cert"),
 						cyng::param_factory("tls-private-key", "priv.key"),
@@ -210,6 +212,7 @@ namespace plog
 						cyng::param_factory("enabled", true),
 						cyng::param_factory("address", "0.0.0.0"),
 						cyng::param_factory("service", "8080"),	//	default is 80
+						cyng::param_factory("timeout", "15"),	//	seconds
 						cyng::param_factory("https-rewrite", false)	//	301 - Moved Permanently
 					))
 
@@ -371,10 +374,11 @@ namespace plog
 		//
 		logic handler(logger);
 
-		const auto http_host = cyng::io::to_str(dom["http"].get("address"));
+		auto const http_host = cyng::io::to_str(dom["http"].get("address"));
 		auto const http_address = cyng::make_address(http_host);
-		const auto http_service = cyng::io::to_str(dom["http"].get("service"));
-		const auto http_port = static_cast<unsigned short>(std::stoi(http_service));
+		auto const http_service = cyng::io::to_str(dom["http"].get("service"));
+		auto const http_port = static_cast<unsigned short>(std::stoi(http_service));
+		auto const http_timeout = cyng::numeric_cast<std::size_t>(dom["http"].get("timeout"), 15u);
 		auto const https_rewrite = cyng::value_cast(dom["http"].get("https-rewrite"), false);
 		if (https_rewrite) {
 			CYNG_LOG_WARNING(logger, "HTTPS rewrite is active");
@@ -383,6 +387,11 @@ namespace plog
 		if (!http_enabled) {
 			CYNG_LOG_WARNING(logger, "HTTP is disabled");
 		}
+		else {
+            CYNG_LOG_INFO(logger, "HTTP address: " << http_address);
+            CYNG_LOG_INFO(logger, "HTTP service: " << http_port);
+            CYNG_LOG_INFO(logger, "HTTP timeout: " << http_timeout << " seconds");            
+        }
 
 		//
 		//	create HTTP VM controller
@@ -395,6 +404,7 @@ namespace plog
 		node::http::server http_srv(logger
 			, scheduler.get_io_service()
 			, boost::asio::ip::tcp::endpoint{ http_address, http_port }
+			, http_timeout
 			, doc_root
 			, blog_root
 #ifdef NODE_SSL_INSTALLED
@@ -420,13 +430,17 @@ namespace plog
 
 		const auto https_host = cyng::io::to_str(dom["https"].get("address"));
 		auto const https_address = cyng::make_address(https_host);
-		const auto https_service = cyng::io::to_str(dom["https"].get("service"));
-		const auto https_port = static_cast<unsigned short>(std::stoi(https_service));
-		const auto https_enabled = cyng::value_cast(dom["https"].get("enabled"), false);
+		auto const https_service = cyng::io::to_str(dom["https"].get("service"));
+		auto const https_port = static_cast<unsigned short>(std::stoi(https_service));
+		auto const https_timeout = cyng::numeric_cast<std::size_t>(dom["https"].get("timeout"), 15u);
+		auto const https_enabled = cyng::value_cast(dom["https"].get("enabled"), false);
 		if (!https_enabled) {
 			CYNG_LOG_WARNING(logger, "HTTP/S is disabled");
 		}
 		else {
+            CYNG_LOG_INFO(logger, "HTTP/S address: " << https_address);
+            CYNG_LOG_INFO(logger, "HTTP/S service: " << https_port);
+            CYNG_LOG_INFO(logger, "HTTP/S timeout: " << https_timeout << " seconds");            
 
 			auto tls_pwd = cyng::value_cast<std::string>(dom["https"].get("tls-pwd"), "test");
 			auto tls_certificate_chain = cyng::value_cast<std::string>(dom["https"].get("tls-certificate-chain"), "fullchain.pem");
@@ -459,6 +473,7 @@ namespace plog
 			, scheduler.get_io_service()
 			, ctx
 			, boost::asio::ip::tcp::endpoint{ https_address, https_port }
+			, https_timeout
 			, doc_root
 			, ad
 			, blacklist
