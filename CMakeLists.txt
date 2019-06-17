@@ -430,10 +430,20 @@ if(UNIX)
 	configure_file (
 		  "${PROJECT_SOURCE_DIR}/tools/docc/templates/docc.linux.cgf.in"
 		  "${PROJECT_BINARY_DIR}/docc_v${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.cfg")
+		  
+	# plog
+	configure_file (
+		  "${PROJECT_SOURCE_DIR}/tools/plog/templates/plog.linux.cgf.in"
+		  "${PROJECT_BINARY_DIR}/plog_v${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.cfg")
+		  
   else()
 	  configure_file (
 			"${PROJECT_SOURCE_DIR}/tools/docc/templates/docc.linux.cgf.in"
 			"${PROJECT_BINARY_DIR}/docc_v${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.cfg")
+			
+	  configure_file (
+			"${PROJECT_SOURCE_DIR}/tools/plog/templates/plog.linux.cgf.in"
+			"${PROJECT_BINARY_DIR}/plog_v${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.cfg")
   endif()
 #
 # CPack configuration
