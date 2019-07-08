@@ -177,8 +177,9 @@ namespace plog
 			//
 			//	get default values
 			//
-			const boost::filesystem::path tmp = boost::filesystem::temp_directory_path();
-			const boost::filesystem::path pwd = boost::filesystem::current_path();
+			auto const tmp = boost::filesystem::temp_directory_path();
+			auto const pwd = boost::filesystem::current_path();
+			auto const root = (pwd / ".." / "homepage" / "dist").lexically_normal();
 			boost::uuids::random_generator uidgen;
 			
 			//
@@ -227,8 +228,8 @@ namespace plog
 						cyng::param_factory("document-root", "/var/www/html"),
 						cyng::param_factory("blog-root", "/var/www/html/blog"),
 #else
-						cyng::param_factory("document-root", (pwd / "htdocs").string()),
-						cyng::param_factory("blog-root", (pwd / "htdocs" / "blog").string()),
+						cyng::param_factory("document-root", root.string()),
+						cyng::param_factory("blog-root", (root / "blog").string()),
 #endif
 						cyng::param_factory("auth", cyng::vector_factory({
 							//	directory: /
@@ -311,18 +312,20 @@ namespace plog
 		CYNG_LOG_TRACE(logger, cyng::dom_counter(cfg) << " configuration nodes found" );
 		auto dom = cyng::make_reader(cfg);
 		
-		const boost::filesystem::path pwd = boost::filesystem::current_path();
+
 #if BOOST_OS_LINUX
 		const auto doc_root = cyng::value_cast<std::string>(dom["web"].get("document-root"), "/var/www/html");
 #else
-		const auto doc_root = cyng::value_cast<std::string>(dom["web"].get("document-root"), (pwd / "htdocs").string());
+		const boost::filesystem::path pwd = boost::filesystem::current_path();
+		auto const root = (pwd / ".." / "homepage" / "dist").lexically_normal();
+		const auto doc_root = cyng::value_cast<std::string>(dom["web"].get("document-root"), root.string());
 #endif
 		CYNG_LOG_TRACE(logger, "document root: " << doc_root);
 
 #if BOOST_OS_LINUX
 		const auto blog_root = cyng::value_cast<std::string>(dom["web"].get("document-root"), "/var/www/html/blog");
 #else
-		const auto blog_root = cyng::value_cast<std::string>(dom["web"].get("blog-root"), (pwd / "htdocs" / "blog").string());
+		const auto blog_root = cyng::value_cast<std::string>(dom["web"].get("blog-root"), (root / "blog").string());
 #endif
 		CYNG_LOG_TRACE(logger, "blog root: " << blog_root);
 

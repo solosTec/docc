@@ -191,6 +191,7 @@ namespace docscript
 					meta_["total-file-size"] = cyng::make_object(file_size);
 					meta_["file-name"] = cyng::make_object(p.filename().string());
 					meta_["title"] = cyng::make_object(p.stem().string());
+					meta_["language"] = cyng::make_object("en");
 				}
 				else {
 

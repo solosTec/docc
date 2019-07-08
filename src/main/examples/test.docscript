@@ -1,4 +1,4 @@
-﻿.meta(released:.now(), author:"solosTec")
+﻿.meta(released:.now(), author:"solosTec", language:"en")
 ;.set(chaper:(one))
 ;.set age:42
 ;.set flag:true

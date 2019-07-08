@@ -10,8 +10,7 @@
 
 #include <cyng/log.h>
 #include <cyng/vm/controller.h>
-//#include <string>
-//#include <cstdint>
+#include <cyng/store/db.h>
 
 namespace plog
 {
@@ -19,15 +18,34 @@ namespace plog
 	{
 	public:
 		/**
+		 * Initialize database
 		 */
 		logic(cyng::logging::log_ptr logger);
+
+		/**
+		 * Register the same functions to different VMs
+		 */
 		void register_this(cyng::controller&);
 
 	private:
 		void http_session_launch(cyng::context& ctx);
 
+		/**
+		 * Cannot use the implementation of the store_domain (CYNG) because
+		 * of the additional source (UUID) parameter.
+		 */
+		void db_req_insert(cyng::context& ctx);
+		void db_req_remove(cyng::context& ctx);
+		void db_req_modify_by_param(cyng::context& ctx);
+
 	private:
 		cyng::logging::log_ptr logger_;
+
+		/**
+		 * global data cache
+		 */
+		cyng::store::db db_;
+
 	};
 }
 

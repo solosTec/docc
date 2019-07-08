@@ -1,4 +1,4 @@
-.meta(title:README, author:"solosTec", released:.now())
+.meta(title:README, author:"solosTec", released:.now(), language:"en")
 .set(name:docc, language:C++)
 
 ;
@@ -16,15 +16,15 @@ Since you have one source file for different target formats, you don't have to m
 .list(type:ordered
  , style: 'lower-roman'
  , items: [
-	(syntax as simple as markdown, but with more features),
+	(syntax as .b simple as markdown, but with more features),
 	(docScript - allows to .b program your document (Turing complete)),
 	(documents can be compiled from different sources),
-	(generate compact HTML files with inline images),
-	(UTF-8 support),
+	(generate compact HTML files with .b(inline images)),
+	(.b(UTF-8) support),
 	(pretty fast),
 	(auto generate numbering),
 	(auto generate meta data),
-	(pre-rendering of other sources - e.g. binary data as hexdump),
+	(.b(pre-rendering) of other sources - e.g. binary data as hexdump),
 	(comprehensive error messages),
 	(hackable)
  ])
@@ -44,7 +44,9 @@ Dependencies:
 	(recent C++ compiler),
 	(Boost > 1.67), 
 	(OpenSSL), 
-	(.link(text:'cyng', url:'https://github.com/solosTec/cyng', title:'VM with dynamic data types') library)])
+	(.link(text:'CYNG', url:'https://github.com/solosTec/cyng', title:'VM with dynamic data types') library),
+	(.link(text:'NODE', url:'https://github.com/solosTec/node', title:'SMF') library)
+	])
 
 .h3(Linux)
 
@@ -76,7 +78,7 @@ That's all.
 
 .h2(Basic Rules)
 
-To generate a paragraph simple write a text. To separate paragraphs, insert a .b blank line.
+To create a paragraph, just write text that follows an empty line. To separate paragraphs, insert a .b blank line.
 
 To avoid any processing put your text into ''single quotation '' marks. 
 
@@ -105,8 +107,9 @@ Example: '.i(emphasized)' => .i(emphasized)
 
 .h4(sup, sub)
 
-;Example: '.sup(sup) X .sub(sub)' => .sup(sup) X .sub(sub)
-Super and subscript is not supported by Github Markdown.
+Super and subscript are not supported by Github Markdown.
+
+Example: '.sup(sup) X .sub(sub)' => .sup(sup) X .sub(sub)
 
 .h4(color)
 
@@ -138,6 +141,9 @@ Example:
 
 .h3(Definitions)
 
+Example:
+.code(language:docscript, caption:'Definitions', source:'inc/example-def.docscript', linenumbers:true)
+
 .h3(Code Listings)
 
 The command is .b '.code'. A listing has the following options:
@@ -158,7 +164,7 @@ The following languages are strongly supported:
 	(binary data as hexdump), 
 	(docScript)])
 
-In case of dubt choose .i txt format.
+In case of doubt choose .i txt format.
 
 .h3(Link)
 
@@ -184,7 +190,7 @@ The specified image will be embedded into the HTML file as base64 encoded string
 
 .h3(Note)
 
-The .b '.node' command generates a side note. LaTeX uses the \marginpar{} command. HTML mimics the behaviour with 
+The .b '.note' command generates a side note. LaTeX uses the \marginpar{} command. HTML mimics the behaviour with 
 an absolut position. Markdown simulates this by a blockquote.
 
 .note(This is a marginal note.)
@@ -196,6 +202,28 @@ The specified image will be embedded into the HTML file as base64 encoded string
 .def(title:"Title of abstract", 
 	text:"The statement")
 
+
+.h3(Symbols)
+
+The following symbols are pre-defined:
+
+.list(type:unordered
+ , style: 'circle'
+ , items: [
+	(pilcrow: .symbol(pilcrow)),	
+	(copyright: .symbol(copyright)),
+	(registered: .symbol(registered)),
+	(latex: .symbol(latex)),
+	(celsius: .symbol(celsius)),
+	(micro: .symbol(micro)),
+	(ohm: .symbol(ohm)),
+	(degree: .symbol(degree)),
+	(promille: .symbol(promille)),
+	(lambda: .symbol(lambda)),
+	(ellipsis: .symbol(ellipsis))
+	])
+
+Example: .b '.symbol(lambda)'
 
 .h3(Set)
 

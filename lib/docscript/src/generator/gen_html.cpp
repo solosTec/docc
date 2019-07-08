@@ -743,7 +743,7 @@ namespace docscript
 			else if (boost::algorithm::iequals(language, "docscript")) {
 
 				std::ifstream  ifs(p.string());
-				ss << "<pre class=\"docscript-pre\">" << std::endl;
+				ss << "<pre class=\"docscript-pre\"><code>";
 				std::string const inp(static_cast<std::stringstream const&>(std::stringstream() << ifs.rdbuf()).str());
 				docscript_to_html filter(line_numbers, uuid_gen_());
 				filter.convert(ss, inp);

@@ -261,6 +261,8 @@ namespace docscript
 				auto const size = reader.get("total-file-size");	//	size_t
 				auto const released = cyng::value_cast(reader.get("released"), std::chrono::system_clock::now());
 				auto const reading_time = symbols * 0.002 / entropy;	//	minutes
+				auto const language = cyng::value_cast<std::string>(reader.get("language"), "en");
+				auto const outline = cyng::value_cast(reader.get("outline"), title);
 
 				auto map = cyng::param_map_factory("title", title)
 					("fileName", file_name)
@@ -271,6 +273,8 @@ namespace docscript
 					("entropy", entropy)
 					("released", released)
 					("readingTime", reading_time)
+					("language", language)
+					("outline", outline)
 					();
 
 				posts.push_back(map);

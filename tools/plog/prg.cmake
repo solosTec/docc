@@ -7,6 +7,8 @@ set (plog_cpp
 	tools/plog/src/main.cpp
 	tools/plog/src/controller.cpp
 	tools/plog/src/logic.cpp
+# from node project
+	${NODE_SOURCE_DIR}/db/db_schemes.cpp
 )
     
 set (plog_h

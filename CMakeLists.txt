@@ -185,6 +185,10 @@ get_filename_component(NODE_INCLUDE_DIR "${NODE_ROOT}/src/main/include" REALPATH
 include_directories("${NODE_INCLUDE_DIR}")
 message(STATUS "** NODE include path  : ${NODE_INCLUDE_DIR}")
 
+get_filename_component(NODE_SOURCE_DIR "${NODE_ROOT}/nodes/shared" REALPATH)
+#add_subdirectory(${NODE_SOURCE_DIR} "${NODE_SOURCE_DIR}/build" )
+#message(STATUS "** NODE source path   : ${NODE_SOURCE_DIR}")
+
 #
 #	setup node build directory
 #   -DNODE_BUILD:path=...
@@ -404,7 +408,7 @@ install(TARGETS batch
 #
 include (tools/plog/prg.cmake)
 add_executable(plog ${plog})
-set(plog_link_libs cyng_io cyng_vm cyng_async cyng_crypto cyng_log cyng_parser cyng_xml cyng_mail cyng_table docscript_core doc_html smf_http_srv smf_https_srv ${OPENSSL_LIBRARIES})
+set(plog_link_libs cyng_io cyng_vm cyng_async cyng_crypto cyng_log cyng_parser cyng_xml cyng_mail cyng_table cyng_store cyng_db docscript_core doc_html smf_http_srv smf_https_srv ${OPENSSL_LIBRARIES})
 if (${GLOBAL_LIBRARY_TYPE} STREQUAL "SHARED")
     if (UNIX)
 		list(APPEND plog_link_libs pthread "${Boost_LIBRARIES}")
