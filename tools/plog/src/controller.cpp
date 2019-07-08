@@ -19,6 +19,7 @@
 #include <cyng/async/signal_handler.h>
 #include <cyng/factory/set_factory.h>
 #include <cyng/io/serializer.h>
+#include <cyng/io/io_bytes.hpp>
 #include <cyng/dom/reader.h>
 #include <cyng/dom/tree_walker.h>
 #include <cyng/json.h>
@@ -192,13 +193,14 @@ namespace plog
 					, cyng::param_factory("version", cyng::version(DOCC_VERSION_MAJOR, DOCC_VERSION_MINOR))
 
 					//
-					//	HHTPS specific params
+					//	HTTPS specific params
 					//
 					, cyng::param_factory("https", cyng::tuple_factory(
 						cyng::param_factory("enabled", true),
 						cyng::param_factory("address", "0.0.0.0"),
 						cyng::param_factory("service", "8443"),	//	default is 443
 						cyng::param_factory("timeout", "15"),	//	seconds
+						cyng::param_factory("max-upload-size", 1024 * 1024 * 10),	//	10 MB
 						cyng::param_factory("tls-pwd", "test"),
 						cyng::param_factory("tls-certificate-chain", "demo.cert"),
 						cyng::param_factory("tls-private-key", "priv.key"),
@@ -206,12 +208,13 @@ namespace plog
 					))
 
 					//
-					//	HHTP specific params
+					//	HTTP specific params
 					//
 					, cyng::param_factory("http", cyng::tuple_factory(
 						cyng::param_factory("enabled", true),
 						cyng::param_factory("address", "0.0.0.0"),
 						cyng::param_factory("service", "8080"),	//	default is 80
+						cyng::param_factory("max-upload-size", 1024 * 1024 * 10),	//	10 MB
 						cyng::param_factory("timeout", "15"),	//	seconds
 						cyng::param_factory("https-rewrite", false)	//	301 - Moved Permanently
 					))
@@ -380,6 +383,7 @@ namespace plog
 		auto const http_service = cyng::io::to_str(dom["http"].get("service"));
 		auto const http_port = static_cast<unsigned short>(std::stoi(http_service));
 		auto const http_timeout = cyng::numeric_cast<std::size_t>(dom["http"].get("timeout"), 15u);
+		auto const http_max_upload_size = cyng::numeric_cast<std::uint64_t>(dom["http"].get("max-upload-size"), 1024u * 1024 * 10u);
 		auto const https_rewrite = cyng::value_cast(dom["http"].get("https-rewrite"), false);
 		if (https_rewrite) {
 			CYNG_LOG_WARNING(logger, "HTTPS rewrite is active");
@@ -393,6 +397,12 @@ namespace plog
             CYNG_LOG_INFO(logger, "HTTP service: " << http_port);
             CYNG_LOG_INFO(logger, "HTTP timeout: " << http_timeout << " seconds");            
         }
+		if (http_max_upload_size < 10 * 1024) {
+			CYNG_LOG_WARNING(logger, "HTTP max-upload-size only: " << http_max_upload_size << " bytes");
+		}
+		else {
+			CYNG_LOG_INFO(logger, "HTTP max-upload-size: " << cyng::bytes_to_str(http_max_upload_size));
+		}
 
 		//
 		//	create HTTP VM controller
@@ -406,6 +416,7 @@ namespace plog
 			, scheduler.get_io_service()
 			, boost::asio::ip::tcp::endpoint{ http_address, http_port }
 			, http_timeout
+			, http_max_upload_size
 			, doc_root
 			, blog_root
 #ifdef NODE_SSL_INSTALLED
@@ -434,6 +445,7 @@ namespace plog
 		auto const https_service = cyng::io::to_str(dom["https"].get("service"));
 		auto const https_port = static_cast<unsigned short>(std::stoi(https_service));
 		auto const https_timeout = cyng::numeric_cast<std::size_t>(dom["https"].get("timeout"), 15u);
+		auto const https_max_upload_size = cyng::numeric_cast<std::uint64_t>(dom["https"].get("max-upload-size"), 1024u * 1024 * 10u);
 		auto const https_enabled = cyng::value_cast(dom["https"].get("enabled"), false);
 		if (!https_enabled) {
 			CYNG_LOG_WARNING(logger, "HTTP/S is disabled");
@@ -442,6 +454,12 @@ namespace plog
             CYNG_LOG_INFO(logger, "HTTP/S address: " << https_address);
             CYNG_LOG_INFO(logger, "HTTP/S service: " << https_port);
             CYNG_LOG_INFO(logger, "HTTP/S timeout: " << https_timeout << " seconds");            
+			if (https_max_upload_size < 10 * 1024) {
+				CYNG_LOG_WARNING(logger, "HTTP/s max-upload-size only: " << https_max_upload_size << " bytes");
+			}
+			else {
+				CYNG_LOG_INFO(logger, "HTTP/S max-upload-size: " << cyng::bytes_to_str(https_max_upload_size));
+			}
 
 			auto static tls_pwd = cyng::value_cast<std::string>(dom["https"].get("tls-pwd"), "test");
 			auto static tls_certificate_chain = cyng::value_cast<std::string>(dom["https"].get("tls-certificate-chain"), "fullchain.pem");
@@ -475,13 +493,12 @@ namespace plog
 			, ctx
 			, boost::asio::ip::tcp::endpoint{ https_address, https_port }
 			, https_timeout
+			, https_max_upload_size
 			, doc_root
 			, ad
 			, blacklist
 			, redirects
 			, https_vm);
-
-		
 		
 		if (https_enabled)	{
 			handler.register_this(https_vm);
