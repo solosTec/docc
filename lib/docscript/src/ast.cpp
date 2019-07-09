@@ -10,6 +10,8 @@
 
 #include <cyng/object.h>
 #include <cyng/vm/generator.h>
+#include <cyng/parser/chrono_parser.h>
+//#include <cyng/io/io_chrono.hpp>
 
 #include <boost/algorithm/string.hpp>
 
@@ -302,7 +304,6 @@ namespace docscript
 				//
 				if (sp->value_.find('.') != std::string::npos) {
 					prg << sp->value_;
-					//prg << static_cast<std::uint64_t>(std::stold(sp->value_));
 				}
 				else {
 					prg << static_cast<std::uint64_t>(std::stoull(sp->value_));
@@ -317,12 +318,29 @@ namespace docscript
 				prg
 					<< cyng::code::ASP
 					<< cyng::code::ESBA
-//					<< ex.what()
 					<< sp->value_
 					<< cyng::invoke("convert.numeric")
 					<< cyng::pr_n(1)	// code::PR
 					<< cyng::code::REBA
 					;
+			}
+		}
+		else if (sp->is_type(SYM_DATETIME)) {
+			//
+			//	convert to datetime object
+			//
+			auto const r = cyng::parse_rfc3339_timestamp(sp->value_);
+			//auto const r = cyng::parse_rfc3339_timestamp("2022-10-02T15:00:00.05Z");
+			
+			if (r.second) {
+				prg << r.first;
+				//std::cout
+				//	<< cyng::date_to_str(r.first)
+				//	<< std::endl;
+			}
+			else {
+				std::cerr << "*** conversion to date-time failed: " << sp->value_ << std::endl;
+				prg << sp->value_;
 			}
 		}
 		else if (sp->is_type(SYM_TEXT)) {

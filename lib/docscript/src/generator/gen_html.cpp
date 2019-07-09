@@ -862,7 +862,7 @@ namespace docscript
 	void gen_html::format_bold(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 		auto el = html::b(accumulate_plain_text(frame));
 		ctx.push(cyng::make_object(el.to_str()));
 	}

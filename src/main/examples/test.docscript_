@@ -1,0 +1,113 @@
+﻿.meta(released:.now(), author:"solosTec", language:"en")
+;.set(chaper:(one))
+;.set age:42
+;.set flag:true
+.set(name:DocScript, language:C++)
+;.if(cond:true, do:.set flag:false)
+
+;.emit(hello, world!)
+
+.h1(chap<T>er)
+
+solos[T]ec, solos(T)ec and solos{T}ec.
+
+Write Docscript inside of Docscript:
+
+.code(caption:'docScript example', source:'inc/example.docscript', linenumbers:true)
+
+.h2(section_1)
+.code(language:C++, caption:'C++ example', source:'example.cpp', linenumbers:true)
+
+.h3(subsection*1)
+
+Binary dump:
+
+.code(language:binary, caption:'hex dump', source:'example.bin', linenumbers:true)
+
+
+.h3(subsection#2)
+
+.note(This is a margin note!)
+
+.h4(subsubsection-1)
+.h4(Definition List)
+
+ .def('abstract syntax':(Specification of a .i structure), 'big endian':(A byte order .b sequence))
+
+.h3(Ordered List)
+
+.list(type:ordered
+ , style: 'lower-roman'
+ , items: [(item one), (item two), (and item number .b three)])
+
+.h3(Unordered List)
+
+.list(type:unordered
+ , style: 'disc'
+ , items: [(item one), (item two), (and item number .i three)])
+
+.h2(section-2)
+.h2(section-3)
+
+.h1(chapter)
+.header(title: "Basics", level: 1, tag: '79bf3ba0-2362-4ea5-bcb5-ed93844ac59a')
+
+.h2(section)
+.h3(subsection-1)
+.h3(subsection-2)
+.h3(subsection-3)
+.h2(section)
+
+
+.h3(subsection-1)
+.h3(subsection-2)
+
+On the other hand, Το λάθος είναι ανθρώπινο.
+カッコいい
+
+.h1(chapter)
+
+.figure(source: 'logo.svg', caption: "solosTec Logo", alt: "solosTec Logi", tag: '9d0dd0fd-de54-49cc-86b0-64fe35b6d5a5')
+.figure(source: 'example.jpg', caption: "Daisies in the rain", alt: "Giovanni Bellini, Man wearing a turban", tag: '338d542a-a4e3-4a4c-9efe-b8d3032306c3')
+
+.h1(chapter)
+.h2(section)
+.h2(section)
+
+.symbol pilgrow .symbol copyright  .symbol registered 
+
+.h1(chapter)
+
+.h1(Render a paragraph)
+
+.get(name) .b.i is intended for C++ programmers to write documentation, blog posts and any other kinds of reports and papers. .get(name) is designed in the spirit of .link(text: "LaTeX", url: 'https://www.latex-project.org/') and .link(text: "troff/nroff", url: 'https://en.wikipedia.org/wiki/Troff', title: "text-formatting program from the 1960") an ancient document processing system with roots back to the first UNIX systems. The main idea .footnote(This is a .b footnote.) is to write the content .b .color(#808000: "spiced up") with some semantic hints. The typesetting system transforms this into a proper document. And since the underlying markup language is Turing complete you do not write the text, you .bold(program it). If required you can use functions, recursion, loops and all kinds of algorithm. And this is the reason it's the perfect fit for programmers like you. With .b this versatile instrument in your hand you have a tool that gives you more power.
+
+;.now()
+;.demo(key1:'value', key2: .now(), key3: &)
+;.demo(key:[1, .now(), (3)])
+
+
+123. hallo!
+
+.quote(source:'Earl Wilson'
+	, url: 'https://www.brainyquote.com/quotes/quotes/e/earlwilson385998.html'
+	, q: "1 2 3")
+
+.code(language:json, caption:'JSON example', source:'example.json', linenumbers:true)
+
+
+.quote(source:'Earl Wilson'
+	, url: 'https://www.brainyquote.com/quotes/quotes/e/earlwilson385998.html'
+	, q: (Science may come up with a better office communication system at .now().))
+
+
+
+;.listing(language:C++, source:.inline-123
+;#include<std.h>
+;int main(){
+;	return 1;
+; }
+;.inline-123)
+
+ 
+

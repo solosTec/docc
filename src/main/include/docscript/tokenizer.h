@@ -40,6 +40,7 @@ namespace docscript
 			STATE_START_,
 			STATE_DOT_,
 			STATE_NUMBER_,		//	0 ... 9
+			STATE_DATETIME_,	//	YYYY-MM-DD[THH:MM:SS]
 			STATE_TOKEN_,		//	lowercase characters and '_'
 			STATE_TEXT_,		//	text and punctuation
 			STATE_QUOTE_,		//	'preserve all white spaces and dots'
@@ -54,6 +55,7 @@ namespace docscript
 		std::pair<state, bool> state_dot(token);
 		std::pair<state, bool> state_token(token);
 		std::pair<state, bool> state_number(token);
+		std::pair<state, bool> state_datetime(token);
 		std::pair<state, bool> state_quote(token);
 		std::pair<state, bool> state_detect(token);
 

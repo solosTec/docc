@@ -366,6 +366,8 @@ namespace docscript
 			return accumulate_plain_text(cyng::value_cast(obj, cyng::vector_t()));
 		case cyng::TC_NULL:
 			return "";
+		case cyng::TC_TIME_POINT:
+			return cyng::to_str(cyng::value_cast(obj, std::chrono::system_clock::now()));
 		default:
 			break;
 		}

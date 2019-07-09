@@ -22,6 +22,7 @@ namespace docscript
 		SYM_TEXT,		//!<	text and symbols
 		SYM_VERBATIM,	//!<	keep spaces
 		SYM_NUMBER,		//!<	number (sanitized)
+		SYM_DATETIME,	//!<	datetime (sanitized)
 		SYM_TOKEN,		//!<	functions at beginning of line are global
 		SYM_PAR,		//!<	new paragraph
 

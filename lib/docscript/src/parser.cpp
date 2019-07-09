@@ -128,6 +128,8 @@ namespace docscript
 			case SYM_TEXT:
 			case SYM_VERBATIM:
 			case SYM_NUMBER:
+			case SYM_DATETIME:
+
 			case SYM_DQUOTE:
 			case SYM_SQUOTE:
 			case SYM_OPEN:
@@ -590,6 +592,7 @@ namespace docscript
 			case SYM_TEXT:
 			case SYM_VERBATIM:
 			case SYM_NUMBER:
+			case SYM_DATETIME:
 
 			case SYM_DQUOTE:
 			case SYM_SQUOTE:
@@ -644,6 +647,7 @@ namespace docscript
 				match(SYM_PAR);
 				break;
 			default:
+				print_error(cyng::logging::severity::LEVEL_FATAL, "unexpected symbol type");
 				break;
 			}
 		}
@@ -681,6 +685,7 @@ namespace docscript
 		case SYM_TEXT:
 		case SYM_VERBATIM:
 		case SYM_NUMBER:
+		case SYM_DATETIME:
 
 		case SYM_SQUOTE:
 			//

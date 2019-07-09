@@ -107,6 +107,7 @@ namespace docscript
 		case SYM_TEXT:		return "TXT";
 		case SYM_VERBATIM:	return "LIT";	//	literal
 		case SYM_NUMBER:	return "NUM";
+		case SYM_DATETIME:	return "DAT";
 		case SYM_TOKEN:		return "TOK";
 		case SYM_PAR:		return "PAR";
 

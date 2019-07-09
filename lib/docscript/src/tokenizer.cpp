@@ -39,6 +39,9 @@ namespace docscript
 		case STATE_NUMBER_:
 			std::tie(state_, advance) = state_number(tok);
 			break;
+		case STATE_DATETIME_:
+			std::tie(state_, advance) = state_datetime(tok);
+			break;
 		case STATE_QUOTE_:
 			std::tie(state_, advance) = state_quote(tok);
 			break;
@@ -130,6 +133,9 @@ namespace docscript
 
 		case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
 			return std::make_pair(STATE_NUMBER_, false);
+
+		case '@':
+			return std::make_pair(STATE_DATETIME_, true);
 
 		default:
 			break;
@@ -300,6 +306,78 @@ namespace docscript
 
 		default:
 			emit(SYM_NUMBER);
+			return std::make_pair(STATE_START_, false);
+		}
+		return std::make_pair(state_, true);
+	}
+
+	std::pair<tokenizer::state, bool> tokenizer::state_datetime(token tok)
+	{
+		if (tok.eof_) {
+			emit(SYM_DATETIME);
+			return std::make_pair(STATE_START_, true);
+		}
+
+		switch (tok.value_) {
+		case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+		case '-': case ':': case '.': case 'T': case 'Z':
+			push(tok);
+
+			//
+			//	format sanitizer
+			//	YYYY-MM-DDTHH:MM:SS.zzZ
+			//
+			if (tmp_.size() > 23) {
+				err_(cyng::logging::severity::LEVEL_ERROR, get_state_name(state_));
+				return std::make_pair(STATE_TEXT_, false);
+			}
+			else if ((tmp_.size() == 23) && (tmp_.at(22) != 'Z')) {
+				err_(cyng::logging::severity::LEVEL_ERROR, get_state_name(state_));
+				return std::make_pair(STATE_TEXT_, false);
+			}
+			else if ((tmp_.size() == 20) && (tmp_.at(19) != '.')) {
+				err_(cyng::logging::severity::LEVEL_ERROR, get_state_name(state_));
+				return std::make_pair(STATE_TEXT_, false);
+			}
+			else if ((tmp_.size() == 17) && (tmp_.at(16) != ':')) {
+				err_(cyng::logging::severity::LEVEL_ERROR, get_state_name(state_));
+				return std::make_pair(STATE_TEXT_, false);
+			}
+			else if ((tmp_.size() == 14) && (tmp_.at(13) != ':')) {
+				err_(cyng::logging::severity::LEVEL_ERROR, get_state_name(state_));
+				return std::make_pair(STATE_TEXT_, false);
+			}
+			else if ((tmp_.size() == 11) && (tmp_.at(10) != 'T')) {
+				err_(cyng::logging::severity::LEVEL_ERROR, get_state_name(state_));
+				return std::make_pair(STATE_TEXT_, false);
+			}
+			else if ((tmp_.size() == 8) && (tmp_.at(7) != '-')) {
+				err_(cyng::logging::severity::LEVEL_ERROR, get_state_name(state_));
+				return std::make_pair(STATE_TEXT_, false);
+			}
+			else if ((tmp_.size() == 5) && (tmp_.at(4) != '-')) {
+				err_(cyng::logging::severity::LEVEL_ERROR, get_state_name(state_));
+				return std::make_pair(STATE_TEXT_, false);
+			}
+			break;
+		default:
+			//
+			//	length sanitizer
+			//	YYYY-MM-DD[THH:MM:SS.zzZ]
+			//
+			if ((tmp_.size() != 10) && (tmp_.size() != 19) && (tmp_.size() != 23)) {
+				err_(cyng::logging::severity::LEVEL_ERROR, get_state_name(state_));
+				return std::make_pair(STATE_TEXT_, false);
+			}
+			else {
+				if (tmp_.size() == 10) {
+					push("T00:00:00.00Z");
+				}
+				else if (tmp_.size() == 19) {
+					push(".00Z");
+				}
+				emit(SYM_DATETIME);
+			}
 			return std::make_pair(STATE_START_, false);
 		}
 		return std::make_pair(state_, true);

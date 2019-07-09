@@ -178,9 +178,12 @@ namespace docscript
 				auto const title = cyng::value_cast<std::string>(reader.get("title"), "title");
 				auto const file_name = cyng::value_cast<std::string>(reader.get("file-name"), "file-name");
 				auto const slug = cyng::value_cast<std::string>(reader.get("slug"), "slug");
-				auto const entropy = reader.get("text-entropy");	// double
-				auto const symbols = reader.get("input-symbols");	//	size_t
+				auto const entropy = cyng::value_cast(reader.get("text-entropy"), 0.0);	// double
+				auto const symbols = cyng::value_cast<std::size_t>(reader.get("token-count"), 0u);	//	size_t
 				auto const released = cyng::value_cast(reader.get("released"), std::chrono::system_clock::now());
+				auto const reading_time = symbols * 0.002 / entropy;	//	minutes
+				auto const language = cyng::value_cast<std::string>(reader.get("language"), "en");
+				auto const outline = cyng::value_cast(reader.get("outline"), title);
 
 					//
 					//	assume that the path has depth of one
@@ -197,19 +200,20 @@ namespace docscript
 					<< "/posts?slug="
 					<< slug
 					<< "\" onclick=\"load_page('"
-					<< file_name
+					<< boost::filesystem::path(file_name).replace_extension(".html").string()
 					//	don't follow href
 					<< "'); return false;\" title=\""
 					<< title
-					<< ' '
-					<< "input symbols with an entropy of "
-					<< cyng::io::to_str(entropy)
+					<< " - reading time "
+					<< reading_time
+					<< " min."
 					<< "\">"
-					<< title
+					<< outline
 					<< "</a>"
 					<< std::endl
-					<< "\t\t<p class=\"docscript-timestamp\">"
+					<< "\t\t<p class=\"docscript-timestamp\">released at "
 					<< cyng::date_to_str(released)
+					//<< cyng::to_str_iso(released)
 					<< "</p>"
 					<< std::endl
 					<< "\t</div>"
@@ -263,6 +267,10 @@ namespace docscript
 				auto const reading_time = symbols * 0.002 / entropy;	//	minutes
 				auto const language = cyng::value_cast<std::string>(reader.get("language"), "en");
 				auto const outline = cyng::value_cast(reader.get("outline"), title);
+
+				//std::cout
+				//	<< cyng::date_to_str(released)
+				//	<< std::endl;
 
 				auto map = cyng::param_map_factory("title", title)
 					("fileName", file_name)
