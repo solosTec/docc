@@ -186,8 +186,6 @@ include_directories("${NODE_INCLUDE_DIR}")
 message(STATUS "** NODE include path  : ${NODE_INCLUDE_DIR}")
 
 get_filename_component(NODE_SOURCE_DIR "${NODE_ROOT}/nodes/shared" REALPATH)
-#add_subdirectory(${NODE_SOURCE_DIR} "${NODE_SOURCE_DIR}/build" )
-#message(STATUS "** NODE source path   : ${NODE_SOURCE_DIR}")
 
 #
 #	setup node build directory
@@ -285,34 +283,7 @@ endif()
 #
 #	setup Boost library
 #
-
-set(Boost_ADDITIONAL_VERSIONS "1.69.0" "1.70.0")
-message(STATUS "** Search Boost    : ${Boost_ADDITIONAL_VERSIONS}")
-find_package(Boost 1.69 REQUIRED COMPONENTS thread system filesystem program_options random unit_test_framework)
-
-if(Boost_FOUND)
-
-	message(STATUS "** Boost Version    : ${Boost_VERSION}")
-	message(STATUS "** Boost Include    : ${Boost_INCLUDE_DIRS}")
-	message(STATUS "** Boost Path       : ${Boost_LIBRARY_DIRS}")
-	message(STATUS "** Boost Libraries  : ${Boost_LIBRARIES}")
-
-	include_directories(${Boost_INCLUDE_DIRS})
-	link_directories(${Boost_LIBRARY_DIRS})
-	
-    set(${PROJECT_NAME}_BOOST_FOUND ${PROJECT_NAME}_BOOST_LIBRARY_FOUND)
-    set(${PROJECT_NAME}_BOOST_VERSION ${Boost_VERSION})
-	
-	# increase MPL list size for Boost.Variant
-	# possible values are  30, 40 or 50 
-	#define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
-	#define BOOST_MPL_LIMIT_LIST_SIZE 30
-	#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBOOST_MPL_CFG_NO_PREPROCESSED_HEADERS -DBOOST_MPL_LIMIT_LIST_SIZE=50 -DBOOST_ASIO_ENABLE_HANDLER_TRACKING")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBOOST_MPL_CFG_NO_PREPROCESSED_HEADERS -DBOOST_MPL_LIMIT_LIST_SIZE=50 -DFUSION_MAX_VECTOR_SIZE=50 -DBOOST_ASIO_HAS_MOVE")
-
-else()
-	set(${PROJECT_NAME}_BOOST_LIBRARY ${PROJECT_NAME}_BOOST_LIBRARY_NOT_FOUND)
-endif(Boost_FOUND)
+include(SelectBoostLibrary)
 
 #
 #	setup SSL library

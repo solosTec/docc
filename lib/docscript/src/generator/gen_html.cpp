@@ -634,12 +634,13 @@ namespace docscript
 							width.set_value("100%");
 						}
 
+						//	https://www.w3.org/TR/SVG/types.html#DataTypeLength
 						auto height = svg.attribute("height");
 						if (!height) {
-							svg.prepend_attribute("width") = "auto";
+							svg.prepend_attribute("height") = "100%";
 						}
 						else {
-							height.set_value("auto");
+							height.set_value("100%");
 						}
 
 						//
