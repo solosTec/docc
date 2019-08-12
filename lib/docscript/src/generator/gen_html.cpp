@@ -1,4 +1,4 @@
-/*
+﻿/*
  * The MIT License (MIT)
  * 
  * Copyright (c) 2019 Sylko Olzscher 
@@ -20,7 +20,7 @@
 #include <cyng/numeric_cast.hpp>
 #include <cyng/dom/reader.h>
 #include <cyng/crypto/base64.h>
-//#include <cyng/xml.h>
+#include <cyng/csv.h>
 #include <pugixml.hpp>
 
 #include <boost/algorithm/string.hpp>
@@ -60,6 +60,7 @@ namespace docscript
 		vm_.register_function("code", 1, std::bind(&gen_html::code, this, std::placeholders::_1));
 		vm_.register_function("def", 1, std::bind(&gen_html::def, this, std::placeholders::_1));
 		vm_.register_function("note", 1, std::bind(&gen_html::annotation, this, std::placeholders::_1));
+		vm_.register_function("table", 1, std::bind(&gen_html::table, this, std::placeholders::_1));
 
 		vm_.register_function("i", 1, std::bind(&gen_html::format_italic, this, std::placeholders::_1));
 		vm_.register_function("b", 1, std::bind(&gen_html::format_bold, this, std::placeholders::_1));
@@ -360,6 +361,37 @@ namespace docscript
 			<< "\t\t\tpadding: 0.5em;"
 			<< std::endl
 			<< "\t\t\tz-index: -1;"
+			<< std::endl
+			<< "\t\t}"
+			<< std::endl
+
+			<< "\t\ttable {"
+			<< std::endl
+			<< "\t\t\tborder-collapse: collapse;"
+			<< std::endl
+			<< "\t\t\tborder-spacing: 0px;"
+			<< std::endl
+			<< "\t\t}"
+			<< std::endl
+			<< "\t\ttable, th, td {"
+			<< "\t\t\tpadding: 5px;"
+			<< std::endl
+			<< "\t\t\tborder: 1px solid black;"
+			<< std::endl
+			<< "\t\t}"
+			<< std::endl
+
+			<< "\t\tcaption {"
+			<< std::endl
+			<< "\t\t\tfont-weight: bold;"
+			<< std::endl
+			<< "\t\t\tcolor: white;"
+			<< std::endl
+			<< "\t\t\tbackground-color: DimGray;"
+			<< std::endl
+			<< "\t\t\tpadding: 5px;"
+			<< std::endl
+			<< "\t\t\ttext-align: left;"
 			<< std::endl
 			<< "\t\t}"
 			<< std::endl
@@ -732,7 +764,7 @@ namespace docscript
 				ss << "</pre>" << std::endl;
 
 			}
-			else if (boost::algorithm::equals(language, "C++") || boost::algorithm::iequals(language, "cpp")) {
+			else if (boost::algorithm::equals(language, "C++") || boost::algorithm::iequals(language, "cpp") || boost::algorithm::iequals(language, "h")) {
 
 				std::ifstream  ifs(p.string());
 				ss << "<pre class=\"docscript-pre\">" << std::endl;
@@ -845,6 +877,69 @@ namespace docscript
 		ctx.push(cyng::make_object(el.to_str()));
 	}
 
+	void gen_html::table(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+
+		auto const reader = cyng::make_reader(frame.at(0));
+		auto const title = accumulate_plain_text(reader.get("title"));
+		cyng::tuple_t header;
+		header = cyng::value_cast(reader.get("header"), header);
+		auto const source = cyng::io::to_str(reader.get("source"));
+		auto const tag = cyng::value_cast(reader.get("tag"), source);
+
+		auto const p = resolve_path(source);
+		if (boost::filesystem::exists(p) && boost::filesystem::is_regular(p)) {
+
+			auto table = html::table(html::class_("docscript-table"));
+			table += html::caption(html::class_("docscript-table-caption"), title);
+
+			//
+			//	parse the CSV file into a vector
+			//
+			auto const csv = cyng::csv::read_file(p.string());
+
+			bool initial{ true };
+			auto head = html::thead(html::class_("docscript-table-head"));
+			auto body = html::tbody(html::class_("docscript-table-body"));
+			for (auto const& row : csv) {
+
+				auto tr = html::tr(html::class_("docscript-tr"));
+				cyng::tuple_t tpl;
+				tpl = cyng::value_cast(row, tpl);
+				for (auto const& cell : tpl) {
+					auto td = (initial) 
+						? html::th(html::class_("docscript-th"), cyng::io::to_str(cell))
+						: html::td(html::class_("docscript-td"), cyng::io::to_str(cell))
+						;
+					tr += std::move(td);
+				}
+
+				if (initial) {
+					initial = false;
+					head += std::move(tr);
+				}
+				else {
+					body += std::move(tr);
+				}
+			}
+
+			table += std::move(head);
+			table += std::move(body);
+			ctx.push(cyng::make_object(table.to_str()));
+		}
+		else {
+
+			std::cerr
+				<< "***error cannot open figure file ["
+				<< source
+				<< "]"
+				<< std::endl;
+			ctx.push(cyng::make_object("cannot open file [" + source + "]"));
+		}
+	}
+
 	void gen_html::make_ref(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
@@ -863,7 +958,7 @@ namespace docscript
 	void gen_html::format_bold(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 		auto el = html::b(accumulate_plain_text(frame));
 		ctx.push(cyng::make_object(el.to_str()));
 	}
@@ -1024,6 +1119,48 @@ namespace docscript
 		}
 		auto const el = html::span(html::style_("font-family:Georgia, Cambria, serif;"), r);
 		ctx.push(cyng::make_object(el.to_str()));
+	}
+
+	void gen_html::print_currency(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		auto const currency = cyng::value_cast<std::string>(frame.at(0), "");
+
+		if (boost::algorithm::equals(currency, "euro")) {
+			ctx.push(cyng::make_object("&euro;"));
+		}
+		else if (boost::algorithm::equals(currency, "yen")) {
+			ctx.push(cyng::make_object("&yen;"));
+		}
+		else if (boost::algorithm::equals(currency, "pound")) {
+			ctx.push(cyng::make_object("&pound;"));
+		}
+		//₣	&#8355;	 	franc sign
+		//₤	&#8356;	 	lira symbol
+		//₧	&#8359;	 	peseta sign
+		//₹	&#x20B9;	 	rupee symbol
+		else if (boost::algorithm::equals(currency, "rupee")) {
+			ctx.push(cyng::make_object("&#x20B9;"));
+		}
+		//₩	&#8361;	 	won sign
+		//₴	&#8372;	 	hryvnia sign
+		//₯	&#8367;	 	drachma sign
+		//₮	&#8366;	 	tugrik sign
+		//₰	&#8368;	 	german penny sign
+		//₲	&#8370;	 	guarani sign
+		//₱	&#8369;	 	peso sign
+		//₳	&#8371;	 	austral sign
+		//₵	&#8373;	 	cedi sign
+		//₭	&#8365;	 	kip sign
+		//₪	&#8362;	 	new sheqel sign
+		else if (boost::algorithm::equals(currency, "sheqel")) {
+			ctx.push(cyng::make_object("&#8362;"));
+		}
+		//₫	&#8363;	 	dong sign
+		else {
+			ctx.push(cyng::make_object(currency));
+		}
 	}
 
 	void gen_html::demo(cyng::context& ctx)

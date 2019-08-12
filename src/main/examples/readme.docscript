@@ -99,7 +99,7 @@ To avoid any processing put your text into ''single quotation '' marks.
 
 .h2(Parameters)
 
-Parameters can be a simple list of words, numbers and symbols or key value pairs separated by a comma. Key vlaue pairs consist of a key and a value
+Parameters can be a simple list of words, numbers and symbols or key value pairs separated by a comma. Key value pairs consist of a key and a value
 separated by colon: .b('key:value'). Values can be the results of a function call, but keys cannot.
 
 .h2(Commands)
@@ -138,9 +138,10 @@ A header has the following options:
 	tag:"unique identifier")
 
 Example:
+
 .code(language:docscript, caption:'Header', source:'inc/example-header.docscript', linenumbers:true)
 
-To simplify writing headers the shortcuts .b h1 up to .b h6 are defined.
+To simplify writing headers the shortcuts .b h1 up to .b h6 are predefined.
 
 .h3(Lists)
 
@@ -151,11 +152,24 @@ A list has the following options:
 	items:"a list of items as [vector]")
 
 Example:
+
 .code(language:docscript, caption:'Header', source:'inc/example-list.docscript', linenumbers:true)
+
+;.include(inc/example-list.docscript)
+.list(type:unordered
+ , style: 'circle'
+ , items: [
+	(CMake >= 3.13),	
+	(recent C++ compiler),
+	(Boost > 1.67), 
+	(OpenSSL), 
+	(.link(text:'cyng', url:'https://github.com/solosTec/cyng', title:'VM with dynamic data types') library)])
+
 
 .h3(Definitions)
 
 Example:
+
 .code(language:docscript, caption:'Definitions', source:'inc/example-def.docscript', linenumbers:true)
 
 .h3(Code Listings)
@@ -217,6 +231,22 @@ The specified image will be embedded into the HTML file as base64 encoded string
 	text:"The statement")
 
 
+.h3(Tables)
+
+Tables are created from CSV files.
+
+.def(source:"path to CSV file",
+	header:"overwrite header from CSV file",
+	title:"table title")
+
+Values are separated by ',' or ';'
+
+Example:
+
+.code(language:docscript, caption:'Tables', source:'inc/example-table.docscript', linenumbers:true)
+
+.table(source:'inc/table.csv', header:"uuid string int", title:'Caption')
+
 .h3(Symbols)
 
 The following symbols are pre-defined:
@@ -239,20 +269,50 @@ The following symbols are pre-defined:
 
 Example: .b '.symbol(lambda)'
 
+.h3(Currency)
+
+The following currencies are pre-defined:
+
+.list(type:unordered
+ , style: 'circle'
+ , items: [
+	(euro: .currency(euro)),	
+	(yen: .currency(yen)),
+	(pound: .currency(pound)),
+	(rupee: .currency(rupee)),
+	(sheqel: .currency(sheqel))
+	])
+
 .h3(Set)
 
 Define one or more variables.
 
-Example: .b '.set(name:docc, language:C++)'
+Example: 
+
+.code(language:docscript, caption:'Set', source:'inc/example-set.docscript', linenumbers:true)
 
 .h3(Get)
 
 Get value of a variable.
 
-Example: .b '.get(name)'
+Example: 
+
+.code(language:docscript, caption:'Get', source:'inc/example-get.docscript', linenumbers:true)
+
 
 .h3(Meta)
 
 Define a set of document meta data.
 
 Example: .b '.meta(title:readme, author:solosTec)'
+
+.h3(Generator Functions)
+.h4(tag)
+
+Generates a random .link(text: 'uuid'
+              , title: 'Universally Unique Identifier'
+              , url: 'https://de.wikipedia.org/wiki/Universally_Unique_Identifier').
+
+Example: 
+
+.code(language:docscript, caption:'Generator: Tag', source:'inc/example-tag.docscript', linenumbers:true)

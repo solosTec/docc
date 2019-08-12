@@ -30,6 +30,7 @@ namespace docscript
 			if (boost::algorithm::equals(name, "footnote"))	return false;
 			if (boost::algorithm::equals(name, "symbol"))	return false;
 			if (boost::algorithm::equals(name, "currency"))	return false;
+			if (boost::algorithm::equals(name, "tag"))	return false;
 			return true;
 		}
 

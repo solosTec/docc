@@ -12,6 +12,7 @@
 #include <cyng/value_cast.hpp>
 #include <cyng/numeric_cast.hpp>
 #include <cyng/dom/reader.h>
+#include <cyng/csv.h>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -48,6 +49,7 @@ namespace docscript
 		vm_.register_function("code", 1, std::bind(&gen_latex::code, this, std::placeholders::_1));
 		vm_.register_function("def", 1, std::bind(&gen_latex::def, this, std::placeholders::_1));
 		vm_.register_function("note", 1, std::bind(&gen_latex::annotation, this, std::placeholders::_1));
+		vm_.register_function("table", 1, std::bind(&gen_latex::table, this, std::placeholders::_1));
 
 		vm_.register_function("i", 1, std::bind(&gen_latex::format_italic, this, std::placeholders::_1));
 		vm_.register_function("b", 1, std::bind(&gen_latex::format_bold, this, std::placeholders::_1));
@@ -153,6 +155,8 @@ namespace docscript
 			<< std::endl
 			<< build_cmd("usepackage", "graphicx")	// Required for including images
 			<< std::endl
+			<< build_cmd("usepackage", "longtable")	// It may be necessary to compile the document several times to get a multi-page table to line up properly
+			<< std::endl
 			<< build_cmd("hypersetup", "colorlinks=true, linkcolor=blue, filecolor=magenta, urlcolor=brown")
 			<< std::endl
 			<< build_cmd("usepackage", "listings")
@@ -173,17 +177,11 @@ namespace docscript
 		auto const author = accumulate_plain_text(reader.get("author"));
 		
 		ofs
-			<< "\\title{"
-			<< title
-			<< "}"
+			<< build_cmd("title", title)
 			<< std::endl
-			<< "\\author{"
-			<< author
-			<< "}"
+			<< build_cmd("author", author)
 			<< std::endl
-			<< "\\date{"
-			<< cyng::io::to_str(reader.get("last-write-time"))
-			<< "}"
+			<< build_cmd("date", cyng::io::to_str(reader.get("last-write-time")))
 			<< std::endl
 			;
 		return ofs;
@@ -195,7 +193,7 @@ namespace docscript
 			<< std::endl
 			<< "%\tdocument"
 			<< std::endl
-			<< "\\begin{document}"
+			<< build_cmd("begin", "document")
 			<< std::endl
 			<< "\\maketitle"
 			<< std::endl
@@ -216,7 +214,7 @@ namespace docscript
 		}
 
 		ofs
-			<< "\\end{document}"
+			<< build_cmd("end", "document")
 			<< std::endl
 			;
 		return ofs;
@@ -320,10 +318,16 @@ namespace docscript
 			ctx.push(cyng::make_object("\\euro"));
 		}
 		else if (boost::algorithm::equals(currency, "yen")) {
-			ctx.push(cyng::make_object(u8"�"));
+			ctx.push(cyng::make_object("\\textyen"));	//	package textcomp 
 		}
 		else if (boost::algorithm::equals(currency, "pound")) {
 			ctx.push(cyng::make_object("\\pounds"));
+		}
+		else if (boost::algorithm::equals(currency, "rupee")) {
+			ctx.push(cyng::make_object("\\faRupee"));	//	package fontawesome
+		}
+		else if (boost::algorithm::equals(currency, "sheqel")) {
+			ctx.push(cyng::make_object("\\faSheqel"));	//	package fontawesome
 		}
 		else {
 			ctx.push(cyng::make_object(currency));
@@ -497,7 +501,7 @@ namespace docscript
 	void gen_latex::code(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		auto const reader = cyng::make_reader(frame.at(0));
 		auto const caption = accumulate_plain_text(reader.get("caption"));
@@ -597,6 +601,81 @@ namespace docscript
 			;
 
 		ctx.push(cyng::make_object(ss.str()));
+	}
+
+	void gen_latex::table(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+
+		auto const reader = cyng::make_reader(frame.at(0));
+		auto const title = accumulate_plain_text(reader.get("title"));
+		cyng::tuple_t header;
+		header = cyng::value_cast(reader.get("header"), header);
+		auto const source = cyng::io::to_str(reader.get("source"));
+		auto const tag = cyng::value_cast(reader.get("tag"), source);
+
+		auto const p = resolve_path(source);
+		if (boost::filesystem::exists(p) && boost::filesystem::is_regular(p)) {
+
+			//auto table = html::table(html::class_("docscript-table"));
+			//table += html::caption(html::class_("docscript-table-caption"), title);
+
+			//
+			//	parse the CSV file into a vector
+			//
+			auto const csv = cyng::csv::read_file(p.string());
+
+			std::stringstream ss;
+			ss
+				<< build_cmd("begin", "longtable")
+				<< std::endl
+				<< build_cmd("caption", title)
+				<< std::endl
+				<< build_cmd("label", tag)
+				<< std::endl
+				<< "\\endfirsthead"
+				<< std::endl
+				<< "\\endhead"
+				<< std::endl
+				;
+
+			for (auto const& row : csv) {
+				//auto tr = html::tr(html::class_("docscript-tr"));
+				cyng::tuple_t tpl;
+				tpl = cyng::value_cast(row, tpl);
+
+				bool initial{ true };
+				for (auto const& cell : tpl) {
+					if (initial) {
+						initial = false;
+					}
+					else {
+						ss << " & ";
+					}
+					ss << cyng::io::to_str(cell);
+				}
+				ss 
+					<< " \\\\"
+					<< std::endl;
+			}
+
+			ss
+				<< build_cmd("end", "longtable")
+				<< std::endl;
+
+			ctx.push(cyng::make_object(ss.str()));
+		}
+		else {
+
+			std::cerr
+				<< "***error cannot open figure file ["
+				<< source
+				<< "]"
+				<< std::endl;
+			ctx.push(cyng::make_object("cannot open file [" + source + "]"));
+		}
+
 	}
 
 	void gen_latex::make_ref(cyng::context& ctx)

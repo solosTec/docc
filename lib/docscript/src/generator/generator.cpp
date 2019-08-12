@@ -66,6 +66,7 @@ namespace docscript
 		vm_.register_function("get", 1, std::bind(&generator::var_get, this, std::placeholders::_1));
 		vm_.register_function("symbol", 1, std::bind(&generator::print_symbol, this, std::placeholders::_1));
 		vm_.register_function("currency", 1, std::bind(&generator::print_currency, this, std::placeholders::_1));
+		vm_.register_function("tag", 1, std::bind(&generator::create_uuid, this, std::placeholders::_1));
 
 	}
 
@@ -173,21 +174,21 @@ namespace docscript
 	{
 		auto const frame = ctx.get_frame();
 		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
-		auto const symbol = cyng::value_cast<std::string>(frame.at(0), "");
-		if (boost::algorithm::equals(symbol, "pilcrow")) {
+		auto const currency = cyng::value_cast<std::string>(frame.at(0), "");
+		if (boost::algorithm::equals(currency, "pilcrow")) {
 			ctx.push(cyng::make_object(u8"¶"));
 		}
-		else if (boost::algorithm::equals(symbol, "copyright")) {
+		else if (boost::algorithm::equals(currency, "copyright")) {
 			ctx.push(cyng::make_object(u8"©"));
 		}
-		else if (boost::algorithm::equals(symbol, "registered")) {
+		else if (boost::algorithm::equals(currency, "registered")) {
 			ctx.push(cyng::make_object(u8"®"));
 		}
-		else if (boost::algorithm::equals(symbol, "ellipsis")) {
+		else if (boost::algorithm::equals(currency, "ellipsis")) {
 			ctx.push(cyng::make_object("..."));
 		}
 		else {
-			ctx.push(cyng::make_object(symbol));
+			ctx.push(cyng::make_object(currency));
 		}
 	}
 
@@ -198,19 +199,29 @@ namespace docscript
 		auto const currency = cyng::value_cast<std::string>(frame.at(0), "");
 
 		if (boost::algorithm::equals(currency, "euro")) {
-			ctx.push(cyng::make_object(u8"�"));
+			ctx.push(cyng::make_object(u8"€"));
 		}
 		else if (boost::algorithm::equals(currency, "yen")) {
-			ctx.push(cyng::make_object(u8"�"));
+			ctx.push(cyng::make_object(u8"¥"));
 		}
 		else if (boost::algorithm::equals(currency, "pound")) {
-			ctx.push(cyng::make_object(u8"�"));
+			ctx.push(cyng::make_object(u8"£"));
+		}
+		else if (boost::algorithm::equals(currency, "rupee")) {
+			ctx.push(cyng::make_object(u8"₹"));
+		}
+		else if (boost::algorithm::equals(currency, "sheqel")) {
+			ctx.push(cyng::make_object(u8"₪"));
 		}
 		else {
 			ctx.push(cyng::make_object(currency));
 		}
 	}
 
+	void generator::create_uuid(cyng::context& ctx)
+	{
+		ctx.push(cyng::make_object(uuid_gen_()));
+	}
 
 	boost::filesystem::path generator::resolve_path(std::string const& s) const
 	{

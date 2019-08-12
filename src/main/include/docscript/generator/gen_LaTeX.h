@@ -44,6 +44,7 @@ namespace docscript
 		virtual void code(cyng::context& ctx) override;
 		virtual void def(cyng::context& ctx) override;
 		virtual void annotation(cyng::context& ctx) override;
+		virtual void table(cyng::context& ctx) override;
 
 		virtual void header(cyng::context& ctx) override;
 		virtual void section(int, cyng::context& ctx) override;
@@ -72,11 +73,19 @@ namespace docscript
 	};
 
 	/**
-	 * build a LaTeC command string with:
+	 * build a LaTeX command string with:
 	 * \cmd{param}
 	 */
 	std::string build_cmd(std::string cmd, std::string param);
+
+	/**
+	 * \cmd[attr]{param}
+	 */
 	std::string build_cmd(std::string cmd, std::string param, std::string attr);
+
+	/**
+	 * \cmd{param}[attr]
+	 */
 	std::string build_cmd_alt(std::string cmd, std::string attr, std::string param);
 
 	/**

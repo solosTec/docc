@@ -56,6 +56,7 @@ namespace docscript
 		virtual void print_symbol(cyng::context& ctx);
 		virtual void print_currency(cyng::context& ctx);
 		virtual void print_hline(cyng::context& ctx) = 0;	//!<	ruler
+		virtual void create_uuid(cyng::context& ctx);
 
 		virtual void generate_file(cyng::context& ctx) = 0;
 		virtual void generate_meta(cyng::context& ctx) = 0;
@@ -71,6 +72,7 @@ namespace docscript
 		virtual void code(cyng::context& ctx) = 0;
 		virtual void def(cyng::context& ctx) = 0;
 		virtual void annotation(cyng::context& ctx) = 0;
+		virtual void table(cyng::context& ctx) = 0;
 
 		virtual void header(cyng::context& ctx) = 0;
 		virtual void section(int, cyng::context& ctx) = 0;

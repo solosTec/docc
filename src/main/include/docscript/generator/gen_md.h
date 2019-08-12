@@ -31,7 +31,7 @@ namespace docscript
 		virtual void convert_alpha(cyng::context& ctx) override;
 
 		virtual void print_symbol(cyng::context& ctx) override;
-		//virtual void print_currency(cyng::context& ctx) override;
+		virtual void print_currency(cyng::context& ctx) override;
 		virtual void print_hline(cyng::context& ctx) override;	//!<	ruler
 
 		virtual void paragraph(cyng::context& ctx) override;
@@ -43,6 +43,7 @@ namespace docscript
 		virtual void code(cyng::context& ctx) override;
 		virtual void def(cyng::context& ctx) override;
 		virtual void annotation(cyng::context& ctx) override;
+		virtual void table(cyng::context& ctx) override;
 
 		virtual void header(cyng::context& ctx) override;
 		virtual void section(int, cyng::context& ctx) override;

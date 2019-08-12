@@ -56,7 +56,7 @@ namespace docscript
 		void generate_html_content(std::size_t depth, node::d_args const*, std::ostream&, bool) const;
 		void generate_html_function_par(std::size_t depth, node::p_args const*, std::string, std::ostream&, bool) const;
 		void generate_html_function_vec(std::size_t depth, node::v_args const*, std::string, std::ostream&, bool) const;
-		void generate_html_symbol(std::size_t depth, symbol const*, std::ostream&, bool) const;
+		void generate_html_symbol(std::size_t depth, symbol const&, std::ostream&, bool) const;
 		void generate_html_list(std::size_t depth, node::s_args const*, std::ostream&, bool) const;
 		void generate_html_vector(std::size_t depth, node::v_args const*, std::ostream&, bool) const;
 

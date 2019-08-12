@@ -1,4 +1,4 @@
-/*
+﻿/*
  * The MIT License (MIT)
  * 
  * Copyright (c) 2019 Sylko Olzscher 
@@ -77,8 +77,9 @@ namespace docscript
 				std::cout << "SP";
 			}
 #if BOOST_OS_WINDOWS
+			//	codepage 1252
 			else if (tok.value_ == 0xb6) {
-				std::cout << u8"�";
+				std::cout << "¶";
 			}
 			else if (tok.value_ == 0xbd) {
 				std::cout << "1/2";

@@ -1,4 +1,4 @@
-/*
+﻿/*
  * The MIT License (MIT)
  * 
  * Copyright (c) 2019 Sylko Olzscher 
@@ -13,6 +13,7 @@
 #include <cyng/value_cast.hpp>
 #include <cyng/numeric_cast.hpp>
 #include <cyng/dom/reader.h>
+#include <cyng/csv.h>
 
 #include <boost/algorithm/string.hpp>
 
@@ -48,6 +49,7 @@ namespace docscript
 		vm_.register_function("code", 1, std::bind(&gen_md::code, this, std::placeholders::_1));
 		vm_.register_function("def", 1, std::bind(&gen_md::def, this, std::placeholders::_1));
 		vm_.register_function("note", 1, std::bind(&gen_md::annotation, this, std::placeholders::_1));
+		vm_.register_function("table", 1, std::bind(&gen_md::table, this, std::placeholders::_1));
 
 		vm_.register_function("header", 1, std::bind(&gen_md::header, this, std::placeholders::_1));
 		vm_.register_function("h1", 1, std::bind(&gen_md::section, this, 1, std::placeholders::_1));
@@ -70,7 +72,7 @@ namespace docscript
 	void gen_md::generate_file(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		auto p = cyng::value_cast(frame.at(0), boost::filesystem::path());
 		if (boost::filesystem::is_directory(p)) {
@@ -177,7 +179,7 @@ namespace docscript
 	void gen_md::generate_meta(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		auto const p = cyng::value_cast(frame.at(0), boost::filesystem::path());
 		std::ofstream ofs(p.string(), std::ios::out | std::ios::trunc);
@@ -285,7 +287,48 @@ namespace docscript
 			}
 		}
 		ctx.push(cyng::make_object(r));
+	}
 
+	void gen_md::print_currency(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		auto const currency = cyng::value_cast<std::string>(frame.at(0), "");
+
+		if (boost::algorithm::equals(currency, "euro")) {
+			ctx.push(cyng::make_object("&euro;"));
+		}
+		else if (boost::algorithm::equals(currency, "yen")) {
+			ctx.push(cyng::make_object("&yen;"));
+		}
+		else if (boost::algorithm::equals(currency, "pound")) {
+			ctx.push(cyng::make_object("&pound;"));
+		}
+		//₣	&#8355;	 	franc sign
+		//₤	&#8356;	 	lira symbol
+		//₧	&#8359;	 	peseta sign
+		//₹	&#x20B9;	 	rupee symbol
+		else if (boost::algorithm::equals(currency, "rupee")) {
+			ctx.push(cyng::make_object("&#x20B9;"));
+		}
+		//₩	&#8361;	 	won sign
+		//₴	&#8372;	 	hryvnia sign
+		//₯	&#8367;	 	drachma sign
+		//₮	&#8366;	 	tugrik sign
+		//₰	&#8368;	 	german penny sign
+		//₲	&#8370;	 	guarani sign
+		//₱	&#8369;	 	peso sign
+		//₳	&#8371;	 	austral sign
+		//₵	&#8373;	 	cedi sign
+		//₭	&#8365;	 	kip sign
+		//₪	&#8362;	 	new sheqel sign
+		else if (boost::algorithm::equals(currency, "sheqel")) {
+			ctx.push(cyng::make_object("&#8362;"));
+		}
+		//₫	&#8363;	 	dong sign
+		else {
+			ctx.push(cyng::make_object(currency));
+		}
 	}
 
 	void gen_md::paragraph(cyng::context& ctx)
@@ -519,6 +562,60 @@ namespace docscript
 		ctx.push(cyng::make_object(ss.str()));
 	}
 
+	void gen_md::table(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+
+		auto const reader = cyng::make_reader(frame.at(0));
+		auto const title = accumulate_plain_text(reader.get("title"));
+		cyng::tuple_t header;
+		header = cyng::value_cast(reader.get("header"), header);
+		auto const source = cyng::io::to_str(reader.get("source"));
+		auto const tag = cyng::value_cast(reader.get("tag"), source);
+
+		auto const p = resolve_path(source);
+		if (boost::filesystem::exists(p) && boost::filesystem::is_regular(p)) {
+
+			//
+			//	parse the CSV file into a vector
+			//
+			auto const csv = cyng::csv::read_file(p.string());
+			std::stringstream ss;
+			ss << std::endl;
+
+			bool initial{ true };
+			for (auto const& row : csv) {
+				cyng::tuple_t tpl;
+				tpl = cyng::value_cast(row, tpl);
+				for (auto const& cell : tpl) {
+					ss << "| " << cyng::io::to_str(cell);
+				}
+				ss << " |" << std::endl;
+				if (initial) {
+					//| ------------ - | ------------ - |
+					for (auto const& cell : tpl) {
+						ss << "| " << std::string(cyng::io::to_str(cell).size(), '-');
+					}
+					ss << " |" << std::endl;
+					initial = false;
+				}
+			}
+
+			ctx.push(cyng::make_object(ss.str()));
+		}
+		else {
+
+			std::cerr
+				<< "***error cannot open figure file ["
+				<< source
+				<< "]"
+				<< std::endl;
+			ctx.push(cyng::make_object("cannot open file [" + source + "]"));
+		}
+
+	}
+
 	void gen_md::make_ref(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
@@ -529,21 +626,21 @@ namespace docscript
 	void gen_md::format_italic(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 		ctx.push(cyng::make_object("_" + accumulate_plain_text(frame) + "_"));
 	}
 
 	void gen_md::format_bold(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 		ctx.push(cyng::make_object("**" + accumulate_plain_text(frame) + "**"));
 	}
 
 	void gen_md::format_color(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		//
 		//	there is no support for colors in markdown
@@ -599,7 +696,7 @@ namespace docscript
 	void gen_md::section(int level, cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		auto const title = accumulate_plain_text(frame);
 		auto const number = content_table_.add(level, uuid_gen_(), title);
@@ -620,7 +717,7 @@ namespace docscript
 	{
 		//	[%(("level":1),("tag":{79bf3ba0-2362-4ea5-bcb5-ed93844ac59a}),("title":{Basics}))]
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		auto const note = accumulate_plain_text(frame);
 		auto const tag = uuid_gen_();

@@ -11,7 +11,6 @@
 #include <cyng/object.h>
 #include <cyng/vm/generator.h>
 #include <cyng/parser/chrono_parser.h>
-//#include <cyng/io/io_chrono.hpp>
 
 #include <boost/algorithm/string.hpp>
 
@@ -354,7 +353,6 @@ namespace docscript
 				//
 				//	target platform may have special requirements for escaping
 				//
-				//prg << sp->value_;
 				prg
 					<< cyng::code::ASP
 					<< cyng::code::ESBA
@@ -444,8 +442,11 @@ namespace docscript
 			return generate_html_paragraph(depth + 1, access_node_paragraph(n), os, linenumber);
 		case node::NODE_CONTENT:
 			return generate_html_content(depth + 1, access_node_content(n), os, linenumber);
-		case node::NODE_SYMBOL:
-			return generate_html_symbol(depth + 1, access_node_symbol(n), os, linenumber);
+		case node::NODE_SYMBOL: {
+			auto const sp = access_node_symbol(n);
+			if (sp != nullptr) generate_html_symbol(depth + 1, *access_node_symbol(n), os, linenumber);
+		}
+			break;
 		case node::NODE_LIST:
 			return generate_html_list(depth + 1, access_node_list(n), os, linenumber);
 		case node::NODE_VECTOR:
@@ -528,7 +529,7 @@ namespace docscript
 		//
 		os
 			<< ')'
-			<< std::endl
+			//<< std::endl
 			;
 	}
 
@@ -613,6 +614,7 @@ namespace docscript
 		if (args->size() == 1) {
 			os << ' ';
 			generate_html(depth + 1, args->at(0), os, linenumber);
+			os << ' ';
 		}
 		else {
 			//
@@ -628,60 +630,60 @@ namespace docscript
 		}
 	}
 
-	void ast::generate_html_symbol(std::size_t depth, symbol const* sp, std::ostream& os, bool linenumber) const
+	void ast::generate_html_symbol(std::size_t depth, symbol const& sym, std::ostream& os, bool linenumber) const
 	{
 
 		if (log_) {
 			print_ast_n(depth, '.');
-			std::cout << "generate_symbol(" << *sp << ")" << std::endl;
+			std::cout << "generate_symbol(" << sym << ")" << std::endl;
 		}
 		//
 		//	check type to build the correct data type
 		//	and handle entities with a special conversion function.
 		//
-		if (sp->is_type(SYM_NUMBER)) {
+		if (sym.is_type(SYM_NUMBER)) {
 			//
 			//	numeric data type
 			//
 			os
 				<< color_brown_
-				<< sp->value_
+				<< sym.value_
 				<< end_
 				;
 		}
-		else if (sp->is_type(SYM_TEXT)) {
-			if (boost::algorithm::equals("true", sp->value_)) {
+		else if (sym.is_type(SYM_TEXT)) {
+			if (boost::algorithm::equals("true", sym.value_)) {
 				os
 					<< color_blue_
-					<< sp->value_
+					<< sym.value_
 					<< end_
 					;
 			}
-			else if (boost::algorithm::equals("false", sp->value_)) {
+			else if (boost::algorithm::equals("false", sym.value_)) {
 				os
 					<< color_blue_
-					<< sp->value_
+					<< sym.value_
 					<< end_
 					;
 			}
 			else {
 				os
-					<< sp->value_
+					<< sym.value_
 					;
 			}
 		}
-		else if (sp->is_type(SYM_VERBATIM)) {
+		else if (sym.is_type(SYM_VERBATIM)) {
 			os
 				<< "'"
 				<< color_green_
-				<< sp->value_
+				<< sym.value_
 				<< end_
 				<< "'"
 				;
 		}
 		else {
 			os
-				<< sp->value_
+				<< sym.value_
 				;
 		}
 	}
@@ -693,9 +695,19 @@ namespace docscript
 			std::cout << "generate_list(" << args->size() << ")" << std::endl;
 		}
 
-		for (auto const& sym : *args) {
-			generate_html_symbol(depth + 1, &sym, os, linenumber);
+		os << '"';
+		bool initial{ true };
+		//	reverse order
+		for (auto pos = args->crbegin(); pos != args->crend(); ++pos) {
+			if (initial) {
+				initial = false;
+			}
+			else {
+				os << ' ';
+			}
+			generate_html_symbol(depth + 1, *pos, os, linenumber);
 		}
+		os << '"';
 	}
 
 	void ast::generate_html_vector(std::size_t depth, node::v_args const* args, std::ostream& os, bool linenumber) const

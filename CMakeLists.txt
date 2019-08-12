@@ -337,6 +337,7 @@ target_link_libraries(docscript_core
 	cyng_crypto
 	cyng_vm
 	cyng_json
+	cyng_csv
 	cyng_xml)
 install(TARGETS docscript_core
     LIBRARY DESTINATION lib

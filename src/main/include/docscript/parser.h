@@ -45,7 +45,10 @@ namespace docscript
 		std::size_t generate_list(std::size_t, node::p_args*);
 		std::size_t generate_list(std::size_t, node::v_args*);
 		std::pair<std::string, node> generate_parameter(std::size_t);
-		//void generate_key(std::size_t, std::string);
+
+		/**
+		 * All elements of the quote are processed as a vector
+		 */
 		node generate_quote(std::size_t);
 		node generate_paragraph(std::size_t, node::d_args& args);
 		node generate_content(std::size_t);	//!< compare to paragraph but enclosed in ()
