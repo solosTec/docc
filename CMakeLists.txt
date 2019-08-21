@@ -338,7 +338,8 @@ target_link_libraries(docscript_core
 	cyng_vm
 	cyng_json
 	cyng_csv
-	cyng_xml)
+	cyng_xml
+	smf_protocol_sml)
 install(TARGETS docscript_core
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib/static)

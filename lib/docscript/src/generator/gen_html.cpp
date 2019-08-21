@@ -12,6 +12,7 @@
 #include "filter/text_to_html.h"
 #include "filter/binary_to_html.h"
 #include "filter/html_to_html.h"
+#include "filter/sml_to_html.h"
 #include <html/node.hpp>
 
 #include <cyng/vm/generator.h>
@@ -809,6 +810,17 @@ namespace docscript
 				ss << "<pre class=\"docscript-pre-html\">" << std::endl;
 				std::string const inp(static_cast<std::stringstream const&>(std::stringstream() << ifs.rdbuf()).str());
 				html_to_html filter(line_numbers, uuid_gen_());
+				filter.convert(ss, inp);
+				ss << "</code></pre>" << std::endl;
+			}
+			else if (boost::algorithm::equals(language, "sml")) {
+
+				// binary mode required
+				std::ifstream  ifs(p.string(), std::ios::binary);
+				ifs.unsetf(std::ios::skipws);
+				ss << "<pre class=\"docscript-pre-binary\">" << std::endl;
+				cyng::buffer_t const inp((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+				sml_to_html filter(line_numbers, uuid_gen_());
 				filter.convert(ss, inp);
 				ss << "</code></pre>" << std::endl;
 			}

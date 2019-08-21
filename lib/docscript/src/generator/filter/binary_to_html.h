@@ -25,8 +25,8 @@ namespace docscript
 
 	private:
 		void convert(std::ostream&, cyng::buffer_t::const_iterator, cyng::buffer_t::const_iterator);
-	private:
 
+	private:
 		bool const linenumbers_;
 		boost::uuids::uuid const tag_;
 		std::size_t	const width_;	//!<	total width

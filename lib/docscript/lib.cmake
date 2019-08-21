@@ -61,6 +61,8 @@ set (docscript_filter
 	lib/docscript/src/generator/filter/docscript_to_html.cpp
 	lib/docscript/src/generator/filter/binary_to_html.h
 	lib/docscript/src/generator/filter/binary_to_html.cpp
+	lib/docscript/src/generator/filter/sml_to_html.h
+	lib/docscript/src/generator/filter/sml_to_html.cpp
 
 	lib/docscript/src/generator/filter/binary_to_md.h
 	lib/docscript/src/generator/filter/binary_to_md.cpp

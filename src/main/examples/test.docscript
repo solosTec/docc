@@ -71,10 +71,13 @@ On the other hand, Το λάθος είναι ανθρώπινο.
 .figure(source: 'example.jpg', caption: "Daisies in the rain", alt: "Giovanni Bellini, Man wearing a turban", tag: '338d542a-a4e3-4a4c-9efe-b8d3032306c3')
 
 .h1(chapter)
-.h2(section)
+.h2(section - SML)
+
+.code(caption:'SML example', source:'push.sml', linenumbers:true)
+
 .h2(section)
 
-.symbol pilgrow .symbol copyright  .symbol registered 
+.symbol pilcrow .symbol copyright  .symbol registered 
 
 .h1(chapter)
 
