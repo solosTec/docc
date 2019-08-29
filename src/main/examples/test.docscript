@@ -75,7 +75,8 @@ On the other hand, Το λάθος είναι ανθρώπινο.
 
 ;.code(caption:'SML example', source:'push.bin', linenumbers:true)
 ;.code(caption:'SML example', source:'03-009.03-010.03-005.03-007.VARIOMUC-ETHERNET-1.412_14520002__X022a.sml', linenumbers:true)
-.code(caption:'SML example', source:'push.sml', linenumbers:true)
+;.code(caption:'SML example', source:'push.sml', linenumbers:true)
+.code(caption:'SML example', source:'out.sml', linenumbers:true)
 
 .h2(section)
 
