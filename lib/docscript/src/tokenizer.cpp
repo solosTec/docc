@@ -74,6 +74,9 @@ namespace docscript
 
 		case '.':
 			//	'.' is the escape symbol
+			if (tok.count_ == 3) {
+				err_(cyng::logging::severity::LEVEL_WARNING, "Did you mean '...'? Consider using .symbol(ellipsis)");
+			}
 			if (tok.count_ > 1u)	push(tok.value_, tok.count_ / 2u);
 			emit(SYM_TEXT);
 			return ((tok.count_ % 2) == 0)
