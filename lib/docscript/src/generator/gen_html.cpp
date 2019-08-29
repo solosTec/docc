@@ -58,6 +58,7 @@ namespace docscript
 		vm_.register_function("list", 1, std::bind(&gen_html::list, this, std::placeholders::_1));
 		vm_.register_function("link", 1, std::bind(&gen_html::link, this, std::placeholders::_1));
 		vm_.register_function("figure", 1, std::bind(&gen_html::figure, this, std::placeholders::_1));
+		vm_.register_function("subfigures", 1, std::bind(&gen_html::subfigures, this, std::placeholders::_1));
 		vm_.register_function("code", 1, std::bind(&gen_html::code, this, std::placeholders::_1));
 		vm_.register_function("def", 1, std::bind(&gen_html::def, this, std::placeholders::_1));
 		vm_.register_function("note", 1, std::bind(&gen_html::annotation, this, std::placeholders::_1));
@@ -273,6 +274,9 @@ namespace docscript
 			<< "\t\t}"
 			<< std::endl
 
+			//
+			//	figure
+			//
 			<< "\t\tfigure {"
 			<< std::endl
 			<< "\t\t\tmargin: 2%;"
@@ -282,8 +286,8 @@ namespace docscript
 
 			<< "\t\timg {"
 			<< std::endl
-			<< "\t\t\tmax-width: 95%;"
-			<< std::endl
+			//<< "\t\t\tmax-width: 95%;"
+			//<< std::endl
 			<< "\t\t\tborder: 2px solid #777;"
 			<< std::endl
 			<< "\t\t}"
@@ -294,6 +298,34 @@ namespace docscript
 			<< std::endl
 			<< "\t\t}"
 			<< std::endl
+
+			//
+			//	gallery
+			//
+			<< "\t\tdiv.gallery {"
+			<< std::endl
+
+			<< "\t\t\tmargin: 5px;"
+			<< "\t\t\tborder: 1px solid #ccc;"
+			<< "\t\t\tfloat: left;"
+			<< "\t\t\twidth: 180px;"
+			<< "\t\t}"
+			<< std::endl
+
+			<< "\t\tdiv.gallery:hover {"
+			<< "\t\t\tborder: 1px solid #777;"
+			<< "\t\t}"
+			<< std::endl
+			
+			<< "\t\tdiv.gallery img {"
+			<< "\t\t\twidth: 100%;"
+			<< "\t\t\theight: auto;"
+			<< "\t\t}"
+			//
+			<< "\t\tdiv.desc {"
+			<< "\t\t\tpadding: 15px;"
+			<< "\t\t\ttext-align: center;"
+			<< "\t\t}"
 
 			//	definition lists with flexbox
 			<< "\t\tdl {"
@@ -583,9 +615,9 @@ namespace docscript
 
 	void gen_html::figure(cyng::context& ctx)
 	{
-		//	  [%(("alt":{Giovanni,Bellini,,,Man,wearing,a,turban}),("caption":{Giovanni,Bellini,,,Man,wearing,a,turban}),("source":LogoSmall.jpg),("tag":{338d542a-a4e3-4a4c-9efe-b8d3032306c3}))]
+		//	  [%(("alt":{Giovanni,Bellini,,,Man,who,plows,daisies}),("caption":{Daisies,in,the,rain}),("source":example.jpg),("tag":338d542a-a4e3-4a4c-9efe-b8d3032306c3),("width":0.5))]
 		auto const frame = ctx.get_frame();
-		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		auto const reader = cyng::make_reader(frame.at(0));
 		auto const alt = accumulate_plain_text(reader.get("alt"));
@@ -594,6 +626,18 @@ namespace docscript
 		auto const tag = cyng::value_cast(reader.get("tag"), source);
 		//	generate unique tag for SVG
 		auto const id = cyng::value_cast(reader.get("id"), boost::uuids::to_string(uuid_gen_()));
+		auto const width = cyng::value_cast(reader.get("width"), 1.0);
+
+		if (width > 1.0 || width < 0.01) {
+			std::cerr
+				<< "***warning: unusual scaling factor ["
+				<< width
+				<< "] for figure: "
+				<< source
+				<< std::endl;
+		}
+
+		auto const max_width = std::to_string(width * 100.0) + "%";
 
 		auto const p = resolve_path(source);
 		if (boost::filesystem::exists(p) && boost::filesystem::is_regular(p)) {
@@ -661,10 +705,10 @@ namespace docscript
 						//
 						auto width = svg.attribute("width");
 						if (!width) {
-							svg.prepend_attribute("width") = "100%";
+							svg.prepend_attribute("width") = max_width.c_str();
 						}
 						else {
-							width.set_value("100%");
+							width.set_value(max_width.c_str());
 						}
 
 						//	https://www.w3.org/TR/SVG/types.html#DataTypeLength
@@ -725,7 +769,7 @@ namespace docscript
 				//
 				//"data:image/" + get_extension(p) + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size())
 
-				auto const el = html::figure(html::id_(tag), html::img(html::alt_(alt), html::title_(caption), html::class_("docscript-img"), html::src_("data:image/" + ext + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size()))), html::figcaption(title));
+				auto const el = html::figure(html::id_(tag), html::img(html::alt_(alt), html::title_(caption), html::class_("docscript-img"), html::style_("max-width: " + max_width), html::src_("data:image/" + ext + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size()))), html::figcaption(title));
 				ctx.push(cyng::make_object(el.to_str()));
 			}
 		}
@@ -737,6 +781,48 @@ namespace docscript
 				<< "]"
 				<< std::endl;
 			ctx.push(cyng::make_object("cannot open file [" + source + "]"));
+		}
+	}
+
+	void gen_html::subfigures(cyng::context& ctx)
+	{
+		//	[%(("caption":{Image,Gallery}),
+		//	("images":[
+		//		[source,:,logo.svg,,,caption,:,",solosTec,Logo,",,,alt,:,",solosTec,Logo,",,,tag,:,9d0dd0fd-de54-49cc-86b0-64fe35b6d5a5],
+		//		[source,:,example.jpg,,,caption,:,",Daisies,in,the,rain,",,,alt,:,",Giovanni,Bellini,,,Man,who,plows,daisies,",,,tag,:,338d542a-a4e3-4a4c-9efe-b8d3032306c3],
+		//		[source,:,frog.jpg,,,caption,:,",Daisies,in,the,rain,",,,alt,:,",Giovanni,Bellini,,,Man,who,plows,daisies,",,,tag,:,338d542a-a4e3-4a4c-9efe-b8d3032306c3]
+		//	]))]
+		auto const frame = ctx.get_frame();
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+
+		auto const reader = cyng::make_reader(frame.at(0));
+		auto const caption = accumulate_plain_text(reader.get("caption"));
+		auto const tag = cyng::value_cast(reader.get("tag"), boost::uuids::to_string(uuid_gen_()));
+
+		cyng::vector_t vec;
+		vec = cyng::value_cast(reader.get("images"), vec);
+
+		if (!vec.empty()) {
+			for (auto pos = 0u; pos < vec.size(); ++pos) {
+				auto const alt = accumulate_plain_text(reader["images"][pos].get("alt"));
+				auto const caption = accumulate_plain_text(reader["images"][pos].get("caption"));
+				auto const source = cyng::io::to_str(reader["images"][pos].get("source"));
+				auto const tag = cyng::value_cast(reader["images"][pos].get("tag"), source);
+			}
+
+			//
+			//	ToDo: incomplete
+			//
+
+			ctx.push(cyng::make_object(html::h4(html::id_(tag), caption).to_str()));
+		}
+		else {
+			std::cerr
+				<< "***error: gallery ["
+				<< caption
+				<< "] contains no images"
+				<< std::endl;
+			ctx.push(cyng::make_object("[" + caption + "]"));
 		}
 	}
 

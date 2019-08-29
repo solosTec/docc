@@ -299,20 +299,29 @@ namespace docscript
 			try {
 				//
 				//	convert to numeric data type
-				//	only integers are supported
 				//
-				if (sp->value_.find('.') != std::string::npos) {
-					prg << sp->value_;
-				}
-				else {
+				auto const dots = std::count(sp->value_.begin(), sp->value_.end(), '.');
+				switch (dots) {
+				case 0:
+					//	integer
 					prg << static_cast<std::uint64_t>(std::stoull(sp->value_));
+					break;
+				case 1:
+					//	double
+					prg << std::stod(sp->value_, 0);
+					break;
+				default:
+					//	error: use the string
+					prg << sp->value_;
+					break;
 				}
 			}
 			catch (std::exception const& ex) {
 				std::cerr
 					<< "*** error: symbol ["
 					<< sp->value_
-					<< "] is not numeric"
+					<< "] is not numeric: "
+					<< ex.what()
 					<< std::endl;
 				prg
 					<< cyng::code::ASP

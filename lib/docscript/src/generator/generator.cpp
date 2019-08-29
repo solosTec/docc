@@ -67,6 +67,7 @@ namespace docscript
 		vm_.register_function("symbol", 1, std::bind(&generator::print_symbol, this, std::placeholders::_1));
 		vm_.register_function("currency", 1, std::bind(&generator::print_currency, this, std::placeholders::_1));
 		vm_.register_function("tag", 1, std::bind(&generator::create_uuid, this, std::placeholders::_1));
+		vm_.register_function("map", 1, std::bind(&generator::make_map, this, std::placeholders::_1));
 
 	}
 
@@ -221,6 +222,21 @@ namespace docscript
 	void generator::create_uuid(cyng::context& ctx)
 	{
 		ctx.push(cyng::make_object(uuid_gen_()));
+	}
+
+	void generator::make_map(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+
+		switch (frame.at(0).get_class().tag()) {
+		case cyng::TC_PARAM_MAP:
+			ctx.push(frame.at(0));
+			break;
+		default:
+			ctx.push(cyng::param_map_factory("error", frame.at(0).get_class().type_name())());
+			break;
+		}
 	}
 
 	boost::filesystem::path generator::resolve_path(std::string const& s) const

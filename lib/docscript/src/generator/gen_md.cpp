@@ -46,6 +46,7 @@ namespace docscript
 		vm_.register_function("list", 1, std::bind(&gen_md::list, this, std::placeholders::_1));
 		vm_.register_function("link", 1, std::bind(&gen_md::link, this, std::placeholders::_1));
 		vm_.register_function("figure", 1, std::bind(&gen_md::figure, this, std::placeholders::_1));
+		vm_.register_function("subfigures", 1, std::bind(&gen_md::subfigures, this, std::placeholders::_1));
 		vm_.register_function("code", 1, std::bind(&gen_md::code, this, std::placeholders::_1));
 		vm_.register_function("def", 1, std::bind(&gen_md::def, this, std::placeholders::_1));
 		vm_.register_function("note", 1, std::bind(&gen_md::annotation, this, std::placeholders::_1));
@@ -448,6 +449,7 @@ namespace docscript
 		auto const caption = cyng::io::to_str(reader.get("caption"));
 		auto const source = cyng::io::to_str(reader.get("source"));
 		auto const tag = cyng::io::to_str(reader.get("tag"));
+		auto const width = cyng::value_cast(reader.get("width"), 1.0);	//	no chance in github  - works with pixel units only
 
 		//![Tux, the Linux mascot](/assets/images/tux.png)
 		std::stringstream ss;
@@ -460,6 +462,12 @@ namespace docscript
 			<< std::endl
 			;
 		ctx.push(cyng::make_object(ss.str()));
+	}
+
+	void gen_md::subfigures(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 	}
 
 	void gen_md::code(cyng::context& ctx)

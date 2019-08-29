@@ -46,6 +46,7 @@ namespace docscript
 		vm_.register_function("list", 1, std::bind(&gen_latex::list, this, std::placeholders::_1));
 		vm_.register_function("link", 1, std::bind(&gen_latex::link, this, std::placeholders::_1));
 		vm_.register_function("figure", 1, std::bind(&gen_latex::figure, this, std::placeholders::_1));
+		vm_.register_function("subfigures", 1, std::bind(&gen_latex::subfigures, this, std::placeholders::_1));
 		vm_.register_function("code", 1, std::bind(&gen_latex::code, this, std::placeholders::_1));
 		vm_.register_function("def", 1, std::bind(&gen_latex::def, this, std::placeholders::_1));
 		vm_.register_function("note", 1, std::bind(&gen_latex::annotation, this, std::placeholders::_1));
@@ -160,6 +161,8 @@ namespace docscript
 			<< build_cmd("hypersetup", "colorlinks=true, linkcolor=blue, filecolor=magenta, urlcolor=brown")
 			<< std::endl
 			<< build_cmd("usepackage", "listings")
+			<< std::endl
+			<< build_cmd("usepackage", "subcaption")
 			<< std::endl
 			<< build_cmd("lstset", "basicstyle=\\small\\ttfamily,breaklines=true")
 			<< std::endl
@@ -480,6 +483,16 @@ namespace docscript
 		auto const caption = accumulate_plain_text(reader.get("caption"));
 		auto const source = cyng::io::to_str(reader.get("source"));
 		auto const tag = cyng::io::to_str(reader.get("tag"));
+		auto const width = cyng::value_cast(reader.get("width"), 1.0);
+		if (width > 1.0 || width < 0.01) {
+			std::cerr
+				<< "***warning: unusual scaling factor ["
+				<< width
+				<< "] for figure: "
+				<< source
+				<< std::endl;
+		}
+		auto const scale = std::to_string(width);
 
 		std::stringstream ss;
 		ss
@@ -488,14 +501,93 @@ namespace docscript
 			<< std::endl
 			<< "%\\centering"
 			<< std::endl
-			<< build_cmd("includegraphics", "width=1.0\\textwidth", resolve_path(source).string())
+			<< build_cmd("includegraphics", "width=" + scale + "\\textwidth", resolve_path(source).string())
 			<< std::endl
 			<< build_cmd("caption", caption)
+			<< std::endl
+			<< build_cmd("label", "fig:" + tag)
 			<< std::endl
 			<< build_cmd("end", "figure")
 			<< std::endl
 			;
 		ctx.push(cyng::make_object(ss.str()));
+	}
+
+	void gen_latex::subfigures(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+
+		auto const reader = cyng::make_reader(frame.at(0));
+		auto const caption = accumulate_plain_text(reader.get("caption"));
+		auto const tag = cyng::value_cast(reader.get("tag"), boost::uuids::to_string(uuid_gen_()));
+
+		cyng::vector_t vec;
+		vec = cyng::value_cast(reader.get("images"), vec);
+
+		if (!vec.empty()) {
+
+			std::stringstream ss;
+			ss
+				<< std::endl
+				<< "\\begin{figure}[ht]"
+				<< std::endl
+				;
+
+			//
+			//	each image with the same width
+			//
+			auto const img_scale = 1.0 / vec.size();
+
+			for (auto pos = 0u; pos < vec.size(); ++pos) {
+
+				//
+				//	Use {subfigure}
+				//
+				auto const alt = accumulate_plain_text(reader["images"][pos].get("alt"));
+				auto const caption = accumulate_plain_text(reader["images"][pos].get("caption"));
+				auto const source = cyng::io::to_str(reader["images"][pos].get("source"));
+				auto const tag = cyng::value_cast(reader["images"][pos].get("tag"), source);
+				auto const width = cyng::value_cast(reader.get("width"), 1.0);
+				if (width > 1.0 || width < 0.01) {
+					std::cerr
+						<< "***warning: unusual scaling factor ["
+						<< width
+						<< "] for figure: "
+						<< source
+						<< std::endl;
+				}
+				auto const scale = std::to_string(width);
+				ss
+					<< build_cmd("begin", "subfigure")
+					<< "{" << img_scale << "\\textwidth}"
+					<< std::endl
+					<< build_cmd("includegraphics", "width=" + scale + "\\textwidth", resolve_path(source).string())
+					<< std::endl
+					<< build_cmd("caption", caption)
+					<< std::endl
+					<< build_cmd("label", "fig:" + tag)
+					<< std::endl
+					<< build_cmd("end", "subfigure")
+					<< std::endl
+					;
+			}
+
+			ss
+				<< build_cmd("end", "figure")
+				<< std::endl
+				;
+			ctx.push(cyng::make_object(ss.str()));
+		}
+		else {
+			std::cerr
+				<< "***error: gallery ["
+				<< caption
+				<< "] contains no images"
+				<< std::endl;
+			ctx.push(cyng::make_object("[" + caption + "]"));
+		}
+
 	}
 
 	void gen_latex::code(cyng::context& ctx)
@@ -632,7 +724,7 @@ namespace docscript
 				<< std::endl
 				<< build_cmd("caption", title)
 				<< std::endl
-				<< build_cmd("label", tag)
+				<< build_cmd("label", "tbl:" + tag)
 				<< std::endl
 				<< "\\endfirsthead"
 				<< std::endl
@@ -750,16 +842,15 @@ namespace docscript
 
 	std::string gen_latex::create_section(std::size_t level, std::string tag, std::string title)
 	{
-		auto const label = build_cmd("label", boost::uuids::to_string(name_gen_(tag)));
 
 		if (is_report()) {
 			switch (level) {
-			case 1:	return build_cmd("chapter", title) + label;
-			case 2: return build_cmd("section", title) + label;
-			case 3: return build_cmd("subsection", title) + label;
-			case 4: return build_cmd("subsubsection", title) + label;
-			case 5: return build_cmd("paragraph", title) + label;
-			case 6: return build_cmd("subparagraph", title) + label;
+			case 1:	return build_cmd("chapter", title) + "\n" + build_cmd("label", "chap:" + boost::uuids::to_string(name_gen_(tag)));
+			case 2: return build_cmd("section", title) + "\n" + build_cmd("label", "sec:" + boost::uuids::to_string(name_gen_(tag)));
+			case 3: return build_cmd("subsection", title) + "\n" + build_cmd("label", "sub:" + boost::uuids::to_string(name_gen_(tag)));
+			case 4: return build_cmd("subsubsection", title) + "\n" + build_cmd("label", "ssub:" + boost::uuids::to_string(name_gen_(tag)));
+			case 5: return build_cmd("paragraph", title) + "\n" + build_cmd("label", "par:" + boost::uuids::to_string(name_gen_(tag)));
+			case 6: return build_cmd("subparagraph", title) + "\n" + build_cmd("label", "spar:" + boost::uuids::to_string(name_gen_(tag)));
 			default:
 				break;
 			}
@@ -768,17 +859,17 @@ namespace docscript
 
 			//	chapter is not supported by documentclass scrartcl
 			switch (level) {
-			case 1:	return build_cmd("section", title) + label;
-			case 2: return build_cmd("subsection", title) + label;
-			case 3: return build_cmd("subsubsection", title) + label;
-			case 4: return build_cmd("paragraph", title) + label;
-			case 5: return build_cmd("subparagraph", title) + label;
+			case 1:	return build_cmd("section", title) + "\n" + build_cmd("label", "sec:" + boost::uuids::to_string(name_gen_(tag)));
+			case 2: return build_cmd("subsection", title) + "\n" + build_cmd("label", "sub:" + boost::uuids::to_string(name_gen_(tag)));
+			case 3: return build_cmd("subsubsection", title) + "\n" + build_cmd("label", "ssub:" + boost::uuids::to_string(name_gen_(tag)));
+			case 4: return build_cmd("paragraph", title) + "\n" + build_cmd("label", "par:" + boost::uuids::to_string(name_gen_(tag)));
+			case 5: return build_cmd("subparagraph", title) + "\n" + build_cmd("label", "spar:" + boost::uuids::to_string(name_gen_(tag)));
 			default:
 				break;
 			}
 		}
 
-		return title + label;
+		return title + "\n" + build_cmd("label", boost::uuids::to_string(name_gen_(tag)));
 	}
 
 	void gen_latex::section(int level, cyng::context& ctx)

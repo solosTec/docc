@@ -42,6 +42,7 @@ namespace docscript
 		virtual void list(cyng::context& ctx) override;
 		virtual void link(cyng::context& ctx) override;
 		virtual void figure(cyng::context& ctx) override;
+		virtual void subfigures(cyng::context& ctx) override;
 		virtual void code(cyng::context& ctx) override;
 		virtual void def(cyng::context& ctx) override;
 		virtual void annotation(cyng::context& ctx) override;
