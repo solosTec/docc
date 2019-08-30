@@ -584,17 +584,68 @@ namespace docscript
 	{
 		//	[%(("items":[<p>one </p>,<p>two </p>,<p>three </p>]),("style":{lower-roman}),("type":ordered))]
 		auto const frame = ctx.get_frame();
-		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+// 		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		auto const reader = cyng::make_reader(frame.at(0));
 		auto const type = cyng::value_cast<std::string>(reader.get("type"), "ordered");
-		auto const style = cyng::value_cast<std::string>(reader.get("style"), "disc");
+		bool const is_ordered = (boost::algorithm::equals(type, "ordered") || boost::algorithm::equals(type, "ol"));
+		auto const style = cyng::value_cast<std::string>(reader.get("style"), is_ordered ? "decimal-leading-zero" : "disc");
 		cyng::vector_t items;
 		items = cyng::value_cast(reader.get("items"), items);
 
-		auto el = (boost::algorithm::equals(type, "ordered") || boost::algorithm::equals(type, "ol"))
+		if (is_ordered) {
+			bool const is_valid =  boost::algorithm::equals("decimal", style)
+			|| boost::algorithm::equals("cjk-decimal", style)
+			|| boost::algorithm::equals("decimal-leading-zero", style)
+			|| boost::algorithm::equals("lower-roman", style)
+			|| boost::algorithm::equals("upper-roman", style)
+			|| boost::algorithm::equals("lower-greek", style)
+			|| boost::algorithm::equals("lower-alpha", style)
+			|| boost::algorithm::equals("lower-latin", style)
+			|| boost::algorithm::equals("upper-alpha", style)
+			|| boost::algorithm::equals("upper-latin", style)
+			|| boost::algorithm::equals("arabic-indic", style)
+			|| boost::algorithm::equals("armenian", style)
+			|| boost::algorithm::equals("bengali", style)
+			|| boost::algorithm::equals("cambodian ", style)
+			|| boost::algorithm::equals("cjk-earthly-branch", style)
+			|| boost::algorithm::equals("cjk-heavenly-stem", style)
+			|| boost::algorithm::equals("cjk-ideographic", style)
+			|| boost::algorithm::equals("devanagari", style)
+			|| boost::algorithm::equals("ethiopic-numeric", style)
+			|| boost::algorithm::equals("georgian", style)
+			|| boost::algorithm::equals("gujarati", style)
+			|| boost::algorithm::equals("gurmukhi", style)
+			|| boost::algorithm::equals("hebrew", style);
+			
+			if (!is_valid) {
+				std::cerr
+					<< "***warning: ["
+					<< style
+					<< "] is an unknwon style for ordered lists "
+					<< std::endl;
+				
+			}
+		}
+		else {
+			bool const is_valid =  boost::algorithm::equals("disc", style)
+			|| boost::algorithm::equals("circle", style)
+			|| boost::algorithm::equals("square", style);
+			
+			if (!is_valid) {
+				std::cerr
+					<< "***warning: ["
+					<< style
+					<< "] is an unknwon style for unorderd lists "
+					<< std::endl;
+				
+			}			
+		}
+		
+		auto el = (is_ordered)
 			? html::ol(html::style_("list-style-type:" + style), html::class_("docscript-ol"))
 			: html::ul(html::style_("list-style-type:" + style), html::class_("docscript-ul"));
+			
 
 		for (auto const& item : items) {
 			el += html::li(accumulate_plain_text(item));
@@ -642,7 +693,7 @@ namespace docscript
 	{
 		//	  [%(("alt":{Giovanni,Bellini,,,Man,who,plows,daisies}),("caption":{Daisies,in,the,rain}),("source":example.jpg),("tag":338d542a-a4e3-4a4c-9efe-b8d3032306c3),("width":0.5))]
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+// 		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		auto const reader = cyng::make_reader(frame.at(0));
 		auto const alt = accumulate_plain_text(reader.get("alt"));
@@ -702,7 +753,7 @@ namespace docscript
 		//		[source,:,frog.jpg,,,caption,:,",Daisies,in,the,rain,",,,alt,:,",Giovanni,Bellini,,,Man,who,plows,daisies,",,,tag,:,338d542a-a4e3-4a4c-9efe-b8d3032306c3]
 		//	]))]
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+// 		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		auto const reader = cyng::make_reader(frame.at(0));
 		auto const caption = accumulate_plain_text(reader.get("caption"));
@@ -1165,6 +1216,9 @@ namespace docscript
 			}
 			else if (boost::algorithm::equals(symbol, "ellipsis")) {
 				r.append("&hellip;");
+			}
+			else if (boost::algorithm::equals(symbol, "multiply")) {
+				r.append("&times;");
 			}
 			else {
 				r += symbol;

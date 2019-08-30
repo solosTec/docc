@@ -1,4 +1,4 @@
-﻿/*
+/*
  * The MIT License (MIT)
  * 
  * Copyright (c) 2019 Sylko Olzscher 
@@ -177,13 +177,13 @@ namespace docscript
 		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 		auto const currency = cyng::value_cast<std::string>(frame.at(0), "");
 		if (boost::algorithm::equals(currency, "pilcrow")) {
-			ctx.push(cyng::make_object(u8"¶"));
+			ctx.push(cyng::make_object(u8"�"));
 		}
 		else if (boost::algorithm::equals(currency, "copyright")) {
-			ctx.push(cyng::make_object(u8"©"));
+			ctx.push(cyng::make_object(u8"�"));
 		}
 		else if (boost::algorithm::equals(currency, "registered")) {
-			ctx.push(cyng::make_object(u8"®"));
+			ctx.push(cyng::make_object(u8"�"));
 		}
 		else if (boost::algorithm::equals(currency, "ellipsis")) {
 			ctx.push(cyng::make_object("..."));
@@ -200,19 +200,19 @@ namespace docscript
 		auto const currency = cyng::value_cast<std::string>(frame.at(0), "");
 
 		if (boost::algorithm::equals(currency, "euro")) {
-			ctx.push(cyng::make_object(u8"€"));
+			ctx.push(cyng::make_object(u8"�"));
 		}
 		else if (boost::algorithm::equals(currency, "yen")) {
-			ctx.push(cyng::make_object(u8"¥"));
+			ctx.push(cyng::make_object(u8"�"));
 		}
 		else if (boost::algorithm::equals(currency, "pound")) {
-			ctx.push(cyng::make_object(u8"£"));
+			ctx.push(cyng::make_object(u8"�"));
 		}
 		else if (boost::algorithm::equals(currency, "rupee")) {
-			ctx.push(cyng::make_object(u8"₹"));
+			ctx.push(cyng::make_object(u8"?"));
 		}
 		else if (boost::algorithm::equals(currency, "sheqel")) {
-			ctx.push(cyng::make_object(u8"₪"));
+			ctx.push(cyng::make_object(u8"?"));
 		}
 		else {
 			ctx.push(cyng::make_object(currency));
@@ -227,7 +227,7 @@ namespace docscript
 	void generator::make_map(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+// 		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		switch (frame.at(0).get_class().tag()) {
 		case cyng::TC_PARAM_MAP:
@@ -288,35 +288,35 @@ namespace docscript
 		switch(id) {
 		case i18n::WID_FIGURE:
 			switch(get_language_code()) {
-			case cyng::io::LC_ES: return "gráfica";
+			case cyng::io::LC_ES: return "gr�fica";
 			case cyng::io::LC_SV: return "illustration";
-			case cyng::io::LC_PT: return "ilustração";
+			case cyng::io::LC_PT: return "ilustra��o";
 			case cyng::io::LC_DE: return "Abbildung";
-			case cyng::io::LC_BG: return "илюстрация";
-			case cyng::io::LC_RU: return "картинка";
-			case cyng::io::LC_UK: return "ілюстрація";
+			case cyng::io::LC_BG: return "??????????";
+			case cyng::io::LC_RU: return "????????";
+			case cyng::io::LC_UK: return "??????????";
 //			case cyng::io::LC_CS: return "czech";
 			case cyng::io::LC_FI: return "kuva";
 			case cyng::io::LC_FR: return "illustration";
-			case cyng::io::LC_EL: return "εικόνα";
+			case cyng::io::LC_EL: return "??????";
 //			case cyng::io::LC_HU: return "magyar";
-			case cyng::io::LC_IS: return "útskýring";
+			case cyng::io::LC_IS: return "�tsk�ring";
 			case cyng::io::LC_IT: return "figura";
 			case cyng::io::LC_NN: return "illustrasjon";
-			case cyng::io::LC_JA: return "イラスト";
-			case cyng::io::LC_KO: return "그림";
-			case cyng::io::LC_FA: return "تصویر";
+			case cyng::io::LC_JA: return "????";
+			case cyng::io::LC_KO: return "??";
+			case cyng::io::LC_FA: return "?????";
 			case cyng::io::LC_PL: return "rysunek";
-			case cyng::io::LC_SK: return "ilustrácie";
-			case cyng::io::LC_HE: return "איור";
+			case cyng::io::LC_SK: return "ilustr�cie";
+			case cyng::io::LC_HE: return "????";
 			case cyng::io::LC_NL: return "afbeelding";
 			case cyng::io::LC_EU: return "ilustrazioa";
 //			case cyng::io::LC_BR: return "breton";
 //			case cyng::io::LC_CA: return "catalan";
 			case cyng::io::LC_HR: return "ilustracija";
-			case cyng::io::LC_ET: return "näide";
-			case cyng::io::LC_GL: return "ilustración";
-			case cyng::io::LC_GA: return "léaráid";
+			case cyng::io::LC_ET: return "n�ide";
+			case cyng::io::LC_GL: return "ilustraci�n";
+			case cyng::io::LC_GA: return "l�ar�id";
 			case cyng::io::LC_LA: return "illustratio";
 //			case cyng::io::LC_SE: return "samin";
 			case cyng::io::LC_RO: return "ilustrare";
@@ -333,23 +333,23 @@ namespace docscript
 			case cyng::io::LC_SV: return "bord";
 			case cyng::io::LC_PT: return "mesa";
 			case cyng::io::LC_DE: return "Tabelle";
-			case cyng::io::LC_BG: return "маса";
-			case cyng::io::LC_RU: return "стол";
-			case cyng::io::LC_UK: return "стіл";
+			case cyng::io::LC_BG: return "????";
+			case cyng::io::LC_RU: return "????";
+			case cyng::io::LC_UK: return "????";
 //			case cyng::io::LC_CS: return "czech";
-			case cyng::io::LC_FI: return "pöytä";
+			case cyng::io::LC_FI: return "p�yt�";
 			case cyng::io::LC_FR: return "table";
-			case cyng::io::LC_EL: return "τραπέζι";
-			case cyng::io::LC_HU: return "táblázat";
+			case cyng::io::LC_EL: return "???????";
+			case cyng::io::LC_HU: return "t�bl�zat";
 			case cyng::io::LC_IS: return "Taflan";
 			case cyng::io::LC_IT: return "tavolo";
 			case cyng::io::LC_NN: return "bord";
-			case cyng::io::LC_JA: return "テーブル";
-			case cyng::io::LC_KO: return "테이블";
-			case cyng::io::LC_FA: return "جدول";
-			case cyng::io::LC_PL: return "stół";
-			case cyng::io::LC_SK: return "stôl";
-			case cyng::io::LC_HE: return "שולחן";
+			case cyng::io::LC_JA: return "????";
+			case cyng::io::LC_KO: return "???";
+			case cyng::io::LC_FA: return "????";
+			case cyng::io::LC_PL: return "st�?";
+			case cyng::io::LC_SK: return "st�l";
+			case cyng::io::LC_HE: return "?????";
 			case cyng::io::LC_NL: return "tafel";
 			case cyng::io::LC_EU: return "taula";
 //			case cyng::io::LC_BR: return "breton";
@@ -357,11 +357,11 @@ namespace docscript
 			case cyng::io::LC_HR: return "stol";
 			case cyng::io::LC_ET: return "tabel";
 			case cyng::io::LC_GL: return "mesa";
-			case cyng::io::LC_GA: return "tábla";
+			case cyng::io::LC_GA: return "t�bla";
 			case cyng::io::LC_LA: return "mensam";
 //			case cyng::io::LC_SE: return "samin";
 			case cyng::io::LC_RO: return "tabel";
-			case cyng::io::LC_GD: return "Clàr";
+			case cyng::io::LC_GD: return "Cl�r";
 			case cyng::io::LC_TR: return "tablo";
 			case cyng::io::LC_CY: return "tabl";
 			default:

@@ -283,6 +283,9 @@ namespace docscript
 			else if (boost::algorithm::equals(symbol, "ellipsis")) {
 				r.append("&#2026;");
 			}
+			else if (boost::algorithm::equals(symbol, "multiply")) {
+				r.append("&#215;");
+			}
 			else {
 				r += symbol;
 			}
