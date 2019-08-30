@@ -13,7 +13,6 @@
 #include "filter/binary_to_html.h"
 #include "filter/html_to_html.h"
 #include "filter/sml_to_html.h"
-#include <html/node.hpp>
 
 #include <cyng/vm/generator.h>
 #include <cyng/io/serializer.h>
@@ -58,7 +57,7 @@ namespace docscript
 		vm_.register_function("list", 1, std::bind(&gen_html::list, this, std::placeholders::_1));
 		vm_.register_function("link", 1, std::bind(&gen_html::link, this, std::placeholders::_1));
 		vm_.register_function("figure", 1, std::bind(&gen_html::figure, this, std::placeholders::_1));
-		vm_.register_function("subfigures", 1, std::bind(&gen_html::subfigures, this, std::placeholders::_1));
+		vm_.register_function("gallery", 1, std::bind(&gen_html::gallery, this, std::placeholders::_1));
 		vm_.register_function("code", 1, std::bind(&gen_html::code, this, std::placeholders::_1));
 		vm_.register_function("def", 1, std::bind(&gen_html::def, this, std::placeholders::_1));
 		vm_.register_function("note", 1, std::bind(&gen_html::annotation, this, std::placeholders::_1));
@@ -304,28 +303,37 @@ namespace docscript
 			//
 			<< "\t\tdiv.gallery {"
 			<< std::endl
-
-			<< "\t\t\tmargin: 5px;"
-			<< "\t\t\tborder: 1px solid #ccc;"
-			<< "\t\t\tfloat: left;"
-			<< "\t\t\twidth: 180px;"
+			<< "\t\t\tdisplay: grid;"
+			<< std::endl
+			<< "\t\t\tgrid-gap: 12px;"
+			<< std::endl
+			<< "\t\t\tbackground-color: #eee;"
+			<< std::endl
 			<< "\t\t}"
 			<< std::endl
 
-			<< "\t\tdiv.gallery:hover {"
-			<< "\t\t\tborder: 1px solid #777;"
+			<< "\t\tdiv.smf-svg:hover {"
+			<< std::endl
+			<< "\t\t\tbox-shadow: 0 0 10px #ccc;"
+			<< std::endl
 			<< "\t\t}"
 			<< std::endl
-			
+
 			<< "\t\tdiv.gallery img {"
+			<< std::endl
 			<< "\t\t\twidth: 100%;"
+			<< std::endl
 			<< "\t\t\theight: auto;"
+			<< std::endl
+			<< "\t\t\tobject-fit: cover;"
+			<< std::endl
 			<< "\t\t}"
+			<< std::endl
 			//
-			<< "\t\tdiv.desc {"
-			<< "\t\t\tpadding: 15px;"
-			<< "\t\t\ttext-align: center;"
-			<< "\t\t}"
+			//<< "\t\tdiv.desc {"
+			//<< "\t\t\tpadding: 15px;"
+			//<< "\t\t\ttext-align: center;"
+			//<< "\t\t}"
 
 			//	definition lists with flexbox
 			<< "\t\tdl {"
@@ -528,10 +536,6 @@ namespace docscript
 		auto const frame = ctx.get_frame();
 		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 		std::string par = accumulate_plain_text(frame);
-//		for (auto obj : frame) {
-//			par.append(cyng::io::to_str(obj));
-//			par.append(" ");
-//		}
 		auto el = html::p(par);
 		ctx.push(cyng::make_object(el.to_str()));
 	}
@@ -613,6 +617,27 @@ namespace docscript
 		ctx.push(cyng::make_object(el.to_str()));
 	}
 
+	std::string gen_html::compute_title(std::string tag, std::string caption)
+	{
+		//
+		// append to figure list
+		//
+		figures_.emplace_back(name_gen_(tag), caption);
+
+		auto const idx = figures_.size();
+
+		std::stringstream ss;
+		ss
+			<< get_name(i18n::WID_FIGURE)
+			<< ": "
+			<< idx
+			<< " - "
+			<< caption
+			;
+
+		return ss.str();
+	}
+
 	void gen_html::figure(cyng::context& ctx)
 	{
 		//	  [%(("alt":{Giovanni,Bellini,,,Man,who,plows,daisies}),("caption":{Daisies,in,the,rain}),("source":example.jpg),("tag":338d542a-a4e3-4a4c-9efe-b8d3032306c3),("width":0.5))]
@@ -637,141 +662,23 @@ namespace docscript
 				<< std::endl;
 		}
 
-		auto const max_width = std::to_string(width * 100.0) + "%";
-
 		auto const p = resolve_path(source);
 		if (boost::filesystem::exists(p) && boost::filesystem::is_regular(p)) {
 
+			auto const title = compute_title(tag, caption);
+
 			//
-			// append to figure list
+			//	generate <figure> tag
 			//
-			figures_.emplace_back(name_gen_(tag), caption);
+			auto const el = make_figure(p
+				, tag
+				, id
+				, width
+				, caption
+				, title
+				, alt);
+			ctx.push(cyng::make_object(el.to_str()));
 
-			auto const idx = figures_.size();
-
-			std::stringstream ss;
-			ss
-				<< get_name(i18n::WID_FIGURE)
-				<< ": "
-				<< idx
-				<< " - "
-				<< caption
-				;
-			auto const title = ss.str();
-
-
-			auto const ext = get_extension(p);
-			if (boost::algorithm::iequals(ext, "svg")) {
-
-				//
-				//	embedding SVG 
-				//	<figure>
-				//		<svg>...</svg>
-				//		<figcaption>CAPTION</figcaption>
-				//	</figure>
-				//
-				//	* remove <XML> trailer 
-				//	* add title info (aria-labelledby="title")
-
-				//
-				//	read into buffer
-				//
-				pugi::xml_document doc;
-				pugi::xml_parse_result result = doc.load_file(p.string().c_str());
-				if (result) {
-					
-					pugi::xml_node svg = doc.child("svg");
-					if (svg) {
-						svg.prepend_attribute("aria-labelledby") = "title";
-						auto node = svg.prepend_child("title");
-						node.append_child(pugi::node_pcdata).set_value(caption.c_str());
-
-						auto id_attr = svg.attribute("id");
-						if (!id_attr) {
-							//
-							//	does not exist
-							//
-							svg.prepend_attribute("id") = id.c_str();
-						}
-						else {
-							//
-							//	update
-							//
-							id_attr.set_value(id.c_str());
-						}
-
-						//
-						//	fix with and height attribute
-						//
-						auto width = svg.attribute("width");
-						if (!width) {
-							svg.prepend_attribute("width") = max_width.c_str();
-						}
-						else {
-							width.set_value(max_width.c_str());
-						}
-
-						//	https://www.w3.org/TR/SVG/types.html#DataTypeLength
-						auto height = svg.attribute("height");
-						if (!height) {
-							svg.prepend_attribute("height") = "100%";
-						}
-						else {
-							height.set_value("100%");
-						}
-
-						//
-						//	remove private data
-						//
-						svg.remove_attribute("inkscape:export-filename");
-					}
-
-					std::stringstream ss;
-					ss << std::endl;
-					doc.save(ss, "\t", pugi::format_default | pugi::format_no_declaration);
-					auto const el = html::figure(html::id_(tag), ss.str(), html::figcaption(title));
-					ctx.push(cyng::make_object(el.to_str()));
-				}
-				else {
-					std::cerr << "SVG [" << p << "] parsed with errors, attr value: [" << doc.child("node").attribute("attr").value() << "]\n";
-					std::cerr << "Error description: " << result.description() << "\n";
-					std::cerr << "Error offset: " << result.offset << " (error at [..." << result.offset << "]\n\n";
-					ctx.push(cyng::make_object(result.description()));
-				}
-			}
-			else {
-				std::ifstream ifs(p.string(), std::ios::binary | std::ios::ate);
-				//
-				//	do not skip 
-				//
-				ifs.unsetf(std::ios::skipws);
-
-				//
-				//	get file size
-				//
-				std::streamsize size = ifs.tellg();
-				ifs.seekg(0, std::ios::beg);
-
-				//
-				//	read into buffer
-				//
-				cyng::buffer_t buffer(size);
-				ifs.read(buffer.data(), size);
-				BOOST_ASSERT(ifs.gcount() == size);
-
-				//<figure>
-				//  <img src="SOURCE" alt="ALT">
-				//  <figcaption>CAPTION</figcaption>
-				//</figure>
-
-				//
-				//	encode image as base 64
-				//
-				//"data:image/" + get_extension(p) + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size())
-
-				auto const el = html::figure(html::id_(tag), html::img(html::alt_(alt), html::title_(caption), html::class_("docscript-img"), html::style_("max-width: " + max_width), html::src_("data:image/" + ext + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size()))), html::figcaption(title));
-				ctx.push(cyng::make_object(el.to_str()));
-			}
 		}
 		else {
 
@@ -780,11 +687,13 @@ namespace docscript
 				<< source
 				<< "]"
 				<< std::endl;
-			ctx.push(cyng::make_object("cannot open file [" + source + "]"));
+
+			auto const el = html::h2(html::id_(tag), "cannot open file [" + source + "]", html::title_(caption));
+			ctx.push(cyng::make_object(el.to_str()));
 		}
 	}
 
-	void gen_html::subfigures(cyng::context& ctx)
+	void gen_html::gallery(cyng::context& ctx)
 	{
 		//	[%(("caption":{Image,Gallery}),
 		//	("images":[
@@ -793,7 +702,7 @@ namespace docscript
 		//		[source,:,frog.jpg,,,caption,:,",Daisies,in,the,rain,",,,alt,:,",Giovanni,Bellini,,,Man,who,plows,daisies,",,,tag,:,338d542a-a4e3-4a4c-9efe-b8d3032306c3]
 		//	]))]
 		auto const frame = ctx.get_frame();
-		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		auto const reader = cyng::make_reader(frame.at(0));
 		auto const caption = accumulate_plain_text(reader.get("caption"));
@@ -802,19 +711,65 @@ namespace docscript
 		cyng::vector_t vec;
 		vec = cyng::value_cast(reader.get("images"), vec);
 
+		auto const size = cyng::numeric_cast<std::size_t>(reader.get("size"), vec.size());
+
+		auto div = html::div(html::id_(tag));
+		div += html::h4(caption);
+
 		if (!vec.empty()) {
+
+			//"grid-template-columns: repeat(N, 1fr)"
+			std::ostringstream ss;
+			ss << "grid-template-columns: repeat(";
+
+			if ((size < vec.size()) && (size != 0u)) {
+				ss << size;
+			}
+			else {
+				ss << vec.size();
+			}
+			ss << ", 1fr)";
+
+			auto grid = html::div(html::id_(tag), html::class_("gallery"), html::style_(ss.str()));
+
 			for (auto pos = 0u; pos < vec.size(); ++pos) {
 				auto const alt = accumulate_plain_text(reader["images"][pos].get("alt"));
 				auto const caption = accumulate_plain_text(reader["images"][pos].get("caption"));
 				auto const source = cyng::io::to_str(reader["images"][pos].get("source"));
 				auto const tag = cyng::value_cast(reader["images"][pos].get("tag"), source);
+				auto const width = cyng::value_cast(reader["images"][pos].get("width"), 1.0);
+				auto const id = cyng::value_cast(reader["images"][pos].get("id"), boost::uuids::to_string(uuid_gen_()));
+
+				auto const p = resolve_path(source);
+				if (boost::filesystem::exists(p) && boost::filesystem::is_regular(p)) {
+
+					auto el = make_figure(p
+						, tag
+						, id
+						, width
+						, caption
+						, compute_title(tag, caption)
+						, alt);
+
+					grid += std::move(el);
+				}
+				else {
+
+					std::cerr
+						<< "***error cannot open figure file ["
+						<< source
+						<< "]"
+						<< std::endl;
+
+				}
 			}
 
 			//
-			//	ToDo: incomplete
+			//	ToDo: improve CSS
 			//
+			div += std::move(grid);
 
-			ctx.push(cyng::make_object(html::h4(html::id_(tag), caption).to_str()));
+			ctx.push(cyng::make_object(div.to_str()));
 		}
 		else {
 			std::cerr
@@ -1438,6 +1393,133 @@ namespace docscript
 
 		return r;
 	}
+
+	html::node make_figure(boost::filesystem::path p
+		, std::string tag
+		, std::string id
+		, double width
+		, std::string caption
+		, std::string title
+		, std::string alt)
+	{
+		auto const max_width = std::to_string(width * 100.0) + "%";
+		auto const ext = get_extension(p);
+		if (boost::algorithm::iequals(ext, "svg")) {
+
+			//
+			//	embedding SVG 
+			//	<figure>
+			//		<svg>...</svg>
+			//		<figcaption>CAPTION</figcaption>
+			//	</figure>
+			//
+			//	* remove <XML> trailer 
+			//	* add title info (aria-labelledby="title")
+
+			//
+			//	read into buffer
+			//
+			pugi::xml_document doc;
+			pugi::xml_parse_result result = doc.load_file(p.string().c_str());
+			if (result) {
+
+				pugi::xml_node svg = doc.child("svg");
+				if (svg) {
+					svg.prepend_attribute("aria-labelledby") = "title";
+					auto node = svg.prepend_child("title");
+					node.append_child(pugi::node_pcdata).set_value(caption.c_str());
+
+					auto id_attr = svg.attribute("id");
+					if (!id_attr) {
+						//
+						//	does not exist
+						//
+						svg.prepend_attribute("id") = id.c_str();
+					}
+					else {
+						//
+						//	update
+						//
+						id_attr.set_value(id.c_str());
+					}
+
+					//
+					//	fix with and height attribute
+					//
+					auto width = svg.attribute("width");
+					if (!width) {
+						svg.prepend_attribute("width") = max_width.c_str();
+					}
+					else {
+						width.set_value(max_width.c_str());
+					}
+
+					//	https://www.w3.org/TR/SVG/types.html#DataTypeLength
+					auto height = svg.attribute("height");
+					if (!height) {
+						svg.prepend_attribute("height") = "100%";
+					}
+					else {
+						height.set_value("100%");
+					}
+
+					//
+					//	remove private data
+					//
+					svg.remove_attribute("inkscape:export-filename");
+				}
+
+				std::stringstream ss;
+				ss << std::endl;
+				doc.save(ss, "\t", pugi::format_default | pugi::format_no_declaration);
+				return html::figure(html::id_(tag), html::div(html::class_("smf-svg"), ss.str()), html::figcaption(title));
+				//ctx.push(cyng::make_object(el.to_str()));
+			}
+			else {
+				std::cerr << "SVG [" << p << "] parsed with errors, attr value: [" << doc.child("node").attribute("attr").value() << "]\n";
+				std::cerr << "Error description: " << result.description() << "\n";
+				std::cerr << "Error offset: " << result.offset << " (error at [..." << result.offset << "]\n\n";
+				//ctx.push(cyng::make_object(result.description()));
+				return html::h2(html::id_(tag), result.description(), html::title_(title));
+			}
+		}
+
+		//
+		//	base64 encoded images
+		//
+		std::ifstream ifs(p.string(), std::ios::binary | std::ios::ate);
+		//
+		//	do not skip 
+		//
+		ifs.unsetf(std::ios::skipws);
+
+		//
+		//	get file size
+		//
+		std::streamsize size = ifs.tellg();
+		ifs.seekg(0, std::ios::beg);
+
+		//
+		//	read into buffer
+		//
+		cyng::buffer_t buffer(size);
+		ifs.read(buffer.data(), size);
+		BOOST_ASSERT(ifs.gcount() == size);
+
+		//<figure>
+		//  <img src="SOURCE" alt="ALT">
+		//  <figcaption>CAPTION</figcaption>
+		//</figure>
+
+		//
+		//	encode image as base 64
+		//
+		//"data:image/" + get_extension(p) + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size())
+
+		return html::figure(html::id_(tag), html::img(html::alt_(alt), html::title_(caption), html::class_("docscript-img"), html::style_("max-width: " + max_width), html::src_("data:image/" + ext + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size()))), html::figcaption(title));
+
+	}
+
 
 }
 

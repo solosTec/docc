@@ -46,7 +46,7 @@ namespace docscript
 		vm_.register_function("list", 1, std::bind(&gen_md::list, this, std::placeholders::_1));
 		vm_.register_function("link", 1, std::bind(&gen_md::link, this, std::placeholders::_1));
 		vm_.register_function("figure", 1, std::bind(&gen_md::figure, this, std::placeholders::_1));
-		vm_.register_function("subfigures", 1, std::bind(&gen_md::subfigures, this, std::placeholders::_1));
+		vm_.register_function("gallery", 1, std::bind(&gen_md::gallery, this, std::placeholders::_1));
 		vm_.register_function("code", 1, std::bind(&gen_md::code, this, std::placeholders::_1));
 		vm_.register_function("def", 1, std::bind(&gen_md::def, this, std::placeholders::_1));
 		vm_.register_function("note", 1, std::bind(&gen_md::annotation, this, std::placeholders::_1));
@@ -464,7 +464,7 @@ namespace docscript
 		ctx.push(cyng::make_object(ss.str()));
 	}
 
-	void gen_md::subfigures(cyng::context& ctx)
+	void gen_md::gallery(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
 		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;

@@ -70,7 +70,7 @@ namespace docscript
 		virtual void list(cyng::context& ctx) = 0;
 		virtual void link(cyng::context& ctx) = 0;
 		virtual void figure(cyng::context& ctx) = 0;
-		virtual void subfigures(cyng::context& ctx) = 0;
+		virtual void gallery(cyng::context& ctx) = 0;
 		virtual void code(cyng::context& ctx) = 0;
 		virtual void def(cyng::context& ctx) = 0;
 		virtual void annotation(cyng::context& ctx) = 0;

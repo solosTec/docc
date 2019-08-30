@@ -10,6 +10,7 @@
 
 #include <docscript/generator/generator.h>
 #include <docscript/generator/numbering.h>
+#include <html/node.hpp>
 
 namespace docscript
 {
@@ -42,7 +43,7 @@ namespace docscript
 		virtual void list(cyng::context& ctx) override;
 		virtual void link(cyng::context& ctx) override;
 		virtual void figure(cyng::context& ctx) override;
-		virtual void subfigures(cyng::context& ctx) override;
+		virtual void gallery(cyng::context& ctx) override;
 		virtual void code(cyng::context& ctx) override;
 		virtual void def(cyng::context& ctx) override;
 		virtual void annotation(cyng::context& ctx) override;
@@ -69,6 +70,8 @@ namespace docscript
 		std::ofstream& emit_body(std::ofstream&, cyng::object) const;
 		std::ofstream& emit_footnotes(std::ofstream&) const;
 
+		std::string compute_title(std::string tag, std::string caption);
+
 	private:
 		footnotes_t footnotes_;
 		figures_t figures_;
@@ -84,6 +87,16 @@ namespace docscript
 	 */
 	std::string replace_html_entities(std::string const& str);
 
+	/**
+	 * Create a HTML figure tag
+	 */
+	html::node make_figure(boost::filesystem::path
+		, std::string tag
+		, std::string id
+		, double width
+		, std::string caption
+		, std::string title
+		, std::string alt);
 }
 
 #endif

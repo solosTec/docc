@@ -1,0 +1,9 @@
+.gallery(
+	caption: "Image Gallery",
+	size: 4,
+	images: [
+		.map(source: 'logo.svg', caption: "solosTec Logo", alt: "solosTec Logo", tag: '9d0dd0fd-de54-49cc-86b0-64fe35b6d5a5'),
+		.map(source: 'example.jpg', caption: "Daisies in the rain", alt: "Giovanni Bellini, Man who plows daisies", tag: '338d542a-a4e3-4a4c-9efe-b8d3032306c3'),
+		.map(source: 'frog.jpg', caption: "Frog in the mountains", alt: "From the Fagarash diary", tag: 'd17c58fd-b777-413b-aae0-d12b6fd7b7c0')
+	]
+)

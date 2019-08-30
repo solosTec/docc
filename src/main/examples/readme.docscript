@@ -209,6 +209,16 @@ The specified image will be embedded into the HTML file as base64 encoded string
 	source:"path of source/image file",
 	tag:"label")
 
+.h3(Gallery)
+
+Generates a gallery of images.
+
+.def(caption:"Title of gallery", 
+	size:"Maximum number of elements in a row")
+
+Example:
+
+.code(language:docscript, caption:'Tables', source:'inc/example-gallery.docscript', linenumbers:true)
 
 .h3(Quote)
 
@@ -316,3 +326,11 @@ Generates a random .link(text: 'uuid'
 Example: 
 
 .code(language:docscript, caption:'Generator: Tag', source:'inc/example-tag.docscript', linenumbers:true)
+
+.h4(map)
+
+Converts a list of parameters into a single object. Usefull to create a vector of objects.
+
+Example: 
+
+.code(language:docscript, caption:'Generator: Map', source:'inc/example-map.docscript', linenumbers:true)

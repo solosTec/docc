@@ -46,7 +46,7 @@ namespace docscript
 		vm_.register_function("list", 1, std::bind(&gen_latex::list, this, std::placeholders::_1));
 		vm_.register_function("link", 1, std::bind(&gen_latex::link, this, std::placeholders::_1));
 		vm_.register_function("figure", 1, std::bind(&gen_latex::figure, this, std::placeholders::_1));
-		vm_.register_function("subfigures", 1, std::bind(&gen_latex::subfigures, this, std::placeholders::_1));
+		vm_.register_function("gallery", 1, std::bind(&gen_latex::gallery, this, std::placeholders::_1));
 		vm_.register_function("code", 1, std::bind(&gen_latex::code, this, std::placeholders::_1));
 		vm_.register_function("def", 1, std::bind(&gen_latex::def, this, std::placeholders::_1));
 		vm_.register_function("note", 1, std::bind(&gen_latex::annotation, this, std::placeholders::_1));
@@ -92,16 +92,10 @@ namespace docscript
 		else
 		{
 			//
-			//	provide a slug if not defined yet.
-			//
-			//slug();
-
-			//
 			//	write output file
 			//
 			auto pos = frame.begin();
 			auto end = frame.end();
-			//emit_file(ofs, pos, end);
 			emit_file(ofs, std::next(pos), end);
 		}
 	}
@@ -513,7 +507,7 @@ namespace docscript
 		ctx.push(cyng::make_object(ss.str()));
 	}
 
-	void gen_latex::subfigures(cyng::context& ctx)
+	void gen_latex::gallery(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
 		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;

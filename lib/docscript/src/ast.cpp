@@ -430,11 +430,17 @@ namespace docscript
 	{
 		if (args != nullptr && !args->empty()) {
 
-
 			//
 			//	generate code
 			//
+			bool initialized{ false };
 			for (auto const& n : *args) {
+				if (initialized) {
+					os << std::endl;
+				}
+				else {
+					initialized = true;
+				}
 				generate_html(0u, n, os, linenumber);
 			}
 		}
@@ -485,6 +491,7 @@ namespace docscript
 			//
 			os 
 				<< std::endl
+				<< std::string((depth - 1) * 2, ' ')
 				<< '.'
 				<< color_blue_
 				<< name
