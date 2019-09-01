@@ -14,12 +14,12 @@
 #include <cyng/numeric_cast.hpp>
 #include <cyng/dom/reader.h>
 #include <cyng/csv.h>
+#include <cyng/io/bom.h>
 
 #include <boost/algorithm/string.hpp>
 
 namespace docscript
 {
-
 	gen_md::gen_md(std::vector< boost::filesystem::path > const& inc)
 		: generator(inc)
 	{
@@ -91,9 +91,9 @@ namespace docscript
 		else
 		{
 			//
-			//	provide a slug if not defined yet.
+			//	write BOM
 			//
-			//slug();
+			cyng::write(ofs, cyng::bom::UTF8);
 
 			//
 			//	write output file

@@ -21,6 +21,7 @@
 #include <cyng/dom/reader.h>
 #include <cyng/crypto/base64.h>
 #include <cyng/csv.h>
+#include <cyng/io/bom.h>
 #include <pugixml.hpp>
 
 #include <boost/algorithm/string.hpp>
@@ -107,12 +108,15 @@ namespace docscript
 			//
 			slug();
 
+			//	write BOM
+			//
+			cyng::write(ofs, cyng::bom::UTF8);
+
 			//
 			//	write output file
 			//
 			auto pos = frame.begin();
 			auto end = frame.end();
-			//emit_file(ofs, pos, end);
 			emit_file(ofs, std::next(pos), end);
 		}
 	}

@@ -13,13 +13,13 @@
 #include <cyng/numeric_cast.hpp>
 #include <cyng/dom/reader.h>
 #include <cyng/csv.h>
+#include <cyng/io/bom.h>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
 namespace docscript
 {
-
 	gen_latex::gen_latex(std::vector< boost::filesystem::path > const& inc)
 		: generator(inc)
 	{
@@ -91,6 +91,11 @@ namespace docscript
 		}
 		else
 		{
+			//
+			//	write BOM
+			//
+			cyng::write(ofs, cyng::bom::UTF8);
+
 			//
 			//	write output file
 			//
