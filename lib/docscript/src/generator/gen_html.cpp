@@ -19,7 +19,7 @@
 #include <cyng/value_cast.hpp>
 #include <cyng/numeric_cast.hpp>
 #include <cyng/dom/reader.h>
-#include <cyng/crypto/base64.h>
+#include <crypto/base64.h>
 #include <cyng/csv.h>
 #include <cyng/io/bom.h>
 #include <pugixml.hpp>

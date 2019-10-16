@@ -172,6 +172,45 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${cyng_MODULE_PATH}")
 message(STATUS "** CMake modules      : ${CMAKE_MODULE_PATH}")
 
 #
+#	setup crypto library
+#   -DCRYPT_ROOT:path=...
+#	assume parallel installation - that is both projects share the same parent directory.
+#
+if(NOT CRYPT_ROOT)
+    set(CRYPT_ROOT "${PROJECT_SOURCE_DIR}/../crypto" CACHE PATH "CRYPT_ROOT")
+	message(STATUS "** Set CRYPT_ROOT: ${CRYPT_ROOT}")
+endif()
+
+get_filename_component(CRYPT_INCLUDE_DIR "${CRYPT_ROOT}/include" REALPATH)
+include_directories("${CRYPT_INCLUDE_DIR}")
+message(STATUS "** CRYPT include path : ${CRYPT_INCLUDE_DIR}")
+
+#
+#	setup cyng build directory
+#   -DCRYPT_BUILD:path=...
+#	assume parallel installation - that is both projects share the same parent directory.
+#
+if (NOT CRYPT_BUILD)
+    set(CRYPT_BUILD "${CRYPT_ROOT}/build" CACHE PATH "CRYPT_BUILD")
+	message(STATUS "** Set CRYPT_BUILD: ${CRYPT_BUILD}")
+endif()
+
+get_filename_component(CRYPT_LIBRARY_DIR ${CRYPT_BUILD} REALPATH)
+include_directories(${CRYPT_LIBRARY_DIR})
+message(STATUS "** CRYPT include path : ${CRYPT_LIBRARY_DIR}")
+
+if (UNIX)
+    link_directories(${CRYPT_LIBRARY_DIR})
+    message(STATUS "** CRYPT Libraries    : ${CRYPT_LIBRARY_DIR}")
+else()
+	#
+	#	$(ConfigurationName) is a variable used by the MS build system
+	#
+	link_directories(${CRYPT_LIBRARY_DIR}/$(ConfigurationName))
+    message(STATUS "** CRYPT Libraries    : ${CRYPT_LIBRARY_DIR}")
+endif()
+
+#
 #	setup node library
 #   -DNODE_ROOT:path=...
 #	assume parallel installation - that is both projects share the same parent directory.
@@ -348,7 +387,7 @@ install(TARGETS docscript_core
 #
 include (tools/docc/prg.cmake)
 add_executable(docc ${docc})
-set(docc_link_libs cyng_io cyng_vm cyng_async cyng_crypto cyng_log cyng_crypto cyng_json cyng_parser cyng_xml docscript_core doc_html ${OPENSSL_LIBRARIES})
+set(docc_link_libs cyng_io cyng_vm cyng_async cyng_crypto cyng_log cyng_crypto cyng_json cyng_parser cyng_xml crypto docscript_core doc_html ${OPENSSL_LIBRARIES})
 if (${GLOBAL_LIBRARY_TYPE} STREQUAL "SHARED")
     if (UNIX)
         list(APPEND docc_link_libs pthread "${Boost_LIBRARIES}" cyng_table)
@@ -365,7 +404,7 @@ install(TARGETS docc
 #
 include (tools/batch/prg.cmake)
 add_executable(batch ${batch})
-set(batch_link_libs cyng_core cyng_io cyng_vm cyng_async cyng_crypto cyng_log cyng_parser cyng_xml cyng_table docscript_core doc_html ${OPENSSL_LIBRARIES})
+set(batch_link_libs cyng_core cyng_io cyng_vm cyng_async cyng_crypto cyng_log cyng_parser cyng_xml cyng_table docscript_core crypto doc_html ${OPENSSL_LIBRARIES})
 if (${GLOBAL_LIBRARY_TYPE} STREQUAL "SHARED")
     if (UNIX)
         list(APPEND batch_link_libs pthread "${Boost_LIBRARIES}")
@@ -381,7 +420,7 @@ install(TARGETS batch
 #
 include (tools/plog/prg.cmake)
 add_executable(plog ${plog})
-set(plog_link_libs cyng_io cyng_vm cyng_async cyng_crypto cyng_log cyng_parser cyng_xml cyng_mail cyng_table cyng_store cyng_db docscript_core doc_html smf_http_srv smf_https_srv ${OPENSSL_LIBRARIES})
+set(plog_link_libs cyng_io cyng_vm cyng_async cyng_crypto cyng_log cyng_parser cyng_xml cyng_mail cyng_table cyng_store cyng_db docscript_core doc_html crypto smf_http_srv smf_https_srv ${OPENSSL_LIBRARIES})
 if (${GLOBAL_LIBRARY_TYPE} STREQUAL "SHARED")
     if (UNIX)
 		list(APPEND plog_link_libs pthread "${Boost_LIBRARIES}")
