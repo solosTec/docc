@@ -141,8 +141,8 @@ endif()
 #
 get_filename_component(CYNG_INCLUDE_MAIN "${CYNG_ROOT}/src/main/include" REALPATH)
 get_filename_component(CYNG_INCLUDE_XML "${CYNG_ROOT}/lib/xml/pugixml/src" REALPATH)
-include_directories("${CYNG_INCLUDE_MAIN} ${CYNG_INCLUDE_XML}")
-message(STATUS "** CYNG include path  : ${CYNG_INCLUDE_DIR} AND ${CYNG_INCLUDE_XML}")
+include_directories(${CYNG_INCLUDE_MAIN} ${CYNG_INCLUDE_XML})
+message(STATUS "** CYNG include path  : ${CYNG_INCLUDE_MAIN} AND ${CYNG_INCLUDE_XML}")
 
 #
 #	setup cyng build directory
