@@ -135,9 +135,14 @@ if(NOT CYNG_ROOT)
 	message(STATUS "** Set CYNG_ROOT: ${CYNG_ROOT}")
 endif()
 
-get_filename_component(CYNG_INCLUDE_DIR "${CYNG_ROOT}/src/main/include" REALPATH)
-include_directories("${CYNG_INCLUDE_DIR}")
-message(STATUS "** CYNG include path  : ${CYNG_INCLUDE_DIR}")
+#
+#	This is a hack.
+#	For a better solution see the node project
+#
+get_filename_component(CYNG_INCLUDE_MAIN "${CYNG_ROOT}/src/main/include" REALPATH)
+get_filename_component(CYNG_INCLUDE_XML "${CYNG_ROOT}/lib/xml/pugixml/src" REALPATH)
+include_directories("${CYNG_INCLUDE_MAIN} ${CYNG_INCLUDE_XML}")
+message(STATUS "** CYNG include path  : ${CYNG_INCLUDE_DIR} AND ${CYNG_INCLUDE_XML}")
 
 #
 #	setup cyng build directory
