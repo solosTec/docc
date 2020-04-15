@@ -19,9 +19,11 @@
 #include <cyng/value_cast.hpp>
 #include <cyng/numeric_cast.hpp>
 #include <cyng/dom/reader.h>
-#include <crypto/base64.h>
 #include <cyng/csv.h>
 #include <cyng/io/bom.h>
+
+#include <crypto/hash/base64.h>
+
 #include <pugixml.hpp>
 
 #include <boost/algorithm/string.hpp>

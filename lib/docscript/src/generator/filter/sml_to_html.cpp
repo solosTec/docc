@@ -145,7 +145,7 @@ namespace docscript
 								<< cyng::io::to_str(vec.at(3));
 
 							if ((depth == 2) && (idx == 0)) {
-								std::string const name = node::sml::messages::name(cyng::value_cast<std::uint16_t>(vec.at(3), 0u));
+								std::string const name = node::sml::messages::name_from_value(cyng::value_cast<std::uint16_t>(vec.at(3), 0u));
 								if (!name.empty()) {
 									os
 										<< " - <span style=\"color: maroon; font-weight: bold;\">"

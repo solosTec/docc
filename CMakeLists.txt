@@ -344,8 +344,8 @@ if(OPENSSL_FOUND)
     message(STATUS "** openSSL SSL library   : ${OPENSSL_SSL_LIBRARY}")
     message(STATUS "** openSSL Libraries     : ${OPENSSL_LIBRARIES}")
     
-    include_directories(${OPENSSL_INCLUDE_DIR})
-    link_directories(${OPENSSL_LIBRARIES})
+#     include_directories(${OPENSSL_INCLUDE_DIR})
+#     link_directories(${OPENSSL_LIBRARIES})
         
 endif()
 
@@ -375,31 +375,42 @@ add_library(doc_html ${GLOBAL_LIBRARY_TYPE} ${html_lib})
 #
 include (lib/docscript/lib.cmake)
 add_library(docscript_core ${GLOBAL_LIBRARY_TYPE} ${docscript_lib})
-target_link_libraries(docscript_core
-	cyng_core
-	cyng_async
-	cyng_crypto
-	cyng_vm
-	cyng_json
-	cyng_csv
-	cyng_xml
-	cyng_sys
-	smf_protocol_sml)
+target_include_directories(docscript_core
+	PRIVATE
+		"$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>"
+		${OPENSSL_INCLUDE_DIR}
+		${BOOST_INCLUDE_DIR}
+)
 install(TARGETS docscript_core
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib/static)
+    
+
 #
 # docscript compiler
 #
 include (tools/docc/prg.cmake)
 add_executable(docc ${docc})
-set(docc_link_libs cyng_io cyng_vm cyng_async cyng_crypto cyng_log cyng_crypto cyng_json cyng_parser cyng_xml crypto docscript_core doc_html ${OPENSSL_LIBRARIES})
-if (${GLOBAL_LIBRARY_TYPE} STREQUAL "SHARED")
-    if (UNIX)
-        list(APPEND docc_link_libs pthread "${Boost_LIBRARIES}" cyng_table)
-    endif()
-endif()
-target_link_libraries(docc ${docc_link_libs})
+
+target_link_libraries(docc 
+	cyng_core
+	cyng_io 
+	cyng_vm 
+	cyng_async 
+	cyng_log 
+	cyng_json 
+	cyng_parser 
+	cyng_xml 
+	cyng_csv
+	cyng_table
+	cyng_sys
+	crypto 
+	smf_protocol_sml
+	docscript_core 
+	doc_html 
+	${OPENSSL_LIBRARIES}
+	"$<$<PLATFORM_ID:Linux>:${Boost_THREAD_LIBRARY};${Boost_SYSTEM_LIBRARY};${Boost_FILESYSTEM_LIBRARY};${Boost_PROGRAM_OPTIONS_LIBRARY};${Boost_RANDOM_LIBRARY};pthread>"
+)
 install(TARGETS docc
     RUNTIME
     DESTINATION bin)
@@ -410,32 +421,58 @@ install(TARGETS docc
 #
 include (tools/batch/prg.cmake)
 add_executable(batch ${batch})
-set(batch_link_libs cyng_core cyng_io cyng_vm cyng_async cyng_crypto cyng_log cyng_parser cyng_xml cyng_table docscript_core crypto doc_html ${OPENSSL_LIBRARIES})
-if (${GLOBAL_LIBRARY_TYPE} STREQUAL "SHARED")
-    if (UNIX)
-        list(APPEND batch_link_libs pthread "${Boost_LIBRARIES}")
-    endif()
-endif()
-target_link_libraries(batch ${batch_link_libs})
+target_link_libraries(batch 
+	cyng_core
+	cyng_io 
+	cyng_vm 
+	cyng_async 
+	cyng_log 
+	cyng_json 
+	cyng_parser 
+	cyng_xml 
+	cyng_csv
+	cyng_table
+	cyng_sys
+	crypto 
+	smf_protocol_sml
+	docscript_core 
+	doc_html 
+	${OPENSSL_LIBRARIES}
+	"$<$<PLATFORM_ID:Linux>:${Boost_THREAD_LIBRARY};${Boost_SYSTEM_LIBRARY};${Boost_FILESYSTEM_LIBRARY};${Boost_PROGRAM_OPTIONS_LIBRARY};${Boost_RANDOM_LIBRARY};pthread>"
+)
 install(TARGETS batch
     RUNTIME
     DESTINATION bin)
 
 #
 # plog server
+# The depenency to mail library in https-server is to remove before
+# this can work again
 #
-include (tools/plog/prg.cmake)
-add_executable(plog ${plog})
-set(plog_link_libs cyng_io cyng_vm cyng_async cyng_crypto cyng_log cyng_parser cyng_xml cyng_mail cyng_table cyng_store cyng_db docscript_core doc_html crypto smf_http_srv smf_https_srv ${OPENSSL_LIBRARIES})
-if (${GLOBAL_LIBRARY_TYPE} STREQUAL "SHARED")
-    if (UNIX)
-		list(APPEND plog_link_libs pthread "${Boost_LIBRARIES}")
-    endif()
-endif()
-target_link_libraries(plog ${plog_link_libs})
-install(TARGETS plog
-    RUNTIME
-    DESTINATION bin)
+# include (tools/plog/prg.cmake)
+# add_executable(plog ${plog})
+# target_link_libraries(plog 
+# 	cyng_core
+# 	cyng_io 
+# 	cyng_vm 
+# 	cyng_async 
+# 	cyng_log 
+# 	cyng_json 
+# 	cyng_parser 
+# 	cyng_xml 
+# 	cyng_csv
+# 	cyng_table
+# 	cyng_sys
+# 	crypto 
+# 	smf_protocol_sml
+# 	docscript_core 
+# 	doc_html 
+# 	${OPENSSL_LIBRARIES}
+# 	"$<$<PLATFORM_ID:Linux>:${Boost_THREAD_LIBRARY};${Boost_SYSTEM_LIBRARY};${Boost_FILESYSTEM_LIBRARY};${Boost_PROGRAM_OPTIONS_LIBRARY};${Boost_RANDOM_LIBRARY};pthread>"
+# )
+# install(TARGETS plog
+#     RUNTIME
+#     DESTINATION bin)
 
 #
 #   Generate configuration files
