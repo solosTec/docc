@@ -471,6 +471,7 @@ target_include_directories(plog
         ${CYNG_LIBRARY_DIR}
         ${CYNG_INCLUDE_MAIN}
         ${NODE_LIBRARY_DIR}
+		${OPENSSL_INCLUDE_DIR}
 )
 target_link_libraries(plog 
     smf_http_srv
@@ -481,7 +482,7 @@ target_link_libraries(plog
  	cyng_async 
  	cyng_log 
  	cyng_json 
-# 	cyng_parser 
+ 	cyng_parser 
 # 	cyng_xml 
 # 	cyng_csv
     cyng_store
