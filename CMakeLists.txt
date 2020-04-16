@@ -141,7 +141,6 @@ endif()
 #
 get_filename_component(CYNG_INCLUDE_MAIN "${CYNG_ROOT}/src/main/include" REALPATH)
 get_filename_component(CYNG_INCLUDE_XML "${CYNG_ROOT}/lib/xml/pugixml/src" REALPATH)
-include_directories(${CYNG_INCLUDE_MAIN} ${CYNG_INCLUDE_XML})
 message(STATUS "** CYNG include path  : ${CYNG_INCLUDE_MAIN} AND ${CYNG_INCLUDE_XML}")
 
 #
@@ -155,8 +154,8 @@ if (NOT CYNG_BUILD)
 endif()
 
 get_filename_component(CYNG_LIBRARY_DIR ${CYNG_BUILD} REALPATH)
-include_directories(${CYNG_LIBRARY_DIR})
-message(STATUS "** CYNG include path  : ${CYNG_LIBRARY_DIR}")
+message(STATUS "** CYNG library path  : ${CYNG_LIBRARY_DIR}")
+# message(STATUS "** pugixml library    : ${PUGIXML_LIBRARY}")
 
 if (UNIX)
     link_directories(${CYNG_LIBRARY_DIR})
@@ -187,7 +186,7 @@ if(NOT CRYPT_ROOT)
 endif()
 
 get_filename_component(CRYPT_INCLUDE_DIR "${CRYPT_ROOT}/include" REALPATH)
-include_directories("${CRYPT_INCLUDE_DIR}")
+# include_directories("${CRYPT_INCLUDE_DIR}")
 message(STATUS "** CRYPT include path : ${CRYPT_INCLUDE_DIR}")
 
 #
@@ -242,7 +241,7 @@ if (NOT NODE_BUILD)
 endif()
 
 get_filename_component(NODE_LIBRARY_DIR ${NODE_BUILD} REALPATH)
-include_directories(${NODE_LIBRARY_DIR})
+# include_directories(${NODE_LIBRARY_DIR})
 message(STATUS "** NODE include path  : ${NODE_LIBRARY_DIR}")
 
 if (UNIX)
@@ -260,16 +259,6 @@ endif()
 #	setup compiler features
 #
 include(CPPFeatureSupport)
-
-#
-# libpugixml-dev (v1.9)
-#
-# Included as 3party software
-#
-set(PUGIXML_INCLUDE_DIR "${CYNG_ROOT}/3party/pugixml-190")
-message(STATUS "** PugiXML Include   : ${PUGIXML_INCLUDE_DIR}")
-add_definitions(-D${PROJECT_NAME}_PUGIXML_INSTALLED)
-include_directories(${PUGIXML_INCLUDE_DIR})
 
 #
 #	setup C++ compiler
@@ -343,10 +332,7 @@ if(OPENSSL_FOUND)
     message(STATUS "** openSSL crypto library: ${OPENSSL_CRYPTO_LIBRARY}")
     message(STATUS "** openSSL SSL library   : ${OPENSSL_SSL_LIBRARY}")
     message(STATUS "** openSSL Libraries     : ${OPENSSL_LIBRARIES}")
-    
-#     include_directories(${OPENSSL_INCLUDE_DIR})
-#     link_directories(${OPENSSL_LIBRARIES})
-        
+            
 endif()
 
 #
@@ -377,9 +363,25 @@ include (lib/docscript/lib.cmake)
 add_library(docscript_core ${GLOBAL_LIBRARY_TYPE} ${docscript_lib})
 target_include_directories(docscript_core
 	PRIVATE
+        ${CYNG_LIBRARY_DIR}
+        ${CYNG_INCLUDE_MAIN}
+        ${CYNG_INCLUDE_XML}
+        ${CRYPT_INCLUDE_DIR}
+#        ${NODE_LIBRARY_DIR}
 		"$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>"
 		${OPENSSL_INCLUDE_DIR}
 		${BOOST_INCLUDE_DIR}
+)
+target_link_libraries(docscript_core 
+    smf_protocol_sml
+    cyng_async
+    cyng_xml
+ 	cyng_parser 
+ 	cyng_json 
+ 	cyng_csv
+ 	cyng_table
+ 	cyng_sys
+    crypto
 )
 install(TARGETS docscript_core
     LIBRARY DESTINATION lib
@@ -391,23 +393,31 @@ install(TARGETS docscript_core
 #
 include (tools/docc/prg.cmake)
 add_executable(docc ${docc})
-
+target_include_directories(docc
+	PRIVATE
+        ${CYNG_LIBRARY_DIR}
+        ${CYNG_INCLUDE_MAIN}
+# 		"$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>"
+# 		${OPENSSL_INCLUDE_DIR}
+# 		${BOOST_INCLUDE_DIR}
+)
 target_link_libraries(docc 
-	cyng_core
-	cyng_io 
-	cyng_vm 
-	cyng_async 
-	cyng_log 
-	cyng_json 
-	cyng_parser 
-	cyng_xml 
-	cyng_csv
-	cyng_table
-	cyng_sys
-	crypto 
-	smf_protocol_sml
+ 	cyng_core
+ 	cyng_io 
+ 	cyng_log 
+ 	cyng_vm 
+ 	cyng_parser 
+# 	cyng_async 
+# 	cyng_json 
+# 	cyng_xml 
+# 	cyng_csv
+# 	cyng_table
+# 	cyng_sys
+# 	crypto 
+# 	smf_protocol_sml
 	docscript_core 
 	doc_html 
+	${PUGIXML_LIBRARY}
 	${OPENSSL_LIBRARIES}
 	"$<$<PLATFORM_ID:Linux>:${Boost_THREAD_LIBRARY};${Boost_SYSTEM_LIBRARY};${Boost_FILESYSTEM_LIBRARY};${Boost_PROGRAM_OPTIONS_LIBRARY};${Boost_RANDOM_LIBRARY};pthread>"
 )
@@ -421,18 +431,23 @@ install(TARGETS docc
 #
 include (tools/batch/prg.cmake)
 add_executable(batch ${batch})
+target_include_directories(batch
+	PRIVATE
+        ${CYNG_LIBRARY_DIR}
+        ${CYNG_INCLUDE_MAIN}
+)
 target_link_libraries(batch 
-	cyng_core
-	cyng_io 
-	cyng_vm 
-	cyng_async 
-	cyng_log 
-	cyng_json 
-	cyng_parser 
-	cyng_xml 
-	cyng_csv
-	cyng_table
-	cyng_sys
+ 	cyng_core
+ 	cyng_io 
+ 	cyng_log 
+ 	cyng_vm 
+ 	cyng_parser 
+ 	cyng_json 
+# 	cyng_async 
+# 	cyng_xml 
+# 	cyng_csv
+# 	cyng_table
+# 	cyng_sys
 	crypto 
 	smf_protocol_sml
 	docscript_core 
@@ -449,30 +464,40 @@ install(TARGETS batch
 # The depenency to mail library in https-server is to remove before
 # this can work again
 #
-# include (tools/plog/prg.cmake)
-# add_executable(plog ${plog})
-# target_link_libraries(plog 
-# 	cyng_core
-# 	cyng_io 
-# 	cyng_vm 
-# 	cyng_async 
-# 	cyng_log 
-# 	cyng_json 
+include (tools/plog/prg.cmake)
+add_executable(plog ${plog})
+target_include_directories(plog
+	PRIVATE
+        ${CYNG_LIBRARY_DIR}
+        ${CYNG_INCLUDE_MAIN}
+        ${NODE_LIBRARY_DIR}
+)
+target_link_libraries(plog 
+    smf_http_srv
+    smf_https_srv
+ 	cyng_core
+ 	cyng_io 
+ 	cyng_vm 
+ 	cyng_async 
+ 	cyng_log 
+ 	cyng_json 
 # 	cyng_parser 
 # 	cyng_xml 
 # 	cyng_csv
-# 	cyng_table
+    cyng_store
+    cyng_db
+ 	cyng_table
 # 	cyng_sys
-# 	crypto 
+ 	crypto 
 # 	smf_protocol_sml
 # 	docscript_core 
 # 	doc_html 
-# 	${OPENSSL_LIBRARIES}
-# 	"$<$<PLATFORM_ID:Linux>:${Boost_THREAD_LIBRARY};${Boost_SYSTEM_LIBRARY};${Boost_FILESYSTEM_LIBRARY};${Boost_PROGRAM_OPTIONS_LIBRARY};${Boost_RANDOM_LIBRARY};pthread>"
-# )
-# install(TARGETS plog
-#     RUNTIME
-#     DESTINATION bin)
+ 	${OPENSSL_LIBRARIES}
+ 	"$<$<PLATFORM_ID:Linux>:${Boost_THREAD_LIBRARY};${Boost_SYSTEM_LIBRARY};${Boost_FILESYSTEM_LIBRARY};${Boost_PROGRAM_OPTIONS_LIBRARY};${Boost_RANDOM_LIBRARY};pthread>"
+)
+install(TARGETS plog
+    RUNTIME
+    DESTINATION bin)
 
 #
 #   Generate configuration files

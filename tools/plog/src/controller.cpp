@@ -10,7 +10,7 @@
 #include <NODE_project_info.h>
 #include <smf/http/srv/server.h>
 #include <smf/https/srv/server.h>
-#include <smf/http/srv/mail_config.h>
+// #include <smf/http/srv/mail_config.h>
 #include "logic.h"
 
 #include <cyng/log.h>
@@ -339,10 +339,10 @@ namespace plog
 			CYNG_LOG_INFO(logger, "restricted access to [" << dir.first << "]");
 		}
 
-		node::mail_config mx;
-		node::init(dom.get("mail"), mx);
-
-		CYNG_LOG_TRACE(logger, "mx: " << mx);
+// 		node::mail_config mx;
+// 		node::init(dom.get("mail"), mx);
+// 
+// 		CYNG_LOG_TRACE(logger, "mx: " << mx);
 
 		//
 		//	get blacklisted addresses
