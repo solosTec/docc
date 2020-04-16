@@ -1,5 +1,5 @@
 #
-#	startup configuration for @PROJECT_NAME@ ipt node
+#	startup configuration for @PROJECT_NAME@ plog server
 #	created : ${${PROJECT_NAME}_NOW_UTC}
 #	platform: @CMAKE_SYSTEM@
 #

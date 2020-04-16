@@ -17,8 +17,20 @@ set (plog_h
 	tools/plog/src/logic.h
 )
 
+if(UNIX)
+	set (plog_resources 
+		tools/plog/templates/plog.linux.cgf.in
+	)
+else()
+	set (plog_resources 
+		tools/plog/templates/plog.windows.cgf.in
+	)
+endif()
+source_group("resources" FILES ${plog_resources})
+
 # define the plog program
 set (plog
   ${plog_cpp}
   ${plog_h}
+  ${plog_resources}
 )

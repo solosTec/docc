@@ -15,7 +15,6 @@
 #include <DOCC_project_info.h>
 #include <CYNG_project_info.h>
 #include <NODE_project_info.h>
-//#include "../../src/driver.h"
 #include "controller.h"
 #if BOOST_OS_WINDOWS
 #include <windows.h>
@@ -81,7 +80,7 @@ int main(int argc, char **argv) {
 
 #if BOOST_OS_WINDOWS
 			("service.enabled,S", boost::program_options::value<bool>()->default_value(false), "run as NT service")
-			("service.name", boost::program_options::value< std::string >()->default_value(std::string("plog_server") + std::string(DOCC_VERSION)), "NT service name")
+			("service.name", boost::program_options::value< std::string >()->default_value(std::string("plog_server") + std::string(DOCC_SUFFIX)), "NT service name")
 #elif BOOST_OS_LINUX
 			("RLIMIT_NOFILE.soft", boost::program_options::value< rlim_t >()->default_value(rl.rlim_cur), "RLIMIT_NOFILE soft")
 			("RLIMIT_NOFILE.hard", boost::program_options::value< rlim_t >()->default_value(rl.rlim_max), "RLIMIT_NOFILE hard")
