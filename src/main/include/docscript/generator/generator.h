@@ -84,6 +84,7 @@ namespace docscript
 		virtual void format_italic(cyng::context& ctx) = 0;
 		virtual void format_bold(cyng::context& ctx) = 0;
 		virtual void format_color(cyng::context& ctx) = 0;
+		virtual void format_tt(cyng::context& ctx) = 0;
 		virtual void format_sub(cyng::context& ctx) = 0;
 		virtual void format_sup(cyng::context& ctx) = 0;
 

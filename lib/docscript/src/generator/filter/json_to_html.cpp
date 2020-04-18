@@ -13,6 +13,7 @@
 #include <cyng/object.h>
 #include <cyng/core/class_interface.h>
 #include <cyng/intrinsics/traits/tag.hpp>
+#include <cyng/set_cast.h>
 
 #include <iostream>
 #include <iomanip>
@@ -36,6 +37,9 @@ namespace docscript
 			}
 		}
 
+		/**
+		 * ToDo: return size of container to optimize formatting (depended from size of the container)
+		 */
 		virtual bool enter_node(std::size_t depth, cyng::object const& obj, std::size_t idx, std::size_t total, cyng::object parent) override
 		{
 
@@ -52,10 +56,18 @@ namespace docscript
 						<< indentation(depth)
 						;
 				}
+
 				os_ << '{';
+
+				if (cyng::to_tuple(obj).empty()) {
+					os_ << '}';
+				}
 				break;
 			case cyng::TC_VECTOR:
 				os_ << '[';
+				if (cyng::to_vector(obj).empty()) {
+					os_ << ']';
+				}
 				break;
 			case cyng::TC_PARAM:
 			{

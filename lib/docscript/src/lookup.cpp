@@ -19,6 +19,7 @@ namespace docscript
 		{
 			if (boost::algorithm::equals(name, "i"))	return false;
 			if (boost::algorithm::equals(name, "b"))	return false;
+			if (boost::algorithm::equals(name, "tt"))	return false;
 			if (boost::algorithm::equals(name, "bold"))	return false;
 			if (boost::algorithm::equals(name, "color"))	return false;
 			if (boost::algorithm::equals(name, "sub"))	return false;

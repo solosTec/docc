@@ -65,6 +65,7 @@ namespace docscript
 		vm_.register_function("i", 1, std::bind(&gen_md::format_italic, this, std::placeholders::_1));
 		vm_.register_function("b", 1, std::bind(&gen_md::format_bold, this, std::placeholders::_1));
 		vm_.register_function("bold", 1, std::bind(&gen_md::format_bold, this, std::placeholders::_1));
+		vm_.register_function("tt", 1, std::bind(&gen_md::format_tt, this, std::placeholders::_1));
 		vm_.register_function("color", 1, std::bind(&gen_md::format_color, this, std::placeholders::_1));
 		vm_.register_function("sub", 1, std::bind(&gen_md::format_sub, this, std::placeholders::_1));
 		vm_.register_function("sup", 1, std::bind(&gen_md::format_sup, this, std::placeholders::_1));
@@ -644,8 +645,13 @@ namespace docscript
 	void gen_md::format_bold(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 		ctx.push(cyng::make_object("**" + accumulate_plain_text(frame) + "**"));
+	}
+
+	void gen_md::format_tt(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		ctx.push(cyng::make_object("`" + accumulate_plain_text(frame) + "`"));
 	}
 
 	void gen_md::format_color(cyng::context& ctx)
