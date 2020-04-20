@@ -491,7 +491,6 @@ target_link_libraries(plog
 # 	docscript_core 
 # 	doc_html 
  	${OPENSSL_LIBRARIES}
- 	${Boost_LIBRARIES}
  	"$<$<PLATFORM_ID:Linux>:${Boost_THREAD_LIBRARY};${Boost_SYSTEM_LIBRARY};${Boost_FILESYSTEM_LIBRARY};${Boost_PROGRAM_OPTIONS_LIBRARY};${Boost_RANDOM_LIBRARY};pthread>"
 )
 install(TARGETS plog
