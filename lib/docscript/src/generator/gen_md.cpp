@@ -516,10 +516,10 @@ namespace docscript
 		else {
 			std::cerr
 				<< "***error ["
-				<< p
+				<< source
 				<< "] does not exist or is not a regular file"
 				<< std::endl;
-			ctx.push(cyng::make_object(p));
+			ctx.push(cyng::make_object(source));
 
 		}
 	}

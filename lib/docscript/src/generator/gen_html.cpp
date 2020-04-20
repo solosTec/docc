@@ -941,10 +941,10 @@ namespace docscript
 
 			std::cerr
 				<< "***error ["
-				<< p
+				<< source
 				<< "] does not exist or is not a regular file"
 				<< std::endl;
-				auto const el = html::strong(p.string());
+				auto const el = html::strong(source);
 				ctx.push(cyng::make_object(el.to_str()));
 
 		}

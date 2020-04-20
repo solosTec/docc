@@ -98,7 +98,7 @@ namespace docscript
 
 			//	
 			//	if the count of ' characters is odd restart with 
-			//	lst one
+			//	last one
 			//
 			return ((tok.count_ % 2) == 0)
 				? std::make_pair(state_, true)
