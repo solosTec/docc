@@ -40,7 +40,11 @@ namespace docscript
 		/**
 		 * ToDo: return size of container to optimize formatting (depended from size of the container)
 		 */
-		virtual bool enter_node(std::size_t depth, cyng::object const& obj, std::size_t idx, std::size_t total, cyng::object parent) override
+		virtual bool enter_node(std::size_t depth
+			, cyng::object const& obj
+			, std::size_t total
+			, bool last
+			, cyng::object parent) override
 		{
 
 			//std::cout << "enter " << depth << " - " << idx << '/' << total << " - " << obj.get_class().type_name() << " - " << cyng::json::to_string(obj) << std::endl;
@@ -58,10 +62,6 @@ namespace docscript
 				}
 
 				os_ << '{';
-
-				if (cyng::to_tuple(obj).empty()) {
-					os_ << '}';
-				}
 				break;
 			case cyng::TC_VECTOR:
 				os_ << '[';
@@ -102,43 +102,43 @@ namespace docscript
 			return true;	//	continue
 		}
 
-		virtual void leave_node(std::size_t depth, cyng::object const& obj, std::size_t idx, std::size_t total, cyng::object previous) override
+		virtual void leave_node(std::size_t depth
+			, cyng::object const& obj
+			, std::size_t total
+			, bool last
+			, std::size_t size) override
 		{
 			//std::cout << "leave " << depth << " - " << idx << '/' << total << " - "  << obj.get_class().type_name() << " - " << cyng::json::to_string(obj) << std::endl;
 
 			switch (obj.get_class().tag()) {
 			case cyng::TC_TUPLE:
-				os_
-					<< nl()
-					<< indentation(depth)
-					<< '}'
-					;
-				if ((idx != 1) && (depth != 0))	os_ << ',';
-				//if ((idx != 1) && total != 1) {
-				//	os_
-				//		<< std::endl
-				//		<< indentation(depth)
-				//		;
-				//}
+				if (size > 0) {
+					os_
+						<< nl()
+						<< indentation(depth)
+						;
+				}
+				os_ << '}';
+				if ((!last) && (depth != 0))	os_ << ',';
 				break;
 			case cyng::TC_VECTOR:
 				//
 				//	If the previous element was a also a container insert a NL.
 				//	
-				if (previous.get_class().tag() == cyng::TC_TUPLE || previous.get_class().tag() == cyng::TC_VECTOR) {
+				if (size > 1) {
 					os_
 						<< nl()
 						<< indentation(depth)
 						;
 				}
 				os_ << ']';
-				if (idx != 1)	os_ << ',';
+				if (!last)	os_ << ',';
 				break;
 			case cyng::TC_PARAM:
 			case cyng::TC_ATTR:
 				break;
 			default:
-				if (idx != 1)	os_ << ',';
+				if (!last)	os_ << ',';
 				break;
 			}
 		}
