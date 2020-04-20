@@ -269,28 +269,6 @@ namespace plog
 							cyng::param_factory("/index.htm", "/index.html")
 						}))
 					))
-
-					//
-					//	external mail service
-					//
-					, cyng::param_factory("mail", cyng::tuple_factory(
-						cyng::param_factory("host", "smtp.gmail.com"),
-						cyng::param_factory("port", 465),
-						cyng::param_factory("auth", cyng::tuple_factory(
-							cyng::param_factory("name", "auth@example.com"),
-							cyng::param_factory("pwd", "secret"),
-							cyng::param_factory("method", "START_TLS")
-						)),
-						cyng::param_factory("sender", cyng::tuple_factory(
-							cyng::param_factory("name", "sender"),
-							cyng::param_factory("address", "sender@example.com")
-						)),
-						cyng::param_factory("recipients", cyng::vector_factory({
-							cyng::tuple_factory(
-								cyng::param_factory("name", "recipient"),
-								cyng::param_factory("address", "recipient@example.com"))}
-						))
-					))
 				)
 			});
 			
@@ -338,11 +316,6 @@ namespace plog
 		for (auto const& dir : ad) {
 			CYNG_LOG_INFO(logger, "restricted access to [" << dir.first << "]");
 		}
-
-// 		node::mail_config mx;
-// 		node::init(dom.get("mail"), mx);
-// 
-// 		CYNG_LOG_TRACE(logger, "mx: " << mx);
 
 		//
 		//	get blacklisted addresses
