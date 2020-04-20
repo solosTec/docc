@@ -401,25 +401,22 @@ target_include_directories(docc
 # 		${OPENSSL_INCLUDE_DIR}
 # 		${BOOST_INCLUDE_DIR}
 )
+# target_compile_definitions(docc 
+#     PRIVATE
+#         $<$<CXX_COMPILER_ID:GNU>:"BOOST_NO_CXX11_SCOPED_ENUMS">
+# )
 target_link_libraries(docc 
  	cyng_core
  	cyng_io 
  	cyng_log 
  	cyng_vm 
  	cyng_parser 
-# 	cyng_async 
-# 	cyng_json 
-# 	cyng_xml 
-# 	cyng_csv
-# 	cyng_table
-# 	cyng_sys
-# 	crypto 
-# 	smf_protocol_sml
+ 	cyng_sys
 	docscript_core 
 	doc_html 
 	${PUGIXML_LIBRARY}
 	${OPENSSL_LIBRARIES}
-	"$<$<PLATFORM_ID:Linux>:${Boost_THREAD_LIBRARY};${Boost_SYSTEM_LIBRARY};${Boost_FILESYSTEM_LIBRARY};${Boost_PROGRAM_OPTIONS_LIBRARY};${Boost_RANDOM_LIBRARY};pthread>"
+	"$<$<PLATFORM_ID:Linux>:${Boost_FILESYSTEM_LIBRARY};${Boost_THREAD_LIBRARY};${Boost_SYSTEM_LIBRARY};${Boost_PROGRAM_OPTIONS_LIBRARY};${Boost_RANDOM_LIBRARY};pthread>"
 )
 install(TARGETS docc
     RUNTIME
@@ -494,6 +491,7 @@ target_link_libraries(plog
 # 	docscript_core 
 # 	doc_html 
  	${OPENSSL_LIBRARIES}
+ 	${Boost_LIBRARIES}
  	"$<$<PLATFORM_ID:Linux>:${Boost_THREAD_LIBRARY};${Boost_SYSTEM_LIBRARY};${Boost_FILESYSTEM_LIBRARY};${Boost_PROGRAM_OPTIONS_LIBRARY};${Boost_RANDOM_LIBRARY};pthread>"
 )
 install(TARGETS plog
