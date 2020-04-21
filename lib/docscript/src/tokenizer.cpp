@@ -65,7 +65,7 @@ namespace docscript
 		case '\n':
 			//	emit a pilcrow
 			if (tok.count_ > 1)	emit(symbol(SYM_PAR, 0xB6));
-//			if (tok.count_ > 1)	emit(symbol(SYM_PAR, u8"¶"));
+			//			if (tok.count_ > 1)	emit(symbol(SYM_PAR, u8"¶"));
 			return std::make_pair(state_, true);
 
 		case ' ': case '\t':
@@ -94,16 +94,22 @@ namespace docscript
 			//	'' => '
 			//
 			push(tok.value_, tok.count_ / 2u);
-			emit(SYM_TEXT);
 
 			//	
 			//	if the count of ' characters is odd restart with 
 			//	last one
 			//
-			return ((tok.count_ % 2) == 0)
-				? std::make_pair(state_, true)
-				: std::make_pair(state_, false)	//	repeat
-				;
+			if ((tok.count_ % 2) != 0) {
+				//
+				//	odd
+				//
+				emit(SYM_TEXT);
+				return std::make_pair(STATE_QUOTE_, true);
+			}
+			//
+			//	even
+			//
+			return std::make_pair(state_, true);
 
 		case '(':
 			emit(SYM_OPEN, tok);

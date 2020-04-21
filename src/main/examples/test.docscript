@@ -9,9 +9,9 @@
 
 .h1(chap<T>er)
 
-solos[T]ec, solos(T)ec and solos{T}ec.
+solos[T]ec, solos(T)ec, solos{T}ec and solos'T'ec.
 
-Write Docscript inside of Docscript:
+Write Docscript ''inside of Docscript:
 
 .code(caption:'docScript example', source:'inc/example.docscript', linenumbers:true)
 
