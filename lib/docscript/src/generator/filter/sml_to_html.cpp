@@ -14,7 +14,7 @@
 #include <cyng/io/io_bytes.hpp>
 #include <cyng/core/class_interface.h>
 #include <cyng/intrinsics/traits/tag.hpp>
-
+#include <cyng/set_cast.h>
 #include <iostream>
 #include <iomanip>
 
@@ -101,7 +101,7 @@ namespace docscript
 
 
 				auto const depth = cyng::value_cast<std::size_t>(vec.at(1), 0u);
-				auto const idx = cyng::value_cast<std::size_t>(vec.at(2), 0u)/* - 1u*/;
+				auto const idx = cyng::value_cast<std::size_t>(vec.at(2), 0u);
 
 				if ((depth == 0) && (idx == 0)) {
 
@@ -136,7 +136,7 @@ namespace docscript
 					case cyng::TC_UINT16:
 						if ((depth == 1) && (idx == 4)) {
 							os
-								<< "[<span style=\"color: blue\">eom</span>] "
+								<< "[<span style=\"color: blue\">crc</span>] "
 								<< cyng::io::to_str(vec.at(3));
 						}
 						else {
@@ -144,7 +144,7 @@ namespace docscript
 								<< "[<span style=\"color: blue\">u16</span>] "
 								<< cyng::io::to_str(vec.at(3));
 
-							if ((depth == 2) && (idx == 0)) {
+							if (idx == 0) {
 								std::string const name = node::sml::messages::name_from_value(cyng::value_cast<std::uint16_t>(vec.at(3), 0u));
 								if (!name.empty()) {
 									os
@@ -237,11 +237,12 @@ namespace docscript
 					case cyng::TC_NULL:
 						os
 							<< "[<span style=\"color: darkgreen\">option</span>] "
-							//<< cyng::io::to_str(vec.at(3))
 							;
 						break;
 
 					case cyng::TC_TUPLE:
+						//os << "/ " << cyng::to_tuple(vec.at(3)).size();
+						//os << "/-> " << cyng::io::to_str(vec.at(3));
 						break;
 
 					default:
@@ -254,7 +255,7 @@ namespace docscript
 					<< std::endl
 					;
 			}
-		}, false, false, true);	//	debug, no logger
+		}, false, false, true);	//	debug, no logger, only data
 
 		sml.read(begin, end);
 

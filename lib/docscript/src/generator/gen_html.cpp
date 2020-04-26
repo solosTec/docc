@@ -237,7 +237,8 @@ namespace docscript
 			<< "\t\t\tfont-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"	
 			<< std::endl
 			//	https://jrl.ninja/etc/1/
-			<< "\t\t\tmax-width: 52rem; "
+			//<< "\t\t\tmax-width: 52rem; "
+			<< "\t\t\tmax-width: 62%; "
 			<< std::endl
 			<< "\t\t\tpadding: 2rem; "
 			<< std::endl
@@ -919,8 +920,19 @@ namespace docscript
 				ifs.unsetf(std::ios::skipws);
 				ss << "<pre class=\"docscript-pre-binary\">" << std::endl;
 				cyng::buffer_t const inp((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
-				sml_to_html filter(line_numbers, uuid_gen_());
-				filter.convert(ss, inp);
+				try {
+					sml_to_html filter(line_numbers, uuid_gen_());
+					filter.convert(ss, inp);
+				}
+				catch (std::exception const& ex) {
+
+					ss
+						<< "***error: converting SML file "
+						<< p
+						<< " to html failed with error: "
+						<< ex.what()
+						<< std::endl;
+				}
 				ss << "</code></pre>" << std::endl;
 			}
 			else {
