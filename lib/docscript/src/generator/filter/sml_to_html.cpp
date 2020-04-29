@@ -56,15 +56,23 @@ namespace docscript
 				auto const tag = vec.at(3).get_class().tag();
 				auto const pos = cyng::value_cast<std::size_t>(vec.at(0), 0u);
 
-
-				os 
-					<< "<code title=\"@"
-					<< prev_pos
-					<< " => "
-					<< pos
-					<< " = "
-					<< cyng::bytes_to_str(pos - prev_pos)
-					<< "\">";
+				if (cyng::TC_TUPLE == tag) {
+					os
+						<< "<code title=\""
+						<< "["
+						<< cyng::io::to_str(vec.at(3))
+						<< "] \">";
+				}
+				else {
+					os
+						<< "<code title=\"@"
+						<< prev_pos
+						<< " => "
+						<< pos
+						<< " = "
+						<< cyng::bytes_to_str(pos - prev_pos)
+						<< "\">";
+				}
 
 
 				if (linenumbers_)
@@ -126,7 +134,7 @@ namespace docscript
 						<< ' '
 						;
 
-					switch (vec.at(3).get_class().tag()) {
+					switch (tag) {
 					case cyng::TC_UINT8:
 						os
 							<< "[<span style=\"color: blue\">u8</span>] "
