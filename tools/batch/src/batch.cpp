@@ -357,6 +357,13 @@ namespace docscript
 
 	batch::chrono_idx_t batch::get_sorted()
 	{
+		std::cout 
+			<< "***info: generate index with "
+			<< index_.size()
+			<< " entries"
+			<< std::endl
+			;
+				
 		chrono_idx_t idx;
 		for (auto const& doc : index_) {
 			//cyng::param_map_t pm;
@@ -370,7 +377,19 @@ namespace docscript
 			//	;
 			auto const reader = cyng::make_reader(doc.second);
 			auto const released = cyng::value_cast(reader.get("released"), std::chrono::system_clock::now());
-			idx.emplace(released, doc.second);
+			auto pos = idx.find(released);
+			if (pos != idx.end()) {
+				//
+				//	collision
+				//
+				std::cerr
+					<< "***error: time stamp collision: "
+					<< boost::filesystem::path(doc.first).filename()
+					<< std::endl;				
+			}
+			else {
+				idx.emplace(released, doc.second);
+			}
 		}
 		return idx;
 	}
