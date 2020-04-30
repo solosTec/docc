@@ -1551,7 +1551,8 @@ namespace docscript
 				std::stringstream ss;
 				ss << std::endl;
 				doc.save(ss, "\t", pugi::format_default | pugi::format_no_declaration);
-				return html::figure(html::id_(tag), html::div(html::class_("smf-svg"), ss.str()), html::figcaption(title));
+                auto const src = ss.str();
+				return html::figure(html::id_(tag), html::div(html::class_("smf-svg"), src), html::figcaption(title));
 			}
 			else {
 				std::cerr << "SVG [" << p << "] parsed with errors, attr value: [" << doc.child("node").attribute("attr").value() << "]\n";
@@ -1593,8 +1594,16 @@ namespace docscript
 		//	encode image as base 64
 		//
 		//"data:image/" + get_extension(p) + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size())
+        
+//         std::cout << std::endl;
+//         std::cout << "tag: " << tag << ", size: " << tag.size() << std::endl;
+//         std::cout << "id: " << id << ", size: " << id.size() << std::endl;
+//         std::cout << "alt: " << alt << ", size: " << alt.size() << std::endl;
+//         std::cout << std::endl;
+//         std::cout << std::endl;
 
-		return html::figure(html::id_(tag), html::img(html::alt_(alt), html::title_(caption), html::class_("docscript-img"), html::style_("max-width: " + max_width), html::src_("data:image/" + ext + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size()))), html::figcaption(title));
+        
+		return html::figure(html::id_(id, html::img(html::alt_(alt), html::title_(caption), html::class_("docscript-img"), html::style_("max-width: " + max_width), html::src_("data:image/" + ext + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size()))), html::figcaption(title));
 
 	}
 
