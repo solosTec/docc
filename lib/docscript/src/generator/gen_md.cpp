@@ -258,9 +258,9 @@ namespace docscript
 			}
 			else if (boost::algorithm::iequals(symbol, "latex")) {
 				r += "L";
-				r += "^A^";
+				r += "<sup>A</sup>";
 				r += "T";
-				r += "~E~";
+				r += "<sub>E</sub>";
 				r += "X";
 			}
 			else if (boost::algorithm::iequals(symbol, "celsius")) {
