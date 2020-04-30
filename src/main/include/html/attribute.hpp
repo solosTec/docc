@@ -32,7 +32,7 @@ namespace html
 		 */
 		explicit attr(std::string const &name, std::string const& value)
 			: base(name)
-			, value_f_([&value]() { return value; })
+			, value_f_([value]() { return value; })
 		{}
 
 		//attr(attr&& other)
