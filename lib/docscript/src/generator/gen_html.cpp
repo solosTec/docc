@@ -1552,7 +1552,6 @@ namespace docscript
 				ss << std::endl;
 				doc.save(ss, "\t", pugi::format_default | pugi::format_no_declaration);
 				return html::figure(html::id_(tag), html::div(html::class_("smf-svg"), ss.str()), html::figcaption(title));
-				//ctx.push(cyng::make_object(el.to_str()));
 			}
 			else {
 				std::cerr << "SVG [" << p << "] parsed with errors, attr value: [" << doc.child("node").attribute("attr").value() << "]\n";

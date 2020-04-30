@@ -22,7 +22,7 @@ namespace docscript
 	 */
 	class batch
 	{
-		using chrono_idx_t = std::map<std::chrono::system_clock::time_point, cyng::object>;
+		using chrono_idx_t = std::map<std::chrono::system_clock::time_point, cyng::param_map_t>;
 
 	public:
 		/**
@@ -79,7 +79,8 @@ namespace docscript
 		int const verbose_;
 
 
-		cyng::param_map_t index_;
+		//cyng::param_map_t index_;
+		std::map<boost::filesystem::path, cyng::param_map_t> index_;
 	};
 
 }

@@ -105,7 +105,7 @@ namespace docscript
 					, false	//	index
 					, "article");
 
-				index_.emplace(out_file.string(), cyng::make_object(d.get_meta()));
+				index_.emplace(out_file, d.get_meta());
 			}
 		}
 	}
@@ -366,17 +366,11 @@ namespace docscript
 				
 		chrono_idx_t idx;
 		for (auto const& doc : index_) {
-			//cyng::param_map_t pm;
-			//pm = cyng::value_cast(doc.second, pm);
-			//std::cout 
-			//	<< boost::filesystem::path(doc.first).filename()
-			//	<< ": "
-			//	<< cyng::io::to_str(doc.second)
-			//	<< std::endl
-			//	<< std::endl
-			//	;
+
 			auto const reader = cyng::make_reader(doc.second);
 			auto const released = cyng::value_cast(reader.get("released"), std::chrono::system_clock::now());
+			auto const file_name = cyng::value_cast<std::string>(reader.get("file-name"), "");
+
 			auto pos = idx.find(released);
 			if (pos != idx.end()) {
 				//
@@ -385,6 +379,8 @@ namespace docscript
 				std::cerr
 					<< "***error: time stamp collision: "
 					<< boost::filesystem::path(doc.first).filename()
+					<< " <-> "
+					<< file_name
 					<< std::endl;				
 			}
 			else {

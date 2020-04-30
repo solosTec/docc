@@ -91,8 +91,8 @@ namespace html
 	//
 	//	define factory functions
 	//
-#define DEFINE_NODE(X) template<class ...Args> node X(Args &&...args){return std::move(node(#X, std::forward<Args>(args)...));}
-#define DEFINE_ATTR(X) template<class T> attr X##_(T &&val){return std::move(attr(#X, std::forward<T>(val)));}
+#define DEFINE_NODE(X) template<class ...Args> node X(Args &&...args){return node(#X, std::forward<Args>(args)...);}
+#define DEFINE_ATTR(X) template<class T> attr X##_(T &&val){return attr(#X, std::forward<T>(val));}
 
 	//template<class ...Args> node a(Args &&...args) { 
 	//	return std::move(node("a", std::forward<Args>(args)...)); 
