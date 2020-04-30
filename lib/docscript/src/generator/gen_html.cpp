@@ -1603,7 +1603,7 @@ namespace docscript
 //         std::cout << std::endl;
 
         
-		return html::figure(html::id_(id, html::img(html::alt_(alt), html::title_(caption), html::class_("docscript-img"), html::style_("max-width: " + max_width), html::src_("data:image/" + ext + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size()))), html::figcaption(title));
+		return html::figure(html::id_(id), html::img(html::alt_(alt), html::title_(caption), html::class_("docscript-img"), html::style_("max-width: " + max_width), html::src_("data:image/" + ext + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size()))), html::figcaption(title));
 
 	}
 
