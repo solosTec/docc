@@ -423,6 +423,7 @@ namespace docscript
 			<< "\t\t}"
 			<< std::endl
 			<< "\t\ttable, th, td {"
+			<< std::endl
 			<< "\t\t\tpadding: 5px;"
 			<< std::endl
 			<< "\t\t\tborder: 1px solid black;"
