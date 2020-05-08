@@ -401,6 +401,13 @@ namespace docscript
 
 		switch (tok.value_) {
 		case '\'':
+   
+            //
+            //  escape multiple single quotes
+            //
+            if (tok.count_ > 1u)	push(tok.value_, tok.count_ / 2u);
+            if ((tok.count_ % 2) == 0) return std::make_pair(state_, true);  //  keep this status
+            
 			emit(SYM_VERBATIM);
 			return std::make_pair(STATE_START_, true);
 

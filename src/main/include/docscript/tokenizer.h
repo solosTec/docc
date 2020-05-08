@@ -57,6 +57,10 @@ namespace docscript
 		std::pair<state, bool> state_number(token);
 		std::pair<state, bool> state_datetime(token);
 		std::pair<state, bool> state_quote(token);
+               
+        /*
+         * Handle the case that dot "." follows an ")" or ".
+         */
 		std::pair<state, bool> state_detect(token);
 
 		void emit(symbol&&) const;
