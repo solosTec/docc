@@ -89,28 +89,18 @@ namespace docscript
 			return std::make_pair(STATE_DETECT_, true);
 
 		case '\'':
-			if (tok.count_ == 1u)	return std::make_pair(STATE_QUOTE_, true);
 			//
 			//	'' => '
 			//
-			push(tok.value_, tok.count_ / 2u);
+            if (tok.count_ > 1u)	push(tok.value_, tok.count_ / 2u);
 
-			//	
-			//	if the count of ' characters is odd restart with 
-			//	last one
-			//
-			if ((tok.count_ % 2) != 0) {
-				//
-				//	odd
-				//
-				emit(SYM_TEXT);
-				return std::make_pair(STATE_QUOTE_, true);
-			}
-			//
-			//	even
-			//
-			return std::make_pair(state_, true);
-
+            if ((tok.count_ % 2) == 0)
+            {
+                return std::make_pair(state_, true);  //  even
+            }
+			emit(SYM_TEXT);
+            return std::make_pair(STATE_QUOTE_, true);    //  odd
+            
 		case '(':
 			emit(SYM_OPEN, tok);
 			return std::make_pair(state_, true);
