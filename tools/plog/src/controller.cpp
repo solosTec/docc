@@ -395,6 +395,7 @@ namespace plog
 			, http_max_upload_size
 			, doc_root
 			, blog_root
+			, "plog"
 #ifdef NODE_SSL_INSTALLED
 			, ad
 #endif
@@ -471,6 +472,7 @@ namespace plog
 			, https_timeout
 			, https_max_upload_size
 			, doc_root
+			, "plog"
 			, ad
 			, blacklist
 			, redirects
