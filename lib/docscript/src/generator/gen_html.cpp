@@ -247,6 +247,13 @@ namespace docscript
 			<< "\t\t}"
 			<< std::endl
 
+			<< "\t\tcode, kbd, pre, samp {"
+			<< std::endl
+			<< "\t\t\tfont-family: monospace;"
+			<< std::endl
+			<< "\t\t}"
+			<< std::endl
+
 			<< "\t\tp > a {"
 			<< std::endl
 			<< "\t\t\ttext-decoration: none;"
@@ -442,6 +449,21 @@ namespace docscript
 			<< "\t\t\tpadding: 5px;"
 			<< std::endl
 			<< "\t\t\ttext-align: left;"
+			<< std::endl
+			<< "\t\t}"
+			<< std::endl
+
+			<< "\t\tkbd {"
+			<< std::endl
+			<< "\t\t\tpadding: 2px 4px;"
+			<< std::endl
+			<< "\t\t\tfont-size: 90%;"
+			<< std::endl
+			<< "\t\t\tcolor: #ffffff;"
+			<< std::endl
+			<< "\t\t\tbackground-color: #333333;"
+			<< std::endl
+			<< "\t\t\tborder-radius: 3px;"
 			<< std::endl
 			<< "\t\t}"
 			<< std::endl
