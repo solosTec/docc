@@ -1,4 +1,4 @@
-/*
+﻿/*
  * The MIT License (MIT)
  * 
  * Copyright (c) 2019 Sylko Olzscher 
@@ -14,6 +14,7 @@
 #include <cyng/dom/reader.h>
 #include <cyng/csv.h>
 #include <cyng/io/bom.h>
+#include <cyng/set_cast.h>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -124,9 +125,11 @@ namespace docscript
 			<< std::endl
 			<< build_cmd("usepackage", "listings")
 			<< std::endl
+			<< build_cmd("lstset", "basicstyle=\\small\\ttfamily,breaklines=true")
+			<< std::endl
 			<< build_cmd("usepackage", "subcaption")
 			<< std::endl
-			<< build_cmd("lstset", "basicstyle=\\small\\ttfamily,breaklines=true")
+			<< build_cmd("usepackage", "awesomebox")
 			<< std::endl
 			;
 		return ofs;
@@ -158,7 +161,7 @@ namespace docscript
 			<< std::endl
 			<< "%\tdocument"
 			<< std::endl
-			<< build_cmd("begin", "document")
+			<< build_begin( "document")
 			<< std::endl
 			<< "\\maketitle"
 			<< std::endl
@@ -179,7 +182,7 @@ namespace docscript
 		}
 
 		ofs
-			<< build_cmd("end", "document")
+			<< build_end( "document")
 			<< std::endl
 			;
 		return ofs;
@@ -368,11 +371,11 @@ namespace docscript
 		std::stringstream ss;
 		ss
 			<< std::endl
-			<< build_cmd("begin", "quotation")
+			<< build_begin( "quotation")
 			<< std::endl
 			<< quote
 			<< std::endl
-			<< build_cmd("end", "quotation")
+			<< build_end( "quotation")
 			<< std::endl
 			;
 
@@ -398,7 +401,7 @@ namespace docscript
 			: "itemize"
 			;
 		ss
-			<< build_cmd("begin", list)
+			<< build_begin( list)
 			<< std::endl
 			;
 
@@ -410,7 +413,7 @@ namespace docscript
 		}
 
 		ss
-			<< build_cmd("end", list)
+			<< build_end( list)
 			<< std::endl
 			;
 
@@ -472,7 +475,7 @@ namespace docscript
 			<< std::endl
 			<< build_cmd("label", "fig:" + tag)
 			<< std::endl
-			<< build_cmd("end", "figure")
+			<< build_end( "figure")
 			<< std::endl
 			;
 		ctx.push(cyng::make_object(ss.str()));
@@ -524,7 +527,7 @@ namespace docscript
 				}
 				auto const scale = std::to_string(width);
 				ss
-					<< build_cmd("begin", "subfigure")
+					<< build_begin( "subfigure")
 					<< "{" << img_scale << "\\textwidth}"
 					<< std::endl
 					<< build_cmd("includegraphics", "width=" + scale + "\\textwidth", resolve_path(source).string())
@@ -533,13 +536,13 @@ namespace docscript
 					<< std::endl
 					<< build_cmd("label", "fig:" + tag)
 					<< std::endl
-					<< build_cmd("end", "subfigure")
+					<< build_end( "subfigure")
 					<< std::endl
 					;
 			}
 
 			ss
-				<< build_cmd("end", "figure")
+				<< build_end( "figure")
 				<< std::endl
 				;
 			ctx.push(cyng::make_object(ss.str()));
@@ -582,7 +585,7 @@ namespace docscript
 					<< std::endl
 					<< ifs.rdbuf()
 					<< std::endl
-					<< build_cmd("end", "lstlisting")
+					<< build_end( "lstlisting")
 					<< std::endl
 					;
 				ctx.push(cyng::make_object(ss.str()));
@@ -594,11 +597,11 @@ namespace docscript
 				//
 				std::stringstream ss;
 				ss
-					<< build_cmd("begin", "verbatim")
+					<< build_begin( "verbatim")
 					<< std::endl
 					<< ifs.rdbuf()
 					<< std::endl
-					<< build_cmd("end", "verbatim")
+					<< build_end( "verbatim")
 					<< std::endl
 					;
 				ctx.push(cyng::make_object(ss.str()));
@@ -622,7 +625,7 @@ namespace docscript
 		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 		std::stringstream ss;
 		ss
-			<< build_cmd("begin", "description")
+			<< build_begin( "description")
 			<< std::endl
 			;
 
@@ -640,7 +643,7 @@ namespace docscript
 		}
 
 		ss
-			<< build_cmd("end", "description")
+			<< build_end( "description")
 			<< std::endl
 			;
 		ctx.push(cyng::make_object(ss.str()));
@@ -685,7 +688,7 @@ namespace docscript
 
 			std::stringstream ss;
 			ss
-				<< build_cmd("begin", "longtable")
+				<< build_begin("longtable")
 				<< std::endl
 				<< build_cmd("caption", title)
 				<< std::endl
@@ -718,7 +721,7 @@ namespace docscript
 			}
 
 			ss
-				<< build_cmd("end", "longtable")
+				<< build_end( "longtable")
 				<< std::endl;
 
 			ctx.push(cyng::make_object(ss.str()));
@@ -736,7 +739,41 @@ namespace docscript
 
 	void gen_latex::alert(cyng::context& ctx)
 	{
-		ctx.push(cyng::make_object("alerts are not implemented yet"));
+		auto const frame = ctx.get_frame();
+
+		auto const reader = cyng::make_reader(frame);
+		auto const map = cyng::to_param_map(reader.get(0));
+
+		if (!map.empty()) {
+			//	note, tip, info, warning, error, important
+			auto const type = boost::algorithm::to_upper_copy(map.begin()->first);
+			auto const msg = accumulate_plain_text(map.begin()->second);
+
+			if (boost::algorithm::equals(type, "INFO")) {
+
+				//	 &#xFE0F; ℹ 
+				ctx.push(cyng::make_object(build_cmd("notebox", msg)));
+			}
+			else if (boost::algorithm::equals(type, "CAUTION")) {
+
+				//	&#10071; ❗
+				ctx.push(cyng::make_object(build_cmd("importantbox", msg)));
+			}
+			else if (boost::algorithm::equals(type, "WARNING")) {
+
+				//	&#9888; ⚠️
+				ctx.push(cyng::make_object(build_cmd("warningbox", msg)));
+			}
+			else {
+
+				ctx.push(cyng::make_object(build_cmd("tipbox", msg)));
+			}
+		}
+		else {
+
+			ctx.push(cyng::make_object(build_cmd("warningbox", "Error in alert definition")));
+
+		}
 	}
 
 	void gen_latex::make_ref(cyng::context& ctx)
@@ -923,6 +960,16 @@ namespace docscript
 	std::string build_cmd(std::string cmd, std::string param)
 	{
 		return "\\" + cmd + "{" + param + "}";
+	}
+
+	std::string build_begin(std::string param)
+	{
+		return build_cmd("begin", param);
+	}
+
+	std::string build_end(std::string param)
+	{
+		return build_cmd("end", param);
 	}
 
 	std::string build_cmd(std::string cmd, std::string attr, std::string param)

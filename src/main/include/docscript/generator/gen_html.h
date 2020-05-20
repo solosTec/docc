@@ -85,6 +85,10 @@ namespace docscript
 		 * @brief generate only the HTML <body>...</body>
 		 */
 		bool const body_only_;
+
+		const static std::string icon_info_;
+		const static std::string icon_warning_;
+		const static std::string icon_caution_;
 	};
 
 	/**

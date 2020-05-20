@@ -15,6 +15,7 @@
 #include <cyng/dom/reader.h>
 #include <cyng/csv.h>
 #include <cyng/io/bom.h>
+#include <cyng/set_cast.h>
 
 #include <boost/algorithm/string.hpp>
 
@@ -594,7 +595,53 @@ namespace docscript
 
 	void gen_md::alert(cyng::context& ctx)
 	{
-		ctx.push(cyng::make_object("Alerts are not implemented yet"));
+		auto const frame = ctx.get_frame();
+
+		auto const reader = cyng::make_reader(frame);
+		auto const map = cyng::to_param_map(reader.get(0));
+
+		if (!map.empty()) {
+			//	note, tip, info, warning, error, important
+			auto const type = boost::algorithm::to_upper_copy(map.begin()->first);
+			auto const msg = accumulate_plain_text(map.begin()->second);
+
+			//	The following emojis are working for github. Other MD dialects
+			//	like https://dillinger.io/ don't understand this. Since our
+			//	main target is github the emojies are used. Feel free to find
+			//	a better solution.
+			//	A list of supported emojies on github:
+			//	https://gist.github.com/rxaviers/7360908
+			//
+			if (boost::algorithm::equals(type, "INFO")) {
+
+				//	 &#xFE0F; ℹ 
+				ctx.push(cyng::make_object("> :information_source: " + msg));
+				//ctx.push(cyng::make_object("> &#2139; " + msg));
+			}
+			else if (boost::algorithm::equals(type, "CAUTION")) {
+
+				//	&#10071; ❗
+				ctx.push(cyng::make_object("> :heavy_exclamation_mark: " + msg));
+				//ctx.push(cyng::make_object("> &#10071; " + msg));
+			}
+			else if (boost::algorithm::equals(type, "WARNING")) {
+
+				//	&#9888; ⚠️
+				ctx.push(cyng::make_object("> :warning: " + msg));
+				//ctx.push(cyng::make_object("> &#9888; " + msg));
+			}
+			else {
+
+				//	&#x1F4A1; 💡
+				ctx.push(cyng::make_object("> :bulb: " + msg));
+				//ctx.push(cyng::make_object("> &#x1F4A1; " + msg));
+			}
+		}
+		else {
+
+			ctx.push(cyng::make_object("***error in ALERT definition"));
+
+		}
 	}
 
 	void gen_md::make_ref(cyng::context& ctx)

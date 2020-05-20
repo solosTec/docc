@@ -80,6 +80,8 @@ namespace docscript
 	 * \cmd{param}
 	 */
 	std::string build_cmd(std::string cmd, std::string param);
+	std::string build_begin(std::string param);
+	std::string build_end(std::string param);
 
 	/**
 	 * \cmd[attr]{param}

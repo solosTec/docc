@@ -329,6 +329,9 @@ namespace docscript
 			<< "\t\t}"
 			<< std::endl
 
+			//
+			//	gallery
+			//
 			<< "\t\tdiv.gallery img {"
 			<< std::endl
 			<< "\t\t\twidth: 100%;"
@@ -339,13 +342,10 @@ namespace docscript
 			<< std::endl
 			<< "\t\t}"
 			<< std::endl
-			//
-			//<< "\t\tdiv.desc {"
-			//<< "\t\t\tpadding: 15px;"
-			//<< "\t\t\ttext-align: center;"
-			//<< "\t\t}"
 
+			//
 			//	definition lists with flexbox
+			//
 			<< "\t\tdl {"
 			<< std::endl
 			<< "\t\t\tdisplay: flex;"
@@ -373,6 +373,32 @@ namespace docscript
 			<< "\t\t\tflex-basis: 70%;"
 			<< std::endl
 			<< "\t\t\tflex-grow: 1;"
+			<< std::endl
+			<< "\t\t}"
+			<< std::endl
+
+			//
+			//	alertbox with flexgrid
+			//
+			<< "\t\tul.alert {"
+			<< std::endl
+			<< "\t\t\tdisplay: flex;"
+			<< std::endl
+			<< "\t\t\tlist-style: none;"
+			<< std::endl
+			<< "\t\t}"
+			<< std::endl
+
+			<< "\t\tul.alert > li {"
+			<< std::endl
+			<< "\t\t\tpadding: 7px;"
+			<< std::endl
+			<< "\t\t}"
+			<< std::endl
+
+			<< "\t\tul.alert > li:nth-child(2) {"
+			<< std::endl
+			<< "\t\t\tbackground-color: #ddd;"
 			<< std::endl
 			<< "\t\t}"
 			<< std::endl
@@ -813,14 +839,14 @@ namespace docscript
 
 		auto const reader = cyng::make_reader(frame.at(0));
 		auto const caption = accumulate_plain_text(reader.get("caption"));
-		auto const tag = cyng::value_cast(reader.get("tag"), boost::uuids::to_string(uuid_gen_()));
+		auto const tag = name_gen_(cyng::value_cast(reader.get("tag"), caption));
+		auto const id = boost::uuids::to_string(tag);
 
-		cyng::vector_t vec;
-		vec = cyng::value_cast(reader.get("images"), vec);
+		auto vec = cyng::to_vector(reader.get("images"));
 
 		auto const size = cyng::numeric_cast<std::size_t>(reader.get("size"), vec.size());
 
-		auto div = html::div(html::id_(tag));
+		auto div = html::div(html::id_(id));
 		div += html::h4(caption);
 
 		if (!vec.empty()) {
@@ -837,7 +863,7 @@ namespace docscript
 			}
 			ss << ", 1fr)";
 
-			auto grid = html::div(html::id_(tag), html::class_("gallery"), html::style_(ss.str()));
+			auto grid = html::div(html::class_("gallery"), html::style_(ss.str()));
 
 			for (auto pos = 0u; pos < vec.size(); ++pos) {
 				auto const alt = accumulate_plain_text(reader["images"][pos].get("alt"));
@@ -948,7 +974,6 @@ namespace docscript
 				ifs.unsetf(std::ios::skipws);
 				ss << "<pre class=\"docscript-pre-binary\">" << std::endl;
 				cyng::buffer_t const inp((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
-				//cyng::buffer_t const inp(static_cast<std::stringstream const&>(std::stringstream() << ifs.rdbuf()).str());
 				binary_to_html filter(line_numbers, uuid_gen_());
 				filter.convert(ss, inp);
 				ss << "</code></pre>" << std::endl;
@@ -1120,11 +1145,48 @@ namespace docscript
 	{
 		auto const frame = ctx.get_frame();
 
-		auto const reader = cyng::make_reader(frame.at(0));
-		auto const title = accumulate_plain_text(reader.get("title"));	//	caption
-		auto const severity = cyng::io::to_str(reader.get("severity"));
+		auto const reader = cyng::make_reader(frame);
+		auto const map = cyng::to_param_map(reader.get(0));
 
-		ctx.push(cyng::make_object("<p>Alerts are not implemented yet</p>"));
+		if (!map.empty()) {
+			//	note, tip, info, warning, error, important
+			auto const type = boost::algorithm::to_upper_copy(map.begin()->first);
+			auto const msg = accumulate_plain_text(map.begin()->second);
+
+			auto const tag = uuid_gen_();
+			auto const id = boost::uuids::to_string(tag);
+
+			if (boost::algorithm::equals(type, "INFO")) {
+
+				//std::string const svg = icon_info_;
+				//	 &#xFE0F; ℹ 
+				auto const ul = html::ul(html::id_(id), html::class_("alert"), html::li(icon_info_), html::li(msg));
+				ctx.push(cyng::make_object(ul.to_str()));
+			}
+			else if (boost::algorithm::equals(type, "CAUTION")) {
+
+				//	&#10071; ❗
+				auto const ul = html::ul(html::id_(id), html::class_("alert"), html::li(icon_caution_), html::li(msg));
+				ctx.push(cyng::make_object(ul.to_str()));
+			}
+			else if (boost::algorithm::equals(type, "WARNING")) {
+
+				//	&#9888; ⚠️
+				auto const ul = html::ul(html::id_(id), html::class_("alert"), html::li(icon_warning_), html::li(msg));
+				ctx.push(cyng::make_object(ul.to_str()));
+			}
+			else {
+
+				auto const ul = html::ul(html::id_(id), html::class_("alert"), html::li(type), html::li(msg));
+				ctx.push(cyng::make_object(ul.to_str()));
+			}
+		}
+		else {
+
+			auto const div = html::div(html::p("***ERROR: alert definition"));
+			ctx.push(cyng::make_object(div.to_str()));
+
+		}
 	}
 
 	void gen_html::make_ref(cyng::context& ctx)
@@ -1162,7 +1224,7 @@ namespace docscript
 		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		auto const reader = cyng::make_reader(frame);
-		const auto map = cyng::value_cast(reader.get(0), cyng::param_map_t());
+		auto const map = cyng::to_param_map(reader.get(0));
 
 		if (!map.empty()) {
 			auto const color = map.begin()->first;
@@ -1172,7 +1234,8 @@ namespace docscript
 		}
 		else {
 
-			ctx.push(cyng::make_object("***error in COLOR definition"));
+			auto div = html::div(html::p("***ERROR: color definition"));
+			ctx.push(cyng::make_object(div.to_str()));
 		}
 	}
 
@@ -1376,6 +1439,90 @@ namespace docscript
 		ctx.push(cyng::make_object("DEMO"));
 	}
 
+	const std::string gen_html::icon_info_ = R"__(
+	<svg "viewBox="0 0 62 62"
+	width="62" height="62"
+	version="1.1">
+	<defs>
+		<linearGradient id="fieldGradient"
+			gradientUnits="userSpaceOnUse"
+			x1="42.9863" y1="7.01270"
+			x2="22.0144" y2="51.9871">
+			<stop offset="0.0" stop-color="#BCD6FE" />
+			<stop offset="1.0" stop-color="#6787D3" />
+		</linearGradient>
+		<linearGradient id="edgeGradient"
+			gradientUnits="userSpaceOnUse"
+			x1="55.4541" y1="42.7529"
+			x2="9.54710" y2="16.2485">
+			<stop offset="0.0" stop-color="#3057A7" />
+			<stop offset="1.0" stop-color="#5A7AC6" />
+		</linearGradient>
+		<radialGradient id="shadowGradient">
+			<stop offset="0.0" stop-color="#C0C0C0" />
+			<stop offset="0.88" stop-color="#C0C0C0" />
+			<stop offset="1.0" stop-color="#C0C0C0" stop-opacity="0.0" />
+		</radialGradient>
+	</defs>
+	<circle id="shadow" r="26.5" cx="32.5" cy="29.5"
+		fill="url(#shadowGradient)"
+		transform="matrix(1.0648,0.0,0.0,1.064822,-2.1,1.0864)" />
+	<circle id="field" r="25.8" cx="31" cy="31"
+		fill="url(#fieldGradient)" stroke="url(#edgeGradient)" stroke-width="2" />
+	<g id="info" fill="white">
+		<polygon points="23,25 35,25 35,44 39,44 39,48 23,48 23,44 27,44 27,28 23,28 23,25" />
+		<circle r="4" cx="31" cy="17" />
+	</g></svg>)__";
+
+	const std::string gen_html::icon_warning_ = R"__(
+	<svg "viewBox="0 0 62 62"
+	width="62" height="62"
+	version="1.1">
+	<g transform="translate(-78.617262,51.751263)">
+    <g transform="matrix(0.37622235,0,0,0.37622235,49.373024,1.3929335)">
+      <path
+         d="m 229.73716,-1.7512624 -139.120776,-6e-7 69.560386,-120.482127 z"
+         style="fill:#ffcc00;stroke:#000000;stroke-width:24;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;paint-order:stroke fill markers" />
+      <g transform="matrix(2.1948519,0,0,2.1948519,23.24464,-183.16959)">
+        <circle
+           r="8.0416269"
+           cy="74.47538"
+           cx="23.921297"
+           transform="matrix(0.54212,0,0,0.54212,49.546,33.731)"
+           style="fill:#000000" />
+        <path
+           d="m 62.486,43.817 c 1.713,0 4.371,1.365 4.371,3.06 l -1.279,17.615 c 0,1.695 -1.379,3.06 -3.092,3.06 -1.713,0 -3.091,-1.365 -3.091,-3.06 L 57.902,46.877 c 0,-1.695 2.871,-3.06 4.584,-3.06 z"
+           style="fill:#000000" />
+      </g>
+    </g>
+  </g></svg>)__";
+
+	const std::string gen_html::icon_caution_ = R"__(
+	<svg "viewBox="0 0 62 62"
+	width="62" height="62"
+	version="1.1">
+	<g transform="translate(-78.617262,51.751263)">
+    <g transform="translate(-73.442018,26.166667)">
+      <circle
+         r="31"
+         cy="-47.032181"
+         cx="183.05928"
+         style="fill:#d40000;stroke:none;stroke-width:25.00840378;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;paint-order:stroke fill markers" />
+      <g style="fill:#dddddd"
+         transform="matrix(1.1432299,0,0,1.1432299,111.7356,-116.93047)">
+        <circle
+           style="fill:#eeeeee"
+           transform="matrix(0.54212,0,0,0.54212,49.546,33.731)"
+           cx="23.921297"
+           cy="74.47538"
+           r="8.0416269" />
+        <path
+           style="fill:#eeeeee"
+           d="m 62.486,43.817 c 1.713,0 4.371,1.365 4.371,3.06 l -1.279,17.615 c 0,1.695 -1.379,3.06 -3.092,3.06 -1.713,0 -3.091,-1.365 -3.091,-3.06 L 57.902,46.877 c 0,-1.695 2.871,-3.06 4.584,-3.06 z" />
+      </g>
+    </g>
+  </g></svg>)__";
+	
 	std::string replace_html_entities(std::string const& str)
 	{
 		//	simple state engine
@@ -1543,7 +1690,6 @@ namespace docscript
 	}
 
 	html::node make_figure(boost::filesystem::path p
-		//, boost::uuids::uuid tag
 		, std::string id
 		, double width
 		, std::string caption

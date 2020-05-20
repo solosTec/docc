@@ -275,6 +275,7 @@ namespace html
 		DEFINE_ATTR(defer)
 		DEFINE_ATTR(dir)
 		DEFINE_ATTR(disabled)
+		//DEFINE_ATTR(display)
 		DEFINE_ATTR(download)
 		DEFINE_ATTR(draggable)
 		DEFINE_ATTR(dropzone)

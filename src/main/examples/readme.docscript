@@ -192,7 +192,9 @@ Example: '.sup(sup) X .sub(sub)' => .sup(sup) X .sub(sub)
 
 Colors can be defined the same way as in HTML/CSS:
 
-.alert(Colors are not supported by Markdown.)
+.alert(info: "Colors are not supported by Markdown.")
+.alert(warning: "This is a warning.")
+.alert(caution: "Colors are not supported by Markdown.")
 
 Example: '.color(#802000: "spiced up")' => .b .color(#802000: "spiced up")
 
