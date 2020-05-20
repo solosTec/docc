@@ -97,6 +97,7 @@ namespace docscript
 		vm_.register_function("color", 1, std::bind(&generator::format_color, this, std::placeholders::_1));
 		vm_.register_function("sub", 1, std::bind(&generator::format_sub, this, std::placeholders::_1));
 		vm_.register_function("sup", 1, std::bind(&generator::format_sup, this, std::placeholders::_1));
+		vm_.register_function("mark", 1, std::bind(&generator::format_mark, this, std::placeholders::_1));
 
 		vm_.register_function("header", 1, std::bind(&generator::header, this, std::placeholders::_1));
 		vm_.register_function("h1", 1, std::bind(&generator::section, this, 1, std::placeholders::_1));

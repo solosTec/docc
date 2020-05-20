@@ -131,6 +131,8 @@ namespace docscript
 			<< std::endl
 			<< build_cmd("usepackage", "awesomebox")
 			<< std::endl
+			<< build_cmd("usepackage", "soul")
+			<< std::endl
 			;
 		return ofs;
 
@@ -835,6 +837,13 @@ namespace docscript
 		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 		//	^{...}
 		ctx.push(cyng::make_object(build_cmd("^", accumulate_plain_text(frame))));
+	}
+
+	void gen_latex::format_mark(cyng::context& ctx)
+	{
+		//	doesn't work for beamer: https://tex.stackexchange.com/a/41693
+		auto const frame = ctx.get_frame();
+ 		ctx.push(cyng::make_object(build_cmd("hl", accumulate_plain_text(frame))));
 	}
 
 	void gen_latex::header(cyng::context& ctx)

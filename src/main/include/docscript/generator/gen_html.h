@@ -62,6 +62,7 @@ namespace docscript
 		virtual void format_color(cyng::context& ctx) override;
 		virtual void format_sub(cyng::context& ctx) override;
 		virtual void format_sup(cyng::context& ctx) override;
+		virtual void format_mark(cyng::context& ctx) override;
 
 		std::ofstream& emit_file(std::ofstream&, cyng::vector_t::const_iterator, cyng::vector_t::const_iterator) const;
 		std::ofstream& emit_doctype(std::ofstream&) const;

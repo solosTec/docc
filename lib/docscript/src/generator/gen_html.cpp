@@ -1255,6 +1255,13 @@ namespace docscript
 		ctx.push(cyng::make_object(el.to_str()));
 	}
 
+	void gen_html::format_mark(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		auto const el = html::mark(accumulate_plain_text(frame));
+		ctx.push(cyng::make_object(el.to_str()));
+	}
+
 	void gen_html::print_hline(cyng::context& ctx)
 	{
 		auto const el = html::hr();

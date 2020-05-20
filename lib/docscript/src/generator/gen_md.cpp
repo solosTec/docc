@@ -708,6 +708,13 @@ namespace docscript
 		//	pandoc style
 		ctx.push(cyng::make_object("^" + accumulate_plain_text(frame) + "^"));
 	}
+	
+	void gen_md::format_mark(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		//	use HTML5
+		ctx.push(cyng::make_object("<mark>" + accumulate_plain_text(frame) + "</mark>"));
+	}	
 
 	void gen_md::header(cyng::context& ctx)
 	{
