@@ -18,6 +18,7 @@
 #include <cyng/io/serializer.h>
 #include <cyng/value_cast.hpp>
 #include <cyng/numeric_cast.hpp>
+#include <cyng/set_cast.h>
 #include <cyng/dom/reader.h>
 #include <cyng/csv.h>
 #include <cyng/io/bom.h>
@@ -35,6 +36,7 @@ namespace docscript
 		: generator(inc)
 		, footnotes_()
 		, figures_()
+		, tables_()
 		, body_only_(body_only)
 	{
 		register_this();
@@ -45,45 +47,6 @@ namespace docscript
 		generator::register_this();
 
 		vm_.register_function("demo", 0, std::bind(&gen_html::demo, this, std::placeholders::_1));
-
-		vm_.register_function("generate.file", 1, std::bind(&gen_html::generate_file, this, std::placeholders::_1));
-		vm_.register_function("generate.meta", 1, std::bind(&gen_html::generate_meta, this, std::placeholders::_1));
-
-		vm_.register_function("hline", 0, std::bind(&gen_html::print_hline, this, std::placeholders::_1));
-
-		vm_.register_function("convert.numeric", 1, std::bind(&gen_html::convert_numeric, this, std::placeholders::_1));
-		vm_.register_function("convert.alpha", 1, std::bind(&gen_html::convert_alpha, this, std::placeholders::_1));
-
-		vm_.register_function("paragraph", 1, std::bind(&gen_html::paragraph, this, std::placeholders::_1));
-		vm_.register_function("abstract", 1, std::bind(&gen_html::abstract, this, std::placeholders::_1));
-		vm_.register_function("quote", 1, std::bind(&gen_html::quote, this, std::placeholders::_1));
-		vm_.register_function("list", 1, std::bind(&gen_html::list, this, std::placeholders::_1));
-		vm_.register_function("link", 1, std::bind(&gen_html::link, this, std::placeholders::_1));
-		vm_.register_function("figure", 1, std::bind(&gen_html::figure, this, std::placeholders::_1));
-		vm_.register_function("gallery", 1, std::bind(&gen_html::gallery, this, std::placeholders::_1));
-		vm_.register_function("code", 1, std::bind(&gen_html::code, this, std::placeholders::_1));
-		vm_.register_function("def", 1, std::bind(&gen_html::def, this, std::placeholders::_1));
-		vm_.register_function("note", 1, std::bind(&gen_html::annotation, this, std::placeholders::_1));
-		vm_.register_function("table", 1, std::bind(&gen_html::table, this, std::placeholders::_1));
-
-		vm_.register_function("i", 1, std::bind(&gen_html::format_italic, this, std::placeholders::_1));
-		vm_.register_function("b", 1, std::bind(&gen_html::format_bold, this, std::placeholders::_1));
-		vm_.register_function("bold", 1, std::bind(&gen_html::format_bold, this, std::placeholders::_1));
-		vm_.register_function("tt", 1, std::bind(&gen_html::format_tt, this, std::placeholders::_1));
-		vm_.register_function("color", 1, std::bind(&gen_html::format_color, this, std::placeholders::_1));
-		vm_.register_function("sub", 1, std::bind(&gen_html::format_sub, this, std::placeholders::_1));
-		vm_.register_function("sup", 1, std::bind(&gen_html::format_sup, this, std::placeholders::_1));
-
-		vm_.register_function("header", 1, std::bind(&gen_html::header, this, std::placeholders::_1));
-		vm_.register_function("h1", 1, std::bind(&gen_html::section, this, 1, std::placeholders::_1));
-		vm_.register_function("h2", 1, std::bind(&gen_html::section, this, 2, std::placeholders::_1));
-		vm_.register_function("h3", 1, std::bind(&gen_html::section, this, 3, std::placeholders::_1));
-		vm_.register_function("h4", 1, std::bind(&gen_html::section, this, 4, std::placeholders::_1));
-		vm_.register_function("h5", 1, std::bind(&gen_html::section, this, 5, std::placeholders::_1));
-		vm_.register_function("h6", 1, std::bind(&gen_html::section, this, 6, std::placeholders::_1));
-		vm_.register_function("footnote", 1, std::bind(&gen_html::make_footnote, this, std::placeholders::_1));
-		vm_.register_function("ref", 1, std::bind(&gen_html::make_ref, this, std::placeholders::_1));
-
 	}
 
 	void gen_html::generate_file(cyng::context& ctx)
@@ -247,12 +210,44 @@ namespace docscript
 			<< "\t\t}"
 			<< std::endl
 
+			//
+			//	styling header h1 and h2
+			//
+			<< "\t\th1, h2 {"
+			<< std::endl
+			<< "\t\t\tpadding-bottom: .3em;"
+			<< std::endl
+			<< "\t\t\tborder-bottom: 1px solid #eaecef;"
+			<< std::endl
+			<< "\t\t}"
+			<< std::endl
+
 			<< "\t\tcode, kbd, pre, samp {"
 			<< std::endl
 			<< "\t\t\tfont-family: monospace;"
 			<< std::endl
 			<< "\t\t}"
 			<< std::endl
+
+			//oction
+
+			<< "\t\ta.oction {"
+			<< std::endl
+			<< "\t\t\topacity: 0;"
+			<< std::endl
+			<< "\t\t\ttransition: opacity 0.2s;"
+			<< std::endl
+			<< "\t\t\tcursor: pointer;"
+			<< std::endl
+			<< "\t\t}"
+			<< std::endl
+			<< "\t\ta.oction:hover{"
+			<< std::endl
+			<< "\t\t\topacity: 1;"
+			<< std::endl
+			<< "\t\t}"
+			<< std::endl
+
 
 			<< "\t\tp > a {"
 			<< std::endl
@@ -438,6 +433,13 @@ namespace docscript
 			<< "\t\t}"
 			<< std::endl
 
+			<< "\t\ttr:nth-child(even) {"
+			<< std::endl
+			<< "\t\t\tbackground-color: #f2f2f2;"
+			<< std::endl
+			<< "\t\t}"
+			<< std::endl
+
 			<< "\t\tcaption {"
 			<< std::endl
 			<< "\t\t\tfont-weight: bold;"
@@ -520,7 +522,7 @@ namespace docscript
 					<< idx
 					<< ']'
 					<< ' '
-					<< note.get_note()
+					<< note.get_text()
 					;
 
 				ofs 
@@ -699,12 +701,12 @@ namespace docscript
 		ctx.push(cyng::make_object(el.to_str()));
 	}
 
-	std::string gen_html::compute_title(std::string tag, std::string caption)
+	std::string gen_html::compute_fig_title(boost::uuids::uuid tag, std::string caption)
 	{
 		//
 		// append to figure list
 		//
-		figures_.emplace_back(name_gen_(tag), caption);
+		figures_.emplace_back(tag, caption);
 
 		auto const idx = figures_.size();
 
@@ -720,6 +722,29 @@ namespace docscript
 		return ss.str();
 	}
 
+	std::string gen_html::compute_tbl_title(boost::uuids::uuid tag, std::string caption)
+	{
+		//
+		// append to table list
+		//
+		tables_.emplace_back(tag, caption);
+
+		auto const idx = tables_.size();
+
+		std::stringstream ss;
+		ss
+			<< get_name(i18n::WID_TABLE)
+			<< ": "
+			<< idx
+			<< " - "
+			<< caption
+			;
+
+		return ss.str();
+
+	}
+
+
 	void gen_html::figure(cyng::context& ctx)
 	{
 		//	  [%(("alt":{Giovanni,Bellini,,,Man,who,plows,daisies}),("caption":{Daisies,in,the,rain}),("source":example.jpg),("tag":338d542a-a4e3-4a4c-9efe-b8d3032306c3),("width":0.5))]
@@ -730,9 +755,10 @@ namespace docscript
 		auto const alt = accumulate_plain_text(reader.get("alt"));
 		auto const caption = accumulate_plain_text(reader.get("caption"));
 		auto const source = cyng::io::to_str(reader.get("source"));
-		auto const tag = cyng::value_cast(reader.get("tag"), source);
+		auto const tag = name_gen_(cyng::value_cast(reader.get("tag"), source));
+
 		//	generate unique tag for SVG
-		auto const id = cyng::value_cast(reader.get("id"), boost::uuids::to_string(uuid_gen_()));
+		auto const id = boost::uuids::to_string(tag);
 		auto const width = cyng::value_cast(reader.get("width"), 1.0);
 
 		if (width > 1.0 || width < 0.01) {
@@ -747,13 +773,12 @@ namespace docscript
 		auto const p = resolve_path(source);
 		if (boost::filesystem::exists(p) && boost::filesystem::is_regular(p)) {
 
-			auto const title = compute_title(tag, caption);
+			auto const title = compute_fig_title(tag, caption);
 
 			//
 			//	generate <figure> tag
 			//
 			auto const el = make_figure(p
-				, tag
 				, id
 				, width
 				, caption
@@ -770,7 +795,7 @@ namespace docscript
 				<< "]"
 				<< std::endl;
 
-			auto const el = html::h2(html::id_(tag), "cannot open file [" + source + "]", html::title_(caption));
+			auto const el = html::h2(html::id_(id), "cannot open file [" + source + "]", html::title_(caption));
 			ctx.push(cyng::make_object(el.to_str()));
 		}
 	}
@@ -818,19 +843,20 @@ namespace docscript
 				auto const alt = accumulate_plain_text(reader["images"][pos].get("alt"));
 				auto const caption = accumulate_plain_text(reader["images"][pos].get("caption"));
 				auto const source = cyng::io::to_str(reader["images"][pos].get("source"));
-				auto const tag = cyng::value_cast(reader["images"][pos].get("tag"), source);
+
+				auto const tag = name_gen_(cyng::value_cast(reader["images"][pos].get("tag"), source));
+				auto const id = boost::uuids::to_string(tag);
+
 				auto const width = cyng::value_cast(reader["images"][pos].get("width"), 1.0);
-				auto const id = cyng::value_cast(reader["images"][pos].get("id"), boost::uuids::to_string(uuid_gen_()));
 
 				auto const p = resolve_path(source);
 				if (boost::filesystem::exists(p) && boost::filesystem::is_regular(p)) {
 
 					auto el = make_figure(p
-						, tag
 						, id
 						, width
 						, caption
-						, compute_title(tag, caption)
+						, compute_fig_title(tag, caption)
 						, alt);
 
 					grid += std::move(el);
@@ -1018,7 +1044,6 @@ namespace docscript
 	void gen_html::annotation(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 		auto const el = html::aside(accumulate_plain_text(frame));
 		ctx.push(cyng::make_object(el.to_str()));
 	}
@@ -1026,20 +1051,25 @@ namespace docscript
 	void gen_html::table(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		auto const reader = cyng::make_reader(frame.at(0));
-		auto const title = accumulate_plain_text(reader.get("title"));
-		cyng::tuple_t header;
-		header = cyng::value_cast(reader.get("header"), header);
+		auto const title = accumulate_plain_text(reader.get("title"));	//	caption
+		auto const header = cyng::to_tuple(reader.get("header"));
 		auto const source = cyng::io::to_str(reader.get("source"));
-		auto const tag = cyng::value_cast(reader.get("tag"), source);
+		auto const tag = name_gen_(cyng::value_cast(reader.get("tag"), source));
 
 		auto const p = resolve_path(source);
 		if (boost::filesystem::exists(p) && boost::filesystem::is_regular(p)) {
 
-			auto table = html::table(html::class_("docscript-table"));
-			table += html::caption(html::class_("docscript-table-caption"), title);
+			//
+			//	update table list
+			//
+			//tables_.emplace_back(tag, title);
+			auto const caption = compute_tbl_title(tag, title);
+
+			auto const id = boost::uuids::to_string(tag);
+			auto table = html::table(html::id_(id), html::class_("docscript-table"));
+			table += html::caption(html::class_("docscript-table-caption"), caption);
 
 			//
 			//	parse the CSV file into a vector
@@ -1084,6 +1114,17 @@ namespace docscript
 				<< std::endl;
 			ctx.push(cyng::make_object("cannot open file [" + source + "]"));
 		}
+	}
+
+	void gen_html::alert(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+
+		auto const reader = cyng::make_reader(frame.at(0));
+		auto const title = accumulate_plain_text(reader.get("title"));	//	caption
+		auto const severity = cyng::io::to_str(reader.get("severity"));
+
+		ctx.push(cyng::make_object("<p>Alerts are not implemented yet</p>"));
 	}
 
 	void gen_html::make_ref(cyng::context& ctx)
@@ -1165,24 +1206,29 @@ namespace docscript
 
 		auto const reader = cyng::make_reader(frame.at(0));
 		auto const title = accumulate_plain_text(reader.get("title"));
-		auto const tag = cyng::io::to_str(reader.get("tag"));
+		auto const tag = name_gen_(cyng::value_cast(reader.get("tag"), title));
+		auto const id = boost::uuids::to_string(tag);
 		auto const level = cyng::numeric_cast<std::size_t>(reader.get("level"), 0ul);
 
-		auto const number = content_table_.add(level, uuid_gen_(), title);
-		auto const header = create_section(level, tag, number + " " + title);
+		auto const number = content_table_.add(level, tag, title);
+		auto const header = create_section(level, id, number + " " + title);
 		//std::cout << header << std::endl;
 		ctx.push(cyng::make_object(header));
 	}
 
-	std::string gen_html::create_section(std::size_t level, std::string tag, std::string title)
+	std::string gen_html::create_section(std::size_t level, std::string id, std::string title)
 	{
+		//	visibility: visible or hidden
+		std::string const oction = "<svg viewBox=\"0 0 16 16\" version=\"1.1\" width=\"16\" height=\"16\" aria-hidden=\"true\"><path fill-rule=\"evenodd\" d=\"M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z\"></path></svg>";
+		auto a = html::a(html::id_(id), html::aria_hidden_("true"), html::href_(id), html::style_("margin-right: 6px;"), html::class_("oction"), oction);
+
 		switch (level) {
-		case 1:	return html::h1(html::id_(tag), title).to_str();
-		case 2: return html::h2(html::id_(tag), title).to_str();
-		case 3: return html::h3(html::id_(tag), title).to_str();
-		case 4: return html::h4(html::id_(tag), title).to_str();
-		case 5: return html::h5(html::id_(tag), title).to_str();
-		case 6: return html::h6(html::id_(tag), title).to_str();
+		case 1:	return html::h1(a, title).to_str();
+		case 2: return html::h2(a, title).to_str();
+		case 3: return html::h3(a, title).to_str();
+		case 4: return html::h4(a, title).to_str();
+		case 5: return html::h5(html::id_(id), title).to_str();
+		case 6: return html::h6(html::id_(id), title).to_str();
 		default:
 			break;
 		}
@@ -1497,7 +1543,7 @@ namespace docscript
 	}
 
 	html::node make_figure(boost::filesystem::path p
-		, std::string tag
+		//, boost::uuids::uuid tag
 		, std::string id
 		, double width
 		, std::string caption
@@ -1575,14 +1621,14 @@ namespace docscript
 				ss << std::endl;
 				doc.save(ss, "\t", pugi::format_default | pugi::format_no_declaration);
                 auto const src = ss.str();
-				return html::figure(html::id_(tag), html::div(html::class_("smf-svg"), src), html::figcaption(title));
+				return html::figure(html::id_(id), html::div(html::class_("smf-svg"), src), html::figcaption(title));
 			}
 			else {
 				std::cerr << "SVG [" << p << "] parsed with errors, attr value: [" << doc.child("node").attribute("attr").value() << "]\n";
 				std::cerr << "Error description: " << result.description() << "\n";
 				std::cerr << "Error offset: " << result.offset << " (error at [..." << result.offset << "]\n\n";
 				//ctx.push(cyng::make_object(result.description()));
-				return html::h2(html::id_(tag), result.description(), html::title_(title));
+				return html::h2(html::id_(id), result.description(), html::title_(title));
 			}
 		}
 

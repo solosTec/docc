@@ -32,6 +32,7 @@ Since you have one source file for different target formats, you don't have to m
 
 ;
 ; Toolchain, platforms
+; Building
 ;
 .h1 Usage
 .h2 Building
@@ -49,14 +50,28 @@ Dependencies:
 	(.link(text:'NODE', url:'https://github.com/solosTec/node', title:'SMF') library)
 	])
 
+;
+; Toolchain, platforms
+; Building
+; Linux
+;
 .h3(Linux)
 
 .code(language:sh, caption:'Linux build', source:'build-linux.txt', linenumbers:false)
 
+;
+; Toolchain, platforms
+; Building
+; Windows
+;
 .h3(Windows)
 
 .code(language:cmd, caption:'Windows build', source:'build-windows.txt', linenumbers:none)
 
+;
+; Toolchain, platforms
+; Usage
+;
 .h2(Usage)
 
 .code(language:verbatim, caption:'Help', source:'help.txt', linenumbers:false)
@@ -71,13 +86,31 @@ is to make as less syntactic noise as possible. It exploits the fact, that a wor
 that starts with a dot is a potential docScript keyword. In case you really want a word with leading point, simply write two consecutive points.
 This is possible since the dot is also the escape sign.
 
+;
+; DocScript
+; Special Characters
+;
 .h2(Special Characters)
 
 .def(dot:'.', 'round brackets':"()", colon:":", 'square backets':"[]")
 
 That's all. 
 
-.h2(Specify a datetime)
+;
+; DocScript
+; Basic Rules
+;
+.h2(Basic Rules)
+
+To create a paragraph, just write text that follows an empty line. To separate paragraphs, insert a .b blank line.
+
+To avoid any processing put your text into ''single quotation '' marks. 
+
+;
+; DocScript
+; Specify a Datetime
+;
+.h2(Specify a Datetime)
 
 To specify a datetime the '@' symbol can be used followed by a string according to RFC 3339.
 
@@ -90,18 +123,19 @@ Example (1): '@2022-10-02' => .b(@2022-10-02)
 Example (2): '@2022-10-02T10:00:02' => .b(@2022-10-02T10:00:02)
 
 
-.h2(Basic Rules)
-
-To create a paragraph, just write text that follows an empty line. To separate paragraphs, insert a .b blank line.
-
-To avoid any processing put your text into ''single quotation '' marks. 
-
-
+;
+; DocScript
+; Parameters
+;
 .h2(Parameters)
 
 Parameters can be a simple list of words, numbers and symbols or key value pairs separated by a comma. Key value pairs consist of a key and a value
 separated by colon: .b('key:value'). Values can be the results of a function call, but keys cannot.
 
+;
+; DocScript
+; Commands
+;
 .h2(Commands)
 
 Commands start with a dot. If the command has only one parameter no brackets are required. In case the command has no parameters
@@ -109,26 +143,64 @@ an opening and closing bracket without contents is necessary.
 
 Example: .b '.now()'
 
+;
+; DocScript
+; Commands
+; Formatting
+;
 .h3(Formatting)
 
+;
+; DocScript
+; Commands
+; Formatting
+; bold
+;
 .h4(bold)
 
 Example: '.b bold' => .b bold
 
+;
+; DocScript
+; Commands
+; Formatting
+; italic
+;
 .h4(italic)
 
 Example: '.i(emphasized)' => .i(emphasized)
 
+;
+; DocScript
+; Commands
+; Formatting
+; sup, sub
+;
 .h4(sup, sub)
 
 Super and subscript are not supported by Github Markdown.
 
 Example: '.sup(sup) X .sub(sub)' => .sup(sup) X .sub(sub)
 
+;
+; DocScript
+; Commands
+; Formatting
+; color
+;
 .h4(color)
 
-Colors are not supported by Markdown. 
+Colors can be defined the same way as in HTML/CSS:
 
+.alert(Colors are not supported by Markdown.)
+
+Example: '.color(#802000: "spiced up")' => .b .color(#802000: "spiced up")
+
+;
+; DocScript
+; Commands
+; Header
+;
 .h3(Header)
 
 A header has the following options:

@@ -18,7 +18,7 @@ namespace html
 			std::string value = value_f_();
 			if (!is_property(tag_)) {
 
-				std::string res = tag_.get() + "=\"";
+				auto res = tag_.get() + "=\"";
 				for (std::string::size_type i = 0; i < value.length(); ++i)
 				{
 					if ('\"' == value.at(i) && (i == 0 || value.at(i - 1) != '\\'))
@@ -46,8 +46,17 @@ namespace html
 			|| boost::algorithm::equals(name, "disabled")
 			|| boost::algorithm::equals(name, "hidden")
 			|| boost::algorithm::equals(name, "autofocus")
-				;
+			;
 	}
 
+	std::string cleanup_attr_name(std::string const& name)
+	{
+		if (boost::algorithm::equals(name, "aria_hidden"))	return "aria-hidden";
+		else if (boost::algorithm::equals(name, "margin_height"))	return "margin-height";
+		else if (boost::algorithm::equals(name, "margin_width"))	return "margin-width";
+		else if (boost::algorithm::equals(name, "margin_right"))	return "margin-right";
+		else if (boost::algorithm::equals(name, "margin_left"))	return "margin-left";
+		return name;
+	}
 
 }

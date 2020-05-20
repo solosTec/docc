@@ -160,35 +160,50 @@ namespace docscript
 		return vec;
 	}
 
-	footnote::footnote(boost::uuids::uuid tag, std::string note)
+	element::element(boost::uuids::uuid tag, std::string note)
 		: tag_(tag)
-		, note_(note)
+		, text_(note)
 	{}
 
-	std::string footnote::get_tag() const
+	std::string element::get_tag() const
 	{
 		return boost::uuids::to_string(tag_);
 	}
 
-	std::string const& footnote::get_note() const
+	std::string const& element::get_text() const
 	{
-		return note_;
+		return text_;
 	}
 
-	figure::figure(boost::uuids::uuid tag, std::string title)
-		: tag_(tag)
-		, title_(title)
-	{}
+	//footnote::footnote(boost::uuids::uuid tag, std::string note)
+	//	: tag_(tag)
+	//	, note_(note)
+	//{}
 
-	std::string figure::get_tag() const
-	{
-		return boost::uuids::to_string(tag_);
-	}
+	//std::string footnote::get_tag() const
+	//{
+	//	return boost::uuids::to_string(tag_);
+	//}
 
-	std::string const& figure::get_title() const
-	{
-		return title_;
-	}
+	//std::string const& footnote::get_note() const
+	//{
+	//	return note_;
+	//}
+
+	//figure::figure(boost::uuids::uuid tag, std::string title)
+	//	: tag_(tag)
+	//	, title_(title)
+	//{}
+
+	//std::string figure::get_tag() const
+	//{
+	//	return boost::uuids::to_string(tag_);
+	//}
+
+	//std::string const& figure::get_title() const
+	//{
+	//	return title_;
+	//}
 }
 
 

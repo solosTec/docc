@@ -32,43 +32,7 @@ namespace docscript
 
 		vm_.register_function("demo", 0, std::bind(&gen_md::demo, this, std::placeholders::_1));
 
-		vm_.register_function("generate.file", 1, std::bind(&gen_md::generate_file, this, std::placeholders::_1));
-		vm_.register_function("generate.meta", 1, std::bind(&gen_md::generate_meta, this, std::placeholders::_1));
 
-		vm_.register_function("hline", 0, std::bind(&gen_md::print_hline, this, std::placeholders::_1));
-
-		vm_.register_function("convert.numeric", 1, std::bind(&gen_md::convert_numeric, this, std::placeholders::_1));
-		vm_.register_function("convert.alpha", 1, std::bind(&gen_md::convert_alpha, this, std::placeholders::_1));
-
-		vm_.register_function("paragraph", 1, std::bind(&gen_md::paragraph, this, std::placeholders::_1));
-		vm_.register_function("abstract", 1, std::bind(&gen_md::abstract, this, std::placeholders::_1));
-		vm_.register_function("quote", 1, std::bind(&gen_md::quote, this, std::placeholders::_1));
-		vm_.register_function("list", 1, std::bind(&gen_md::list, this, std::placeholders::_1));
-		vm_.register_function("link", 1, std::bind(&gen_md::link, this, std::placeholders::_1));
-		vm_.register_function("figure", 1, std::bind(&gen_md::figure, this, std::placeholders::_1));
-		vm_.register_function("gallery", 1, std::bind(&gen_md::gallery, this, std::placeholders::_1));
-		vm_.register_function("code", 1, std::bind(&gen_md::code, this, std::placeholders::_1));
-		vm_.register_function("def", 1, std::bind(&gen_md::def, this, std::placeholders::_1));
-		vm_.register_function("note", 1, std::bind(&gen_md::annotation, this, std::placeholders::_1));
-		vm_.register_function("table", 1, std::bind(&gen_md::table, this, std::placeholders::_1));
-
-		vm_.register_function("header", 1, std::bind(&gen_md::header, this, std::placeholders::_1));
-		vm_.register_function("h1", 1, std::bind(&gen_md::section, this, 1, std::placeholders::_1));
-		vm_.register_function("h2", 1, std::bind(&gen_md::section, this, 2, std::placeholders::_1));
-		vm_.register_function("h3", 1, std::bind(&gen_md::section, this, 3, std::placeholders::_1));
-		vm_.register_function("h4", 1, std::bind(&gen_md::section, this, 4, std::placeholders::_1));
-		vm_.register_function("h5", 1, std::bind(&gen_md::section, this, 5, std::placeholders::_1));
-		vm_.register_function("h6", 1, std::bind(&gen_md::section, this, 6, std::placeholders::_1));
-		vm_.register_function("footnote", 1, std::bind(&gen_md::make_footnote, this, std::placeholders::_1));
-		vm_.register_function("ref", 1, std::bind(&gen_md::make_ref, this, std::placeholders::_1));
-
-		vm_.register_function("i", 1, std::bind(&gen_md::format_italic, this, std::placeholders::_1));
-		vm_.register_function("b", 1, std::bind(&gen_md::format_bold, this, std::placeholders::_1));
-		vm_.register_function("bold", 1, std::bind(&gen_md::format_bold, this, std::placeholders::_1));
-		vm_.register_function("tt", 1, std::bind(&gen_md::format_tt, this, std::placeholders::_1));
-		vm_.register_function("color", 1, std::bind(&gen_md::format_color, this, std::placeholders::_1));
-		vm_.register_function("sub", 1, std::bind(&gen_md::format_sub, this, std::placeholders::_1));
-		vm_.register_function("sup", 1, std::bind(&gen_md::format_sup, this, std::placeholders::_1));
 	}
 
 	void gen_md::generate_file(cyng::context& ctx)
@@ -169,7 +133,7 @@ namespace docscript
 					<< ']'
 					<< ':'
 					<< ' '
-					<< note.get_note()
+					<< note.get_text()
 					<< std::endl
 				;
 
@@ -628,6 +592,11 @@ namespace docscript
 
 	}
 
+	void gen_md::alert(cyng::context& ctx)
+	{
+		ctx.push(cyng::make_object("Alerts are not implemented yet"));
+	}
+
 	void gen_md::make_ref(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
@@ -738,7 +707,7 @@ namespace docscript
 
 		auto const note = accumulate_plain_text(frame);
 		auto const tag = uuid_gen_();
-		footnotes_.emplace_back(footnote(tag, note));
+		footnotes_.emplace_back( tag, note );
 		auto const idx = footnotes_.size();
 
 		std::stringstream ss;

@@ -69,6 +69,45 @@ namespace docscript
 		vm_.register_function("tag", 1, std::bind(&generator::create_uuid, this, std::placeholders::_1));
 		vm_.register_function("map", 1, std::bind(&generator::make_map, this, std::placeholders::_1));
 
+		vm_.register_function("generate.file", 1, std::bind(&generator::generate_file, this, std::placeholders::_1));
+		vm_.register_function("generate.meta", 1, std::bind(&generator::generate_meta, this, std::placeholders::_1));
+
+		vm_.register_function("hline", 0, std::bind(&generator::print_hline, this, std::placeholders::_1));
+
+		vm_.register_function("convert.numeric", 1, std::bind(&generator::convert_numeric, this, std::placeholders::_1));
+		vm_.register_function("convert.alpha", 1, std::bind(&generator::convert_alpha, this, std::placeholders::_1));
+
+		vm_.register_function("paragraph", 1, std::bind(&generator::paragraph, this, std::placeholders::_1));
+		vm_.register_function("abstract", 1, std::bind(&generator::abstract, this, std::placeholders::_1));
+		vm_.register_function("quote", 1, std::bind(&generator::quote, this, std::placeholders::_1));
+		vm_.register_function("list", 1, std::bind(&generator::list, this, std::placeholders::_1));
+		vm_.register_function("link", 1, std::bind(&generator::link, this, std::placeholders::_1));
+		vm_.register_function("figure", 1, std::bind(&generator::figure, this, std::placeholders::_1));
+		vm_.register_function("gallery", 1, std::bind(&generator::gallery, this, std::placeholders::_1));
+		vm_.register_function("code", 1, std::bind(&generator::code, this, std::placeholders::_1));
+		vm_.register_function("def", 1, std::bind(&generator::def, this, std::placeholders::_1));
+		vm_.register_function("note", 1, std::bind(&generator::annotation, this, std::placeholders::_1));
+		vm_.register_function("table", 1, std::bind(&generator::table, this, std::placeholders::_1));
+		vm_.register_function("alert", 1, std::bind(&generator::alert, this, std::placeholders::_1));
+
+		vm_.register_function("i", 1, std::bind(&generator::format_italic, this, std::placeholders::_1));
+		vm_.register_function("b", 1, std::bind(&generator::format_bold, this, std::placeholders::_1));
+		vm_.register_function("bold", 1, std::bind(&generator::format_bold, this, std::placeholders::_1));
+		vm_.register_function("tt", 1, std::bind(&generator::format_tt, this, std::placeholders::_1));
+		vm_.register_function("color", 1, std::bind(&generator::format_color, this, std::placeholders::_1));
+		vm_.register_function("sub", 1, std::bind(&generator::format_sub, this, std::placeholders::_1));
+		vm_.register_function("sup", 1, std::bind(&generator::format_sup, this, std::placeholders::_1));
+
+		vm_.register_function("header", 1, std::bind(&generator::header, this, std::placeholders::_1));
+		vm_.register_function("h1", 1, std::bind(&generator::section, this, 1, std::placeholders::_1));
+		vm_.register_function("h2", 1, std::bind(&generator::section, this, 2, std::placeholders::_1));
+		vm_.register_function("h3", 1, std::bind(&generator::section, this, 3, std::placeholders::_1));
+		vm_.register_function("h4", 1, std::bind(&generator::section, this, 4, std::placeholders::_1));
+		vm_.register_function("h5", 1, std::bind(&generator::section, this, 5, std::placeholders::_1));
+		vm_.register_function("h6", 1, std::bind(&generator::section, this, 6, std::placeholders::_1));
+		vm_.register_function("footnote", 1, std::bind(&generator::make_footnote, this, std::placeholders::_1));
+		vm_.register_function("ref", 1, std::bind(&generator::make_ref, this, std::placeholders::_1));
+
 	}
 
 	void generator::init_meta_data(cyng::context& ctx)

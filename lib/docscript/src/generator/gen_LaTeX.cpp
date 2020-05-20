@@ -32,44 +32,6 @@ namespace docscript
 
 		vm_.register_function("demo", 0, std::bind(&gen_latex::demo, this, std::placeholders::_1));
 
-		vm_.register_function("generate.file", 1, std::bind(&gen_latex::generate_file, this, std::placeholders::_1));
-		vm_.register_function("generate.meta", 1, std::bind(&gen_latex::generate_meta, this, std::placeholders::_1));
-
-		vm_.register_function("hline", 0, std::bind(&gen_latex::print_hline, this, std::placeholders::_1));
-
-		vm_.register_function("convert.numeric", 1, std::bind(&gen_latex::convert_numeric, this, std::placeholders::_1));
-		vm_.register_function("convert.alpha", 1, std::bind(&gen_latex::convert_alpha, this, std::placeholders::_1));
-
-		vm_.register_function("paragraph", 1, std::bind(&gen_latex::paragraph, this, std::placeholders::_1));
-		vm_.register_function("abstract", 1, std::bind(&gen_latex::abstract, this, std::placeholders::_1));
-		vm_.register_function("quote", 1, std::bind(&gen_latex::quote, this, std::placeholders::_1));
-		vm_.register_function("list", 1, std::bind(&gen_latex::list, this, std::placeholders::_1));
-		vm_.register_function("link", 1, std::bind(&gen_latex::link, this, std::placeholders::_1));
-		vm_.register_function("figure", 1, std::bind(&gen_latex::figure, this, std::placeholders::_1));
-		vm_.register_function("gallery", 1, std::bind(&gen_latex::gallery, this, std::placeholders::_1));
-		vm_.register_function("code", 1, std::bind(&gen_latex::code, this, std::placeholders::_1));
-		vm_.register_function("def", 1, std::bind(&gen_latex::def, this, std::placeholders::_1));
-		vm_.register_function("note", 1, std::bind(&gen_latex::annotation, this, std::placeholders::_1));
-		vm_.register_function("table", 1, std::bind(&gen_latex::table, this, std::placeholders::_1));
-
-		vm_.register_function("i", 1, std::bind(&gen_latex::format_italic, this, std::placeholders::_1));
-		vm_.register_function("b", 1, std::bind(&gen_latex::format_bold, this, std::placeholders::_1));
-		vm_.register_function("bold", 1, std::bind(&gen_latex::format_bold, this, std::placeholders::_1));
-		vm_.register_function("tt", 1, std::bind(&gen_latex::format_tt, this, std::placeholders::_1));
-		vm_.register_function("color", 1, std::bind(&gen_latex::format_color, this, std::placeholders::_1));
-		vm_.register_function("sub", 1, std::bind(&gen_latex::format_sub, this, std::placeholders::_1));
-		vm_.register_function("sup", 1, std::bind(&gen_latex::format_sup, this, std::placeholders::_1));
-
-		vm_.register_function("header", 1, std::bind(&gen_latex::header, this, std::placeholders::_1));
-		vm_.register_function("h1", 1, std::bind(&gen_latex::section, this, 1, std::placeholders::_1));
-		vm_.register_function("h2", 1, std::bind(&gen_latex::section, this, 2, std::placeholders::_1));
-		vm_.register_function("h3", 1, std::bind(&gen_latex::section, this, 3, std::placeholders::_1));
-		vm_.register_function("h4", 1, std::bind(&gen_latex::section, this, 4, std::placeholders::_1));
-		vm_.register_function("h5", 1, std::bind(&gen_latex::section, this, 5, std::placeholders::_1));
-		vm_.register_function("h6", 1, std::bind(&gen_latex::section, this, 6, std::placeholders::_1));
-		vm_.register_function("footnote", 1, std::bind(&gen_latex::make_footnote, this, std::placeholders::_1));
-		vm_.register_function("ref", 1, std::bind(&gen_latex::make_ref, this, std::placeholders::_1));
-
 	}
 
 	void gen_latex::generate_file(cyng::context& ctx)
@@ -770,7 +732,11 @@ namespace docscript
 				<< std::endl;
 			ctx.push(cyng::make_object("cannot open file [" + source + "]"));
 		}
+	}
 
+	void gen_latex::alert(cyng::context& ctx)
+	{
+		ctx.push(cyng::make_object("alerts are not implemented yet"));
 	}
 
 	void gen_latex::make_ref(cyng::context& ctx)

@@ -65,38 +65,55 @@ namespace docscript
 	cyng::vector_t serialize(std::size_t, numbering const* n);
 
 	/**
-	 * Simple list of footnotes
+	 * element like table, figure, footnode with an UUID
+	 * and text
 	 */
-	class footnote
+	class element
 	{
 	public:
-		footnote(boost::uuids::uuid, std::string);
+		element(boost::uuids::uuid, std::string);
 
 		std::string get_tag() const;
-		std::string const& get_note() const;
+		std::string const& get_text() const;
 	private:
 		boost::uuids::uuid const tag_;
-		std::string const note_;
+		std::string const text_;
 	};
 
-	using footnotes_t = std::list<footnote>;
+	/**
+	 * Simple list of footnotes
+	 */
+	//class footnote
+	//{
+	//public:
+	//	footnote(boost::uuids::uuid, std::string);
+
+	//	std::string get_tag() const;
+	//	std::string const& get_note() const;
+	//private:
+	//	boost::uuids::uuid const tag_;
+	//	std::string const note_;
+	//};
+
+	using footnotes_t = std::list<element>;
 
 	/**
 	 * Simple list of figures
 	 */
-	class figure
-	{
-	public:
-		figure(boost::uuids::uuid, std::string);
+	//class figure
+	//{
+	//public:
+	//	figure(boost::uuids::uuid, std::string);
 
-		std::string get_tag() const;
-		std::string const& get_title() const;
-	private:
-		boost::uuids::uuid const tag_;
-		std::string const title_;
-	};
+	//	std::string get_tag() const;
+	//	std::string const& get_title() const;
+	//private:
+	//	boost::uuids::uuid const tag_;
+	//	std::string const title_;
+	//};
 
-	using figures_t = std::list<footnote>;
+	using figures_t = std::list<element>;
+	using tables_t = std::list<element>;
 
 }
 

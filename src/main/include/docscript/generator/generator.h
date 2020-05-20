@@ -75,6 +75,7 @@ namespace docscript
 		virtual void def(cyng::context& ctx) = 0;
 		virtual void annotation(cyng::context& ctx) = 0;
 		virtual void table(cyng::context& ctx) = 0;
+		virtual void alert(cyng::context& ctx) = 0;
 
 		virtual void header(cyng::context& ctx) = 0;
 		virtual void section(int, cyng::context& ctx) = 0;
@@ -123,7 +124,11 @@ namespace docscript
 
 	protected:
 		boost::uuids::random_generator	uuid_gen_;	//	basic_random_generator<mt19937>
-		boost::uuids::name_generator name_gen_;
+
+		/**
+		 * namespace for UUID generation based on SHA1
+		 */
+		boost::uuids::name_generator_sha1 name_gen_;
 
 		cyng::async::scheduler	scheduler_;
 		cyng::controller vm_;

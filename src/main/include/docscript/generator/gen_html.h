@@ -48,6 +48,7 @@ namespace docscript
 		virtual void def(cyng::context& ctx) override;
 		virtual void annotation(cyng::context& ctx) override;
 		virtual void table(cyng::context& ctx) override;
+		virtual void alert(cyng::context& ctx) override;
 
 		virtual void header(cyng::context& ctx) override;
 		virtual void section(int, cyng::context& ctx) override;
@@ -71,11 +72,14 @@ namespace docscript
 		std::ofstream& emit_body(std::ofstream&, cyng::object) const;
 		std::ofstream& emit_footnotes(std::ofstream&) const;
 
-		std::string compute_title(std::string tag, std::string caption);
+		std::string compute_fig_title(boost::uuids::uuid tag, std::string caption);
+		std::string compute_tbl_title(boost::uuids::uuid tag, std::string caption);
 
 	private:
+
 		footnotes_t footnotes_;
 		figures_t figures_;
+		tables_t tables_;
 
 		/**
 		 * @brief generate only the HTML <body>...</body>
@@ -92,7 +96,7 @@ namespace docscript
 	 * Create a HTML figure tag
 	 */
 	html::node make_figure(boost::filesystem::path
-		, std::string tag
+		//, boost::uuids::uuid tag
 		, std::string id
 		, double width
 		, std::string caption

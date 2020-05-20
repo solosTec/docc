@@ -46,6 +46,7 @@ namespace docscript
 		virtual void def(cyng::context& ctx) override;
 		virtual void annotation(cyng::context& ctx) override;
 		virtual void table(cyng::context& ctx) override;
+		virtual void alert(cyng::context& ctx) override;
 
 		virtual void header(cyng::context& ctx) override;
 		virtual void section(int, cyng::context& ctx) override;

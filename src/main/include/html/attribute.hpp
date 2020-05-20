@@ -14,16 +14,22 @@
 
 namespace html
 {
+	/**
+	 * Fix some special attribute names like "href" => "#href" 
+	 * that cannot be repesented in proper C++ code.
+	 */
+	std::string cleanup_attr_name(std::string const& name);
+
 	class attr : public base
 	{
 	public:
 		explicit attr(std::string const &name) 
-			: base(name)
+			: base(cleanup_attr_name(name))
 			, value_f_()
 		{}
 
 		explicit attr(std::string const &name, std::string &&value)
-			: base(name)
+			: base(cleanup_attr_name(name))
 			, value_f_([value]() { return value; })
 		{}
 
@@ -31,7 +37,7 @@ namespace html
 		 * be carefull with ownership of value
 		 */
 		explicit attr(std::string const &name, std::string const& value)
-			: base(name)
+			: base(cleanup_attr_name(name))
 			, value_f_([value]() { return value; })
 		{}
 
@@ -46,7 +52,7 @@ namespace html
 		 */
 		template<typename T, class = decltype(std::to_string(std::declval<T>()))>
 		explicit attr(std::string const &name, T &&value) 
-			: base(name)
+			: base(cleanup_attr_name(name))
 			, value_f_([value]() {return std::to_string(value); })
 		{}
 
@@ -55,7 +61,7 @@ namespace html
 		 */
 		template<class F, class = std::enable_if<is_string<typename F::result_type>::value>>
 		explicit attr(std::string const &name, F f)
-			: base(name)
+			: base(cleanup_attr_name(name))
 			, value_f_(f)
 		{}
 
@@ -67,6 +73,7 @@ namespace html
 		std::function<std::string()> value_f_;
 
 	};
+
 
 	bool is_property(std::string const&);
 }
