@@ -1531,47 +1531,47 @@ namespace docscript
 				break;
 			case 0x0393: r += U"\\textGamma"; // Γ (Gamma)
 				break;
-			case 0x0394: r += U"\\textDelta"; // Δ	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER DELTA	Griechischer Großbuchstabe Delta
+			case 0x0394: r += U"\\textDelta"; // Δ	Groß­buchstabe	GREEK CAPITAL LETTER DELTA	Griechischer Großbuchstabe Delta
 				break;
-			case 0x0395: r += U"\\textEpsilon"; // Ε	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER EPSILON	Griechischer Großbuchstabe Epsilon
+			case 0x0395: r += U"\\textEpsilon"; // Ε	Groß­buchstabe	GREEK CAPITAL LETTER EPSILON	Griechischer Großbuchstabe Epsilon
 				break;
-			case 0x0396: r += U"\\textZeta"; // Ζ	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER ZETA	Griechischer Großbuchstabe Zeta
+			case 0x0396: r += U"\\textZeta"; // Ζ	Groß­buchstabe	GREEK CAPITAL LETTER ZETA	Griechischer Großbuchstabe Zeta
 				break;
-			case 0x0397: r += U"\\textEta"; // Η	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER ETA	Griechischer Großbuchstabe Eta
+			case 0x0397: r += U"\\textEta"; // Η	Groß­buchstabe	GREEK CAPITAL LETTER ETA	Griechischer Großbuchstabe Eta
 				break;
-			case 0x0398: r += U"\\textTheta"; // Θ	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER THETA	Griechischer Großbuchstabe Theta
+			case 0x0398: r += U"\\textTheta"; // Θ	Groß­buchstabe	GREEK CAPITAL LETTER THETA	Griechischer Großbuchstabe Theta
 				break;
-			case 0x0399: r += U"\\textIota"; // Ι	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER IOTA	Griechischer Großbuchstabe Iota
+			case 0x0399: r += U"\\textIota"; // Ι	Groß­buchstabe	GREEK CAPITAL LETTER IOTA	Griechischer Großbuchstabe Iota
 				break;
-			case 0x039A: r += U"\\textKappa"; // Κ	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER KAPPA	Griechischer Großbuchstabe Kappa
+			case 0x039A: r += U"\\textKappa"; // Κ	Groß­buchstabe	GREEK CAPITAL LETTER KAPPA	Griechischer Großbuchstabe Kappa
 				break;
-			case 0x039B: r += U"\\textLambda"; // Λ	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER LAMDA	Griechischer Großbuchstabe Lambda
+			case 0x039B: r += U"\\textLambda"; // Λ	Groß­buchstabe	GREEK CAPITAL LETTER LAMDA	Griechischer Großbuchstabe Lambda
 				break;
-			case 0x039C: r += U"\\textMu"; // Μ	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER MU	Griechischer Großbuchstabe My
+			case 0x039C: r += U"\\textMu"; // Μ	Groß­buchstabe	GREEK CAPITAL LETTER MU	Griechischer Großbuchstabe My
 				break;
-			case 0x039D: r += U"\\textNu"; // Ν	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER NU	Griechischer Großbuchstabe Ny
+			case 0x039D: r += U"\\textNu"; // Ν	Groß­buchstabe	GREEK CAPITAL LETTER NU	Griechischer Großbuchstabe Ny
 				break;
-			case 0x039E: r += U"\\textXi"; // Ξ	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER XI	Griechischer Großbuchstabe Xi
+			case 0x039E: r += U"\\textXi"; // Ξ	Groß­buchstabe	GREEK CAPITAL LETTER XI	Griechischer Großbuchstabe Xi
 				break;
-			case 0x039F: r += U"\\textOmikron"; // Ο	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER OMICRON	Griechischer Großbuchstabe Omikron
+			case 0x039F: r += U"\\textOmikron"; // Ο	Groß­buchstabe	GREEK CAPITAL LETTER OMICRON	Griechischer Großbuchstabe Omikron
 				break;
-			case 0x03A0: r += U"\\textPi"; // Π	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER PI	Griechischer Großbuchstabe Pi
+			case 0x03A0: r += U"\\textPi"; // Π	Groß­buchstabe	GREEK CAPITAL LETTER PI	Griechischer Großbuchstabe Pi
 				break;
-			case 0x03A1: r += U"\\textRho"; // Ρ	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER RHO	Griechischer Großbuchstabe Rho
+			case 0x03A1: r += U"\\textRho"; // Ρ	Groß­buchstabe	GREEK CAPITAL LETTER RHO	Griechischer Großbuchstabe Rho
 				break;
-			case 0x03A3: r += U"\\textSigma"; // Σ	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER SIGMA	Griechischer Großbuchstabe Sigma
+			case 0x03A3: r += U"\\textSigma"; // Σ	Groß­buchstabe	GREEK CAPITAL LETTER SIGMA	Griechischer Großbuchstabe Sigma
 				break;
 			case 0x03A4: r += U"\\textTau"; // Τ (Tau)
 				break;
-			case 0x03A5: r += U"\\textUpsilon"; // Υ	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER UPSILON	Griechischer Großbuchstabe Ypsilon
+			case 0x03A5: r += U"\\textUpsilon"; // Υ	Groß­buchstabe	GREEK CAPITAL LETTER UPSILON	Griechischer Großbuchstabe Ypsilon
 				break;
-			case 0x03A6: r += U"\\textPhi"; // Φ	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER PHI	Griechischer Großbuchstabe Phi
+			case 0x03A6: r += U"\\textPhi"; // Φ	Groß­buchstabe	GREEK CAPITAL LETTER PHI	Griechischer Großbuchstabe Phi
 				break;
-			case 0x03A7: r += U"\\textChi"; // Χ	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER CHI	Griechischer Großbuchstabe Chi
+			case 0x03A7: r += U"\\textChi"; // Χ	Groß­buchstabe	GREEK CAPITAL LETTER CHI	Griechischer Großbuchstabe Chi
 				break;
-			case 0x03A8: r += U"\\textPsi"; // Ψ	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER PSI	Griechischer Großbuchstabe Psi
+			case 0x03A8: r += U"\\textPsi"; // Ψ	Groß­buchstabe	GREEK CAPITAL LETTER PSI	Griechischer Großbuchstabe Psi
 				break;
-			case 0x03A9: r += U"\\textOmega"; // Ω	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER OMEGA	Griechischer Großbuchstabe Omega
+			case 0x03A9: r += U"\\textOmega"; // Ω	Groß­buchstabe	GREEK CAPITAL LETTER OMEGA	Griechischer Großbuchstabe Omega
 				break;
 				
 			case 0x03AC: r += U"$\\acute{\\alpha}$"; 	//	ά
@@ -1589,55 +1589,55 @@ namespace docscript
 			case 0x03Ce: r += U"$\\acute{\\omega}$"; 	//	ώ
 				break;
 
-			case 0x03B1: r += U"\\textalpha"; // α	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER ALPHA	Griechischer Kleinbuchstabe Alpha
+			case 0x03B1: r += U"\\textalpha"; // α	Klein­buchstabe	ALPHA	Alpha
 				break;
-			case 0x03B2: r += U"\\textbeta"; // β	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER BETA	Griechischer Kleinbuchstabe Beta
+			case 0x03B2: r += U"\\textbeta"; // β	Klein­buchstabe	BETA	Beta
 				break;
-			case 0x03B3: r += U"\\textgamma"; // γ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER GAMMA	Griechischer Kleinbuchstabe Gamma
+			case 0x03B3: r += U"\\textgamma"; // γ	Klein­buchstabe	GAMMA	Gamma
 				break;
-			case 0x03B4: r += U"\\textdelta"; // δ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER DELTA	Griechischer Kleinbuchstabe Delta
+			case 0x03B4: r += U"\\textdelta"; // δ	Klein­buchstabe	DELTA	Delta
 				break;
-			case 0x03B5: r += U"\\textepsilon"; // ε	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER EPSILON	Griechischer Kleinbuchstabe Epsilon
+			case 0x03B5: r += U"\\textepsilon"; // ε	Klein­buchstabe	EPSILON	Epsilon
 				break;
-			case 0x03B6: r += U"\\textzeta"; // ζ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER ZETA	Griechischer Kleinbuchstabe Zeta
+			case 0x03B6: r += U"\\textzeta"; // ζ	Klein­buchstabe	ZETA	Zeta
 				break;
-			case 0x03B7: r += U"\\texteta"; // η	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER ETA	Griechischer Kleinbuchstabe Eta
+			case 0x03B7: r += U"\\texteta"; // η	Klein­buchstabe	ETA	Eta
 				break;
-			case 0x03B8: r += U"\\texttheta"; // θ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER THETA	Griechischer Kleinbuchstabe Theta
+			case 0x03B8: r += U"\\texttheta"; // θ	Klein­buchstabe	THETA	Theta
 				break;
-			case 0x03B9: r += U"\\textiota"; // ι	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER IOTA	Griechischer Kleinbuchstabe Iota
+			case 0x03B9: r += U"\\textiota"; // ι	Klein­buchstabe	IOTA	Iota
 				break;
-			case 0x03BA: r += U"\\textkappa"; // κ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER KAPPA	Griechischer Kleinbuchstabe Kappa
+			case 0x03BA: r += U"\\textkappa"; // κ	Klein­buchstabe	KAPPA	Kappa
 				break;
-			case 0x03BB: r += U"\\textlambda"; // λ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER LAMDA	Griechischer Kleinbuchstabe Lambda
+			case 0x03BB: r += U"\\textlambda"; // λ	Klein­buchstabe	LAMDA	Lambda
 				break;
-			case 0x03BC: r += U"\\textmu"; // μ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER MU	Griechischer Kleinbuchstabe My
+			case 0x03BC: r += U"\\textmu"; // μ	Klein­buchstabe	MU	My
 				break;
-			case 0x03BD: r += U"\\textnu"; // ν	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER NU	Griechischer Kleinbuchstabe Ny
+			case 0x03BD: r += U"\\textnu"; // ν	Klein­buchstabe	NU	Ny
 				break;
-			case 0x03BE: r += U"\\textxi"; // ξ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER XI	Griechischer Kleinbuchstabe Xi
+			case 0x03BE: r += U"\\textxi"; // ξ	Klein­buchstabe	XI	Xi
 				break;
-			case 0x03BF: r += U"\\textomikron"; // ο	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER OMICRON	Griechischer Kleinbuchstabe Omikron
+			case 0x03BF: r += U"\\textomikron"; // ο	Klein­buchstabe	OMICRON	Omikron
 				break;
-			case 0x03C0: r += U"\\textpi"; // π	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER PI	Griechischer Kleinbuchstabe Pi
+			case 0x03C0: r += U"\\textpi"; // π	Klein­buchstabe	PI	Pi
 				break;
-			case 0x03C1: r += U"\\textrho"; // ρ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER RHO	Griechischer Kleinbuchstabe Rho
+			case 0x03C1: r += U"\\textrho"; // ρ	Klein­buchstabe	RHO	Rho
 				break;
-			case 0x03C2: r += U"\\textsigma"; // ς	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER FINAL SIGMA	Griechischer Kleinbuchstabe finales Sigma
+			case 0x03C2: r += U"\\textsigma"; // ς	Klein­buchstabe	FINAL SIGMA	finales Sigma
 				break;
-			case 0x03C3: r += U"\\textsigma"; // σ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER SIGMA	Griechischer Kleinbuchstabe Sigma
+			case 0x03C3: r += U"\\textsigma"; // σ	Klein­buchstabe	SIGMA	Sigma
 				break;
-			case 0x03C4: r += U"\\texttau"; // τ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER TAU	Griechischer Kleinbuchstabe Tau
+			case 0x03C4: r += U"\\texttau"; // τ	Klein­buchstabe	TAU	Tau
 				break;
-			case 0x03C5: r += U"\\textupsilon"; // υ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER UPSILON	Griechischer Kleinbuchstabe Ypsilon
+			case 0x03C5: r += U"\\textupsilon"; // υ	Klein­buchstabe	UPSILON	Ypsilon
 				break;
-			case 0x03C6: r += U"\\textphi"; // φ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER PHI	Griechischer Kleinbuchstabe Phi
+			case 0x03C6: r += U"\\textphi"; // φ	Klein­buchstabe	PHI	Phi
 				break;
-			case 0x03C7: r += U"\\textchi"; // χ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER CHI	Griechischer Kleinbuchstabe Chi
+			case 0x03C7: r += U"\\textchi"; // χ	Klein­buchstabe	CHI	Chi
 				break;
-			case 0x03C8: r += U"\\textpsi"; // ψ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER PSI	Griechischer Kleinbuchstabe Psi
+			case 0x03C8: r += U"\\textpsi"; // ψ	Klein­buchstabe	PSI	Psi
 				break;
-			case 0x03C9: r += U"\\textomega"; // ω	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER OMEGA	Griechischer Kleinbuchstabe Omega
+			case 0x03C9: r += U"\\textomega"; // ω	Klein­buchstabe	OMEGA	Omega
 				break;
 			default:
 				r += *pos;
