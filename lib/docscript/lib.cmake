@@ -66,6 +66,10 @@ set (docscript_filter
 
 	lib/docscript/src/generator/filter/binary_to_md.h
 	lib/docscript/src/generator/filter/binary_to_md.cpp
+	
+	lib/docscript/src/generator/filter/binary_to_latex.h
+	lib/docscript/src/generator/filter/binary_to_latex.cpp
+	
 )
 
 source_group("generator" FILES ${docscript_generator})

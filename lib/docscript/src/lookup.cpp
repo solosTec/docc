@@ -25,6 +25,7 @@ namespace docscript
 			if (boost::algorithm::equals(name, "sub"))	return false;
 			if (boost::algorithm::equals(name, "sup"))	return false;
 			if (boost::algorithm::equals(name, "link"))	return false;
+			if (boost::algorithm::equals(name, "ref"))	return false;
 			if (boost::algorithm::equals(name, "now"))	return false;
 			//if (boost::algorithm::equals(name, "set"))	return false;
 			if (boost::algorithm::equals(name, "get"))	return false;

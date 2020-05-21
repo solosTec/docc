@@ -6,6 +6,7 @@
  */ 
 
 #include <docscript/generator/gen_LaTeX.h>
+#include "filter/binary_to_latex.h"
 
 #include <cyng/vm/generator.h>
 #include <cyng/io/serializer.h>
@@ -105,12 +106,24 @@ namespace docscript
 			<< std::endl
 			<< build_cmd("usepackage", "official", "eurosym")
 			<< std::endl
-			<< build_cmd("usepackage", "stix")
+			//	stix generates error when used
+// 			<< build_cmd("usepackage", "stix")
+// 			<< std::endl
+
+
+			//	critical package
+			//	may require to install additional packages like
+			//	babel-greek, greek-fontenc, cbfonts
+			<< "% install babel-greek, greek-fontenc and cbfonts when using textgreek"
 			<< std::endl
+			<< build_cmd("usepackage", "textgreek")
+			<< std::endl
+			
 			<< build_cmd("usepackage", "amsmath")//v2.14
 			<< std::endl
-			<< build_cmd("usepackage", "amssymb") // v3.01
-			<< std::endl
+// 				amssymb is redundant when using package stix
+ 			<< build_cmd("usepackage", "amssymb") // v3.01
+ 			<< std::endl
 			<< build_cmd("usepackage", "amsfonts") // v3.01
 			<< std::endl
 			<< build_cmd("usepackage", "latexsym")
@@ -475,7 +488,8 @@ namespace docscript
 			<< std::endl
 			<< build_cmd("caption", caption)
 			<< std::endl
-			<< build_cmd("label", "fig:" + tag)
+			<< build_cmd("label", tag)
+// 			<< build_cmd("label", "fig:" + tag)
 			<< std::endl
 			<< build_end( "figure")
 			<< std::endl
@@ -536,7 +550,8 @@ namespace docscript
 					<< std::endl
 					<< build_cmd("caption", caption)
 					<< std::endl
-					<< build_cmd("label", "fig:" + tag)
+					<< build_cmd("label", tag)
+// 					<< build_cmd("label", "fig:" + tag)
 					<< std::endl
 					<< build_end( "subfigure")
 					<< std::endl
@@ -593,20 +608,39 @@ namespace docscript
 				ctx.push(cyng::make_object(ss.str()));
 			}
 			else {
+				
+				if (boost::algorithm::equals(language, "bin") || boost::algorithm::iequals(language, "binary")) {
 
-				//
-				//	use verbatim
-				//
-				std::stringstream ss;
-				ss
-					<< build_begin( "verbatim")
-					<< std::endl
-					<< ifs.rdbuf()
-					<< std::endl
-					<< build_end( "verbatim")
-					<< std::endl
-					;
-				ctx.push(cyng::make_object(ss.str()));
+					std::stringstream ss;
+					// binary mode required
+					std::ifstream  ifs(p.string(), std::ios::binary);
+					ifs.unsetf(std::ios::skipws);
+// 					ss << "<pre class=\"docscript-pre-binary\">" << std::endl;
+					cyng::buffer_t const inp((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+					
+					binary_to_latex filter(line_numbers, uuid_gen_());
+					
+					ss << build_begin("verbatim") << std::endl;
+					filter.convert(ss, inp);
+					ss << build_end("verbatim");
+					ctx.push(cyng::make_object(ss.str()));
+				}
+				else {
+
+					//
+					//	use verbatim
+					//
+					std::stringstream ss;
+					ss
+						<< build_begin( "verbatim")
+						<< std::endl
+						<< ifs.rdbuf()
+						<< std::endl
+						<< build_end( "verbatim")
+						<< std::endl
+						;
+					ctx.push(cyng::make_object(ss.str()));
+				}
 			}
 		}
 		else {
@@ -694,7 +728,8 @@ namespace docscript
 				<< std::endl
 				<< build_cmd("caption", title)
 				<< std::endl
-				<< build_cmd("label", "tbl:" + tag)
+				<< build_cmd("label", tag)
+// 				<< build_cmd("label", "tbl:" + tag)
 				<< std::endl
 				<< "\\endfirsthead"
 				<< std::endl
@@ -781,8 +816,15 @@ namespace docscript
 	void gen_latex::make_ref(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
-		ctx.push(cyng::make_object(cyng::io::to_str(frame)));
+// 		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		auto const reader = cyng::make_reader(frame.at(0));
+		auto const tag = name_gen_(cyng::value_cast<std::string>(reader.get("tag"), ""));
+		auto const id = boost::uuids::to_string(tag);
+		auto const text = accumulate_plain_text(reader.get("text"));
+		
+		
+		//	\hyperref[sec1]{Section 1}
+		ctx.push(cyng::make_object(build_cmd("hyperref", id, text)));
 	}
 
 	void gen_latex::format_italic(cyng::context& ctx)
@@ -865,12 +907,12 @@ namespace docscript
 
 		if (is_report()) {
 			switch (level) {
-			case 1:	return build_cmd("chapter", title) + "\n" + build_cmd("label", "chap:" + boost::uuids::to_string(name_gen_(tag)));
-			case 2: return build_cmd("section", title) + "\n" + build_cmd("label", "sec:" + boost::uuids::to_string(name_gen_(tag)));
-			case 3: return build_cmd("subsection", title) + "\n" + build_cmd("label", "sub:" + boost::uuids::to_string(name_gen_(tag)));
-			case 4: return build_cmd("subsubsection", title) + "\n" + build_cmd("label", "ssub:" + boost::uuids::to_string(name_gen_(tag)));
-			case 5: return build_cmd("paragraph", title) + "\n" + build_cmd("label", "par:" + boost::uuids::to_string(name_gen_(tag)));
-			case 6: return build_cmd("subparagraph", title) + "\n" + build_cmd("label", "spar:" + boost::uuids::to_string(name_gen_(tag)));
+			case 1:	return build_cmd("chapter", title) + "\n" + build_cmd("label", boost::uuids::to_string(name_gen_(tag)));
+			case 2: return build_cmd("section", title) + "\n" + build_cmd("label", boost::uuids::to_string(name_gen_(tag)));
+			case 3: return build_cmd("subsection", title) + "\n" + build_cmd("label", boost::uuids::to_string(name_gen_(tag)));
+			case 4: return build_cmd("subsubsection", title) + "\n" + build_cmd("label", boost::uuids::to_string(name_gen_(tag)));
+			case 5: return build_cmd("paragraph", title) + "\n" + build_cmd("label", boost::uuids::to_string(name_gen_(tag)));
+			case 6: return build_cmd("subparagraph", title) + "\n" + build_cmd("label", boost::uuids::to_string(name_gen_(tag)));
 			default:
 				break;
 			}
@@ -1481,6 +1523,122 @@ namespace docscript
 			case 0x27DA: r += U"$\\DashVDash$"; break; // ?
 			case 0x27DB: r += U"$\\dashVdash$"; break; // ?
 			case 0x27DC: r += U"$\\multimapinv$"; break; // ?
+			
+			//	greek letters
+			case 0x0391: r += U"\\textAlpha"; // Α (Alpha)
+				break;
+			case 0x0392: r += U"\\textBeta"; // Β (Beta)
+				break;
+			case 0x0393: r += U"\\textGamma"; // Γ (Gamma)
+				break;
+			case 0x0394: r += U"\\textDelta"; // Δ	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER DELTA	Griechischer Großbuchstabe Delta
+				break;
+			case 0x0395: r += U"\\textEpsilon"; // Ε	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER EPSILON	Griechischer Großbuchstabe Epsilon
+				break;
+			case 0x0396: r += U"\\textZeta"; // Ζ	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER ZETA	Griechischer Großbuchstabe Zeta
+				break;
+			case 0x0397: r += U"\\textEta"; // Η	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER ETA	Griechischer Großbuchstabe Eta
+				break;
+			case 0x0398: r += U"\\textTheta"; // Θ	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER THETA	Griechischer Großbuchstabe Theta
+				break;
+			case 0x0399: r += U"\\textIota"; // Ι	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER IOTA	Griechischer Großbuchstabe Iota
+				break;
+			case 0x039A: r += U"\\textKappa"; // Κ	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER KAPPA	Griechischer Großbuchstabe Kappa
+				break;
+			case 0x039B: r += U"\\textLambda"; // Λ	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER LAMDA	Griechischer Großbuchstabe Lambda
+				break;
+			case 0x039C: r += U"\\textMu"; // Μ	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER MU	Griechischer Großbuchstabe My
+				break;
+			case 0x039D: r += U"\\textNu"; // Ν	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER NU	Griechischer Großbuchstabe Ny
+				break;
+			case 0x039E: r += U"\\textXi"; // Ξ	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER XI	Griechischer Großbuchstabe Xi
+				break;
+			case 0x039F: r += U"\\textOmikron"; // Ο	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER OMICRON	Griechischer Großbuchstabe Omikron
+				break;
+			case 0x03A0: r += U"\\textPi"; // Π	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER PI	Griechischer Großbuchstabe Pi
+				break;
+			case 0x03A1: r += U"\\textRho"; // Ρ	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER RHO	Griechischer Großbuchstabe Rho
+				break;
+			case 0x03A3: r += U"\\textSigma"; // Σ	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER SIGMA	Griechischer Großbuchstabe Sigma
+				break;
+			case 0x03A4: r += U"\\textTau"; // Τ (Tau)
+				break;
+			case 0x03A5: r += U"\\textUpsilon"; // Υ	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER UPSILON	Griechischer Großbuchstabe Ypsilon
+				break;
+			case 0x03A6: r += U"\\textPhi"; // Φ	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER PHI	Griechischer Großbuchstabe Phi
+				break;
+			case 0x03A7: r += U"\\textChi"; // Χ	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER CHI	Griechischer Großbuchstabe Chi
+				break;
+			case 0x03A8: r += U"\\textPsi"; // Ψ	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER PSI	Griechischer Großbuchstabe Psi
+				break;
+			case 0x03A9: r += U"\\textOmega"; // Ω	Groß­buchstabe	links nach rechts	GREEK CAPITAL LETTER OMEGA	Griechischer Großbuchstabe Omega
+				break;
+				
+			case 0x03AC: r += U"$\\acute{\\alpha}$"; 	//	ά
+				break;
+			case 0x03AD: r += U"$\\acute{\\epsilon}$"; 	//	έ
+				break;
+			case 0x03AE: r += U"$\\acute{\\eta}$"; 	//	ή
+				break;
+			case 0x03AF: r += U"$\\acute{\\iota}$"; 	//	ί
+				break;
+			case 0x03CC: r += U"$\\acute{\\omikron}$"; 	//	ό
+				break;
+			case 0x03CD: r += U"$\\acute{\\upsilon}$"; 	//	ύ
+				break;
+			case 0x03Ce: r += U"$\\acute{\\omega}$"; 	//	ώ
+				break;
+
+			case 0x03B1: r += U"\\textalpha"; // α	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER ALPHA	Griechischer Kleinbuchstabe Alpha
+				break;
+			case 0x03B2: r += U"\\textbeta"; // β	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER BETA	Griechischer Kleinbuchstabe Beta
+				break;
+			case 0x03B3: r += U"\\textgamma"; // γ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER GAMMA	Griechischer Kleinbuchstabe Gamma
+				break;
+			case 0x03B4: r += U"\\textdelta"; // δ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER DELTA	Griechischer Kleinbuchstabe Delta
+				break;
+			case 0x03B5: r += U"\\textepsilon"; // ε	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER EPSILON	Griechischer Kleinbuchstabe Epsilon
+				break;
+			case 0x03B6: r += U"\\textzeta"; // ζ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER ZETA	Griechischer Kleinbuchstabe Zeta
+				break;
+			case 0x03B7: r += U"\\texteta"; // η	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER ETA	Griechischer Kleinbuchstabe Eta
+				break;
+			case 0x03B8: r += U"\\texttheta"; // θ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER THETA	Griechischer Kleinbuchstabe Theta
+				break;
+			case 0x03B9: r += U"\\textiota"; // ι	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER IOTA	Griechischer Kleinbuchstabe Iota
+				break;
+			case 0x03BA: r += U"\\textkappa"; // κ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER KAPPA	Griechischer Kleinbuchstabe Kappa
+				break;
+			case 0x03BB: r += U"\\textlambda"; // λ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER LAMDA	Griechischer Kleinbuchstabe Lambda
+				break;
+			case 0x03BC: r += U"\\textmu"; // μ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER MU	Griechischer Kleinbuchstabe My
+				break;
+			case 0x03BD: r += U"\\textnu"; // ν	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER NU	Griechischer Kleinbuchstabe Ny
+				break;
+			case 0x03BE: r += U"\\textxi"; // ξ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER XI	Griechischer Kleinbuchstabe Xi
+				break;
+			case 0x03BF: r += U"\\textomikron"; // ο	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER OMICRON	Griechischer Kleinbuchstabe Omikron
+				break;
+			case 0x03C0: r += U"\\textpi"; // π	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER PI	Griechischer Kleinbuchstabe Pi
+				break;
+			case 0x03C1: r += U"\\textrho"; // ρ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER RHO	Griechischer Kleinbuchstabe Rho
+				break;
+			case 0x03C2: r += U"\\textsigma"; // ς	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER FINAL SIGMA	Griechischer Kleinbuchstabe finales Sigma
+				break;
+			case 0x03C3: r += U"\\textsigma"; // σ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER SIGMA	Griechischer Kleinbuchstabe Sigma
+				break;
+			case 0x03C4: r += U"\\texttau"; // τ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER TAU	Griechischer Kleinbuchstabe Tau
+				break;
+			case 0x03C5: r += U"\\textupsilon"; // υ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER UPSILON	Griechischer Kleinbuchstabe Ypsilon
+				break;
+			case 0x03C6: r += U"\\textphi"; // φ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER PHI	Griechischer Kleinbuchstabe Phi
+				break;
+			case 0x03C7: r += U"\\textchi"; // χ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER CHI	Griechischer Kleinbuchstabe Chi
+				break;
+			case 0x03C8: r += U"\\textpsi"; // ψ	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER PSI	Griechischer Kleinbuchstabe Psi
+				break;
+			case 0x03C9: r += U"\\textomega"; // ω	Klein­buchstabe	links nach rechts	GREEK SMALL LETTER OMEGA	Griechischer Kleinbuchstabe Omega
+				break;
 			default:
 				r += *pos;
 				break;

@@ -1192,8 +1192,22 @@ namespace docscript
 	void gen_html::make_ref(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
-		ctx.push(cyng::make_object(cyng::io::to_str(frame)));
+//  		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		
+		auto const reader = cyng::make_reader(frame.at(0));
+		auto const tag = name_gen_(cyng::value_cast<std::string>(reader.get("tag"), ""));
+		auto const id = boost::uuids::to_string(tag);
+		auto const text = accumulate_plain_text(reader.get("text"));
+		
+		//	<a href="#id">text</a>
+		
+		std::string ref = text.empty() 
+			? "?" 
+			: (text)
+			;
+		auto const a = html::a(html::href_("#" + id), ref);
+		
+		ctx.push(cyng::make_object(a.to_str()));
 	}
 
 	void gen_html::format_italic(cyng::context& ctx)
