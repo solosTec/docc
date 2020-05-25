@@ -401,6 +401,8 @@ namespace docscript
 			<< std::endl
 			<< "\t\t\tbackground-color: #ddd;"
 			<< std::endl
+			<< "\t\t\tborder-radius: 5px;"
+			<< std::endl
 			<< "\t\t}"
 			<< std::endl
 
@@ -1085,11 +1087,15 @@ namespace docscript
 			else if (boost::algorithm::iequals(language, "docscript")) {
 
 				std::ifstream  ifs(p.string());
-				ss << "<pre class=\"docscript-pre\"><code>";
+				ss 
+					<< "<pre class=\"docscript-pre\" title=\""
+					<< caption
+					<< "\"><code>"
+					;
 				std::string const inp(static_cast<std::stringstream const&>(std::stringstream() << ifs.rdbuf()).str());
 				docscript_to_html filter(line_numbers, uuid_gen_());
 				filter.convert(ss, inp);
-				ss << "</code></pre>" << std::endl;
+				ss << std::endl << "</code></pre>" << std::endl;
 			}
 			else if (boost::algorithm::equals(language, "txt") || boost::algorithm::iequals(language, "text") || boost::algorithm::iequals(language, "verbatim")) {
 

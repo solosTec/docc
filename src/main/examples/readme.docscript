@@ -359,6 +359,22 @@ Example:
 .code(language:docscript, caption:'Reference', source:'inc/example-ref.docscript', linenumbers:true)
 
 ;
+;	alert
+;
+.h3(Alert)
+
+Create an alert box. The following alert boxes are defined:
+
+.list(items: [info, warning, caution]
+  , style: 'circle'
+  , type: unordered)
+
+
+Example:
+
+.code(language:docscript, caption:'Alert Boxes', source:'inc/example-alert.docscript', linenumbers:true)
+
+;
 ;	symbols
 ;
 .h3(Symbols)

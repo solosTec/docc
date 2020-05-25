@@ -1,0 +1,3 @@
+.alert(info: "Colors are not supported by Markdown.")
+.alert(warning: "This is a warning.")
+.alert(caution: "Colors are not supported by Markdown.")
