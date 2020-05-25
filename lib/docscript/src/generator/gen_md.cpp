@@ -18,6 +18,8 @@
 #include <cyng/set_cast.h>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/uuid/uuid_io.hpp>
+#include <boost/uuid/nil_generator.hpp>
 
 namespace docscript
 {
@@ -74,10 +76,99 @@ namespace docscript
 	{
 		emit_meta(ofs);
 		while (pos != end) {
-			emit_obj(ofs, *pos);
+			if (pos->get_class().tag() == cyng::TC_UUID) {
+				emit_intrinsic(ofs, cyng::value_cast(*pos, boost::uuids::nil_uuid()));
+			}
+			else {
+				emit_obj(ofs, *pos);
+			}
 			++pos;
 		}
 		emit_footnotes(ofs);
+		return ofs;
+	}
+
+	std::ofstream& gen_md::emit_intrinsic(std::ofstream& ofs, boost::uuids::uuid tag) const
+	{
+
+		if (tag == name_gen_("[ToC]")) {
+			emit_toc(ofs, 5);
+		}
+		else if (tag == name_gen_("[ToC-1]")) {
+			emit_toc(ofs, 1);
+		}
+		else if (tag == name_gen_("[ToC-2]")) {
+			emit_toc(ofs, 2);
+		}
+		else if (tag == name_gen_("[ToC-3]")) {
+			emit_toc(ofs, 3);
+		}
+		else if (tag == name_gen_("[ToC-4]")) {
+			emit_toc(ofs, 4);
+		}
+		else {
+			ofs
+				<< "***ERROR: unknown intrinsic: "
+				<< boost::uuids::to_string(tag)
+				<< std::endl
+				;
+		}
+		return ofs;
+	}
+
+	std::ofstream& gen_md::emit_toc(std::ofstream& ofs, std::size_t depth) const
+	{
+
+		ofs
+			<< "# "
+			<< get_name(i18n::WID_TOC)
+			<< std::endl
+			;
+
+		auto const toc = serialize(content_table_);
+		emit_toc(ofs, toc, 0, depth);
+
+		ofs
+			<< std::endl
+			;
+
+		return ofs;
+	}
+
+	std::ofstream& gen_md::emit_toc(std::ofstream& ofs, cyng::vector_t const& toc, std::size_t level, std::size_t depth) const
+	{
+		bool const descend = level + 1 < depth;
+		for (auto const& header : toc) {
+
+			auto const h = cyng::to_param_map(header);
+			auto const title = cyng::io::to_str(h.at("title"));
+			auto const number = cyng::io::to_str(h.at("number"));
+			auto const tag = cyng::value_cast(h.at("tag"), boost::uuids::nil_uuid());
+			auto const href = "#" + boost::uuids::to_string(tag);
+
+			ofs
+				<< std::string(level, '\t')
+				<< '-'
+				<< ' '
+				<< '['
+				<< number
+				<< ' '
+				<< title
+				<< ']'
+				<< '('
+				<< href
+				<< ')'
+				<< std::endl
+				;
+
+			auto const pos = h.find("sub");
+			if (descend && (pos != h.end())) {
+
+				auto const sub = cyng::to_vector(pos->second);
+				emit_toc(ofs, sub, level + 1, depth);
+
+			}
+		}
 		return ofs;
 	}
 
@@ -651,6 +742,32 @@ namespace docscript
 		ctx.push(cyng::make_object(cyng::io::to_str(frame)));
 	}
 
+	void gen_md::make_tok(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		auto const reader = cyng::make_reader(frame.at(0));
+		auto const level = cyng::numeric_cast<std::size_t>(reader.get("depth"), 3u);
+
+		switch (level) {
+		case 1:
+			ctx.push(cyng::make_object(name_gen_("[ToC-1]")));
+			break;
+		case 2:
+			ctx.push(cyng::make_object(name_gen_("[ToC-2]")));
+			break;
+		case 3:
+			ctx.push(cyng::make_object(name_gen_("[ToC-3]")));
+			break;
+		case 4:
+			ctx.push(cyng::make_object(name_gen_("[ToC-4]")));
+			break;
+		default:
+			ctx.push(cyng::make_object(name_gen_("[ToC]")));
+			break;
+		}
+
+	}
+
 	void gen_md::format_italic(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
@@ -719,18 +836,30 @@ namespace docscript
 	void gen_md::header(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
-		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		auto const reader = cyng::make_reader(frame.at(0));
 		auto const title = accumulate_plain_text(reader.get("title"));
-		auto const tag = cyng::io::to_str(reader.get("tag"));
+
+		auto const tag = name_gen_(cyng::value_cast(reader.get("tag"), title));
+		auto const id = boost::uuids::to_string(tag);
 		auto const level = cyng::numeric_cast<std::size_t>(reader.get("level"), 0ul);
 
-		auto const number = content_table_.add(level, uuid_gen_(), title);
+		auto const number = content_table_.add(level, tag, title);
 
-// 		std::cout << std::string(level, '#') << " " << number << " " << title << std::endl;
+		std::stringstream ss;
+		ss
+			<< "<a id=\""
+			<< id
+			<< "\"></a>"
+			<< std::endl 
+			<< std::string(level, '#')
+			<< ' '
+			<< number
+			<< ' '
+			<< title
+			;
 
-		ctx.push(cyng::make_object(std::string(level, '#') + " " + number + " " + title));
+		ctx.push(cyng::make_object(ss.str()));
 	}
 
 	void gen_md::section(int level, cyng::context& ctx)
@@ -739,18 +868,26 @@ namespace docscript
 		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		auto const title = accumulate_plain_text(frame);
-		auto const number = content_table_.add(level, uuid_gen_(), title);
+		auto const tag = name_gen_(title);
+		auto const id = boost::uuids::to_string(tag);
+		auto const number = content_table_.add(level, tag, title);
 
-		ctx.push(cyng::make_object(std::string(level, '#') + " " + number + " " + title));
+		//ctx.push(cyng::make_object(std::string(level, '#') + " " + number + " " + title));
 
-		//std::stringstream ss;
-		//ss
-		//	<< std::string(level, '#')
-		//	<< ' '
-		//	<< cyng::io::to_str(frame)
-		//	<< std::endl
-		//	;
-		//ctx.push(cyng::make_object(ss.str()));
+		std::stringstream ss;
+		ss
+			<< "<a id=\""
+			<< id
+			<< "\"></a>"
+			<< std::endl
+			<< std::string(level, '#')
+			<< ' '
+			<< number
+			<< ' '
+			<< title
+			;
+
+		ctx.push(cyng::make_object(ss.str()));
 	}
 
 	void gen_md::make_footnote(cyng::context& ctx)

@@ -26,7 +26,7 @@ namespace docscript
 	class numbering
 	{
 		friend cyng::vector_t serialize(numbering const&);
-		friend cyng::vector_t serialize(std::size_t depth, numbering const* p);
+		friend cyng::vector_t serialize(std::size_t depth, numbering const* p, std::vector<std::size_t>);
 
 	public:
 		numbering();
@@ -51,10 +51,14 @@ namespace docscript
 		 * std::optional<> requires complete types and no recursive
 		 * declarations are possible.
 		 */
-		std::unique_ptr<numbering> next_;
-		std::unique_ptr<numbering> sub_;
+		std::unique_ptr<numbering> next_;	//	sibling
+		std::unique_ptr<numbering> sub_;	//	child
 	};
 
+	/**
+	 * Takes a vector with hierarchical information
+	 * and generates the numbering.
+	 */
 	std::string get_numbering(std::vector<std::size_t> const&);
 
 	/**
@@ -62,10 +66,10 @@ namespace docscript
 	 * like 3.2.5 ...
 	 */
 	cyng::vector_t serialize(numbering const&);
-	cyng::vector_t serialize(std::size_t, numbering const* n);
+	cyng::vector_t serialize(std::size_t, numbering const* n, std::vector<std::size_t>);
 
 	/**
-	 * element like table, figure, footnode with an UUID
+	 * element like table, figure, footnote with an UUID
 	 * and text
 	 */
 	class element
@@ -83,36 +87,16 @@ namespace docscript
 	/**
 	 * Simple list of footnotes
 	 */
-	//class footnote
-	//{
-	//public:
-	//	footnote(boost::uuids::uuid, std::string);
-
-	//	std::string get_tag() const;
-	//	std::string const& get_note() const;
-	//private:
-	//	boost::uuids::uuid const tag_;
-	//	std::string const note_;
-	//};
-
 	using footnotes_t = std::list<element>;
 
 	/**
 	 * Simple list of figures
 	 */
-	//class figure
-	//{
-	//public:
-	//	figure(boost::uuids::uuid, std::string);
-
-	//	std::string get_tag() const;
-	//	std::string const& get_title() const;
-	//private:
-	//	boost::uuids::uuid const tag_;
-	//	std::string const title_;
-	//};
-
 	using figures_t = std::list<element>;
+
+	/**
+	 * Simple list of tables
+	 */
 	using tables_t = std::list<element>;
 
 }

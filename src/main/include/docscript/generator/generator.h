@@ -24,6 +24,7 @@ namespace docscript
 		enum word_id {
 			WID_FIGURE,
 			WID_TABLE,
+			WID_TOC,
 		};
 	}
 
@@ -81,6 +82,7 @@ namespace docscript
 		virtual void section(int, cyng::context& ctx) = 0;
 		virtual void make_footnote(cyng::context& ctx) = 0;
 		virtual void make_ref(cyng::context& ctx) = 0;
+		virtual void make_tok(cyng::context& ctx) = 0;
 
 		virtual void format_italic(cyng::context& ctx) = 0;
 		virtual void format_bold(cyng::context& ctx) = 0;

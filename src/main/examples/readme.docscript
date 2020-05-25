@@ -3,6 +3,11 @@
 .set(name:docc, language:C++)
 
 ;
+; Table od Contents
+;
+.toc(depth: 3)
+
+;
 ; Overview
 ;
 .h1 Overview
@@ -331,6 +336,31 @@ Example:
 
 .table(source:'inc/table.csv', header:"uuid string int", title:'Caption')
 
+;
+;	table of content
+;
+.h3(Table of Contents)
+
+Generates a table of contents.
+
+Example:
+
+.code(language:docscript, caption:'Table of Contents', source:'inc/example-toc.docscript', linenumbers:true)
+
+;
+;	reference
+;
+.h3(Reference)
+
+Create a reference to another tag in the same document.
+
+Example:
+
+.code(language:docscript, caption:'Reference', source:'inc/example-ref.docscript', linenumbers:true)
+
+;
+;	symbols
+;
 .h3(Symbols)
 
 The following symbols are pre-defined:
@@ -390,8 +420,8 @@ Define a set of document meta data.
 
 Example: .b '.meta(title:readme, author:solosTec)'
 
-.h3(Generator Functions)
-.h4(tag)
+.h2(Generator Functions)
+.h3(tag)
 
 Generates a random .link(text: 'uuid'
               , title: 'Universally Unique Identifier'
@@ -401,7 +431,7 @@ Example:
 
 .code(language:docscript, caption:'Generator: Tag', source:'inc/example-tag.docscript', linenumbers:true)
 
-.h4(map)
+.h3(map)
 
 Converts a list of parameters into a single object. Usefull to create a vector of objects.
 

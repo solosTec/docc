@@ -51,6 +51,7 @@ namespace docscript
 		virtual void section(int, cyng::context& ctx) override;
 		virtual void make_footnote(cyng::context& ctx) override;
 		virtual void make_ref(cyng::context& ctx) override;
+		virtual void make_tok(cyng::context& ctx) override;
 
 		virtual void format_italic(cyng::context& ctx) override;
 		virtual void format_bold(cyng::context& ctx) override;
@@ -64,6 +65,9 @@ namespace docscript
 		std::ofstream& emit_meta(std::ofstream&) const;
 		std::ofstream& emit_obj(std::ofstream&, cyng::object) const;
 		std::ofstream& emit_footnotes(std::ofstream&) const;
+		std::ofstream& emit_intrinsic(std::ofstream&, boost::uuids::uuid) const;
+		std::ofstream& emit_toc(std::ofstream&, std::size_t) const;
+		std::ofstream& emit_toc(std::ofstream&, cyng::vector_t const&, std::size_t, std::size_t) const;
 
 
 	private:

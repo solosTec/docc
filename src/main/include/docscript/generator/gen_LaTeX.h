@@ -52,6 +52,7 @@ namespace docscript
 		virtual void section(int, cyng::context& ctx) override;
 		virtual void make_footnote(cyng::context& ctx) override;
 		virtual void make_ref(cyng::context& ctx) override;
+		virtual void make_tok(cyng::context& ctx) override;
 
 		virtual void format_italic(cyng::context& ctx) override;
 		virtual void format_bold(cyng::context& ctx) override;

@@ -29,6 +29,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <boost/uuid/nil_generator.hpp>
 
 namespace docscript
 {
@@ -496,6 +497,22 @@ namespace docscript
 			<< "\t\t}"
 			<< std::endl
 
+			//
+			//	ToC
+			//
+			<< "\t\tdetails > ul * {"
+			<< std::endl
+			<< "\t\t\tlist-style-type: none;"
+			<< std::endl
+			<< "\t\t\ttext-decoration: none;"
+			<< std::endl
+			<< "\t\t\tmargin-left: 0em;"
+			<< std::endl
+			<< "\t\t\tpadding-left: 0.7em;"
+			<< std::endl
+			<< "\t\t}"
+			<< std::endl
+
 			<< "\t</style>"
 			<< std::endl
 
@@ -506,7 +523,12 @@ namespace docscript
 	std::ofstream& gen_html::emit_body(std::ofstream& ofs, cyng::vector_t::const_iterator pos, cyng::vector_t::const_iterator end) const
 	{
 		while (pos != end) {
-			emit_body(ofs, *pos);
+			if (pos->get_class().tag() == cyng::TC_UUID) {
+				emit_intrinsic(ofs, cyng::value_cast(*pos, boost::uuids::nil_uuid()));
+			}
+			else {
+				emit_body(ofs, *pos);
+			}
 			++pos;
 		}
 
@@ -518,6 +540,117 @@ namespace docscript
 	{
 		ofs
 			<< cyng::io::to_str(obj)
+			<< std::endl
+			;
+		return ofs;
+	}
+
+	std::ofstream& gen_html::emit_intrinsic(std::ofstream& ofs, boost::uuids::uuid tag) const
+	{
+
+		if (tag == name_gen_("[ToC]")) {
+			emit_toc(ofs, 5);
+		}
+		else if (tag == name_gen_("[ToC-1]")) {
+			emit_toc(ofs, 1);
+		}
+		else if (tag == name_gen_("[ToC-2]")) {
+			emit_toc(ofs, 2);
+		}
+		else if (tag == name_gen_("[ToC-3]")) {
+			emit_toc(ofs, 3);
+		}
+		else if (tag == name_gen_("[ToC-4]")) {
+			emit_toc(ofs, 4);
+		}
+		else {
+			ofs
+				<< "***ERROR: unknown intrinsic: "
+				<< boost::uuids::to_string(tag)
+				<< std::endl
+				;
+		}
+		return ofs;
+	}
+
+	std::ofstream& gen_html::emit_toc(std::ofstream& ofs, std::size_t depth) const
+	{
+
+		ofs
+			<< "<details>"
+			<< std::endl
+			<< "\t<summary>"
+			<< get_name(i18n::WID_TOC)
+			<< "</summary>"
+			<< std::endl
+			;
+
+		auto const toc = serialize(content_table_);
+
+		emit_toc(ofs, toc, 0, depth);
+
+		ofs
+			<< "</details>"
+			<< std::endl
+			;
+		return ofs;
+	}
+
+	std::ofstream& gen_html::emit_toc(std::ofstream& ofs, cyng::vector_t const& toc, std::size_t level, std::size_t depth) const
+	{
+		ofs
+			<< std::string(level + 1, '\t')
+			<< "<ul toclevel-"
+			<< level
+			<< ">"
+			<< std::endl
+			;
+
+		bool const descend = level + 1 < depth;
+		for (auto const& header : toc) {
+
+			auto const h = cyng::to_param_map(header);
+			auto const title = cyng::io::to_str(h.at("title"));
+			auto const number = cyng::io::to_str(h.at("number"));
+			auto const tag = cyng::value_cast(h.at("tag"), boost::uuids::nil_uuid());
+			auto const href = "#" + boost::uuids::to_string(tag);
+			auto const a = html::a(html::href_(href), html::title_(title), number + "&nbsp;" + title);
+
+
+			auto const pos = h.find("sub");
+			if (descend && (pos != h.end())) {
+				//	<ul> must be nested inside of <li></li>
+				ofs
+					<< std::string(level + 1, '\t')
+					<< "<li>"
+					<< a.to_str()
+					<< std::endl
+					;
+
+				auto const sub = cyng::to_vector(pos->second);
+				emit_toc(ofs, sub, level + 1, depth);
+
+				ofs
+					<< std::string(level + 1, '\t')
+					<< "</li>"
+					<< std::endl;
+			}
+			else {
+				ofs
+					<< std::string(level + 1, '\t')
+					<< "<li>"
+					<< a.to_str()
+					<< "</li>"
+					<< std::endl
+					;
+
+			}
+
+
+		}
+		ofs
+			<< std::string(level + 1, '\t')
+			<< "</ul>"
 			<< std::endl
 			;
 		return ofs;
@@ -1210,6 +1343,31 @@ namespace docscript
 		ctx.push(cyng::make_object(a.to_str()));
 	}
 
+	void gen_html::make_tok(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		auto const reader = cyng::make_reader(frame.at(0));
+		auto const level = cyng::numeric_cast<std::size_t>(reader.get("depth"), 3u);
+
+		switch (level) {
+		case 1:
+			ctx.push(cyng::make_object(name_gen_("[ToC-1]")));
+			break;
+		case 2:
+			ctx.push(cyng::make_object(name_gen_("[ToC-2]")));
+			break;
+		case 3:
+			ctx.push(cyng::make_object(name_gen_("[ToC-3]")));
+			break;
+		case 4:
+			ctx.push(cyng::make_object(name_gen_("[ToC-4]")));
+			break;
+		default:
+			ctx.push(cyng::make_object(name_gen_("[ToC]")));
+			break;
+		}
+	}
+
 	void gen_html::format_italic(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();
@@ -1461,7 +1619,7 @@ namespace docscript
 	}
 
 	const std::string gen_html::icon_info_ = R"__(
-	<svg "viewBox="0 0 62 62"
+	<svg viewBox="0 0 62 62"
 	width="62" height="62"
 	version="1.1">
 	<defs>
@@ -1496,7 +1654,7 @@ namespace docscript
 	</g></svg>)__";
 
 	const std::string gen_html::icon_warning_ = R"__(
-	<svg "viewBox="0 0 62 62"
+	<svg viewBox="0 0 62 62"
 	width="62" height="62"
 	version="1.1">
 	<g transform="translate(-78.617262,51.751263)">
@@ -1519,7 +1677,7 @@ namespace docscript
   </g></svg>)__";
 
 	const std::string gen_html::icon_caution_ = R"__(
-	<svg "viewBox="0 0 62 62"
+	<svg viewBox="0 0 62 62"
 	width="62" height="62"
 	version="1.1">
 	<g transform="translate(-78.617262,51.751263)">

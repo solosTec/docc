@@ -827,6 +827,20 @@ namespace docscript
 		ctx.push(cyng::make_object(build_cmd("hyperref", id, text)));
 	}
 
+	void gen_latex::make_tok(cyng::context& ctx)
+	{
+		auto const frame = ctx.get_frame();
+		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
+		auto const reader = cyng::make_reader(frame.at(0));
+		auto const level = cyng::numeric_cast<std::size_t>(reader.get("depth"), 3u);
+		//
+		//	ToDo: \setcounter{tocdepth}{1}
+		//	before \begin{document}
+		//
+
+		ctx.push(cyng::make_object("\\tableofcontents"));
+	}
+
 	void gen_latex::format_italic(cyng::context& ctx)
 	{
 		auto const frame = ctx.get_frame();

@@ -94,10 +94,10 @@ namespace docscript
 			}
 		}
 		else {
-			ptr->add_next(cp);
 			if (root) {
 				++vec.at(idx);
 			}
+			ptr->add_next(cp);
 		}
 	}
 
@@ -124,36 +124,68 @@ namespace docscript
 
 	cyng::vector_t serialize(numbering const& n)
 	{
-
 		//
 		//	skip first entry
 		//
 		if (n.next_) {
 
-			return serialize(1, n.next_.get());
+			std::vector<std::size_t> number;
+			number.push_back(1u);
+			return serialize(1, n.next_.get(), number);
 
 		}
 
 		return cyng::vector_t();
 	}
 
-	cyng::vector_t serialize(std::size_t depth, numbering const* p)
+	cyng::vector_t serialize(std::size_t depth, numbering const* p, std::vector<std::size_t> number)
 	{
 		cyng::vector_t vec;
 
-		//std::cout << "serialize " << std::string(depth, '.' ) << ": " << p->title_ << std::endl;
+		//std::cout 
+		//	<< "serialize " 
+		//	<< std::string(depth, '.' ) 
+		//	<< ": " 
+		//	<< p->title_ 
+		//	<< std::endl;
 
 		if (p->sub_) {
-			auto params = cyng::param_map_factory("tag", p->tag_)("title", p->title_)("depth", depth)("sub", serialize(depth + 1, p->sub_.get()))();
+			//	has child(ren)
+
+			//std::cout
+			//	<< get_numbering(number)
+			//	<< ' '
+			//	<< p->title_
+			//	<< std::endl;
+
+			auto tmp = number;
+			tmp.push_back(1);
+			auto params = cyng::param_map_factory("tag", p->tag_)
+				("title", p->title_)
+				("number", get_numbering(number))
+				("depth", depth)
+				("sub", serialize(depth + 1, p->sub_.get(), tmp))();
 			vec.push_back(params);
 		}
 		else {
-			auto params = cyng::param_map_factory("tag", p->tag_)("title", p->title_)("depth", depth)();
+			//std::cout
+			//	<< get_numbering(number)
+			//	<< ' '
+			//	<< p->title_
+			//	<< std::endl;
+
+			auto params = cyng::param_map_factory("tag", p->tag_)
+				("title", p->title_)
+				("number", get_numbering(number))
+				("depth", depth)();
 			vec.push_back(params);
 		}
 
 		if (p->next_) {
-			auto const v = serialize(depth, p->next_.get());
+			//	has sibling(s)
+
+			++number.back();
+			auto const v = serialize(depth, p->next_.get(), number);
 			vec.insert(vec.end(), v.begin(), v.end());
 		}
 
