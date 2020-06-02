@@ -430,12 +430,20 @@ Example:
 .code(language:docscript, caption:'Get', source:'inc/example-get.docscript', linenumbers:true)
 
 
+;
+;	Commands
+;	Meta
+;
 .h3(Meta)
 
 Define a set of document meta data.
 
 Example: .b '.meta(title:readme, author:solosTec)'
 
+;
+;	Generator Functions
+;	tag
+;
 .h2(Generator Functions)
 .h3(tag)
 
@@ -447,6 +455,10 @@ Example:
 
 .code(language:docscript, caption:'Generator: Tag', source:'inc/example-tag.docscript', linenumbers:true)
 
+;
+;	Generator Functions
+;	map
+;
 .h3(map)
 
 Converts a list of parameters into a single object. Usefull to create a vector of objects.
@@ -454,3 +466,12 @@ Converts a list of parameters into a single object. Usefull to create a vector o
 Example: 
 
 .code(language:docscript, caption:'Generator: Map', source:'inc/example-map.docscript', linenumbers:true)
+
+;
+;	Generator Functions
+;	version
+;
+.h3(version)
+
+Get the current version in the format: major.minor.patch.tweak
+

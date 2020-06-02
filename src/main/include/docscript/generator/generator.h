@@ -59,6 +59,7 @@ namespace docscript
 		virtual void print_hline(cyng::context& ctx) = 0;	//!<	ruler
 		virtual void create_uuid(cyng::context& ctx);
 		virtual void make_map(cyng::context& ctx);
+		virtual void get_version(cyng::context& ctx);
 
 		virtual void generate_file(cyng::context& ctx) = 0;
 		virtual void generate_meta(cyng::context& ctx) = 0;

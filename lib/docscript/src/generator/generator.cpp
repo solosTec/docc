@@ -6,12 +6,14 @@
  */ 
 
 #include <docscript/generator/generator.h>
+#include "DOCC_project_info.h"
 
 #include <cyng/vm/generator.h>
 #include <cyng/io/serializer.h>
 #include <cyng/value_cast.hpp>
 #include <cyng/dom/reader.h>
 #include <cyng/json.h>
+#include <cyng/intrinsics/version.h>
 
 #include <boost/algorithm/string.hpp>
 
@@ -68,6 +70,7 @@ namespace docscript
 		vm_.register_function("currency", 1, std::bind(&generator::print_currency, this, std::placeholders::_1));
 		vm_.register_function("tag", 1, std::bind(&generator::create_uuid, this, std::placeholders::_1));
 		vm_.register_function("map", 1, std::bind(&generator::make_map, this, std::placeholders::_1));
+		vm_.register_function("version", 1, std::bind(&generator::get_version, this, std::placeholders::_1));
 
 		vm_.register_function("generate.file", 1, std::bind(&generator::generate_file, this, std::placeholders::_1));
 		vm_.register_function("generate.meta", 1, std::bind(&generator::generate_meta, this, std::placeholders::_1));
@@ -278,6 +281,11 @@ namespace docscript
 			ctx.push(cyng::param_map_factory("error", frame.at(0).get_class().type_name())());
 			break;
 		}
+	}
+
+	void generator::get_version(cyng::context& ctx)
+	{
+		ctx.push(cyng::make_object(cyng::revision(DOCC_VERSION_MAJOR, DOCC_VERSION_MINOR, DOCC_VERSION_PATCH, DOCC_VERSION_TWEAK)));
 	}
 
 	boost::filesystem::path generator::resolve_path(std::string const& s) const
