@@ -70,7 +70,7 @@ namespace docscript
 		vm_.register_function("currency", 1, std::bind(&generator::print_currency, this, std::placeholders::_1));
 		vm_.register_function("tag", 1, std::bind(&generator::create_uuid, this, std::placeholders::_1));
 		vm_.register_function("map", 1, std::bind(&generator::make_map, this, std::placeholders::_1));
-		vm_.register_function("version", 1, std::bind(&generator::get_version, this, std::placeholders::_1));
+		vm_.register_function("version", 0, std::bind(&generator::get_version, this, std::placeholders::_1));
 
 		vm_.register_function("generate.file", 1, std::bind(&generator::generate_file, this, std::placeholders::_1));
 		vm_.register_function("generate.meta", 1, std::bind(&generator::generate_meta, this, std::placeholders::_1));

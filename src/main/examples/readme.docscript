@@ -15,6 +15,8 @@
 Generate HTML, Markdown and .symbol(LaTeX) files from one single source file written in .i docScript. 
 .get(name) is a compiler for the docScript language to generate documents. It is positioned between Markdown and LaTex. 
 
+This is the feature list of docScript v .version().
+
 .h2 Features
 
 Since you have one source file for different target formats, you don't have to memorize all the tiny syntactic quirks of LaTeX, Markdown or HTML.

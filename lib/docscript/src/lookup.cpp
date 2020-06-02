@@ -33,6 +33,8 @@ namespace docscript
 			if (boost::algorithm::equals(name, "symbol"))	return false;
 			if (boost::algorithm::equals(name, "currency"))	return false;
 			if (boost::algorithm::equals(name, "tag"))	return false;
+			if (boost::algorithm::equals(name, "version"))	return false;
+			if (boost::algorithm::equals(name, "list"))	return false;
 			return true;
 		}
 
