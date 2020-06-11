@@ -10,7 +10,7 @@
 
 #include <docscript/node.h>
 #include <cyng/intrinsics/sets.h>
-#include <boost/filesystem.hpp>
+#include <cyng/compatibility/file_system.hpp>
 
 namespace docscript
 {
@@ -32,7 +32,7 @@ namespace docscript
 		/**
 		 * generate code from parse tree
 		 */
-		cyng::vector_t generate(boost::filesystem::path out, bool meta, bool index) const;
+		cyng::vector_t generate(cyng::filesystem::path out, bool meta, bool index) const;
 
 		/**
 		 * generate HTML
@@ -40,7 +40,7 @@ namespace docscript
 		void generate_html(std::ostream&, bool) const;
 
 	private:
-		cyng::vector_t generate(node::d_args const*, boost::filesystem::path out, bool meta, bool index) const;
+		cyng::vector_t generate(node::d_args const*, cyng::filesystem::path out, bool meta, bool index) const;
 		cyng::vector_t generate(std::size_t depth, node const&) const;
 		cyng::vector_t generate_paragraph(std::size_t depth, node::d_args const*) const;
 		cyng::vector_t generate_content(std::size_t depth, node::d_args const*) const;

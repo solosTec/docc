@@ -8,7 +8,7 @@
 #ifndef DOCSCRIPT_INCLUDE_H
 #define DOCSCRIPT_INCLUDE_H
 
-#include <boost/filesystem.hpp>
+#include <cyng/compatibility/file_system.hpp>
 #include <tuple>
 
 namespace docscript
@@ -21,7 +21,7 @@ namespace docscript
 	 * <li>length of range to include</li>
 	 * </ol>
 	 */
-	using incl_t = std::tuple<boost::filesystem::path, std::size_t, std::size_t>;
+	using incl_t = std::tuple<cyng::filesystem::path, std::size_t, std::size_t>;
 }
 
 #endif	

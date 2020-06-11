@@ -15,12 +15,13 @@
 #include <cyng/json.h>
 #include <cyng/intrinsics/version.h>
 
+#include <fstream>
 #include <boost/algorithm/string.hpp>
 
 namespace docscript
 {
 
-	generator::generator(std::vector< boost::filesystem::path > const& inc)
+	generator::generator(std::vector< cyng::filesystem::path > const& inc)
 		: uuid_gen_()
 		, name_gen_(uuid_gen_())
 		, scheduler_()
@@ -194,7 +195,7 @@ namespace docscript
 		auto const frame = ctx.get_frame();
 		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
-		auto const p = cyng::value_cast(frame.at(0), boost::filesystem::path()) / "index.json";
+		auto const p = cyng::value_cast(frame.at(0), cyng::filesystem::path()) / "index.json";
 		std::ofstream ofs(p.string(), std::ios::out | std::ios::trunc);
 		if (!ofs.is_open())
 		{
@@ -288,17 +289,17 @@ namespace docscript
 		ctx.push(cyng::make_object(cyng::revision(DOCC_VERSION_MAJOR, DOCC_VERSION_MINOR, DOCC_VERSION_PATCH, DOCC_VERSION_TWEAK)));
 	}
 
-	boost::filesystem::path generator::resolve_path(std::string const& s) const
+	cyng::filesystem::path generator::resolve_path(std::string const& s) const
 	{
-		boost::filesystem::path p(s);
+		cyng::filesystem::path p(s);
 		for (auto dir : includes_)
 		{
-			if (boost::filesystem::exists(dir / p))
+			if (cyng::filesystem::exists(dir / p))
 			{
-				return boost::filesystem::path(dir / p);
+				return cyng::filesystem::path(dir / p);
 			}
 		}
-		return boost::filesystem::path();
+		return cyng::filesystem::path();
 	}
 
 	std::string generator::get_type() const
@@ -464,7 +465,7 @@ namespace docscript
 		return "";
 	}
 
-	std::string get_extension(boost::filesystem::path const& p)
+	std::string get_extension(cyng::filesystem::path const& p)
 	{
 		if (p.empty())
 		{

@@ -34,7 +34,7 @@
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/uuid/nil_generator.hpp>
-#include <boost/filesystem.hpp>
+#include <cyng/compatibility/file_system.hpp>
 #include <boost/assert.hpp>
 
 namespace plog 
@@ -177,8 +177,8 @@ namespace plog
 			//
 			//	get default values
 			//
-			auto const tmp = boost::filesystem::temp_directory_path();
-			auto const pwd = boost::filesystem::current_path();
+			auto const tmp = cyng::filesystem::temp_directory_path();
+			auto const pwd = cyng::filesystem::current_path();
 			auto const root = (pwd / ".." / "homepage" / "dist").lexically_normal();
 			boost::uuids::random_generator uidgen;
 			
@@ -294,7 +294,7 @@ namespace plog
 #if BOOST_OS_LINUX
 		const auto doc_root = cyng::value_cast<std::string>(dom["web"].get("document-root"), "/var/www/html");
 #else
-		const boost::filesystem::path pwd = boost::filesystem::current_path();
+		const cyng::filesystem::path pwd = cyng::filesystem::current_path();
 		auto const root = (pwd / ".." / "homepage" / "dist").lexically_normal();
 		const auto doc_root = cyng::value_cast<std::string>(dom["web"].get("document-root"), root.string());
 #endif

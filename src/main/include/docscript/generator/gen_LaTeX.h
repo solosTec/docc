@@ -16,7 +16,7 @@ namespace docscript
 	class gen_latex : public generator
 	{
 	public:
-		gen_latex(std::vector< boost::filesystem::path > const&);
+		gen_latex(std::vector< cyng::filesystem::path > const&);
 
 	private:
 		/**

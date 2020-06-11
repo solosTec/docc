@@ -10,7 +10,7 @@
 
 #include <docscript/include.h>
 
-#include <boost/filesystem.hpp>
+#include <cyng/compatibility/file_system.hpp>
 
 #include <string>
 #include <tuple>

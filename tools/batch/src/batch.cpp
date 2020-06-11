@@ -15,10 +15,12 @@
 #include <cyng/io/io_chrono.hpp>
 #include <cyng/factory.h>
 
+#include <iostream>
+#include <fstream>
+
 #include <boost/range/iterator_range.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 #include <boost/algorithm/string.hpp>
-#include <iostream>
 
 namespace docscript
 {
@@ -33,14 +35,14 @@ namespace docscript
 	batch::~batch()
 	{}
 
-	int batch::run(boost::filesystem::path const& inp
-		, boost::filesystem::path const& out
+	int batch::run(cyng::filesystem::path const& inp
+		, cyng::filesystem::path const& out
 		, bool gen_robot
 		, bool gen_sitemap)
 	{
-		if (boost::filesystem::is_directory(inp)) {
+		if (cyng::filesystem::is_directory(inp)) {
 
-			for (auto const& entry : boost::make_iterator_range(boost::filesystem::directory_iterator(inp), {})) {
+			for (auto const& entry : boost::make_iterator_range(cyng::filesystem::directory_iterator(inp), {})) {
 
 				process_file(entry, out);
 			}
@@ -60,8 +62,8 @@ namespace docscript
 		return EXIT_FAILURE;
 	}
 
-	void batch::process_file(boost::filesystem::path const& inp
-		, boost::filesystem::path const& out)
+	void batch::process_file(cyng::filesystem::path const& inp
+		, cyng::filesystem::path const& out)
 	{
 		//
 		//	exclude all files without the extension ".docscript"
@@ -73,7 +75,7 @@ namespace docscript
 				//
 				//	generate some temporary file names for intermediate files
 				//
-				boost::filesystem::path tmp = boost::filesystem::temp_directory_path() / (boost::filesystem::path(inp).filename().string() + ".bin");
+				cyng::filesystem::path tmp = cyng::filesystem::temp_directory_path() / (cyng::filesystem::path(inp).filename().string() + ".bin");
 
 				//
 				//	Construct driver instance
@@ -83,7 +85,7 @@ namespace docscript
 				//
 				//	output file
 				//
-				boost::filesystem::path out_file = out / inp.filename();
+				cyng::filesystem::path out_file = out / inp.filename();
 				out_file.replace_extension(".html");
 
 				if (verbose_ > 0) {
@@ -97,7 +99,7 @@ namespace docscript
 				//
 				//	Start driver with the main/input file
 				//
-				d.run(boost::filesystem::path(inp).filename()
+				d.run(cyng::filesystem::path(inp).filename()
 					, tmp
 					, out_file
 					, true	//	only HTML body
@@ -110,7 +112,7 @@ namespace docscript
 		}
 	}
 
-	void batch::generate_index(boost::filesystem::path const& out
+	void batch::generate_index(cyng::filesystem::path const& out
 		, bool gen_robot
 		, bool gen_sitemap)
 	{
@@ -147,10 +149,10 @@ namespace docscript
 
 	}
 
-	void batch::generate_index_page(boost::filesystem::path const& out
+	void batch::generate_index_page(cyng::filesystem::path const& out
 		, chrono_idx_t const& idx)
 	{
-		boost::filesystem::path p = out / "index.html";
+		cyng::filesystem::path p = out / "index.html";
 
 		std::ofstream ofs(p.string(), std::ios::out | std::ios::trunc);
 		if (!ofs.is_open())
@@ -200,7 +202,7 @@ namespace docscript
 					<< "/posts?slug="
 					<< slug
 					<< "\" onclick=\"load_page('"
-					<< boost::filesystem::path(file_name).replace_extension(".html").string()
+					<< cyng::filesystem::path(file_name).replace_extension(".html").string()
 					//	don't follow href
 					<< "'); return false;\" title=\""
 					<< title
@@ -229,9 +231,9 @@ namespace docscript
 		}
 	}
 
-	void batch::generate_index_map(boost::filesystem::path const& out, chrono_idx_t const& idx)
+	void batch::generate_index_map(cyng::filesystem::path const& out, chrono_idx_t const& idx)
 	{
-		boost::filesystem::path p = out / "index.json";
+		cyng::filesystem::path p = out / "index.json";
 
 		std::ofstream ofs(p.string(), std::ios::out | std::ios::trunc);
 		if (!ofs.is_open())
@@ -297,9 +299,9 @@ namespace docscript
 		}
 	}
 
-	void batch::generate_robots_txt(boost::filesystem::path const& out, chrono_idx_t const& idx, bool gen_sitemap)
+	void batch::generate_robots_txt(cyng::filesystem::path const& out, chrono_idx_t const& idx, bool gen_sitemap)
 	{
-		boost::filesystem::path p = out / "robots.txt";
+		cyng::filesystem::path p = out / "robots.txt";
 
 		std::ofstream ofs(p.string(), std::ios::out | std::ios::trunc);
 		if (!ofs.is_open())
@@ -334,9 +336,9 @@ namespace docscript
 		}
 	}
 
-	void batch::generate_sitemap(boost::filesystem::path const& out, chrono_idx_t const& idx)
+	void batch::generate_sitemap(cyng::filesystem::path const& out, chrono_idx_t const& idx)
 	{
-		boost::filesystem::path p = out / "sitemap.xml";
+		cyng::filesystem::path p = out / "sitemap.xml";
 
 		std::ofstream ofs(p.string(), std::ios::out | std::ios::trunc);
 		if (!ofs.is_open())
@@ -378,7 +380,7 @@ namespace docscript
 				//
 				std::cerr
 					<< "***error: time stamp collision: "
-					<< boost::filesystem::path(doc.first).filename()
+					<< cyng::filesystem::path(doc.first).filename()
 					<< " <-> "
 					<< file_name
 					<< std::endl;				

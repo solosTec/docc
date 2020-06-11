@@ -19,7 +19,7 @@
 #include <chrono>
 #include <deque>
 
-#include <boost/filesystem.hpp>
+#include <cyng/compatibility/file_system.hpp>
 
 namespace docscript
 {
@@ -29,9 +29,9 @@ namespace docscript
 	struct context
 	{
 		context();
-		bool push(boost::filesystem::path);
+		bool push(cyng::filesystem::path);
 		void pop();
-		boost::filesystem::path top() const;
+		cyng::filesystem::path top() const;
 
 		/**
 		 * @return true if no stack contains no source files
@@ -53,7 +53,7 @@ namespace docscript
 		/**
 		 * stack of source files
 		 */
-		std::deque<boost::filesystem::path>	source_files_;
+		std::deque<cyng::filesystem::path>	source_files_;
 
 	};
 
@@ -94,9 +94,9 @@ namespace docscript
 		 * @param index generate an index file in JSON format
 		 * @param type article/report
 		 */
-		int run(boost::filesystem::path const& master
-			, boost::filesystem::path const& tmp
-			, boost::filesystem::path const& out
+		int run(cyng::filesystem::path const& master
+			, cyng::filesystem::path const& tmp
+			, cyng::filesystem::path const& out
 			, bool body_only
 			, bool meta
 			, bool index
@@ -105,7 +105,7 @@ namespace docscript
 		cyng::param_map_t const& get_meta() const;
 
 	private:
-		int run(boost::filesystem::path const& inp, std::size_t start, std::size_t count, std::size_t depth);
+		int run(cyng::filesystem::path const& inp, std::size_t start, std::size_t count, std::size_t depth);
 		int open_and_run(incl_t inp, std::size_t);
 
 		/**
@@ -116,15 +116,15 @@ namespace docscript
 		 * @param index generate an index file in JSON format
 		 * @param type article/report
 		 */
-		void finish(boost::filesystem::path const& body
-			, boost::filesystem::path const& out
+		void finish(cyng::filesystem::path const& body
+			, cyng::filesystem::path const& out
 			, bool meta
 			, bool index);
 
 		/**
 		 *	build the artifact
 		 */
-		void build(boost::filesystem::path const& in, boost::filesystem::path out, bool body_only, std::chrono::milliseconds);
+		void build(cyng::filesystem::path const& in, cyng::filesystem::path out, bool body_only, std::chrono::milliseconds);
 		void print_error(cyng::logging::severity, std::string);
 
 	private:
@@ -133,7 +133,7 @@ namespace docscript
 		 * If the driver opens a file it searches in all given directories
 		 * until the spcified file is found.
 		 */
-		std::vector< boost::filesystem::path > const includes_;
+		std::vector< cyng::filesystem::path > const includes_;
 
 		/**
 		 * verbosity level. 
@@ -178,12 +178,12 @@ namespace docscript
 	 * @return last write time and file size of the specified file. If file does not exist 
 	 * the file size is 0.
 	 */
-	std::tuple<std::chrono::system_clock::time_point, uintmax_t> read_meta_data(boost::filesystem::path);
+	std::tuple<std::chrono::system_clock::time_point, uintmax_t> read_meta_data(cyng::filesystem::path);
 		
 	/**
 	 * Sets the specified extension if the file name doesn't contains one.
 	 */
-	boost::filesystem::path verify_extension(boost::filesystem::path p, std::string const& ext);
+	cyng::filesystem::path verify_extension(cyng::filesystem::path p, std::string const& ext);
 }
 
 

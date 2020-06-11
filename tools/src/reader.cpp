@@ -10,13 +10,15 @@
 #include "driver.h"
 #include <docscript/pre_compiler.h>
 
-#include <boost/algorithm/string.hpp>
 #include <iostream>
+#include <fstream>
+
+#include <boost/algorithm/string.hpp>
 
 namespace docscript
 {
 	
-	reader::reader(driver& d, boost::filesystem::path const& source, std::size_t start, std::size_t count)
+	reader::reader(driver& d, cyng::filesystem::path const& source, std::size_t start, std::size_t count)
 		: driver_(d)
 		, source_(source)
 		, start_(start)

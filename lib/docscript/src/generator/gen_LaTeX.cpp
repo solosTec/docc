@@ -17,12 +17,14 @@
 #include <cyng/io/bom.h>
 #include <cyng/set_cast.h>
 
+#include <fstream>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
 namespace docscript
 {
-	gen_latex::gen_latex(std::vector< boost::filesystem::path > const& inc)
+	gen_latex::gen_latex(std::vector< cyng::filesystem::path > const& inc)
 		: generator(inc)
 	{
 		register_this();
@@ -41,8 +43,8 @@ namespace docscript
 		auto const frame = ctx.get_frame();
 		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
-		auto p = cyng::value_cast(frame.at(0), boost::filesystem::path());
-		if (boost::filesystem::is_directory(p)) {
+		auto p = cyng::value_cast(frame.at(0), cyng::filesystem::path());
+		if (cyng::filesystem::is_directory(p)) {
 			p = p / "out.tex";
 		}
 		std::ofstream ofs(p.string(), std::ios::out | std::ios::trunc);
@@ -217,7 +219,7 @@ namespace docscript
 		auto const frame = ctx.get_frame();
 		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
-		auto const p = cyng::value_cast(frame.at(0), boost::filesystem::path());
+		auto const p = cyng::value_cast(frame.at(0), cyng::filesystem::path());
 	}
 
 	void gen_latex::convert_numeric(cyng::context& ctx)
@@ -588,7 +590,7 @@ namespace docscript
 		auto const p = resolve_path(source);
 		auto const language = cleanup_language(cyng::value_cast(reader.get("language"), get_extension(p)));
 
-		if (boost::filesystem::exists(p) && boost::filesystem::is_regular(p)) {
+		if (cyng::filesystem::exists(p) && cyng::filesystem::is_regular(p)) {
 
 			std::ifstream  ifs(p.string());
 			if (is_language_supported(language)) {
@@ -712,7 +714,7 @@ namespace docscript
 		auto const tag = cyng::value_cast(reader.get("tag"), source);
 
 		auto const p = resolve_path(source);
-		if (boost::filesystem::exists(p) && boost::filesystem::is_regular(p)) {
+		if (cyng::filesystem::exists(p) && cyng::filesystem::is_regular(p)) {
 
 			//auto table = html::table(html::class_("docscript-table"));
 			//table += html::caption(html::class_("docscript-table-caption"), title);

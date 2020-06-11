@@ -34,7 +34,7 @@ namespace docscript
 	class generator
 	{
 	public:
-		generator(std::vector< boost::filesystem::path > const&);
+		generator(std::vector< cyng::filesystem::path > const&);
 		virtual ~generator();
 
 		void run(cyng::vector_t&&);
@@ -93,7 +93,7 @@ namespace docscript
 		virtual void format_sup(cyng::context& ctx) = 0;
 		virtual void format_mark(cyng::context& ctx) = 0;
 
-		boost::filesystem::path resolve_path(std::string const& s) const;
+		cyng::filesystem::path resolve_path(std::string const& s) const;
 
 		/**
 		 * Default value is report
@@ -143,7 +143,7 @@ namespace docscript
 		cyng::param_map_t	vars_;
 		cyng::param_map_t	const_;
 
-		std::vector< boost::filesystem::path > const includes_;
+		std::vector< cyng::filesystem::path > const includes_;
 		numbering content_table_;
 
 		/**
@@ -153,7 +153,7 @@ namespace docscript
 
 	};
 
-	std::string get_extension(boost::filesystem::path const& p);
+	std::string get_extension(cyng::filesystem::path const& p);
 
 	std::string accumulate_plain_text(cyng::object);
 	std::string accumulate_plain_text(cyng::tuple_t);

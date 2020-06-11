@@ -11,7 +11,7 @@
 #include <cyng/object.h>
 #include <cyng/intrinsics/sets.h>
 #include <chrono>
-#include <boost/filesystem.hpp>
+#include <cyng/compatibility/file_system.hpp>
 
 namespace docscript
 {
@@ -44,23 +44,23 @@ namespace docscript
 		 * @param tmp temporary intermediate file.
 		 * @param out output file (html)
 		 */
-		int run(boost::filesystem::path const& inp
-			, boost::filesystem::path const& out
+		int run(cyng::filesystem::path const& inp
+			, cyng::filesystem::path const& out
 			, bool gen_robot
 			, bool gen_sitemap);
 
 	private:
-		void process_file(boost::filesystem::path const& inp
-			, boost::filesystem::path const& out);
+		void process_file(cyng::filesystem::path const& inp
+			, cyng::filesystem::path const& out);
 
-		void generate_index(boost::filesystem::path const& out
+		void generate_index(cyng::filesystem::path const& out
 			, bool gen_robot
 			, bool gen_sitemap);
 
-		void generate_index_page(boost::filesystem::path const& out, chrono_idx_t const& idx);
-		void generate_index_map(boost::filesystem::path const& out, chrono_idx_t const& idx);
-		void generate_robots_txt(boost::filesystem::path const& out, chrono_idx_t const& idx, bool);
-		void generate_sitemap(boost::filesystem::path const& out, chrono_idx_t const& idx);
+		void generate_index_page(cyng::filesystem::path const& out, chrono_idx_t const& idx);
+		void generate_index_map(cyng::filesystem::path const& out, chrono_idx_t const& idx);
+		void generate_robots_txt(cyng::filesystem::path const& out, chrono_idx_t const& idx, bool);
+		void generate_sitemap(cyng::filesystem::path const& out, chrono_idx_t const& idx);
 
 		chrono_idx_t get_sorted();
 
@@ -80,7 +80,7 @@ namespace docscript
 
 
 		//cyng::param_map_t index_;
-		std::map<boost::filesystem::path, cyng::param_map_t> index_;
+		std::map<cyng::filesystem::path, cyng::param_map_t> index_;
 	};
 
 }

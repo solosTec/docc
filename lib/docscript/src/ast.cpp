@@ -36,13 +36,13 @@ namespace docscript
 		return access_node_root(root_);
 	}
 
-	cyng::vector_t ast::generate(boost::filesystem::path out, bool meta, bool index) const
+	cyng::vector_t ast::generate(cyng::filesystem::path out, bool meta, bool index) const
 	{
 		return generate(get_node_root(), out, meta, index);
 	}
 
 	cyng::vector_t ast::generate(node::d_args const* args
-		, boost::filesystem::path out
+		, cyng::filesystem::path out
 		, bool meta
 		, bool index) const
 	{

@@ -10,7 +10,8 @@
 
 #include <docscript/include.h>
 #include <cstdint>
-#include <boost/filesystem.hpp>
+#include <functional>
+#include <cyng/compatibility/file_system.hpp>
 
 namespace docscript
 {
@@ -20,7 +21,7 @@ namespace docscript
 		using include_f = std::function<int(incl_t inp, std::size_t)>;
 
 	public:
-		reader(driver&, boost::filesystem::path const&, std::size_t start, std::size_t count);
+		reader(driver&, cyng::filesystem::path const&, std::size_t start, std::size_t count);
 		bool run(std::size_t depth);
 
 	private:
@@ -29,7 +30,7 @@ namespace docscript
 
 	private:
 		driver& driver_;
-		boost::filesystem::path const source_;
+		cyng::filesystem::path const source_;
 		std::size_t const start_;
 		std::size_t const count_;
 		std::size_t	curr_line_;

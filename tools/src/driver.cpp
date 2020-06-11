@@ -22,6 +22,8 @@
 #include <cyng/vm/generator.h>
 
 #include <iostream>
+#include <fstream>
+
 #include <boost/algorithm/string.hpp>
 
 namespace docscript
@@ -90,9 +92,9 @@ namespace docscript
 		return meta_;
 	}
 
-	int driver::run(boost::filesystem::path const& master
-		, boost::filesystem::path const& body
-		, boost::filesystem::path const& out
+	int driver::run(cyng::filesystem::path const& master
+		, cyng::filesystem::path const& body
+		, cyng::filesystem::path const& out
 		, bool generate_body_only
 		, bool generate_meta
 		, bool generate_index
@@ -147,13 +149,17 @@ namespace docscript
 		//
 		//	remove temporary files
 		//
+#if defined(__CPP_SUPPORT_P0218R1)
+		std::error_code ec;
+#else
 		boost::system::error_code ec;
-		remove(body, ec);
+#endif
+		cyng::filesystem::remove(body, ec);
 			
 		return !ec;
 	}
 
-	int driver::run(boost::filesystem::path const& inp, std::size_t start, std::size_t count, std::size_t depth)
+	int driver::run(cyng::filesystem::path const& inp, std::size_t start, std::size_t count, std::size_t depth)
 	{	
 		reader r(*this, inp, start, count);
 		return r.run(depth)
@@ -172,7 +178,7 @@ namespace docscript
 		//
 		for (auto dir : includes_)
 		{
-			if (boost::filesystem::exists(dir / p))
+			if (cyng::filesystem::exists(dir / p))
 			{
 				if (depth == 0)
 				{
@@ -224,8 +230,8 @@ namespace docscript
 
 	}
 
-	void driver::finish(boost::filesystem::path const& body
-		, boost::filesystem::path const& out
+	void driver::finish(cyng::filesystem::path const& body
+		, cyng::filesystem::path const& out
 		, bool meta
 		, bool index)
 	{
@@ -327,8 +333,8 @@ namespace docscript
 		}
 	}
 
-	void driver::build(boost::filesystem::path const& in
-		, boost::filesystem::path out
+	void driver::build(cyng::filesystem::path const& in
+		, cyng::filesystem::path out
 		, bool body_only
 		, std::chrono::milliseconds compile_time)
 	{
@@ -428,7 +434,7 @@ namespace docscript
 		, source_files_()
 	{}
 
-	bool context::push(boost::filesystem::path p)
+	bool context::push(cyng::filesystem::path p)
 	{
 		auto const size = std::count(source_files_.begin(), source_files_.end(), p);
 		if (size == 0u) {
@@ -442,7 +448,7 @@ namespace docscript
 		source_files_.pop_back();
 	}
 
-	boost::filesystem::path context::top() const
+	cyng::filesystem::path context::top() const
 	{
 		return source_files_.back();
 	}
@@ -457,15 +463,15 @@ namespace docscript
 		return source_files_.size();
 	}
 
-	std::tuple<std::chrono::system_clock::time_point, uintmax_t> read_meta_data(boost::filesystem::path p)
+	std::tuple<std::chrono::system_clock::time_point, uintmax_t> read_meta_data(cyng::filesystem::path p)
 	{
-		return (boost::filesystem::exists(p) && boost::filesystem::is_regular(p))
-			? std::make_tuple(std::chrono::system_clock::from_time_t(boost::filesystem::last_write_time(p)), boost::filesystem::file_size(p))
+		return (cyng::filesystem::exists(p) && cyng::filesystem::is_regular(p))
+			? std::make_tuple(cyng::filesystem::get_write_time(p), cyng::filesystem::file_size(p))
 			: std::make_tuple(std::chrono::system_clock::now(), uintmax_t(0u))
 			;
 	}
 
-	boost::filesystem::path verify_extension(boost::filesystem::path p, std::string const& ext)
+	cyng::filesystem::path verify_extension(cyng::filesystem::path p, std::string const& ext)
 	{
 		if (!p.has_extension())
 		{

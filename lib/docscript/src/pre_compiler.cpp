@@ -22,7 +22,7 @@ namespace docscript
 		//	.include (snippet.docscript:0:2)
 		//
 
-		boost::filesystem::path p;
+		cyng::filesystem::path p;
 		if (boost::algorithm::starts_with(input_, ".include")) {
 
 			//
@@ -36,22 +36,22 @@ namespace docscript
 			std::vector<std::string> const r = cyng::split(expr, "(:)");
 			switch (r.size()) {
 			case 3:
-				return std::make_tuple(boost::filesystem::path(r.at(1))
+				return std::make_tuple(cyng::filesystem::path(r.at(1))
 					, 0
 					, std::numeric_limits<std::size_t>::max());
 			case 4:
-				return std::make_tuple(boost::filesystem::path(r.at(1))
+				return std::make_tuple(cyng::filesystem::path(r.at(1))
 					, std::stoul(r.at(2))
 					, std::numeric_limits<std::size_t>::max());
 			case 5:
-				return std::make_tuple(boost::filesystem::path(r.at(1))
+				return std::make_tuple(cyng::filesystem::path(r.at(1))
 					, std::stoul(r.at(2))
 					, std::stoul(r.at(3)));
 			default:
 				break;
 			}
 		}
-		return std::make_tuple(boost::filesystem::path(), 0u, 0u);
+		return std::make_tuple(cyng::filesystem::path(), 0u, 0u);
 	}
 }
 

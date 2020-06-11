@@ -6,7 +6,7 @@
  */ 
 
 #include <boost/program_options.hpp>
-#include <boost/filesystem.hpp>
+#include <cyng/compatibility/file_system.hpp>
 #include <boost/config.hpp>
 #include <boost/predef.h>
 #include <fstream>
@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
 
 	try
 	{
-		const boost::filesystem::path cwd = boost::filesystem::current_path();
+		const cyng::filesystem::path cwd = cyng::filesystem::current_path();
 
 		std::string config_file = "docc_" + std::string(DOCC_SUFFIX) + ".cfg";
 		std::string inp_file = "main.docscript";
@@ -182,7 +182,7 @@ int main(int argc, char* argv[]) {
 		//
 		//	generate some temporary file names for intermediate files
 		//
-		boost::filesystem::path tmp = boost::filesystem::temp_directory_path() / (boost::filesystem::path(inp_file).filename().string() + ".bin");
+		cyng::filesystem::path tmp = cyng::filesystem::temp_directory_path() / (cyng::filesystem::path(inp_file).filename().string() + ".bin");
 
 		const int verbose = vm["verbose"].as< int >();
 		if (verbose > 0)
@@ -203,7 +203,7 @@ int main(int argc, char* argv[]) {
 		//
 		//	Add the path of the input file as include path, if it is not already specified
 		//
-		auto path = boost::filesystem::path(inp_file).parent_path();
+		auto path = cyng::filesystem::path(inp_file).parent_path();
 		auto pos = std::find(inc_paths.begin(), inc_paths.end(), path);
 		if (pos == inc_paths.end()) {
 			inc_paths.push_back(path.string());
@@ -245,7 +245,7 @@ int main(int argc, char* argv[]) {
 		//
 		//	Start driver with the main/input file
 		//
- 		return d.run(boost::filesystem::path(inp_file).filename()
+ 		return d.run(cyng::filesystem::path(inp_file).filename()
  			, tmp
 			, out_file
 			, vm["generator.body"].as< bool >()

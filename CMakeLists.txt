@@ -440,11 +440,6 @@ target_link_libraries(batch
  	cyng_vm 
  	cyng_parser 
  	cyng_json 
-# 	cyng_async 
-# 	cyng_xml 
-# 	cyng_csv
-# 	cyng_table
-# 	cyng_sys
 	crypto 
 	smf_protocol_sml
 	docscript_core 
@@ -453,6 +448,34 @@ target_link_libraries(batch
 	"$<$<PLATFORM_ID:Linux>:${Boost_THREAD_LIBRARY};${Boost_SYSTEM_LIBRARY};${Boost_FILESYSTEM_LIBRARY};${Boost_PROGRAM_OPTIONS_LIBRARY};${Boost_RANDOM_LIBRARY};pthread>"
 )
 install(TARGETS batch
+    RUNTIME
+    DESTINATION bin)
+
+#
+# site generator
+#
+include (tools/site/prg.cmake)
+add_executable(site ${site})
+target_include_directories(site
+	PRIVATE
+        ${CYNG_LIBRARY_DIR}
+        ${CYNG_INCLUDE_MAIN}
+)
+target_link_libraries(site
+ 	cyng_core
+ 	cyng_io 
+ 	cyng_log 
+ 	cyng_vm 
+ 	cyng_parser 
+ 	cyng_json 
+	crypto 
+	smf_protocol_sml
+	docscript_core 
+	doc_html 
+	${OPENSSL_LIBRARIES}
+	"$<$<PLATFORM_ID:Linux>:${Boost_THREAD_LIBRARY};${Boost_SYSTEM_LIBRARY};${Boost_FILESYSTEM_LIBRARY};${Boost_PROGRAM_OPTIONS_LIBRARY};${Boost_RANDOM_LIBRARY};pthread>"
+)
+install(TARGETS site
     RUNTIME
     DESTINATION bin)
 

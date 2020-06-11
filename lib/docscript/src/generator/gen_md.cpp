@@ -17,13 +17,15 @@
 #include <cyng/io/bom.h>
 #include <cyng/set_cast.h>
 
+#include <fstream>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/uuid/nil_generator.hpp>
 
 namespace docscript
 {
-	gen_md::gen_md(std::vector< boost::filesystem::path > const& inc)
+	gen_md::gen_md(std::vector< cyng::filesystem::path > const& inc)
 		: generator(inc)
 	{
 		register_this();
@@ -43,8 +45,8 @@ namespace docscript
 		auto const frame = ctx.get_frame();
 		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
-		auto p = cyng::value_cast(frame.at(0), boost::filesystem::path());
-		if (boost::filesystem::is_directory(p)) {
+		auto p = cyng::value_cast(frame.at(0), cyng::filesystem::path());
+		if (cyng::filesystem::is_directory(p)) {
 			p = p / "out.md";
 		}
 		std::ofstream ofs(p.string(), std::ios::out | std::ios::trunc);
@@ -239,7 +241,7 @@ namespace docscript
 		auto const frame = ctx.get_frame();
 		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
-		auto const p = cyng::value_cast(frame.at(0), boost::filesystem::path());
+		auto const p = cyng::value_cast(frame.at(0), cyng::filesystem::path());
 		std::ofstream ofs(p.string(), std::ios::out | std::ios::trunc);
 		if (!ofs.is_open())
 		{
@@ -543,7 +545,7 @@ namespace docscript
 		auto const p = resolve_path(source);
 		auto const language = cyng::value_cast(reader.get("language"), get_extension(p));
 
-		if (boost::filesystem::exists(p) && boost::filesystem::is_regular(p)) {
+		if (cyng::filesystem::exists(p) && cyng::filesystem::is_regular(p)) {
 
 			std::stringstream ss;
 			if (boost::algorithm::equals(language, "bin") || boost::algorithm::iequals(language, "binary")) {
@@ -643,7 +645,7 @@ namespace docscript
 		auto const tag = cyng::value_cast(reader.get("tag"), source);
 
 		auto const p = resolve_path(source);
-		if (boost::filesystem::exists(p) && boost::filesystem::is_regular(p)) {
+		if (cyng::filesystem::exists(p) && cyng::filesystem::is_regular(p)) {
 
 			//
 			//	parse the CSV file into a vector

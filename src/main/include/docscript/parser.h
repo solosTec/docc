@@ -13,7 +13,7 @@
 
 #include <cyng/log/severity.h>
 
-#include <boost/filesystem.hpp>
+#include <cyng/compatibility/file_system.hpp>
 
 namespace docscript
 {

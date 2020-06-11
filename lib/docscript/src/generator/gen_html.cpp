@@ -25,6 +25,7 @@
 
 #include <crypto/hash/base64.h>
 
+#include <fstream>
 #include <pugixml.hpp>
 
 #include <boost/algorithm/string.hpp>
@@ -33,7 +34,7 @@
 
 namespace docscript
 {
-	gen_html::gen_html(std::vector< boost::filesystem::path > const& inc, bool body_only)
+	gen_html::gen_html(std::vector< cyng::filesystem::path > const& inc, bool body_only)
 		: generator(inc)
 		, footnotes_()
 		, figures_()
@@ -55,8 +56,8 @@ namespace docscript
 		auto const frame = ctx.get_frame();
 		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
-		auto p = cyng::value_cast(frame.at(0), boost::filesystem::path());
-		if (boost::filesystem::is_directory(p)) {
+		auto p = cyng::value_cast(frame.at(0), cyng::filesystem::path());
+		if (cyng::filesystem::is_directory(p)) {
 			p = p / "out.html";
 		}
 		std::ofstream ofs(p.string(), std::ios::out | std::ios::trunc);
@@ -701,7 +702,7 @@ namespace docscript
 		auto const frame = ctx.get_frame();
 		//std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
-		auto const p = cyng::value_cast(frame.at(0), boost::filesystem::path());
+		auto const p = cyng::value_cast(frame.at(0), cyng::filesystem::path());
 	}
 
 	void gen_html::convert_numeric(cyng::context& ctx)
@@ -932,7 +933,7 @@ namespace docscript
 		}
 
 		auto const p = resolve_path(source);
-		if (boost::filesystem::exists(p) && boost::filesystem::is_regular(p)) {
+		if (cyng::filesystem::exists(p) && cyng::filesystem::is_regular_file(p)) {
 
 			auto const title = compute_fig_title(tag, caption);
 
@@ -1011,7 +1012,7 @@ namespace docscript
 				auto const width = cyng::value_cast(reader["images"][pos].get("width"), 1.0);
 
 				auto const p = resolve_path(source);
-				if (boost::filesystem::exists(p) && boost::filesystem::is_regular(p)) {
+				if (cyng::filesystem::exists(p) && cyng::filesystem::is_regular(p)) {
 
 					auto el = make_figure(p
 						, id
@@ -1062,7 +1063,7 @@ namespace docscript
 		auto const p = resolve_path(source);
 		auto const language = cyng::value_cast(reader.get("language"), get_extension(p));
 
-		if (boost::filesystem::exists(p) && boost::filesystem::is_regular(p)) {
+		if (cyng::filesystem::exists(p) && cyng::filesystem::is_regular(p)) {
 
 			std::stringstream ss;
 			if (boost::algorithm::iequals(language, "json")) {
@@ -1223,7 +1224,7 @@ namespace docscript
 		auto const tag = name_gen_(cyng::value_cast(reader.get("tag"), source));
 
 		auto const p = resolve_path(source);
-		if (boost::filesystem::exists(p) && boost::filesystem::is_regular(p)) {
+		if (cyng::filesystem::exists(p) && cyng::filesystem::is_regular(p)) {
 
 			//
 			//	update table list
@@ -1874,7 +1875,7 @@ namespace docscript
 		return r;
 	}
 
-	html::node make_figure(boost::filesystem::path p
+	html::node make_figure(cyng::filesystem::path p
 		, std::string id
 		, double width
 		, std::string caption

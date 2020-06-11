@@ -1,0 +1,117 @@
+{
+    "languages": ["de", "en", "ru", "fr"],
+    "downloads": [
+        {
+            "name": "smf-manual-de",
+            "source": "downloads/manual-de.pdf",
+            "lang": "de"
+        },
+        {
+            "name": "smf-manual-en",
+            "source": "downloads/manual-en.pdf",
+            "lang": "en"
+        }
+    ],
+    "pages": [
+        {
+            "name": "home",
+            "source": "home.docscript"
+        },
+        {
+            "name": "hw",
+            "source": "hw.docscript"
+        },
+        {
+            "name": "sw",
+            "source": "sw.docscript"
+        },
+        {
+            "name": "hosting",
+            "source": "hosting.docscript"
+        },
+        {
+            "name": "consulting",
+            "source": "consulting.docscript"
+        },
+        {
+            "name": "contact",
+            "source": "contact.docscript"
+        },
+        {
+            "name": "team",
+            "source": "team.docscript"
+        },
+        {
+            "name": "plog",
+            "source": "plog.docscript"
+        }
+    ],
+    "menues": [
+        {
+            "name": "main",
+            "placement": "sticky-top",
+            "color-scheme": "dark",
+            "brand":  "images/logo.png",
+            "items": [
+                {
+                    "title": "home",
+                    "ref": "home",
+                    "enabled": true
+                },
+                {
+                    "title": "products",
+                    "enabled": true,
+                    "items": [
+                        {
+                            "title": "software",
+                            "ref": "sw",
+                            "enabled": true
+                        },
+                        {
+                            "title": "hosting",
+                            "ref": "hosting",
+                            "enabled": true
+                        },
+                        {
+                            "title": "hardware",
+                            "ref": "hw",
+                            "enabled": true
+                        },
+                        {
+                            "title": "consulting",
+                            "ref": "consulting",
+                            "enabled": true
+                        }
+                    ]
+                },
+                {
+                    "title": "blog",
+                    "ref": "plog"
+                },
+                {
+                    "title": "contact",
+                    "items": [
+                        {
+                            "title": "support"
+                        },
+                        {
+                            "title": "team"
+                        },
+                        {
+                            "title": "downloads"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "secondary"
+        }
+    ],
+    "site": {
+        "name": "main",
+        "menue": "main",
+        "pages": [ "home", "hw", "sw" ]
+    }
+
+}

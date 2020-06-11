@@ -15,7 +15,7 @@ namespace docscript
 	class gen_md : public generator
 	{
 	public:
-		gen_md(std::vector< boost::filesystem::path > const&);
+		gen_md(std::vector< cyng::filesystem::path > const&);
 
 	private:
 		/**

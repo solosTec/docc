@@ -6,7 +6,7 @@
  */
 
 #include <boost/program_options.hpp>
-#include <boost/filesystem.hpp>
+#include <cyng/compatibility/file_system.hpp>
 #include <boost/config.hpp>
 #include <boost/predef.h>
 #include <fstream>
@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
 			;
 
 		//	get the working directory
-		const boost::filesystem::path cwd = boost::filesystem::current_path();
+		const cyng::filesystem::path cwd = cyng::filesystem::current_path();
 
 		//	path to JSON configuration file
 		std::string json_path;
@@ -202,7 +202,7 @@ int main(int argc, char **argv) {
 		//	"include-path""
 		//
 		auto includes = vm["include-path"].as< std::vector<std::string> >();
-		includes.push_back(boost::filesystem::temp_directory_path().string());
+		includes.push_back(cyng::filesystem::temp_directory_path().string());
 		includes.push_back("");
 
 		if (verbose > 0)

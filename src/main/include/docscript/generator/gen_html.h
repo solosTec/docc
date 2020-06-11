@@ -17,7 +17,7 @@ namespace docscript
 	class gen_html : public generator
 	{
 	public:
-		gen_html(std::vector< boost::filesystem::path > const&, bool body_only);
+		gen_html(std::vector< cyng::filesystem::path > const&, bool body_only);
 
 	private:
 		/**
@@ -104,7 +104,7 @@ namespace docscript
 	/**
 	 * Create a HTML figure tag
 	 */
-	html::node make_figure(boost::filesystem::path
+	html::node make_figure(cyng::filesystem::path
 		, std::string id
 		, double width
 		, std::string caption

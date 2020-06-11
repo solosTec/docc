@@ -6,7 +6,7 @@
  */ 
 
 #include <boost/program_options.hpp>
-#include <boost/filesystem.hpp>
+#include <cyng/compatibility/file_system.hpp>
 #include <boost/config.hpp>
 #include <boost/predef.h>
 #include <fstream>
@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
 
 	try
 	{
-		const boost::filesystem::path cwd = boost::filesystem::current_path();
+		const cyng::filesystem::path cwd = cyng::filesystem::current_path();
 
 		std::string config_file;
 		std::string inp_dir = (cwd / "docscript" / "inp").string();
