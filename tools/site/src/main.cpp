@@ -34,7 +34,12 @@ int main(int argc, char* argv[]) {
 		const cyng::filesystem::path cwd = cyng::filesystem::current_path();
 
 		std::string config_file;
+#ifdef _DEBUG
+		cyng::filesystem::path const src_dir{ __SOURCE_DIR };
+		std::string cfg_file = (src_dir / "src" / "main" / "examples" / "site.json").generic_string();
+#else
 		std::string cfg_file = (cwd / "docscript" / "site.json").string();
+#endif
 		std::string out_dir = (cwd / "build").string();
 
 		//
@@ -53,7 +58,7 @@ int main(int argc, char* argv[]) {
 		//
 		//	all compiler options
 		//
-		boost::program_options::options_description compiler("compiler");
+		boost::program_options::options_description compiler("site generator");
 		compiler.add_options()
 
 			("site,S", boost::program_options::value(&cfg_file)->default_value(cfg_file), "config file")

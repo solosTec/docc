@@ -49,6 +49,9 @@ namespace docscript
 			, bool gen_sitemap);
 
 	private:
+		void generate(cyng::param_map_t&&, cyng::filesystem::path const&);
+		void generate_pages(cyng::vector_t&&, cyng::filesystem::path const&);
+		void generate_menues(cyng::vector_t&&, cyng::filesystem::path const&);
 
 	private:
 		/**

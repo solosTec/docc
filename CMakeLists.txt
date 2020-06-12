@@ -461,6 +461,13 @@ target_include_directories(site
         ${CYNG_LIBRARY_DIR}
         ${CYNG_INCLUDE_MAIN}
 )
+
+#	"$<$<CONFIG:Debug>:__SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\">"
+
+target_compile_definitions(site
+  PRIVATE
+	"$<$<CONFIG:Debug>:__SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\">" )
+
 target_link_libraries(site
  	cyng_core
  	cyng_io 
