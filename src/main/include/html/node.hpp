@@ -308,6 +308,7 @@ namespace html
 		DEFINE_ATTR(language)
 		DEFINE_ATTR(link)
 		DEFINE_ATTR(list)
+		DEFINE_ATTR(loading)
 		DEFINE_ATTR(longdesc)
 		DEFINE_ATTR(loop)
 		DEFINE_ATTR(low)

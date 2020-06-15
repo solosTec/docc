@@ -13,6 +13,9 @@
 #include <chrono>
 #include <cyng/compatibility/file_system.hpp>
 
+#include <boost/uuid/name_generator.hpp>
+#include <boost/uuid/random_generator.hpp>
+
 namespace docscript
 {
 
@@ -52,6 +55,12 @@ namespace docscript
 		void generate(cyng::param_map_t&&, cyng::filesystem::path const&);
 		void generate_pages(cyng::vector_t&&, cyng::filesystem::path const&);
 		void generate_menues(cyng::vector_t&&, cyng::filesystem::path const&);
+		void generate_menu(std::string const& name
+			, boost::uuids::uuid tag
+			, std::string const& brand
+			, std::string const& color_scheme
+			, cyng::vector_t&& vec
+			, cyng::filesystem::path const& out);
 
 	private:
 		/**
@@ -67,8 +76,15 @@ namespace docscript
 		 */
 		int const verbose_;
 
+		/**
+		 * basic_random_generator<mt19937>
+		 */
+		boost::uuids::random_generator	uuid_gen_;	
 
-		//std::map<cyng::filesystem::path, cyng::param_map_t> index_;
+		/**
+		 * namespace for UUID generation based on SHA1
+		 */
+		boost::uuids::name_generator_sha1 name_gen_;
 	};
 
 }

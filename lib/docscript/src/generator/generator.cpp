@@ -20,7 +20,6 @@
 
 namespace docscript
 {
-
 	generator::generator(std::vector< cyng::filesystem::path > const& inc)
 		: uuid_gen_()
 		, name_gen_(uuid_gen_())

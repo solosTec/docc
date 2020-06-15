@@ -46,7 +46,7 @@
         {
             "name": "team",
             "source": "team.docscript",
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "plog",
@@ -59,9 +59,10 @@
     "menus": [
         {
             "name": "main",
+            "enabled": true,
             "placement": "sticky-top",
-            "color-scheme": "dark",
-            "brand":  "images/logo.png",
+            "color-scheme": "success",
+            "brand": "images/logo.png",
             "items": [
                 {
                     "title": "home",
