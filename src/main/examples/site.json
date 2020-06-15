@@ -1,5 +1,5 @@
 {
-    "languages": ["de", "en", "ru", "fr"],
+    "languages": [ "de", "en", "fr", "ru" ],
     "downloads": [
         {
             "name": "smf-manual-de",
@@ -15,38 +15,48 @@
     "pages": [
         {
             "name": "home",
-            "source": "home.docscript"
+            "source": "home.docscript",
+            "enabled":  true
         },
         {
             "name": "hw",
-            "source": "hw.docscript"
+            "source": "hw.docscript",
+            "enabled": true
         },
         {
             "name": "sw",
-            "source": "sw.docscript"
+            "source": "sw.docscript",
+            "enabled": true
         },
         {
             "name": "hosting",
-            "source": "hosting.docscript"
+            "source": "hosting.docscript",
+            "enabled": true
         },
         {
             "name": "consulting",
-            "source": "consulting.docscript"
+            "source": "consulting.docscript",
+            "enabled": true
         },
         {
             "name": "contact",
-            "source": "contact.docscript"
+            "source": "contact.docscript",
+            "enabled": true
         },
         {
             "name": "team",
-            "source": "team.docscript"
+            "source": "team.docscript",
+            "enabled": true
         },
         {
             "name": "plog",
-            "source": "plog.docscript"
+            "source": "plog.docscript",
+            "enabled": true,
+            "type": "blog",
+            "css": "css/plog.css"
         }
     ],
-    "menues": [
+    "menus": [
         {
             "name": "main",
             "placement": "sticky-top",
@@ -110,7 +120,8 @@
     ],
     "site": {
         "name": "main",
-        "menue": "main",
+        "menu": "main",
+        "css": "css/style.css",
         "pages": [ "home", "hw", "sw" ]
     }
 

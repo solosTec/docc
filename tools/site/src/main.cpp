@@ -51,7 +51,8 @@ int main(int argc, char* argv[]) {
 			("help,h", "print usage message")
 			("version,v", "print version string")
 			("build,b", "last built timestamp and platform")
-			("config,C", boost::program_options::value<std::string>(&config_file)->default_value("batch.cfg"), "configuration file")
+			("config,C", boost::program_options::value<std::string>(&config_file)->default_value("site.cfg"), "configuration file")
+			//("init,I", boost::program_options::bool_switch()->default_value(false), "generate a configuration template")
 
 			;
 
