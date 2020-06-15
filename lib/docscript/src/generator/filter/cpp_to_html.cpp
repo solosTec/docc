@@ -682,11 +682,11 @@ namespace docscript
 			os 
 				<< "</code>"
 				<< std::endl
-				<< "<code>"
+				<< "<code contenteditable spellcheck=\"false\">"
 				;
 		}
 		else {
-			os << "<code>";
+			os << "<code contenteditable spellcheck=\"false\">";
 		}
 
 		if (linenumbers_) {

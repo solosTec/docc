@@ -118,7 +118,7 @@ namespace docscript
 			return generate_list(depth + 1, access_node_list(n));
 		case node::NODE_VECTOR:
 			return generate_vector(depth + 1, access_node_vector(n));
-
+			 
 		default:
 			//
 			//	unknown type
@@ -285,8 +285,6 @@ namespace docscript
 
 	cyng::vector_t ast::generate_symbol(std::size_t depth, symbol const* sp) const
 	{
-		cyng::vector_t prg;
-
 		if (log_) {
 			print_ast_n(depth, '.');
 			std::cout << "generate_symbol(" << *sp << ")" << std::endl;
@@ -304,16 +302,13 @@ namespace docscript
 				switch (dots) {
 				case 0:
 					//	integer
-					prg << static_cast<std::uint64_t>(std::stoull(sp->value_));
-					break;
+					return cyng::vector_factory({ static_cast<std::uint64_t>(std::stoull(sp->value_)) });
 				case 1:
 					//	double
-					prg << std::stod(sp->value_, 0);
-					break;
+					return cyng::vector_factory({ std::stod(sp->value_, 0) });
 				default:
 					//	error: use the string
-					prg << sp->value_;
-					break;
+					return cyng::vector_factory({ sp->value_ });
 				}
 			}
 			catch (std::exception const& ex) {
@@ -323,6 +318,8 @@ namespace docscript
 					<< "] is not numeric: "
 					<< ex.what()
 					<< std::endl;
+
+				cyng::vector_t prg;
 				prg
 					<< cyng::code::ASP
 					<< cyng::code::ESBA
@@ -331,6 +328,7 @@ namespace docscript
 					<< cyng::pr_n(1)	// code::PR
 					<< cyng::code::REBA
 					;
+				return prg;
 			}
 		}
 		else if (sp->is_type(SYM_DATETIME)) {
@@ -338,30 +336,27 @@ namespace docscript
 			//	convert to datetime object
 			//
 			auto const r = cyng::parse_rfc3339_timestamp(sp->value_);
-			//auto const r = cyng::parse_rfc3339_timestamp("2022-10-02T15:00:00.05Z");
 			
 			if (r.second) {
-				prg << r.first;
-				//std::cout
-				//	<< cyng::date_to_str(r.first)
-				//	<< std::endl;
+				return cyng::vector_factory({ r.first });
 			}
 			else {
 				std::cerr << "*** conversion to date-time failed: " << sp->value_ << std::endl;
-				prg << sp->value_;
+				return cyng::vector_factory({ sp->value_ });
 			}
 		}
 		else if (sp->is_type(SYM_TEXT)) {
 			if (boost::algorithm::equals("true", sp->value_)) {
-				prg << true;
+				return cyng::vector_factory({ true });
 			}
 			else if (boost::algorithm::equals("false", sp->value_)) {
-				prg << false;
+				return cyng::vector_factory({ false });
 			}
 			else {
 				//
 				//	target platform may have special requirements for escaping
 				//
+				cyng::vector_t prg;
 				prg
 					<< cyng::code::ASP
 					<< cyng::code::ESBA
@@ -370,12 +365,13 @@ namespace docscript
 					<< cyng::pr_n(1)	// code::PR
 					<< cyng::code::REBA
 					;
+				return prg;
 			}
 		}
 		else {
-			prg << sp->value_;
+			return cyng::vector_factory({ sp->value_ });
 		}
-		return prg;
+		return cyng::vector_t{};
 	}
 
 	cyng::vector_t ast::generate_list(std::size_t depth, node::s_args const* args) const
