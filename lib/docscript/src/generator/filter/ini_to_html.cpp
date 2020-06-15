@@ -72,6 +72,11 @@ namespace docscript
 					line += *pos;
 				}
 				break;
+			case '=':
+				line.append(color_blue_);
+				line += *pos;
+				line.append(end_);
+				break;
 			default:
 				line += *pos;
 				break;

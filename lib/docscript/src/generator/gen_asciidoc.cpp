@@ -447,6 +447,7 @@ namespace docscript
 				//
 				std::ifstream  ifs(p.string());
 				ss
+					<< std::endl
 					<< "."
 					<< caption
 					<< std::endl
@@ -597,36 +598,17 @@ namespace docscript
 			auto const type = boost::algorithm::to_upper_copy(map.begin()->first);
 			auto const msg = accumulate_plain_text(map.begin()->second);
 
-			//	The following emojis are working for github. Other MD dialects
-			//	like https://dillinger.io/ don't understand this. Since our
-			//	main target is github the emojies are used. Feel free to find
-			//	a better solution.
-			//	A list of supported emojies on github:
-			//	https://gist.github.com/rxaviers/7360908
-			//
 			if (boost::algorithm::equals(type, "INFO")) {
-
-				//	 &#xFE0F; ℹ 
-				ctx.push(cyng::make_object("> :information_source: " + msg));
-				//ctx.push(cyng::make_object("> &#2139; " + msg));
+				ctx.push(cyng::make_object("TIP: " + msg));
 			}
 			else if (boost::algorithm::equals(type, "CAUTION")) {
-
-				//	&#10071; ❗
-				ctx.push(cyng::make_object("> :heavy_exclamation_mark: " + msg));
-				//ctx.push(cyng::make_object("> &#10071; " + msg));
+				ctx.push(cyng::make_object("CAUTION: " + msg));
 			}
 			else if (boost::algorithm::equals(type, "WARNING")) {
-
-				//	&#9888; ⚠️
-				ctx.push(cyng::make_object("> :warning: " + msg));
-				//ctx.push(cyng::make_object("> &#9888; " + msg));
+				ctx.push(cyng::make_object("WARNING: " + msg));
 			}
 			else {
-
-				//	&#x1F4A1; 💡
-				ctx.push(cyng::make_object("> :bulb: " + msg));
-				//ctx.push(cyng::make_object("> &#x1F4A1; " + msg));
+				ctx.push(cyng::make_object("IMPORTANT: " + msg));
 			}
 		}
 		else {
@@ -743,6 +725,7 @@ namespace docscript
 
 		std::stringstream ss;
 		ss
+			<< std::endl
 			<< "[#"
 			<< id
 			<< "]"
@@ -771,6 +754,7 @@ namespace docscript
 
 		std::stringstream ss;
 		ss
+			<< std::endl
 			<< "[#"
 			<< id
 			<< "]"
