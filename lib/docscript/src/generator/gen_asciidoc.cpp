@@ -76,6 +76,11 @@ namespace docscript
 
 	std::ofstream& gen_asciidoc::emit_file(std::ofstream& ofs, cyng::vector_t::const_iterator pos, cyng::vector_t::const_iterator end) const
 	{
+		ofs
+			<< ":pdf-page-size: A4"
+			<< std::endl
+			<< std::endl
+			;
 		emit_meta(ofs);
 		while (pos != end) {
 			emit_obj(ofs, *pos);
@@ -98,11 +103,10 @@ namespace docscript
 		//	meta data nor supported by github
 		for (auto const& e : meta_) {
 			ofs
-				<< "<!-- "
+				<< "// "
 				<< e.first
 				<< ":\t"
 				<< cyng::io::to_str(e.second)
-				<< " -->"
 				<< std::endl
 				;
 		}
@@ -445,12 +449,12 @@ namespace docscript
 				ss
 					<< "."
 					<< caption
+					<< std::endl
 					<< "[source,"
 					<< language
 					<< "]"
 					<< std::endl
 					<< std::string(4, '-')
-					<< language
 					<< std::endl
 					<< ifs.rdbuf()
 					<< std::endl

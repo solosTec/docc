@@ -13,6 +13,7 @@
 #include "filter/binary_to_html.h"
 #include "filter/html_to_html.h"
 #include "filter/sml_to_html.h"
+#include "filter/ini_to_html.h"
 
 #include <cyng/vm/generator.h>
 #include <cyng/io/serializer.h>
@@ -291,6 +292,14 @@ namespace docscript
 			<< "\t\tfigure {"
 			<< std::endl
 			<< "\t\t\tmargin: 2%;"
+			<< std::endl
+			<< "\t\t}"
+			<< std::endl
+			<< "\t\tfigure > figcaption {"
+			<< std::endl
+			<< "\t\t\tbackground-color: #ddd;"
+			<< std::endl
+			<< "\t\t\tfont-style: italic;"
 			<< std::endl
 			<< "\t\t}"
 			<< std::endl
@@ -1066,6 +1075,14 @@ namespace docscript
 		if (cyng::filesystem::exists(p) && cyng::filesystem::is_regular(p)) {
 
 			std::stringstream ss;
+			ss 
+				<< "<figure>"
+				<< std::endl
+				<< "\t<figcaption>"
+				<< caption
+				<< "</figcaption>"
+				<< std::endl
+				;
 			if (boost::algorithm::iequals(language, "json")) {
 
 				std::ifstream  ifs(p.string());
@@ -1091,7 +1108,7 @@ namespace docscript
 				ss 
 					<< "<pre class=\"docscript-pre\" title=\""
 					<< caption
-					<< "\"><code>"
+					<< "\"><code contenteditable spellcheck=\"false\">"
 					;
 				std::string const inp(static_cast<std::stringstream const&>(std::stringstream() << ifs.rdbuf()).str());
 				docscript_to_html filter(line_numbers, uuid_gen_());
@@ -1147,6 +1164,17 @@ namespace docscript
 						<< ex.what()
 						<< std::endl;
 				}
+				ss 
+					<< "</code></pre>" 
+					<< std::endl;
+			}
+			else if (boost::algorithm::equals(language, "ini") || boost::algorithm::iequals(language, "service") || boost::algorithm::iequals(language, "cfg")) {
+
+				std::ifstream  ifs(p.string());
+				ss << "<pre class=\"docscript-pre\">" << std::endl;
+				std::string const inp(static_cast<std::stringstream const&>(std::stringstream() << ifs.rdbuf()).str());
+				ini_to_html filter(line_numbers, uuid_gen_());
+				filter.convert(ss, inp);
 				ss << "</code></pre>" << std::endl;
 			}
 			else {
@@ -1160,6 +1188,11 @@ namespace docscript
 					<< std::endl
 					;
 			}
+
+			ss 
+				<< "</figure>"
+				<< std::endl
+				;
 
 			ctx.push(cyng::make_object(ss.str()));
 		}
