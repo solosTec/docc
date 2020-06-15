@@ -39,11 +39,13 @@ set (docscript_generator
 	src/main/include/docscript/generator/generator.h
 	src/main/include/docscript/generator/gen_html.h  
 	src/main/include/docscript/generator/gen_md.h  
+	src/main/include/docscript/generator/gen_asciidoc.h  
 	src/main/include/docscript/generator/gen_LaTeX.h  
 	src/main/include/docscript/generator/numbering.h
 	lib/docscript/src/generator/generator.cpp
 	lib/docscript/src/generator/gen_html.cpp
 	lib/docscript/src/generator/gen_md.cpp
+	lib/docscript/src/generator/gen_asciidoc.cpp
 	lib/docscript/src/generator/gen_LaTeX.cpp
 	lib/docscript/src/generator/numbering.cpp
 )

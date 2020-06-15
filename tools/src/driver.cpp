@@ -11,6 +11,7 @@
 #include <docscript/parser.h>
 #include <docscript/generator/gen_html.h>
 #include <docscript/generator/gen_md.h>
+#include <docscript/generator/gen_asciidoc.h>
 #include <docscript/generator/gen_LaTeX.h>
 
 #include <cyng/io/serializer.h>
@@ -379,6 +380,16 @@ namespace docscript
 			}
 			else if (boost::algorithm::iequals(extension, ".md")) {
 				gen_md g(this->includes_);
+				g.run(std::move(prg));
+				auto const m = g.get_meta();
+				for (auto const& i : m) {
+					meta_[i.first] = i.second;
+				}
+			}
+			else if (boost::algorithm::iequals(extension, ".asciidoc") 
+				|| boost::algorithm::iequals(extension, ".adoc") 
+				|| boost::algorithm::iequals(extension, ".asc")) {
+				gen_asciidoc g(this->includes_);
 				g.run(std::move(prg));
 				auto const m = g.get_meta();
 				for (auto const& i : m) {

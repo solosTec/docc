@@ -20,10 +20,6 @@ namespace docscript
 	 * Parsing a docscript document produces an AST that
 	 * consists of nodes.
 	 */
-//	namespace impl {
-//		class node;
-//	}
-
 	class node
 	{
 	public:

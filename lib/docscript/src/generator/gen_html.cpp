@@ -914,8 +914,8 @@ namespace docscript
 // 		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
 
 		auto const reader = cyng::make_reader(frame.at(0));
-		auto const alt = accumulate_plain_text(reader.get("alt"));
 		auto const caption = accumulate_plain_text(reader.get("caption"));
+		auto const alt = cyng::value_cast(reader.get("alt"), caption);
 		auto const source = cyng::io::to_str(reader.get("source"));
 		auto const tag = name_gen_(cyng::value_cast(reader.get("tag"), source));
 
