@@ -8,6 +8,7 @@
 #ifndef DOCC_SITE_H
 #define DOCC_SITE_H
 
+
 #include <cyng/object.h>
 #include <cyng/intrinsics/sets.h>
 #include <chrono>
@@ -55,6 +56,7 @@ namespace docscript
 		void generate(cyng::param_map_t&&, cyng::filesystem::path const&);
 
 		void generate_pages(cyng::vector_t&&
+			, cyng::vector_t&&
 			, boost::uuids::name_generator_sha1& gen
 			, cyng::filesystem::path css_global
 			, cyng::filesystem::path const&);
@@ -65,11 +67,13 @@ namespace docscript
 			, std::string const& type
 			, cyng::filesystem::path css_global
 			, cyng::filesystem::path css_page
+			, cyng::object menu
+			, std::string const& footer
 			, cyng::filesystem::path const&);
 
-		void generate_menues(cyng::vector_t&&
-			, boost::uuids::name_generator_sha1& gen
-			, cyng::filesystem::path const&);
+		//void generate_menus(cyng::vector_t&&
+		//	, boost::uuids::name_generator_sha1& gen
+		//	, cyng::filesystem::path const&);
 
 		void generate_menu(std::string const& name
 			, boost::uuids::uuid tag
@@ -93,6 +97,13 @@ namespace docscript
 		int const verbose_;
 
 	};
+
+	/**
+	 * Search vector of menue definitions for specified name
+	 */
+	cyng::object get_menu(cyng::vector_t const& menus, std::string const& menu);
+	cyng::object get_page(cyng::vector_t const& pages, std::string const& page);
+
 
 }
 

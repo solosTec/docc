@@ -29,6 +29,8 @@
 namespace docscript
 {
 
+	html::node generate_dropdown_menu(cyng::vector_t const&);
+
 	site::site(std::vector< std::string >const& inc
 		, int verbose)
 	: includes_(inc.begin(), inc.end())
@@ -102,7 +104,16 @@ namespace docscript
 		//
 		if (reader.exists("pages"))
 		{
-			generate_pages(cyng::to_vector(reader.get("pages")), name_gen, css, out);
+			if (!reader.exists("menus"))
+			{
+				std::cerr << "***warning: no menues defined" << std::endl;
+			}
+
+			generate_pages(cyng::to_vector(reader.get("pages"))
+				, cyng::to_vector(reader.get("menus"))
+				, name_gen
+				, css
+				, out);
 		}
 		else {
 			std::cerr << "***warning: no pages defined" << std::endl;
@@ -111,16 +122,17 @@ namespace docscript
 		//
 		//	generate menues
 		//
-		if (reader.exists("menus"))
-		{
-			generate_menues(cyng::to_vector(reader.get("menus")), name_gen, out);
-		}
-		else {
-			std::cerr << "***warning: no menues defined" << std::endl;
-		}
+		//if (reader.exists("menus"))
+		//{
+		//	generate_menus(cyng::to_vector(reader.get("menus")), name_gen, out);
+		//}
+		//else {
+		//	std::cerr << "***warning: no menues defined" << std::endl;
+		//}
 	}
 
 	void site::generate_pages(cyng::vector_t&& vec
+		, cyng::vector_t&& menus
 		, boost::uuids::name_generator_sha1& gen
 		, cyng::filesystem::path css_global
 		, cyng::filesystem::path const& out)
@@ -136,10 +148,16 @@ namespace docscript
 				//auto const id = boost::uuids::to_string(tag);
 				auto const type = cyng::value_cast<std::string>(reader.get("type"), "page");
 				auto const css_page = cyng::value_cast<std::string>(reader.get("css"), "");
+				auto const menu = cyng::value_cast<std::string>(reader.get("menu"), "");
+				auto const footer = cyng::value_cast<std::string>(reader.get("footer"), "");
 
 				std::cout << "***info: generate page [" << name << "]" << std::endl;
+				auto const obj = get_menu(menus, menu);
+				if (obj.is_null()) {
+					std::cout << "***warning: menu [" << menu << "] not defined" << std::endl;
+				}
 
-				generate_page(name, tag, source, type, css_global, css_page, out);
+				generate_page(name, tag, source, type, css_global, css_page, obj, footer, out);
 			}
 			else {
 				std::cout << "***warning: skip page  [" << name << "]" << std::endl;
@@ -153,6 +171,8 @@ namespace docscript
 		, std::string const& type
 		, cyng::filesystem::path css_global
 		, cyng::filesystem::path css_page
+		, cyng::object menu
+		, std::string const& footer
 		, cyng::filesystem::path const& out)
 	{
 		auto const id = boost::uuids::to_string(tag);
@@ -179,38 +199,17 @@ namespace docscript
 			, false	//	index
 			, "article");
 
-		//std::ofstream of(p.string());
-		//if (of.is_open()) {
-		//}
-		//else {
-		//	std::cout << "***error: cannot open [" << p << "]" << std::endl;
-		//}
-	}
+		if (!menu.is_null()) {
+			auto const reader = cyng::make_reader(menu);
+			auto const menu_name = cyng::value_cast<std::string>(reader.get("name"), "");
+			auto const placement = cyng::value_cast<std::string>(reader.get("placement"), "sticky-top");
+			auto const color_scheme = cyng::value_cast<std::string>(reader.get("color-scheme"), "dark");
+			auto const brand = cyng::value_cast<std::string>(reader.get("brand"), "images/logo.png");
 
+			std::cout << "***info: generate menu [" << menu_name << "]" << std::endl;
 
-	void site::generate_menues(cyng::vector_t&& vec
-		, boost::uuids::name_generator_sha1& gen
-		, cyng::filesystem::path const& out)
-	{
-		for (auto const& obj : vec) {
-			auto const reader = cyng::make_reader(obj);
-			auto const name = cyng::value_cast<std::string>(reader.get("name"), "");
-			auto const enabled = cyng::value_cast(reader.get("enabled"), false);
+			generate_menu(menu_name, tag, brand, color_scheme, cyng::to_vector(reader.get("items")), out);
 
-			if (enabled) {
-
-				auto const placement = cyng::value_cast<std::string>(reader.get("placement"), "sticky-top");
-				auto const color_scheme = cyng::value_cast<std::string>(reader.get("color-scheme"), "dark");
-				auto const brand = cyng::value_cast<std::string>(reader.get("brand"), "images/logo.png");
-				auto const tag = gen(cyng::value_cast(reader.get("tag"), name));
-
-				std::cout << "***info: generate menu [" << name << "]" << std::endl;
-
-				generate_menu(name, tag, brand, color_scheme, cyng::to_vector(reader.get("items")), out);
-			}
-			else {
-				std::cout << "***warning: skip menu [" << name << "]" << std::endl;
-			}
 		}
 	}
 
@@ -222,7 +221,7 @@ namespace docscript
 		, cyng::filesystem::path const& out)
 	{
 		auto const id = boost::uuids::to_string(tag);
-		auto const p = out / (id + ".html.menu");
+		auto const p = out / (id + ".menu.html");
 		
 		std::ofstream of(p.string());
 		if (of.is_open()) {
@@ -237,21 +236,56 @@ namespace docscript
 						;
 
 			//
+			//	generate menu items
+			//
+			//auto div = html::div(html::class_("collapse navbar-collapse")
+			//	, html::ul(html::class_("navbar-nav mr-auto"))
+			//);
+			auto ul = html::ul(html::class_("navbar-nav mr-auto"));
+			for (auto const& obj : vec) {
+
+				auto const reader = cyng::make_reader(obj);
+				auto const title = cyng::value_cast<std::string>(reader.get("title"), "?");
+				auto const ref = cyng::value_cast<std::string>(reader.get("ref"), "#");
+				auto const enabled = cyng::value_cast(reader.get("enabled"), false);
+				auto const items = cyng::to_vector(reader.get("items"));
+
+				if (items.empty()) {
+					if (enabled) {
+						ul += html::li(html::class_("nav-item"), 	//	ToDo: set active, enabled
+							html::a(html::class_("nav-link"), html::href_(ref), title)
+						);
+					}
+					else {
+						ul += html::li(html::class_("nav-item"), 
+							html::a(html::class_("nav-link disabled"), html::href_(ref), title)
+						);
+					}
+				}
+				else {
+					ul += html::li(html::class_("nav-item dropdown")
+						, html::a(html::class_("nav-link dropdown-toggle"), html::href_("#"), html::data_toggle_("dropdown"), title)
+						, generate_dropdown_menu(items)
+					);
+				}
+			}
+
+			//
 			//	generate menu
 			//
-			auto const nav = html::nav(html::class_(cs), 
+			auto nav = html::nav(html::class_(cs), 
 				html::a(html::class_("navbar-brand")
 					, html::href_("#")
 					, html::img(html::src_("logo.svg"), html::width_(30), html::height_(30), html::alt_(""), html::loading_("lazy"))
-				)
+				),
+				html::button(html::class_("navbar-toggler")
+					, html::type_("button")
+					, html::data_toggle_("collapse")
+					, html::span(html::class_("navbar-toggler-icon"))
+				),
+				html::div(html::class_("collapse navbar-collapse"), ul)
 			);
 
-			//
-			//	generate menu items
-			//
-			for (auto const& obj : vec) {
-				std::cout << "[" << cyng::io::to_str(obj) << "] " << p.generic_string() << std::endl;
-			}
 
 			of
 				<< nav.to_str()
@@ -261,6 +295,46 @@ namespace docscript
 		else {
 			std::cout << "***error: cannot open [" << p << "]" << std::endl;
 		}
+	}
+
+	cyng::object get_menu(cyng::vector_t const& menus, std::string const& menu)
+	{
+		for (auto const& obj : menus) {
+			auto const reader = cyng::make_reader(obj);
+			auto const name = cyng::value_cast<std::string>(reader.get("name"), "");
+			if (boost::algorithm::equals(name, menu))	return obj;
+		}
+		return cyng::make_object();
+	}
+
+	cyng::object get_page(cyng::vector_t const& pages, std::string const& page)
+	{
+		for (auto const& obj : pages) {
+			auto const reader = cyng::make_reader(obj);
+			auto const name = cyng::value_cast<std::string>(reader.get("name"), "");
+			if (boost::algorithm::equals(name, page))	return obj;
+		}
+		return cyng::make_object();
+	}
+
+	html::node generate_dropdown_menu(cyng::vector_t const& vec)
+	{
+		auto div = html::div(html::class_("dropdown-menu"));
+		for (auto const& obj : vec) {
+			auto const reader = cyng::make_reader(obj);
+			auto const title = cyng::value_cast<std::string>(reader.get("title"), "?");
+			auto const ref = cyng::value_cast<std::string>(reader.get("ref"), "#");
+			auto const type = cyng::value_cast<std::string>(reader.get("type"), "item");
+			//auto const items = cyng::to_vector(reader.get("items"));
+
+			if (boost::algorithm::equals(type, "divider")) {
+				div += html::div(html::class_("dropdown-divider"));
+			}
+			else {
+				div += html::a(html::class_("dropdown-item"), html::href_(ref), title);
+			}
+		}
+		return div;
 	}
 
 }

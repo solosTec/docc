@@ -56,6 +56,7 @@ namespace html
 		else if (boost::algorithm::equals(name, "margin_width"))	return "margin-width";
 		else if (boost::algorithm::equals(name, "margin_right"))	return "margin-right";
 		else if (boost::algorithm::equals(name, "margin_left"))	return "margin-left";
+		else if (boost::algorithm::equals(name, "data_toggle"))	return "data-toggle";
 		return name;
 	}
 

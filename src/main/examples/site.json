@@ -68,13 +68,12 @@
     "menus": [
         {
             "name": "main",
-            "enabled": true,
             "placement": "sticky-top",
             "color-scheme": "success",
             "brand": "images/logo.png",
             "items": [
                 {
-                    "title": "home",
+                    "title": "Home",
                     "ref": "home",
                     "enabled": true
                 },
@@ -96,6 +95,9 @@
                             "title": "hardware",
                             "ref": "hw",
                             "enabled": true
+                        },
+                        {
+                            "type":  "divider"
                         },
                         {
                             "title": "consulting",
@@ -139,6 +141,7 @@
         "tag": "ea4808e2-0b3a-48c5-b3a9-9004dbc23c8d",
         "menu": "main",
         "css": "css/style.css",
+        "bootstrap": "v4.5",
         "pages": [ "home", "hw", "sw" ]
     }
 

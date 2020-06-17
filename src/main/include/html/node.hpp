@@ -269,6 +269,7 @@ namespace html
 		DEFINE_ATTR(controls)
 		DEFINE_ATTR(coords)
 		DEFINE_ATTR(data)
+		DEFINE_ATTR(data_toggle)	//	bootstrap 4
 		DEFINE_ATTR(datetime)
 		DEFINE_ATTR(declare)
 		DEFINE_ATTR(default)
