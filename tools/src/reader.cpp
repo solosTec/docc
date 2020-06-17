@@ -116,10 +116,6 @@ namespace docscript
 
 						//	virtual "new line" at the beginning
 						tokenize("\n");
-
-#ifdef _DEBUG
-						//std::cout << ">> " << line << std::endl;
-#endif
 						tokenize(line);
 					}
 				}

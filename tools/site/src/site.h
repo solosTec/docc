@@ -9,6 +9,7 @@
 #define DOCC_SITE_H
 
 
+#include "page.h"
 #include <cyng/object.h>
 #include <cyng/intrinsics/sets.h>
 #include <chrono>
@@ -19,6 +20,7 @@
 
 namespace docscript
 {
+	using dict_t = std::map<std::string, page>;
 
 	/**
 	 * Takes a site description and generated a complete site from
@@ -26,7 +28,6 @@ namespace docscript
 	 */
 	class site
 	{
-		using chrono_idx_t = std::map<std::chrono::system_clock::time_point, cyng::param_map_t>;
 
 	public:
 		/**
@@ -55,32 +56,36 @@ namespace docscript
 	private:
 		void generate(cyng::param_map_t&&, cyng::filesystem::path const&);
 
-		void generate_pages(cyng::vector_t&&
+		void generate_pages(dict_t const&
+			, std::vector<std::string> const& site
 			, cyng::vector_t&&
 			, boost::uuids::name_generator_sha1& gen
 			, cyng::filesystem::path css_global
 			, cyng::filesystem::path const&);
 
-		void generate_page(std::string const& name
-			, boost::uuids::uuid tag
-			, cyng::filesystem::path source
-			, std::string const& type
-			, cyng::filesystem::path css_global
-			, cyng::filesystem::path css_page
+		void generate_page(dict_t const&
+			, page const& p
 			, cyng::object menu
-			, std::string const& footer
 			, cyng::filesystem::path const&);
 
-		//void generate_menus(cyng::vector_t&&
-		//	, boost::uuids::name_generator_sha1& gen
-		//	, cyng::filesystem::path const&);
-
-		void generate_menu(std::string const& name
+		void generate_menu(dict_t const&
+			, std::string const& name
 			, boost::uuids::uuid tag
 			, std::string const& brand
 			, std::string const& color_scheme
 			, cyng::vector_t&& vec
 			, cyng::filesystem::path const& out);
+
+		void build_site(dict_t const&
+			, std::vector<std::string> const& site
+			, std::string const& css
+			, cyng::filesystem::path const& out);
+
+		void build_page(page const& p
+			, std::string const& css
+			, cyng::filesystem::path const& out);
+
+		void import_css(std::ofstream& of, page const& p, std::string const& css, cyng::filesystem::path const& out);
 
 	private:
 		/**
@@ -88,7 +93,7 @@ namespace docscript
 		 * If the driver opens a file it searches in all given directories
 		 * until the spcified file is found.
 		 */
-		std::vector< std::string > const includes_;
+		std::vector< cyng::filesystem::path > const includes_;
 
 		/**
 		 * verbosity level.
@@ -104,7 +109,13 @@ namespace docscript
 	cyng::object get_menu(cyng::vector_t const& menus, std::string const& menu);
 	cyng::object get_page(cyng::vector_t const& pages, std::string const& page);
 
+	dict_t create_page_dict(cyng::vector_t const& pages
+		, std::string const& index
+		, boost::uuids::name_generator_sha1&
+		, cyng::filesystem::path const& out);
 
+	void import_menu(std::ofstream& of, page const& p, cyng::filesystem::path const& out);
+	void import_body(std::ofstream& of, page const& p, cyng::filesystem::path const& out);
 }
 
 #endif

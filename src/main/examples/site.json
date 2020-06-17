@@ -22,18 +22,21 @@
         },
         {
             "name": "hw",
+            "title":  "Hardware",
             "source": "hw.docscript",
-            "enabled": false,
+            "enabled": true,
             "menu": "main"
         },
         {
             "name": "sw",
+            "title": "Software",
             "source": "sw.docscript",
-            "enabled": false,
+            "enabled": true,
             "menu": "main"
         },
         {
             "name": "hosting",
+            "title": "Hosting",
             "source": "hosting.docscript",
             "enabled": false,
             "menu": "main"
@@ -69,8 +72,9 @@
         {
             "name": "main",
             "placement": "sticky-top",
-            "color-scheme": "success",
-            "brand": "images/logo.png",
+            "color-scheme": "primary",
+            "color-scheme-unused": "dark",
+            "brand": "images/logo.svg",
             "items": [
                 {
                     "title": "Home",
@@ -78,49 +82,48 @@
                     "enabled": true
                 },
                 {
-                    "title": "products",
+                    "title": "Products",
                     "enabled": true,
                     "items": [
                         {
-                            "title": "software",
-                            "ref": "sw",
-                            "enabled": true
+                            "title": "Software",
+                            "ref": "sw"
                         },
                         {
-                            "title": "hosting",
-                            "ref": "hosting",
-                            "enabled": true
+                            "title": "Hosting",
+                            "ref": "hosting"
                         },
                         {
-                            "title": "hardware",
-                            "ref": "hw",
-                            "enabled": true
+                            "title": "Hardware",
+                            "ref": "hw"
                         },
                         {
-                            "type":  "divider"
+                            "type": "divider"
                         },
                         {
-                            "title": "consulting",
-                            "ref": "consulting",
-                            "enabled": true
+                            "title": "Consulting",
+                            "ref": "consulting"
                         }
                     ]
                 },
                 {
-                    "title": "blog",
+                    "title": "Blog",
                     "ref": "plog"
                 },
                 {
-                    "title": "contact",
+                    "title": "Contact",
                     "items": [
                         {
-                            "title": "support"
+                            "title": "Support",
+                            "ref": "support"
                         },
                         {
-                            "title": "team"
+                            "title": "Team",
+                            "ref": "team"
                         },
                         {
-                            "title": "downloads"
+                            "title": "Downloads",
+                            "ref": "downloads"
                         }
                     ]
                 }
@@ -133,15 +136,16 @@
     "footers": [
         {
             "name": "main",
-            "color-scheme": "success"
+            "color-scheme": "success",
+            "content": "Copyright © solosTec 2018-2020"
         } 
     ],
     "site": {
-        "name": "main",
+        "name": "solostec.ch",
         "tag": "ea4808e2-0b3a-48c5-b3a9-9004dbc23c8d",
-        "menu": "main",
+        "index": "home",
         "css": "css/style.css",
-        "bootstrap": "v4.5",
+        "bootstrap": "4.5.0",
         "pages": [ "home", "hw", "sw" ]
     }
 

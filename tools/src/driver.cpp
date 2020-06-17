@@ -41,52 +41,62 @@ namespace docscript
 		//
 		//	sanitizer => tokenizer 
 		//
-		, sanitizer_([this](docscript::token&& tok) {
-
-			if (!tok.eof_)
-			{
-				//	update frequency
-				stats_[tok.value_] += tok.count_;
-			}
-
-			while (!tokenizer_.next(tok))
-			{
-#ifdef _DEBUG
-				if (verbose_ > 9)
-				{
-					std::cout
-						<< "***info: repeat"
-						<< tok
-						<< std::endl;
-				}
-#endif
-			}
-		}, std::bind(&driver::print_error, this, std::placeholders::_1, std::placeholders::_2))
-
-		//
-		//	tokenizer 
-		//
-		, tokenizer_([this](symbol&& sym) {
-
-			if (verbose_ > 5)
-			{ 
-				std::cout 
-					<< "SYMBOL  " 
-					<< sym 
-					<< std::endl;
-			}
-
-			//
-			//	save in stream
-			//
-			stream_.emplace_back(std::move(sym));
-
-		}, std::bind(&driver::print_error, this, std::placeholders::_1, std::placeholders::_2))
+		, sanitizer_(std::bind(&driver::sanitize, this, std::placeholders::_1), std::bind(&driver::print_error, this, std::placeholders::_1, std::placeholders::_2))
+		, tokenizer_(std::bind(&driver::tokenize, this, std::placeholders::_1), std::bind(&driver::print_error, this, std::placeholders::_1, std::placeholders::_2))
 
 	{}
 		
+	driver::driver(std::vector< cyng::filesystem::path >const& inc, int verbose)
+		: includes_(inc.begin(), inc.end())
+		, verbose_(verbose)
+		, stats_()
+		, stream_()
+		, ctx_()
+		, meta_()
+		, sanitizer_(std::bind(&driver::sanitize, this, std::placeholders::_1), std::bind(&driver::print_error, this, std::placeholders::_1, std::placeholders::_2))
+		, tokenizer_(std::bind(&driver::tokenize, this, std::placeholders::_1), std::bind(&driver::print_error, this, std::placeholders::_1, std::placeholders::_2))
+	{}
+
 	driver::~driver()
 	{}
+
+	void driver::tokenize(symbol&& sym)
+	{
+		if (verbose_ > 5)
+		{
+			std::cout
+				<< "SYMBOL  "
+				<< sym
+				<< std::endl;
+		}
+
+		//
+		//	save in stream
+		//
+		stream_.emplace_back(std::move(sym));
+	}
+
+	void driver::sanitize(docscript::token&& tok)
+	{
+		if (!tok.eof_)
+		{
+			//	update frequency
+			stats_[tok.value_] += tok.count_;
+		}
+
+		while (!tokenizer_.next(tok))
+		{
+#ifdef _DEBUG
+			if (verbose_ > 9)
+			{
+				std::cout
+					<< "***info: repeat"
+					<< tok
+					<< std::endl;
+			}
+#endif
+		}
+	}
 
 	cyng::param_map_t const& driver::get_meta() const
 	{
@@ -101,15 +111,76 @@ namespace docscript
 		, bool generate_index
 		, std::string type)
 	{
+		if (!out.empty())
+		{
+			//
+			// update meta data
+			//
+			meta_["og:type"] = cyng::make_object(type);
+
+			//
+			//	generate IML code
+			//
+			generate_iml(master, body, out, generate_meta, generate_index);
+
+			print_msg(cyng::logging::severity::LEVEL_INFO, "output file is", out);
+			build(body, out, generate_body_only);
+
+			//
+			//	remove temporary files
+			//
+			cyng::error_code ec;
+			cyng::filesystem::remove(body, ec);
+
+			return ec.value();
+		}
+
+		print_msg(cyng::logging::severity::LEVEL_ERROR, "no output file specified");
+		return EXIT_FAILURE;
+	}
+
+	int driver::generate_bootstrap_page(cyng::filesystem::path const& master
+		, cyng::filesystem::path const& body
+		, cyng::filesystem::path const& out)
+	{
+		if (!out.empty())
+		{
+			//
+			//	generate IML code
+			//
+			generate_iml(master, body, out, false, false);
+
+			//
+			//	generate HTML bootstrap page
+			//
+			print_msg(cyng::logging::severity::LEVEL_INFO, "output file is", out);
+			//build_bootstrap(body, out, true);
+
+			//
+			//	remove temporary files
+			//
+			cyng::error_code ec;
+			cyng::filesystem::remove(body, ec);
+
+			return ec.value();
+		}
+
+		print_msg(cyng::logging::severity::LEVEL_ERROR, "no output file specified");
+		return EXIT_FAILURE;
+
+	}
+
+	void driver::generate_iml(cyng::filesystem::path const& master
+		, cyng::filesystem::path const& body
+		, cyng::filesystem::path const& out
+		, bool generate_meta
+		, bool generate_index)
+	{
+
 		//
 		//	get a timestamp to measure performance
 		//
 		auto const now = std::chrono::system_clock::now();
-
-		//
-		// update meta data
-		//
-		meta_["og:type"] = cyng::make_object(type);
 
 		//
 		//	read and tokenize file recursive
@@ -120,45 +191,13 @@ namespace docscript
 		//
 		//	calculate duration of reading and compilation
 		//
-		std::chrono::milliseconds const delta = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - now);
+		auto const delta = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - now);
 		if (verbose_ > 0)
 		{
-			std::cout
-				<< "***info: compilation took "
-				<< cyng::to_str(delta)
-				<< std::endl
-				;
+			print_msg(cyng::logging::severity::LEVEL_TRACE, "compilation took ", cyng::to_str(delta));
 		}
-
-		if (!out.empty())
-		{
-			std::cout
-				<< "***info: output file is "
-				<< out
-				<< std::endl
-				;
-			build(body, out, generate_body_only, delta);
-		}
-		else
-		{
-			std::cerr
-				<< "***warning: no output file specified"
-				<< std::endl
-				;
-		}
-
-		//
-		//	remove temporary files
-		//
-#if defined(__CPP_SUPPORT_P0218R1)
-		std::error_code ec;
-#else
-		boost::system::error_code ec;
-#endif
-		cyng::filesystem::remove(body, ec);
-			
-		return !ec;
 	}
+
 
 	int driver::run(cyng::filesystem::path const& inp, std::size_t start, std::size_t count, std::size_t depth)
 	{	
@@ -177,56 +216,48 @@ namespace docscript
 		//
 		//	open file and read it line by line
 		//
-		for (auto dir : includes_)
-		{
-			if (cyng::filesystem::exists(dir / p))
+		auto const r = resolve_path(includes_, p);
+		if (r.second) {
+			if (depth == 0)
 			{
-				if (depth == 0)
-				{
-					//
-					//	get meta data of master file
-					//
-					std::chrono::system_clock::time_point last_write_time;
-					uintmax_t file_size;
-					//std::uint64_t file_size;
+				//
+				//	get meta data of master file
+				//
+				std::chrono::system_clock::time_point last_write_time;
+				uintmax_t file_size;
 
-					std::tie(last_write_time, file_size) = read_meta_data(dir / p);
+				std::tie(last_write_time, file_size) = read_meta_data(r.first);
 
-					meta_["last-write-time"] = cyng::make_object(last_write_time);
-					meta_["released"] = cyng::make_object(last_write_time);
-					meta_["file-size"] = cyng::make_object(file_size);
-					meta_["total-file-size"] = cyng::make_object(file_size);
-					meta_["file-name"] = cyng::make_object(p.filename().string());
-					meta_["title"] = cyng::make_object(p.stem().string());
-					meta_["language"] = cyng::make_object("en");
-				}
-				else {
-
-					//
-					//	update total file size
-					//
-					std::chrono::system_clock::time_point last_write_time;
-					uintmax_t file_size;
-					std::tie(last_write_time, file_size) = read_meta_data(dir / p);
-					file_size += cyng::value_cast(meta_.at("total-file-size"), file_size);
-					meta_["total-file-size"] = cyng::make_object(file_size);
-
-				}
-				return run(dir / p, std::get<1>(inp), std::get<2>(inp), depth);
+				meta_["last-write-time"] = cyng::make_object(last_write_time);
+				meta_["released"] = cyng::make_object(last_write_time);
+				meta_["file-size"] = cyng::make_object(file_size);
+				meta_["total-file-size"] = cyng::make_object(file_size);
+				meta_["file-name"] = cyng::make_object(p.filename().string());
+				meta_["title"] = cyng::make_object(p.stem().string());
+				meta_["language"] = cyng::make_object("en");
 			}
+			else {
+
+				//
+				//	update total file size
+				//
+				std::chrono::system_clock::time_point last_write_time;
+				uintmax_t file_size;
+				std::tie(last_write_time, file_size) = read_meta_data(r.first);
+				file_size += cyng::value_cast(meta_.at("total-file-size"), file_size);
+				meta_["total-file-size"] = cyng::make_object(file_size);
+
+			}
+			return run(r.first
+				, std::get<1>(inp)	//	start
+				, std::get<2>(inp)	//	count
+				, depth);
 		}
 
 		//
 		//	print error message
 		//
-		std::stringstream ss;
-		ss
-			<< "file ["
-			<< p
-			<< "] not found"
-			;
-		print_error(cyng::logging::severity::LEVEL_FATAL, ss.str());
-
+		print_msg(cyng::logging::severity::LEVEL_FATAL, "file [", p, "] not found");
 		return EXIT_FAILURE;
 
 	}
@@ -242,23 +273,14 @@ namespace docscript
 		std::ofstream file(body.string(), std::ios::out | std::ios::trunc | std::ios::binary);
 		if (!file.is_open())
 		{
-			std::cerr
-				<< "***error connot open file "
-				<< body
-				<< std::endl;
-
+			print_msg(cyng::logging::severity::LEVEL_ERROR, "connot open file [", body, "]");
 		}
 		else
 		{
 			
 			if (verbose_ > 1)
 			{
-				std::cout
-					<< "***info: start parser with "
-					<< stream_.size()
-					<< " input symbols"
-					<< std::endl
-					;
+				print_msg(cyng::logging::severity::LEVEL_TRACE, "start parser with", stream_.size(), "input symbols");
 			}
 
 			//
@@ -336,8 +358,7 @@ namespace docscript
 
 	void driver::build(cyng::filesystem::path const& in
 		, cyng::filesystem::path out
-		, bool body_only
-		, std::chrono::milliseconds compile_time)
+		, bool body_only)
 	{
 		//
 		//	read intermediate file
@@ -489,5 +510,24 @@ namespace docscript
 			p.replace_extension(ext);
 		}
 		return p;	
+	}
+
+	std::pair<cyng::filesystem::path, bool> resolve_path(std::vector< cyng::filesystem::path >const& inc, cyng::filesystem::path p)
+	{
+		for (auto const& dir : inc)
+		{
+			if (cyng::filesystem::exists(dir / p))	return std::make_pair((dir / p), true);
+		}
+
+		//
+		//	not found - try harder
+		//
+		for (auto const& dir : inc)
+		{
+			//	ignore path
+			if (cyng::filesystem::exists(dir / p.filename()))	return std::make_pair((dir / p.filename()), true);
+		}
+
+		return std::make_pair(p, false);
 	}
 }	

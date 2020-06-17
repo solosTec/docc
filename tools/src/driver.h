@@ -78,6 +78,7 @@ namespace docscript
 		 * @param verbose verbose level. The higher the number, the more will be logged.
 		 */
 		driver(std::vector< std::string >const& inc, int verbose);
+		driver(std::vector< cyng::filesystem::path >const& inc, int verbose);
 		virtual ~driver();
 
 		/**
@@ -102,10 +103,23 @@ namespace docscript
 			, bool index
 			, std::string type);
 
+		/**
+		 * Explicit build of an boostrap based HTML page
+		 */
+		int generate_bootstrap_page(cyng::filesystem::path const& master
+			, cyng::filesystem::path const& tmp
+			, cyng::filesystem::path const& out);
+
+		/**
+		 * @return collected meta data
+		 */
 		cyng::param_map_t const& get_meta() const;
 
 	private:
-		int run(cyng::filesystem::path const& inp, std::size_t start, std::size_t count, std::size_t depth);
+		int run(cyng::filesystem::path const& inp
+			, std::size_t start
+			, std::size_t count
+			, std::size_t depth);
 		int open_and_run(incl_t inp, std::size_t);
 
 		/**
@@ -124,8 +138,46 @@ namespace docscript
 		/**
 		 *	build the artifact
 		 */
-		void build(cyng::filesystem::path const& in, cyng::filesystem::path out, bool body_only, std::chrono::milliseconds);
+		void build(cyng::filesystem::path const& in, cyng::filesystem::path out, bool body_only);
 		void print_error(cyng::logging::severity, std::string);
+
+		template<typename ...Args>
+		void print_msg(cyng::logging::severity level, Args... args)
+		{
+			std::cout
+				<< "***"
+				<< cyng::logging::to_string(level)
+				<< ": "
+				;
+
+			std::size_t n{ 0 };
+			((std::cout << args << (++n != sizeof...(Args) ? " " : "")), ...);
+
+			std::cout
+				<< " #"
+				<< ctx_.curr_line_
+				;
+
+			if (!ctx_.empty()) {
+				std::cout
+					<< '@'
+					<< ctx_.top()
+					;
+			}
+			std::cout
+				<< std::endl
+				;
+
+		}
+
+		void sanitize(docscript::token&& tok);
+		void tokenize(symbol&& sym);
+
+		void generate_iml(cyng::filesystem::path const& master
+			, cyng::filesystem::path const& body
+			, cyng::filesystem::path const& out
+			, bool generate_meta
+			, bool generate_index);
 
 	private:
 		/**
@@ -184,6 +236,12 @@ namespace docscript
 	 * Sets the specified extension if the file name doesn't contains one.
 	 */
 	cyng::filesystem::path verify_extension(cyng::filesystem::path p, std::string const& ext);
+
+	/**
+	 * Scan all provided directories for p
+	 */
+	std::pair<cyng::filesystem::path, bool> resolve_path(std::vector< cyng::filesystem::path >const& inc, cyng::filesystem::path p);
+
 }
 
 

@@ -6,6 +6,7 @@ set (site)
 set (site_cpp
 	tools/site/src/main.cpp
 	tools/site/src/site.cpp
+	tools/site/src/page.cpp
 	tools/src/driver.cpp
 	tools/src/reader.cpp
 )
@@ -13,6 +14,7 @@ set (site_cpp
 set (site_h
 	 "${PROJECT_BINARY_DIR}/DOCC_project_info.h"
 	tools/site/src/site.h
+	tools/site/src/page.h
 	tools/src/driver.h
 	tools/src/reader.h
 )
