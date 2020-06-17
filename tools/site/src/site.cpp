@@ -7,7 +7,7 @@
 
 
 #include "site.h"
-//#include "../../src/driver.h"
+#include "../../src/driver.h"
 #include <html/node.hpp>
 
 #include <cyng/json.h>
@@ -24,6 +24,7 @@
 #include <boost/range/adaptor/reversed.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <boost/uuid/uuid_generators.hpp>
 
 namespace docscript
 {
@@ -32,8 +33,6 @@ namespace docscript
 		, int verbose)
 	: includes_(inc.begin(), inc.end())
 		, verbose_(verbose)
-		, uuid_gen_()
-		, name_gen_(uuid_gen_())
 	{}
 
 	site::~site()
@@ -88,13 +87,22 @@ namespace docscript
 	void site::generate(cyng::param_map_t&& cfg, cyng::filesystem::path const& out)
 	{
 		auto const reader = cyng::make_reader(cfg);
+		auto const name = cyng::value_cast<std::string>(reader.get("name"), "");
+		auto const id = cyng::value_cast<std::string>(reader.get("tag"), "89712b23-b8e4-479c-ae27-e6b76a41e090");
+		auto const tag = boost::uuids::string_generator()(id);
+		auto const css = cyng::value_cast<std::string>(reader.get("css"), "css/style.css");
+
+		/**
+		 * namespace for UUID generation based on SHA1
+		 */
+		boost::uuids::name_generator_sha1 name_gen(tag);
 
 		//
 		//	compile pages
 		//
 		if (reader.exists("pages"))
 		{
-			generate_pages(cyng::to_vector(reader.get("pages")), out);
+			generate_pages(cyng::to_vector(reader.get("pages")), name_gen, css, out);
 		}
 		else {
 			std::cerr << "***warning: no pages defined" << std::endl;
@@ -105,14 +113,17 @@ namespace docscript
 		//
 		if (reader.exists("menus"))
 		{
-			generate_menues(cyng::to_vector(reader.get("menus")), out);
+			generate_menues(cyng::to_vector(reader.get("menus")), name_gen, out);
 		}
 		else {
 			std::cerr << "***warning: no menues defined" << std::endl;
 		}
 	}
 
-	void site::generate_pages(cyng::vector_t&& vec, cyng::filesystem::path const&)
+	void site::generate_pages(cyng::vector_t&& vec
+		, boost::uuids::name_generator_sha1& gen
+		, cyng::filesystem::path css_global
+		, cyng::filesystem::path const& out)
 	{
 		for (auto const& obj : vec) {
 			auto const reader = cyng::make_reader(obj);
@@ -121,10 +132,14 @@ namespace docscript
 			if (enabled) {
 
 				auto const source = cyng::value_cast(reader.get("name"), name);
-				auto const tag = name_gen_(cyng::value_cast(reader.get("tag"), source));
-				auto const id = boost::uuids::to_string(tag);
+				auto const tag = gen(cyng::value_cast(reader.get("tag"), source));
+				//auto const id = boost::uuids::to_string(tag);
+				auto const type = cyng::value_cast<std::string>(reader.get("type"), "page");
+				auto const css_page = cyng::value_cast<std::string>(reader.get("css"), "");
 
 				std::cout << "***info: generate page [" << name << "]" << std::endl;
+
+				generate_page(name, tag, source, type, css_global, css_page, out);
 			}
 			else {
 				std::cout << "***warning: skip page  [" << name << "]" << std::endl;
@@ -132,7 +147,50 @@ namespace docscript
 		}
 	}
 
-	void site::generate_menues(cyng::vector_t&& vec, cyng::filesystem::path const& out)
+	void site::generate_page(std::string const& name
+		, boost::uuids::uuid tag
+		, cyng::filesystem::path source
+		, std::string const& type
+		, cyng::filesystem::path css_global
+		, cyng::filesystem::path css_page
+		, cyng::filesystem::path const& out)
+	{
+		auto const id = boost::uuids::to_string(tag);
+		auto const p = out / (id + ".page.html");
+
+		//
+		//	Construct driver instance
+		//
+		driver d(includes_, verbose_);
+
+		//
+		//	generate some temporary file names for intermediate files
+		//
+		cyng::filesystem::path tmp = cyng::filesystem::temp_directory_path() / (cyng::filesystem::path(source).filename().string() + ".bin");
+
+		//
+		//	Start driver with the main/input file
+		//
+		d.run(cyng::filesystem::path(source).filename()
+			, tmp
+			, p
+			, true	//	only HTML body
+			, false	//	generate meta data
+			, false	//	index
+			, "article");
+
+		//std::ofstream of(p.string());
+		//if (of.is_open()) {
+		//}
+		//else {
+		//	std::cout << "***error: cannot open [" << p << "]" << std::endl;
+		//}
+	}
+
+
+	void site::generate_menues(cyng::vector_t&& vec
+		, boost::uuids::name_generator_sha1& gen
+		, cyng::filesystem::path const& out)
 	{
 		for (auto const& obj : vec) {
 			auto const reader = cyng::make_reader(obj);
@@ -144,7 +202,7 @@ namespace docscript
 				auto const placement = cyng::value_cast<std::string>(reader.get("placement"), "sticky-top");
 				auto const color_scheme = cyng::value_cast<std::string>(reader.get("color-scheme"), "dark");
 				auto const brand = cyng::value_cast<std::string>(reader.get("brand"), "images/logo.png");
-				auto const tag = name_gen_(cyng::value_cast(reader.get("tag"), name));
+				auto const tag = gen(cyng::value_cast(reader.get("tag"), name));
 
 				std::cout << "***info: generate menu [" << name << "]" << std::endl;
 
@@ -164,7 +222,7 @@ namespace docscript
 		, cyng::filesystem::path const& out)
 	{
 		auto const id = boost::uuids::to_string(tag);
-		auto const p = out / (id + ".menu");
+		auto const p = out / (id + ".html.menu");
 		
 		std::ofstream of(p.string());
 		if (of.is_open()) {

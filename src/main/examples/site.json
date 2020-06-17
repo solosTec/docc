@@ -16,44 +16,53 @@
         {
             "name": "home",
             "source": "home.docscript",
-            "enabled":  true
+            "enabled": true,
+            "menu": "main",
+            "footer": "main"
         },
         {
             "name": "hw",
             "source": "hw.docscript",
-            "enabled": true
+            "enabled": false,
+            "menu": "main"
         },
         {
             "name": "sw",
             "source": "sw.docscript",
-            "enabled": true
+            "enabled": false,
+            "menu": "main"
         },
         {
             "name": "hosting",
             "source": "hosting.docscript",
-            "enabled": true
+            "enabled": false,
+            "menu": "main"
         },
         {
             "name": "consulting",
             "source": "consulting.docscript",
-            "enabled": true
+            "enabled": false,
+            "menu": "main"
         },
         {
             "name": "contact",
             "source": "contact.docscript",
-            "enabled": true
+            "enabled": false,
+            "menu": "main"
         },
         {
             "name": "team",
             "source": "team.docscript",
-            "enabled": false
+            "enabled": false,
+            "menu": "main"
         },
         {
             "name": "plog",
             "source": "plog.docscript",
-            "enabled": true,
+            "enabled": false,
             "type": "blog",
-            "css": "css/plog.css"
+            "css": "css/plog.css",
+            "menu": "plog"
         }
     ],
     "menus": [
@@ -119,8 +128,15 @@
             "name": "secondary"
         }
     ],
+    "footers": [
+        {
+            "name": "main",
+            "color-scheme": "success"
+        } 
+    ],
     "site": {
         "name": "main",
+        "tag": "ea4808e2-0b3a-48c5-b3a9-9004dbc23c8d",
         "menu": "main",
         "css": "css/style.css",
         "pages": [ "home", "hw", "sw" ]
