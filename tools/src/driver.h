@@ -136,9 +136,15 @@ namespace docscript
 			, bool index);
 
 		/**
-		 *	build the artifact
+		 *	build the HTML artifact
 		 */
 		void build(cyng::filesystem::path const& in, cyng::filesystem::path out, bool body_only);
+
+		/**
+		 *	build the bootstrap artifact
+		 */
+		void build_bootstrap(cyng::filesystem::path const& in, cyng::filesystem::path out);
+
 		void print_error(cyng::logging::severity, std::string);
 
 		template<typename ...Args>
@@ -241,6 +247,8 @@ namespace docscript
 	 * Scan all provided directories for p
 	 */
 	std::pair<cyng::filesystem::path, bool> resolve_path(std::vector< cyng::filesystem::path >const& inc, cyng::filesystem::path p);
+
+	cyng::vector_t read_iml_file(cyng::filesystem::path const& name);
 
 }
 

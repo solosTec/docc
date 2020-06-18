@@ -10,7 +10,7 @@
 
 #include <docscript/generator/generator.h>
 #include <docscript/generator/numbering.h>
-#include <html/node.hpp>
+#include <html/dom.hpp>
 
 namespace docscript
 {
@@ -104,7 +104,7 @@ namespace docscript
 	/**
 	 * Create a HTML figure tag
 	 */
-	html::node make_figure(cyng::filesystem::path
+	dom::element make_figure(cyng::filesystem::path
 		, std::string id
 		, double width
 		, std::string caption

@@ -72,7 +72,7 @@
         {
             "name": "main",
             "placement": "sticky-top",
-            "color-scheme": "primary",
+            "color-scheme": "custom",
             "color-scheme-unused": "dark",
             "brand": "images/logo.svg",
             "items": [

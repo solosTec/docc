@@ -49,6 +49,30 @@ Binary dump:
  , items: [(item one), (item two), (and item number .i three)])
 
 .h2(section-2)
+
+.list(items:
+[
+	(login to the auth server as .link(text: 'admin', url: 'https://auth.solostec.net/auth/', title: 'admin')),
+	(goto the .b Users .link(text: 'menu', url: 'https://auth.solostec.net/auth/admin/master/console/#/realms/master/users') 
+	.list(items:[
+	(click on the .b(new user) button and provide the following information: 
+		.list(items:[
+		(Username),
+		(Email - very important - without an email there is no way to login to smf),
+		(First Name and Last name are optional),
+		(hit the .b save button)
+	], style: square, type: unordered)),
+	(select the created user 
+		.list(items:[
+		(select the .b(groups) tab and assign .b(smf-admin) or .b(smf-user) or both)
+	], style: square, type: unordered)),
+	(select the Credentials tab 
+		.list(items:[
+		(provide the initial password and click .b(Reset Password)),
+		(if the option .b(Temporary) is on the user must change the password at his first login)], style: square, type: unordered))
+	], style: circle, type: unordered))
+], style: disc, type: unordered)
+
 .h2(section-3)
 
 .h1(chapter)

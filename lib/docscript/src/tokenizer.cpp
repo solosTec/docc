@@ -254,10 +254,19 @@ namespace docscript
 		case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
 		case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g': case 'h': case 'i': case 'j': case 'k': case 'l': case 'm':
 		case 'n': case 'o': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'x': case 'y': case 'z':
-		case '_': //case '.':
+		case '_': 
 			push(tok);
 			break;
 			
+		case '-':
+			if (tok.count_ == 1) {
+				// convert '-' to '_'
+				push(token('_', 1, false));
+				break;
+			}
+			emit(SYM_TOKEN);
+			return std::make_pair(STATE_START_, false);
+
 		case '\n':
 			emit(SYM_TOKEN);
 			if (tok.count_ > 1)	emit(symbol(SYM_PAR, 0xB6));

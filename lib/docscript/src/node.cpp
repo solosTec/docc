@@ -44,8 +44,8 @@ namespace docscript
 
 	node::node(std::deque<docscript::node>&& children)
 		: type_(docscript::node::NODE_ROOT)
-		, name_()
-//		, name_(u8"↓")
+		, name_("ROOT")
+		//, name_(u8"↓")
 		, data_(std::move(children))
 	{}
 
@@ -101,6 +101,26 @@ namespace docscript
 	node::type node::get_type() const
 	{
 		return type_;
+	}
+
+	std::string node::get_type_name() const
+	{
+		switch (get_type())
+		{
+		case NODE_ROOT:	return "ROOT";
+		case NODE_EMPTY: return "EMPTY";
+		case NODE_SYMBOL: return "SYMBOL";
+		case NODE_LIST: return "LIST";
+		case NODE_META: return "META";
+		case NODE_FUNCTION_PAR: return "FUNCTION-PAR";
+		case NODE_FUNCTION_VEC: return "FUNCTION-VEC";
+		case NODE_PARAGRAPH: return "PARAGRAPH";
+		case NODE_CONTENT:	return "CONTENT";
+		case NODE_VECTOR:	return "VECTOR";
+		default:
+			break;
+		}
+		return "!";
 	}
 
 	node make_node()

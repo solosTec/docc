@@ -84,6 +84,7 @@ namespace docscript
 		//	obvious functions
 		//
 		type get_type() const;
+		std::string get_type_name() const;
 
 	private:
 		node(std::deque<docscript::node>&& children);

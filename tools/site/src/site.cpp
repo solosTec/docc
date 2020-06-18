@@ -8,7 +8,7 @@
 
 #include "site.h"
 #include "../../src/driver.h"
-#include <html/node.hpp>
+#include <html/dom.hpp>
 
 #include <cyng/json.h>
 #include <cyng/dom/reader.h>
@@ -30,7 +30,7 @@
 namespace docscript
 {
 
-	std::pair<html::node, bool> generate_dropdown_menu(dict_t const& dict
+	std::pair<dom::element, bool> generate_dropdown_menu(dict_t const& dict
 		, cyng::vector_t const&
 		, std::string const& page);
 
@@ -279,13 +279,9 @@ namespace docscript
 		//
 		//	Start driver with the main/input file
 		//
-		d.run(cyng::filesystem::path(p.get_source())
+		d.generate_bootstrap_page(cyng::filesystem::path(p.get_source())
 			, tmp
-			, p.get_fragment()
-			, true	//	only HTML body
-			, false	//	generate meta data
-			, false	//	index
-			, "article");
+			, p.get_fragment());
 
 		if (!menu.is_null()) {
 
@@ -348,13 +344,17 @@ namespace docscript
 					? "navbar navbar-expand-lg navbar-dark bg-primary"
 					: boost::algorithm::equals(color_scheme, "success")
 						? "navbar navbar-expand-lg navbar-dark bg-success"
-						: "navbar navbar-expand-lg navbar-dark bg-dark"
+						: boost::algorithm::equals(color_scheme, "secondary")
+							? "navbar navbar-expand-lg navbar-dark bg-secondary"
+							: boost::algorithm::equals(color_scheme, "custom")
+								? "navbar navbar-expand-lg navbar-dark navbar-custom"
+								: "navbar navbar-expand-lg navbar-dark bg-dark"
 						;
 
 			//
 			//	generate menu items
 			//
-			auto ul = html::ul(html::class_("navbar-nav mr-auto"));
+			auto ul = dom::ul(dom::class_("navbar-nav ml-auto"));
 			for (auto const& obj : vec) {
 
 				auto const reader = cyng::make_reader(obj);
@@ -375,8 +375,8 @@ namespace docscript
 					std::string class_li{ boost::algorithm::equals(page, ref) ? "nav-item active" : "nav-item" };
 					std::string class_a{ enabled ? "nav-link" : "nav-link disabled"};
 
-					ul += html::li(html::class_(class_li), 
-						html::a(html::class_(class_a), html::href_(file.string()), title)
+					ul += dom::li(dom::class_(class_li), 
+						dom::a(dom::class_(class_a), dom::href_(file.string()), title)
 					);
 				}
 				else {
@@ -384,11 +384,11 @@ namespace docscript
 					//
 					//	active path?
 					//
-					std::pair<html::node, bool> r = generate_dropdown_menu(dict, items, page);
+					std::pair<dom::element, bool> r = generate_dropdown_menu(dict, items, page);
 					std::string class_li{ r.second ? "nav-item active dropdown" : "nav-item dropdown" };
 
-					ul += html::li(html::class_(class_li)
-						, html::a(html::class_("nav-link dropdown-toggle"), html::href_("#"), html::data_toggle_("dropdown"), title)
+					ul += dom::li(dom::class_(class_li)
+						, dom::a(dom::class_("nav-link dropdown-toggle"), dom::href_("#"), dom::data_toggle_("dropdown"), title)
 						, r.first
 					);
 				}
@@ -397,22 +397,23 @@ namespace docscript
 			//
 			//	generate menu
 			//
-			auto nav = html::nav(html::class_(cs), 
-				html::a(html::class_("navbar-brand")
-					, html::href_("#")
-					, html::img(html::src_(brand), html::width_(30), html::height_(30), html::alt_(""), html::loading_("lazy"))
+			auto nav = dom::nav(dom::class_(cs), 
+				dom::a(dom::class_("navbar-brand")
+					, dom::href_("#")
+					, dom::img(dom::src_(brand), dom::width_(30), dom::height_(30), dom::alt_(""), dom::loading_("lazy"))
 				),
-				html::button(html::class_("navbar-toggler")
-					, html::type_("button")
-					, html::data_toggle_("collapse")
-					, html::span(html::class_("navbar-toggler-icon"))
+				dom::button(dom::class_("navbar-toggler")
+					, dom::type_("button")
+					, dom::data_toggle_("collapse")
+					, dom::span(dom::class_("navbar-toggler-icon"))
 				),
-				html::div(html::class_("collapse navbar-collapse"), ul)
+				dom::div(dom::class_("collapse navbar-collapse"), ul)
 			);
 
 
+			auto section = dom::section(dom::class_("container-fluid"), nav);
 			ofs
-				<< nav.to_str()
+				<< section(1)
 				<< std::endl
 				;
 		}
@@ -483,12 +484,12 @@ namespace docscript
 		return cyng::make_object();
 	}
 
-	std::pair<html::node, bool> generate_dropdown_menu(dict_t const& dict
+	std::pair<dom::element, bool> generate_dropdown_menu(dict_t const& dict
 		, cyng::vector_t const& vec
 		, std::string const& page)
 	{
 		bool active{ false };
-		auto div = html::div(html::class_("dropdown-menu"));
+		auto div = dom::div(dom::class_("dropdown-menu"));
 		for (auto const& obj : vec) {
 			auto const reader = cyng::make_reader(obj);
 			auto const title = cyng::value_cast<std::string>(reader.get("title"), "?");
@@ -497,7 +498,7 @@ namespace docscript
 			//auto const items = cyng::to_vector(reader.get("items"));	//	ToDo. nested dropdown
 
 			if (boost::algorithm::equals(type, "divider")) {
-				div += html::div(html::class_("dropdown-divider"));
+				div += dom::div(dom::class_("dropdown-divider"));
 			}
 			else {
 
@@ -509,7 +510,7 @@ namespace docscript
 					;
 
 				std::string class_a{ enabled ? "dropdown-item" : "dropdown-item disabled" };
-				div += html::a(html::class_(class_a), html::href_(file.string()), title);
+				div += dom::a(dom::class_(class_a), dom::href_(file.string()), title);
 
 				//
 				//	propagate upwards that this an active path

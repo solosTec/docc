@@ -65,11 +65,12 @@ namespace docscript
 					<< ")" 
 					<< std::endl;
 			}
+
 			//
 			//	generate code
 			//
 			for (auto const& n : *args) {
-				prg << cyng::unwinder(generate(0u, n));
+				prg << cyng::unwinder(generate(0u, n, root_));
 			}
 		}
 
@@ -101,23 +102,27 @@ namespace docscript
 		return prg;
 	}
 
-	cyng::vector_t ast::generate(std::size_t depth, node const& n) const
+	cyng::vector_t ast::generate(std::size_t depth, node const& n, node const& parent) const
 	{
 		switch (n.get_type()) {
 		case node::NODE_FUNCTION_PAR:
-			return generate_function_par(depth + 1, access_function_params(n), get_function_par_name(n));
+			return generate_function_par(depth
+				, n
+				, parent);
 		case node::NODE_FUNCTION_VEC:
-			return generate_function_vec(depth + 1, access_function_vector(n), get_function_vec_name(n));
+			return generate_function_vec(depth
+				, n
+				, parent);
 		case node::NODE_PARAGRAPH:
-			return generate_paragraph(depth + 1, access_node_paragraph(n));
+			return generate_paragraph(depth, n, parent);
 		case node::NODE_CONTENT:
-			return generate_content(depth + 1, access_node_content(n));
+			return generate_content(depth, n, parent);
 		case node::NODE_SYMBOL:
-			return generate_symbol(depth + 1, access_node_symbol(n));
+			return generate_symbol(depth, access_node_symbol(n), parent);
 		case node::NODE_LIST:
-			return generate_list(depth + 1, access_node_list(n));
+			return generate_list(depth, n, parent);
 		case node::NODE_VECTOR:
-			return generate_vector(depth + 1, access_node_vector(n));
+			return generate_vector(depth, n, parent);
 			 
 		default:
 			//
@@ -126,11 +131,13 @@ namespace docscript
 			std::cerr << "*** unknown node type: " << n.get_type() << std::endl;
 			break;
 		}
-		return cyng::vector_t();
+		return cyng::vector_t{};
 	}
 
-	cyng::vector_t ast::generate_paragraph(std::size_t depth, node::d_args const* args) const
+	cyng::vector_t ast::generate_paragraph(std::size_t depth, node const& n, node const& parent) const
 	{
+		auto const* args = access_node_paragraph(n);
+
 		if (log_) {
 			print_ast_n(depth, '.');
 			std::cout 
@@ -154,14 +161,15 @@ namespace docscript
 			//
 			//	walktrouh the paragraph
 			//
-			for (auto const& n : *args) {
-				prg << cyng::unwind(generate(depth + 1, n));
+			for (auto const& child : *args) {
+				prg << cyng::unwind(generate(depth + 1, child, n));
 			}
 
 			//
 			//	trailer
 			//
 			prg
+				//<< args->size()
 				<< cyng::invoke("paragraph")
 				<< cyng::pr_n(1)	// code::PR
 				<< cyng::code::REBA
@@ -170,8 +178,10 @@ namespace docscript
 		return prg;
 	}
 
-	cyng::vector_t ast::generate_content(std::size_t depth, node::d_args const* args) const
+	cyng::vector_t ast::generate_content(std::size_t depth, node const& n, node const& parent) const
 	{
+		auto const* args = access_node_content(n);
+
 		if (log_) {
 			print_ast_n(depth, '.');
 			std::cout
@@ -183,8 +193,9 @@ namespace docscript
 		cyng::vector_t prg;
 
 		if (!args->empty()) {
-			for (auto const& n : *args) {
-				prg << cyng::unwind(generate(depth + 1, n));
+			for (auto const& child : *args) {
+				//	pass the parent node 
+				prg << cyng::unwind(generate(depth + 1, child, parent));
 			}
 
 			prg
@@ -196,11 +207,21 @@ namespace docscript
 		return prg;
 	}
 
-	cyng::vector_t ast::generate_function_par(std::size_t depth, node::p_args const* args, std::string name) const
+	cyng::vector_t ast::generate_function_par(std::size_t depth, node const& n, node const& parent) const
 	{
+		auto const args = access_function_params(n);
+		auto const name = get_function_par_name(n);
+
 		if (log_) {
 			print_ast_n(depth, '.');
-			std::cout << "generate_function_par(" << name << ": " << args->size() << ")" << std::endl;
+			std::cout 
+				<< get_name(parent)
+				<< "::generate_function_par(" 
+				<< name 
+				<< ": " 
+				<< args->size() 
+				<< ")" 
+				<< std::endl;
 		}
 		auto const rcount = lookup::rcount(name);
 		cyng::vector_t prg;
@@ -225,7 +246,7 @@ namespace docscript
 			}
 			verify_param_range(name, arg.first, arg.second);
 			prg
-				<< cyng::unwind(generate(depth + 1, arg.second))
+				<< cyng::unwind(generate(depth + 1, arg.second, n))
 				<< arg.first
 				<< cyng::code::ASSEMBLE_PARAM
 				;
@@ -234,23 +255,40 @@ namespace docscript
 		prg
 			<< args->size()
 			<< cyng::code::ASSEMBLE_PARAM_MAP
+			//	potential ad ditional information
+			//	requires to refactor the generator functions
+			//<< (boost::algorithm::equals(name, "list") 
+			//	? static_cast<std::uint64_t>((depth - 3) / 6) 
+			//	: static_cast<std::uint64_t>(depth))
+			<< static_cast<std::uint64_t>(depth)
+			<< get_name(parent)
+			<< parent.get_type_name()
+			<< cyng::invoke(name)
+			<< cyng::pr_n(rcount)	// code::PR
+			<< cyng::code::REBA
 			;
 
 		//
 		//	trailer
 		//
-		return prg 
-			<< cyng::invoke(name)
-			<< cyng::pr_n(rcount)	// code::PR
-			<< cyng::code::REBA
-			;
+		return prg;
 	}
 
-	cyng::vector_t ast::generate_function_vec(std::size_t depth, node::v_args const* args, std::string name) const
+	cyng::vector_t ast::generate_function_vec(std::size_t depth, node const& n, node const& parent) const
 	{
+		auto const* args = access_function_vector(n);
+		auto const name = get_function_vec_name(n);
+
 		if (log_) {
 			print_ast_n(depth, '.');
-			std::cout << "generate_function_vec(" << name << ": " << args->size() << ")" << std::endl;
+			std::cout 
+				<< get_name(parent)
+				<< "::generate_function_vec(" 
+				<< name 
+				<< ": " 
+				<< args->size() 
+				<< ")" 
+				<< std::endl;
 		}
 		auto const rcount = lookup::rcount(name);
 		cyng::vector_t prg;
@@ -267,14 +305,19 @@ namespace docscript
 		//
 		//	build a vector
 		//
-		for (auto const& n : *args) {
-			prg << cyng::unwind(generate(depth + 1, n));
+		for (auto const& child : *args) {
+			prg << cyng::unwind(generate(depth + 1, child, n));
 		}
 
 		//
 		//	trailer
 		//
 		prg
+			//	potential additional information
+			//	requires to refactor the generator functions
+			//<< static_cast<std::uint64_t>(depth)
+			//<< get_name(parent)
+			//<< parent.get_type_name()
 			<< cyng::invoke(name)
 			<< cyng::pr_n(rcount)
 			<< cyng::code::REBA
@@ -283,12 +326,18 @@ namespace docscript
 		return prg;
 	}
 
-	cyng::vector_t ast::generate_symbol(std::size_t depth, symbol const* sp) const
+	cyng::vector_t ast::generate_symbol(std::size_t depth, symbol const* sp, node const& parent) const
 	{
 		if (log_) {
 			print_ast_n(depth, '.');
-			std::cout << "generate_symbol(" << *sp << ")" << std::endl;
+			std::cout 
+				<< get_name(parent)
+				<< "::generate_symbol("
+				<< *sp 
+				<< ")" 
+				<< std::endl;
 		}
+
 		//
 		//	check type to build the correct data type
 		//	and handle entities with a special conversion function.
@@ -368,14 +417,14 @@ namespace docscript
 				return prg;
 			}
 		}
-		else {
-			return cyng::vector_factory({ sp->value_ });
-		}
-		return cyng::vector_t{};
+
+		return cyng::vector_factory({ sp->value_ });
 	}
 
-	cyng::vector_t ast::generate_list(std::size_t depth, node::s_args const* args) const
+	cyng::vector_t ast::generate_list(std::size_t depth, node const& n, node const& parent) const
 	{
+		auto const* args = access_node_list(n);
+
 		cyng::vector_t prg;
 
 		if (log_) {
@@ -384,7 +433,7 @@ namespace docscript
 		}
 
 		for (auto const& sym : *args) {
-			prg << cyng::unwind(generate_symbol(depth + 1, &sym));
+			prg << cyng::unwind(generate_symbol(depth + 1, &sym, n));
 		}
 
 		prg
@@ -395,8 +444,10 @@ namespace docscript
 		return prg;
 	}
 
-	cyng::vector_t ast::generate_vector(std::size_t depth, node::v_args const* args) const
+	cyng::vector_t ast::generate_vector(std::size_t depth, node const& n, node const& parent) const
 	{
+		auto const* args = access_node_vector(n);
+
 		cyng::vector_t prg;
 
 		if (log_) {
@@ -405,7 +456,8 @@ namespace docscript
 		}
 
 		for (auto const& arg : *args) {
-			prg << cyng::unwind(generate(depth + 1, arg));
+			//	pass paranet
+			prg << cyng::unwind(generate(depth + 1, arg, parent));
 		}
 
 		prg

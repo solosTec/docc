@@ -11,6 +11,7 @@
 #include <cyng/vm/generator.h>
 #include <cyng/io/serializer.h>
 #include <cyng/value_cast.hpp>
+#include <cyng/set_cast.h>
 #include <cyng/dom/reader.h>
 #include <cyng/json.h>
 #include <cyng/intrinsics/version.h>
@@ -126,9 +127,7 @@ namespace docscript
 	{
 		auto const frame = ctx.get_frame();
 //		std::cout << ctx.get_name() << " - " << cyng::io::to_str(frame) << std::endl;
-		cyng::param_map_t m;
-		m = cyng::value_cast(frame.at(0), m);
-		//meta_.insert(m.begin(), m.end());	//	merge
+		auto const m = cyng::to_param_map(frame.at(0));
 		//	overwrite
 		for (auto const& i : m) {
 			meta_[i.first] = i.second;

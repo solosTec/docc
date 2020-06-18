@@ -41,14 +41,14 @@ namespace docscript
 
 	private:
 		cyng::vector_t generate(node::d_args const*, cyng::filesystem::path out, bool meta, bool index) const;
-		cyng::vector_t generate(std::size_t depth, node const&) const;
-		cyng::vector_t generate_paragraph(std::size_t depth, node::d_args const*) const;
-		cyng::vector_t generate_content(std::size_t depth, node::d_args const*) const;
-		cyng::vector_t generate_function_par(std::size_t depth, node::p_args const*, std::string) const;
-		cyng::vector_t generate_function_vec(std::size_t depth, node::v_args const*, std::string) const;
-		cyng::vector_t generate_symbol(std::size_t depth, symbol const*) const;
-		cyng::vector_t generate_list(std::size_t depth, node::s_args const*) const;
-		cyng::vector_t generate_vector(std::size_t depth, node::v_args const*) const;
+		cyng::vector_t generate(std::size_t depth, node const&, node const& parent) const;
+		cyng::vector_t generate_paragraph(std::size_t depth, node const& n, node const& parent) const;
+		cyng::vector_t generate_content(std::size_t depth, node const& n, node const& parent) const;
+		cyng::vector_t generate_function_par(std::size_t depth, node const& n, node const& parent) const;
+		cyng::vector_t generate_function_vec(std::size_t depth, node const& n, node const& parent) const;
+		cyng::vector_t generate_symbol(std::size_t depth, symbol const*, node const& parent) const;
+		cyng::vector_t generate_list(std::size_t depth, node const& n, node const& parent) const;
+		cyng::vector_t generate_vector(std::size_t depth, node const& n, node const& parent) const;
 
 		void generate_html(node::d_args const*, std::ostream&, bool) const;
 		void generate_html(std::size_t depth, node const&, std::ostream&, bool) const;

@@ -13,6 +13,7 @@
 #include <docscript/generator/gen_md.h>
 #include <docscript/generator/gen_asciidoc.h>
 #include <docscript/generator/gen_LaTeX.h>
+#include <docscript/generator/gen_bootstrap.h>
 
 #include <cyng/io/serializer.h>
 #include <cyng/io/parser/parser.h>
@@ -154,7 +155,7 @@ namespace docscript
 			//	generate HTML bootstrap page
 			//
 			print_msg(cyng::logging::severity::LEVEL_INFO, "output file is", out);
-			//build_bootstrap(body, out, true);
+			build_bootstrap(body, out);
 
 			//
 			//	remove temporary files
@@ -273,7 +274,7 @@ namespace docscript
 		std::ofstream file(body.string(), std::ios::out | std::ios::trunc | std::ios::binary);
 		if (!file.is_open())
 		{
-			print_msg(cyng::logging::severity::LEVEL_ERROR, "connot open file [", body, "]");
+			print_msg(cyng::logging::severity::LEVEL_ERROR, "cannot open file [", body, "]");
 		}
 		else
 		{
@@ -363,79 +364,75 @@ namespace docscript
 		//
 		//	read intermediate file
 		//
-		std::ifstream file(in.string(), std::ios::binary);
-		if (!file.is_open())
-		{
-			std::cerr
-				<< "***error connot open input file "
-				<< in
-				<< std::endl;
+		auto prg = read_iml_file(in);
+
+		//
+		//	startup VM/generator
+		//
+		auto const extension = out.extension().string();
+		if (boost::algorithm::iequals(extension, ".html")) {
+			gen_html g(this->includes_, body_only);
+			g.run(std::move(prg));
+			auto const m = g.get_meta();
+			for (auto const& i : m) {
+				meta_[i.first] = i.second;
+			}
 		}
-		else
-		{
-			//
-			//	do not skip 
-			//
-			file.unsetf(std::ios::skipws);
-
-			//
-			//	parse temporary file
-			//
-			cyng::vector_t prg;
-			cyng::parser np([&prg](cyng::vector_t&& vec) {
-				prg = std::move(vec);
-			});
-			np.read(std::istream_iterator<char>(file), std::istream_iterator<char>());
-
-			//
-			//	startup VM/generator
-			//
-			auto const extension = out.extension().string();
-			if (boost::algorithm::iequals(extension, ".html")) {
-				gen_html g(this->includes_, body_only);
-				g.run(std::move(prg));
-				auto const m = g.get_meta();
-				for (auto const& i : m) {
-					meta_[i.first] = i.second;
-				}
+		else if (boost::algorithm::iequals(extension, ".md")) {
+			gen_md g(this->includes_);
+			g.run(std::move(prg));
+			auto const m = g.get_meta();
+			for (auto const& i : m) {
+				meta_[i.first] = i.second;
 			}
-			else if (boost::algorithm::iequals(extension, ".md")) {
-				gen_md g(this->includes_);
-				g.run(std::move(prg));
-				auto const m = g.get_meta();
-				for (auto const& i : m) {
-					meta_[i.first] = i.second;
-				}
+		}
+		else if (boost::algorithm::iequals(extension, ".asciidoc") 
+			|| boost::algorithm::iequals(extension, ".adoc") 
+			|| boost::algorithm::iequals(extension, ".asc")) {
+			gen_asciidoc g(this->includes_);
+			g.run(std::move(prg));
+			auto const m = g.get_meta();
+			for (auto const& i : m) {
+				meta_[i.first] = i.second;
 			}
-			else if (boost::algorithm::iequals(extension, ".asciidoc") 
-				|| boost::algorithm::iequals(extension, ".adoc") 
-				|| boost::algorithm::iequals(extension, ".asc")) {
-				gen_asciidoc g(this->includes_);
-				g.run(std::move(prg));
-				auto const m = g.get_meta();
-				for (auto const& i : m) {
-					meta_[i.first] = i.second;
-				}
+		}
+		else if (boost::algorithm::iequals(extension, ".tex")) {
+			gen_latex g(this->includes_);
+			g.run(std::move(prg));
+			auto const m = g.get_meta();
+			for (auto const& i : m) {
+				meta_[i.first] = i.second;
 			}
-			else if (boost::algorithm::iequals(extension, ".tex")) {
-				gen_latex g(this->includes_);
-				g.run(std::move(prg));
-				auto const m = g.get_meta();
-				for (auto const& i : m) {
-					meta_[i.first] = i.second;
-				}
-			}
-			else {
-				std::cerr
-					<< "***"
-					<< cyng::logging::to_string(cyng::logging::severity::LEVEL_FATAL)
-					<< ": unknown output format: ["
-					<< extension
-					<< "]"
-					;
-			}
+		}
+		else {
+			std::cerr
+				<< "***"
+				<< cyng::logging::to_string(cyng::logging::severity::LEVEL_FATAL)
+				<< ": unknown output format: ["
+				<< extension
+				<< "]"
+				;
 		}
 	}
+
+	void driver::build_bootstrap(cyng::filesystem::path const& in, cyng::filesystem::path out)
+	{
+		//
+		//	read intermediate file
+		//
+		auto prg = read_iml_file(in);
+
+		//
+		//	startup VM/generator
+		//
+		gen_bootstrap g(this->includes_);
+		g.run(std::move(prg));
+		auto const m = g.get_meta();
+		for (auto const& i : m) {
+			meta_[i.first] = i.second;
+		}
+	}
+
 
 	void driver::print_error(cyng::logging::severity level, std::string msg)
 	{
@@ -530,4 +527,28 @@ namespace docscript
 
 		return std::make_pair(p, false);
 	}
+
+	cyng::vector_t read_iml_file(cyng::filesystem::path const& name)
+	{
+		cyng::vector_t prg;
+
+		std::ifstream file(name.string(), std::ios::binary);
+		if (file.is_open())
+		{
+			//
+			//	do not skip 
+			//
+			file.unsetf(std::ios::skipws);
+
+			//
+			//	parse temporary file
+			//
+			cyng::parser np([&prg](cyng::vector_t&& vec) {
+				prg = std::move(vec);
+				});
+			np.read(std::istream_iterator<char>(file), std::istream_iterator<char>());
+		}
+		return prg;
+	}
+
 }	
