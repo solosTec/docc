@@ -68,7 +68,7 @@ namespace dom
 				<< args 
 				<< (++n != sizeof...(Args) ? " " : "")), ...);
 
-			value_.swap(ss.str());
+			value_ = ss.str();
 		}
 
 		virtual void serialize(std::ostream&) const override;
@@ -108,7 +108,7 @@ namespace dom
 				<< args
 				<< (++n != sizeof...(Args) ? " " : "")), ...);
 
-			value_.swap(ss.str());
+			value_ = ss.str();
 		}
 
 

@@ -579,7 +579,7 @@ namespace docscript
 	{
 		if (p.has_menu()) {
 
-			std::ifstream ifs(p.get_nav());
+			std::ifstream ifs(p.get_nav().string());
 			if (ifs.is_open()) {
 				ofs << ifs.rdbuf();
 				ifs.close();
@@ -594,7 +594,7 @@ namespace docscript
 
 	void import_body(std::ofstream& ofs, page const& p, cyng::filesystem::path const& out)
 	{
-		std::ifstream ifs(p.get_fragment());
+		std::ifstream ifs(p.get_fragment().string());
 		if (ifs.is_open()) {
 			ofs << ifs.rdbuf();
 			ifs.close();
