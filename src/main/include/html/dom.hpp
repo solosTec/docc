@@ -28,7 +28,7 @@ namespace dom
 	/**
 	 * cleanup HTML text
 	 */
-	std::string cleanup(std::string value);
+	std::string patch_attribute_name(std::string value);
 
 	/**
 	 * base class
@@ -98,7 +98,7 @@ namespace dom
 
 		template<typename ...Args>
 		attribute(std::string name, Args... args)
-			: name_(std::move(name))
+			: name_(patch_attribute_name(name))
 			, value_()
 		{
 			std::size_t n{ 0 };

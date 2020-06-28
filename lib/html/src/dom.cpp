@@ -6,6 +6,7 @@
  */
 
 #include <html/dom.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace dom
 {
@@ -54,14 +55,9 @@ namespace dom
 	{}
 
 	attribute::attribute(std::string name)
-		: name_(std::move(name))
+		: name_(patch_attribute_name(name))
 		, value_()
 	{}
-
-	//attribute::attribute(std::string name, std::string value)
-	//	: name_(std::move(name))
-	//	, value_(cleanup(value))
-	//{}
 
 	void attribute::serialize(std::ostream& os) const
 	{
@@ -71,8 +67,10 @@ namespace dom
 
 		if (!value_.empty()) {
 			os
-				<< "="
+				<< '='
+				<< '"'
 				<< value_
+				<< '"'
 				;
 		}
 	}
@@ -166,7 +164,7 @@ namespace dom
 					;
 			}
 			else {
-				os << ' ' << '/' << '>' ;
+				os << ' ' << '/' << '>';
 			}
 		}
 		else {
@@ -238,6 +236,23 @@ namespace dom
 				child.serialize(os, depth + 1);
 			}
 
+			//
+			//	check indentation
+			//
+			auto const tag = tag_.get();
+			if (boost::algorithm::equals(tag, "div")
+				|| boost::algorithm::equals(tag, "ul")
+				|| boost::algorithm::equals(tag, "ol")
+				|| boost::algorithm::equals(tag, "li")
+				|| boost::algorithm::equals(tag, "nav")
+				|| boost::algorithm::equals(tag, "section")) {
+
+				os
+					<< std::endl
+					<< std::string(depth, '\t')
+					;
+			}
+
 			os
 				<< "</"
 				<< tag_.get()
@@ -247,28 +262,11 @@ namespace dom
 		}
 	}
 
-
-	std::string cleanup(std::string s)
+	std::string patch_attribute_name(std::string name)
 	{
-		std::string r;
-		r.reserve(s.size());
-
-		r.push_back('\"');
-		for (std::string::size_type idx = 0; idx < s.size(); ++idx)
-		{
-			if ('\"' == s.at(idx) && (idx == 0 || s.at(idx - 1) != '\\'))
-			{
-				r.push_back('\\');
-				r.push_back('\"');
-			}
-			else
-			{
-				r.push_back(s.at(idx));
-			}
-		}
-		r.push_back('\"');
-
-		return r;
+		std::replace(name.begin(), name.end(), '_', '-');
+		return name;
 	}
+
 
 }

@@ -223,6 +223,8 @@ namespace docscript
 				<< std::endl
 				<< "</body>"
 				<< std::endl
+				<< "</html>"
+				<< std::endl
 				;
 		}
 	}
@@ -400,7 +402,7 @@ namespace docscript
 			auto nav = dom::nav(dom::class_(cs), 
 				dom::a(dom::class_("navbar-brand")
 					, dom::href_("#")
-					, dom::img(dom::src_(brand), dom::width_(30), dom::height_(30), dom::alt_(""), dom::loading_("lazy"))
+					, dom::img(dom::src_(brand), dom::width_(30), dom::height_(30), dom::alt_("alt"), dom::loading_("lazy"))
 				),
 				dom::button(dom::class_("navbar-toggler")
 					, dom::type_("button")
