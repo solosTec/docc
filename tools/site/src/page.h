@@ -28,9 +28,10 @@ namespace docscript
 			, cyng::filesystem::path fragment
 			, std::string const& type
 			, std::string const& css_page
-			, std::string const& menu
-			, cyng::filesystem::path nav
-			, std::string const& footer);
+			, std::string const& menu_name
+			, cyng::filesystem::path menu_file
+			, std::string const& footer_name
+			, cyng::filesystem::path footer_file);
 
 
 		std::string const& get_name() const;
@@ -43,8 +44,9 @@ namespace docscript
 		std::string const& get_type() const;
 		std::string const& get_css() const;
 		std::string const& get_menu() const;
-		cyng::filesystem::path const& get_nav() const;
+		cyng::filesystem::path const& get_menu_file() const;
 		std::string const& get_footer() const;
+		cyng::filesystem::path const& get_footer_file() const;
 
 		bool has_menu() const;
 		bool has_footer() const;
@@ -61,8 +63,9 @@ namespace docscript
 		std::string const type_;
 		std::string const css_;
 		std::string const menu_;
-		cyng::filesystem::path const nav_;
+		cyng::filesystem::path const menu_file_;
 		std::string const footer_;
+		cyng::filesystem::path const footer_file_;
 
 	};
 

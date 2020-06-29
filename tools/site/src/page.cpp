@@ -24,8 +24,9 @@ namespace docscript
 		, type_()
 		, css_()
 		, menu_()
-		, nav_()
+		, menu_file_()
 		, footer_()
+		, footer_file_()
 	{}
 
 	page::page(std::string const& name
@@ -39,7 +40,8 @@ namespace docscript
 		, std::string const& css
 		, std::string const& menu
 		, cyng::filesystem::path nav
-		, std::string const& footer)
+		, std::string const& footer
+		, cyng::filesystem::path footer_file)
 	: name_(name)
 		, title_(title)
 		, enabled_(enabled)
@@ -50,8 +52,9 @@ namespace docscript
 		, type_(type)
 		, css_(css)
 		, menu_(menu)
-		, nav_(nav)
+		, menu_file_(nav)
 		, footer_(footer)
+		, footer_file_(footer_file)
 	{}
 
 	std::string const& page::get_name() const
@@ -104,14 +107,19 @@ namespace docscript
 		return menu_;
 	}
 
-	cyng::filesystem::path const& page::get_nav() const
+	cyng::filesystem::path const& page::get_menu_file() const
 	{
-		return nav_;
+		return menu_file_;
 	}
 
 	std::string const& page::get_footer() const
 	{
 		return footer_;
+	}
+
+	cyng::filesystem::path const& page::get_footer_file() const
+	{
+		return footer_file_;
 	}
 
 	bool page::has_menu() const

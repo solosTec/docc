@@ -124,6 +124,7 @@ namespace docscript
 			generate_pages(dict
 				, pages
 				, cyng::to_vector(reader.get("menus"))
+				, cyng::to_vector(reader.get("footers"))
 				, name_gen
 				, css
 				, out);
@@ -212,6 +213,7 @@ namespace docscript
 
 			import_menu(ofs, p, out);
 			import_body(ofs, p, out);
+			import_footer(ofs, p, out);
 
 			ofs
 				<< std::endl
@@ -232,6 +234,7 @@ namespace docscript
 	void site::generate_pages(dict_t const& dict
 		, std::vector<std::string> const& site
 		, cyng::vector_t&& menus
+		, cyng::vector_t&& footers
 		, boost::uuids::name_generator_sha1& gen
 		, cyng::filesystem::path css_global
 		, cyng::filesystem::path const& out)
@@ -240,8 +243,8 @@ namespace docscript
 			auto pos = dict.find(p);
 			if (pos != dict.end()) {
 
-				auto const obj = get_menu(menus, pos->second.get_menu());
-				if (obj.is_null()) {
+				auto const menu = get_menu(menus, pos->second.get_menu());
+				if (menu.is_null()) {
 
 					std::cerr
 						<< "***warning: menu [" 
@@ -250,7 +253,8 @@ namespace docscript
 						<< std::endl;
 				}
 
-				generate_page(dict, pos->second, obj, out);
+				auto const footer = get_footer(footers, pos->second.get_footer());
+				generate_page(dict, pos->second, menu, footer, out);
 			}
 			else {
 				std::cerr 
@@ -266,6 +270,7 @@ namespace docscript
 	void site::generate_page(dict_t const& dict
 		, page const& p
 		, cyng::object menu
+		, cyng::object footer
 		, cyng::filesystem::path const& out)
 	{
 		//
@@ -304,6 +309,25 @@ namespace docscript
 			generate_menu(dict, p.get_name(), p.get_tag(), brand, color_scheme, cyng::to_vector(reader.get("items")), out);
 
 		}
+
+		if (!footer.is_null()) {
+
+			auto const reader = cyng::make_reader(footer);
+			auto const footer_name = cyng::value_cast<std::string>(reader.get("name"), "");
+			auto const color_scheme = cyng::value_cast<std::string>(reader.get("color-scheme"), "dark");
+			auto const content = cyng::value_cast<std::string>(reader.get("content"), "");
+
+			std::cout
+				<< "***info: generate footer ["
+				<< footer_name
+				<< "] for page ["
+				<< p.get_name()
+				<< "]"
+				<< std::endl;
+
+			generate_footer(dict, p.get_name(), p.get_tag(), content, color_scheme, out);
+		}
+
 	}
 
 	void site::generate_menu(dict_t const& dict
@@ -335,7 +359,7 @@ namespace docscript
 		//
 		//	get temporary file name
 		//
-		auto const p = dict.find(page)->second.get_nav();
+		auto const p = dict.find(page)->second.get_menu_file();
 		
 		std::ofstream ofs(p.string());
 		if (ofs.is_open()) {
@@ -424,6 +448,38 @@ namespace docscript
 		}
 	}
 
+	void site::generate_footer(dict_t const& dict
+		, std::string const& page
+		, boost::uuids::uuid tag
+		, std::string const& content
+		, std::string const& color_scheme
+		, cyng::filesystem::path const& out)
+	{
+		//
+		//	get temporary file name
+		//
+		auto const p = dict.find(page)->second.get_footer_file();
+
+		std::ofstream ofs(p.string());
+		if (ofs.is_open()) {
+
+			//	To make the footer "sticky" the following CSS is required:
+			//	position: absolute;
+			//	bottom: 0;
+			//	width: 100%;
+
+			auto footer = dom::footer(dom::class_("footer"), dom::div(dom::class_("container text-center"), dom::span(dom::class_("text-muted"), content)));
+			ofs
+				<< footer(1)
+				<< std::endl
+				;
+
+		}
+		else {
+			std::cerr << "***error: cannot open [" << p << "]" << std::endl;
+		}
+	}
+
 	void site::import_css(std::ofstream& ofs, page const& p, std::string const& css, cyng::filesystem::path const& out)
 	{
 		//
@@ -472,6 +528,16 @@ namespace docscript
 			auto const reader = cyng::make_reader(obj);
 			auto const name = cyng::value_cast<std::string>(reader.get("name"), "");
 			if (boost::algorithm::equals(name, menu))	return obj;
+		}
+		return cyng::make_object();
+	}
+
+	cyng::object get_footer(cyng::vector_t const& footers, std::string const& footer)
+	{
+		for (auto const& obj : footers) {
+			auto const reader = cyng::make_reader(obj);
+			auto const name = cyng::value_cast<std::string>(reader.get("name"), "");
+			if (boost::algorithm::equals(name, footer))	return obj;
 		}
 		return cyng::make_object();
 	}
@@ -567,7 +633,8 @@ namespace docscript
 					, css_page
 					, menu
 					, out / ("menu-" + id + ".html")
-					, footer));
+					, footer
+					, out / ("footer-" + id + ".html")));
 
 				std::cout << "***info: [" << name << "] => " << (id + ".html") << std::endl;
 
@@ -581,14 +648,14 @@ namespace docscript
 	{
 		if (p.has_menu()) {
 
-			std::ifstream ifs(p.get_nav().string());
+			std::ifstream ifs(p.get_menu_file().string());
 			if (ifs.is_open()) {
 				ofs << ifs.rdbuf();
 				ifs.close();
-				cyng::filesystem::remove(p.get_nav());
+				cyng::filesystem::remove(p.get_menu_file());
 			}
 			else {
-				std::cout << "***warning: cannot read [" << p.get_nav() << std::endl;
+				std::cout << "***warning: cannot read [" << p.get_menu_file() << std::endl;
 
 			}
 		}
@@ -607,5 +674,17 @@ namespace docscript
 		}
 	}
 
+	void import_footer(std::ofstream& ofs, page const& p, cyng::filesystem::path const& out)
+	{
+		std::ifstream ifs(p.get_footer_file().string());
+		if (ifs.is_open()) {
+			ofs << ifs.rdbuf();
+			ifs.close();
+			cyng::filesystem::remove(p.get_footer_file());
+		}
+		else {
+			std::cout << "***warning: cannot read [" << (out / p.get_fragment()) << std::endl;
+		}
+	}
 
 }

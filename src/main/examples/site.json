@@ -22,17 +22,19 @@
         },
         {
             "name": "hw",
-            "title":  "Hardware",
+            "title": "Hardware",
             "source": "hw.docscript",
             "enabled": true,
-            "menu": "main"
+            "menu": "main",
+            "footer": "main"
         },
         {
             "name": "sw",
             "title": "Software",
             "source": "sw.docscript",
             "enabled": true,
-            "menu": "main"
+            "menu": "main",
+            "footer": "main"
         },
         {
             "name": "hosting",

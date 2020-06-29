@@ -1075,16 +1075,16 @@ namespace docscript
 	std::string gen_bootstrap::create_section(std::size_t level, std::string id, std::string title)
 	{
 		//	visibility: visible or hidden
-		std::string const oction = "<svg viewBox=\"0 0 16 16\" version=\"1.1\" width=\"16\" height=\"16\" aria-hidden=\"true\"><path fill-rule=\"evenodd\" d=\"M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z\"></path></svg>";
-		auto a = dom::a(dom::id_(id), dom::aria_hidden_("true"), dom::href_(id), dom::style_("margin-right: 6px;"), dom::class_("oction"), oction);
+		//std::string const oction = "<svg viewBox=\"0 0 16 16\" version=\"1.1\" width=\"16\" height=\"16\" aria-hidden=\"true\"><path fill-rule=\"evenodd\" d=\"M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z\"></path></svg>";
+		auto a = dom::a(dom::id_(id), dom::aria_hidden_("true"), dom::href_(id), dom::class_("oction"));
 
 		switch (level) {
-		case 1:	return dom::h1(a, title)(0);
-		case 2: return dom::h2(a, title)(0);
-		case 3: return dom::h3(a, title)(0);
-		case 4: return dom::h4(a, title)(0);
-		case 5: return dom::h5(dom::id_(id), title)(0);
-		case 6: return dom::h6(dom::id_(id), title)(0);
+		case 1:	return dom::h1(dom::id_(id), title, dom::class_("display-1"))(0);
+		case 2: return dom::h2(dom::id_(id), title, dom::class_("display-2"))(0);
+		case 3: return dom::h3(dom::id_(id), title, dom::class_("display-3"))(0);
+		case 4: return dom::h4(dom::id_(id), title, dom::class_("display-4"))(0);
+		case 5: return dom::h5(dom::id_(id), title, dom::class_("display-5"))(0);
+		case 6: return dom::h6(dom::id_(id), title, dom::class_("display-6"))(0);
 		default:
 			break;
 		}

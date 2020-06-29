@@ -245,6 +245,7 @@ namespace dom
 				|| boost::algorithm::equals(tag, "ol")
 				|| boost::algorithm::equals(tag, "li")
 				|| boost::algorithm::equals(tag, "nav")
+				|| boost::algorithm::equals(tag, "footer")
 				|| boost::algorithm::equals(tag, "section")) {
 
 				os

@@ -58,7 +58,8 @@ namespace docscript
 
 		void generate_pages(dict_t const&
 			, std::vector<std::string> const& site
-			, cyng::vector_t&&
+			, cyng::vector_t&& menus
+			, cyng::vector_t&& footers
 			, boost::uuids::name_generator_sha1& gen
 			, cyng::filesystem::path css_global
 			, cyng::filesystem::path const&);
@@ -66,6 +67,7 @@ namespace docscript
 		void generate_page(dict_t const&
 			, page const& p
 			, cyng::object menu
+			, cyng::object footer
 			, cyng::filesystem::path const&);
 
 		void generate_menu(dict_t const&
@@ -74,6 +76,13 @@ namespace docscript
 			, std::string const& brand
 			, std::string const& color_scheme
 			, cyng::vector_t&& vec
+			, cyng::filesystem::path const& out);
+
+		void generate_footer(dict_t const&
+			, std::string const& name
+			, boost::uuids::uuid tag
+			, std::string const& content
+			, std::string const& color_scheme
 			, cyng::filesystem::path const& out);
 
 		void build_site(dict_t const&
@@ -107,6 +116,7 @@ namespace docscript
 	 * Search vector of menue definitions for specified name
 	 */
 	cyng::object get_menu(cyng::vector_t const& menus, std::string const& menu);
+	cyng::object get_footer(cyng::vector_t const& footers, std::string const& footer);
 	cyng::object get_page(cyng::vector_t const& pages, std::string const& page);
 
 	dict_t create_page_dict(cyng::vector_t const& pages
@@ -116,6 +126,7 @@ namespace docscript
 
 	void import_menu(std::ofstream& of, page const& p, cyng::filesystem::path const& out);
 	void import_body(std::ofstream& of, page const& p, cyng::filesystem::path const& out);
+	void import_footer(std::ofstream& of, page const& p, cyng::filesystem::path const& out);
 }
 
 #endif
