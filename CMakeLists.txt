@@ -250,8 +250,9 @@ if (UNIX)
 else()
 	#
 	#	$(ConfigurationName) is a variable used by the MS build system
+	# D:/projects/node/build/lib/http/server/Debug/
 	#
-	link_directories(${NODE_LIBRARY_DIR}/$(ConfigurationName))
+	link_directories(${NODE_LIBRARY_DIR}/lib/http/server/$(ConfigurationName);${NODE_LIBRARY_DIR}/lib/https/server/$(ConfigurationName);${NODE_LIBRARY_DIR}/lib/sml/protocol/$(ConfigurationName))
     message(STATUS "** NODE Libraries     : ${NODE_LIBRARY_DIR}")
 endif()
 
