@@ -1079,12 +1079,12 @@ namespace docscript
 		auto a = dom::a(dom::id_(id), dom::aria_hidden_("true"), dom::href_(id), dom::class_("oction"));
 
 		switch (level) {
-		case 1:	return dom::h1(dom::id_(id), title, dom::class_("display-1"))(0);
-		case 2: return dom::h2(dom::id_(id), title, dom::class_("display-2"))(0);
-		case 3: return dom::h3(dom::id_(id), title, dom::class_("display-3"))(0);
-		case 4: return dom::h4(dom::id_(id), title, dom::class_("display-4"))(0);
-		case 5: return dom::h5(dom::id_(id), title, dom::class_("display-5"))(0);
-		case 6: return dom::h6(dom::id_(id), title, dom::class_("display-6"))(0);
+		case 1:	return dom::h1(dom::id_(id), title, dom::class_("display-1"))(1);
+		case 2: return dom::h2(dom::id_(id), title, dom::class_("display-2"))(1);
+		case 3: return dom::h3(dom::id_(id), title, dom::class_("display-3"))(1);
+		case 4: return dom::h4(dom::id_(id), title, dom::class_("display-4"))(1);
+		case 5: return dom::h5(dom::id_(id), title, dom::class_("display-5"))(1);
+		case 6: return dom::h6(dom::id_(id), title, dom::class_("display-6"))(1);
 		default:
 			break;
 		}
