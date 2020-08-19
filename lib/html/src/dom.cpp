@@ -255,6 +255,7 @@ namespace dom
 			}
 
 			os
+				<< text_.value_
 				<< "</"
 				<< tag_.get()
 				<< ">"
