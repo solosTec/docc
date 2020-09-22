@@ -11,7 +11,7 @@
 namespace docscript
 {
 	tokenizer::tokenizer(emit_symbol_f f, std::function<void(cyng::logging::severity, std::string)> err)
-		: state_(STATE_START_)
+		: state_(state::START_)
 		, emit_(f)
 		, err_(err)
 		, tmp_()
@@ -24,28 +24,28 @@ namespace docscript
 		//std::cout << "--- " << tok << std::endl;
 
 		switch (state_) {
-		case STATE_START_:
+		case state::START_:
 			std::tie(state_, advance) = state_start(tok);
 			break;
-		case STATE_TEXT_:
+		case state::TEXT_:
 			std::tie(state_, advance) = state_text(tok);
 			break;
-		case STATE_DOT_:
+		case state::DOT_:
 			std::tie(state_, advance) = state_dot(tok);
 			break;
-		case STATE_TOKEN_:
+		case state::TOKEN_:
 			std::tie(state_, advance) = state_token(tok);
 			break;
-		case STATE_NUMBER_:
+		case state::NUMBER_:
 			std::tie(state_, advance) = state_number(tok);
 			break;
-		case STATE_DATETIME_:
+		case state::DATETIME_:
 			std::tie(state_, advance) = state_datetime(tok);
 			break;
-		case STATE_QUOTE_:
+		case state::QUOTE_:
 			std::tie(state_, advance) = state_quote(tok);
 			break;
-		case STATE_DETECT_:
+		case state::DETECT_:
 			std::tie(state_, advance) = state_detect(tok);
 			break;
 		default:
@@ -81,12 +81,12 @@ namespace docscript
 			emit(SYM_TEXT);
 			return ((tok.count_ % 2) == 0)
 				? std::make_pair(state_, true)
-				: std::make_pair(STATE_DOT_, true)
+				: std::make_pair(state::DOT_, true)
 				;
 
 		case '"':
 			emit(SYM_DQUOTE, tok);
-			return std::make_pair(STATE_DETECT_, true);
+			return std::make_pair(state::DETECT_, true);
 
 		case '\'':
 			//
@@ -99,7 +99,7 @@ namespace docscript
                 return std::make_pair(state_, true);  //  even
             }
 			emit(SYM_TEXT);
-            return std::make_pair(STATE_QUOTE_, true);    //  odd
+            return std::make_pair(state::QUOTE_, true);    //  odd
             
 		case '(':
 			emit(SYM_OPEN, tok);
@@ -107,7 +107,7 @@ namespace docscript
 
 		case ')':
 			emit(SYM_CLOSE, tok);
-			return std::make_pair(STATE_DETECT_, true);
+			return std::make_pair(state::DETECT_, true);
 
 		case ',':
 			emit(SYM_SEP, tok);
@@ -131,23 +131,23 @@ namespace docscript
 			return std::make_pair(state_, true);
 
 		case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
-			return std::make_pair(STATE_NUMBER_, false);
+			return std::make_pair(state::NUMBER_, false);
 
 		case '@':
-			return std::make_pair(STATE_DATETIME_, true);
+			return std::make_pair(state::DATETIME_, true);
 
 		default:
 			break;
 		}
 
-		return std::make_pair(STATE_TEXT_, false);
+		return std::make_pair(state::TEXT_, false);
 	}
 
 	std::pair<tokenizer::state, bool> tokenizer::state_text(token tok)
 	{
 		if (tok.eof_) {
 			emit(SYM_TEXT);
-			return std::make_pair(STATE_START_, true);
+			return std::make_pair(state::START_, true);
 		}
 
 		switch (tok.value_) {
@@ -157,7 +157,7 @@ namespace docscript
 				emit(SYM_TEXT);
 				emit(symbol(SYM_PAR, 0xB6));
 //				emit(symbol(SYM_PAR, u8"¶"));
-				return std::make_pair(STATE_START_, true);
+				return std::make_pair(state::START_, true);
 			}
 
 			//
@@ -166,12 +166,12 @@ namespace docscript
 
 		case ' ': case '\t':
 			emit(SYM_TEXT);
-			return std::make_pair(STATE_START_, true);
+			return std::make_pair(state::START_, true);
 
 		case '"':
 			//	terminate word and handle " as single character
 			emit(SYM_TEXT);
-			return std::make_pair(STATE_START_, false);
+			return std::make_pair(state::START_, false);
 
 		case '(': case ')':
 		case '[': case ']':
@@ -181,7 +181,7 @@ namespace docscript
 			//	characters that terminate a word
 			//
 			emit(SYM_TEXT);
-			return std::make_pair(STATE_START_, false);
+			return std::make_pair(state::START_, false);
 
 		case '.':
 			emit(SYM_TEXT);
@@ -190,7 +190,7 @@ namespace docscript
 			//
 			//	At the end of a word . cannot be used as escape symbol
 			//
-			return std::make_pair(STATE_START_, true);
+			return std::make_pair(state::START_, true);
 
 		case '\'':
 			//	don't start a quotes section here, when "'" is inside a word,
@@ -208,7 +208,7 @@ namespace docscript
 	{
 		if (tok.eof_) {
 			emit(SYM_TEXT);
-			return std::make_pair(STATE_START_, true);
+			return std::make_pair(state::START_, true);
 		}
 
 		switch (tok.value_) {
@@ -217,13 +217,13 @@ namespace docscript
 		case 'n': case 'o': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'x': case 'y': case 'z':
 		case '_':
 			push(tok);
-			return std::make_pair(STATE_TOKEN_, true);
+			return std::make_pair(state::TOKEN_, true);
 
 		case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
 			//	convert ".n" to "0.n"
 			push("0.");
 			push(tok);
-			return std::make_pair(STATE_NUMBER_, true);
+			return std::make_pair(state::NUMBER_, true);
 
 		case ' ':
 			//	emit the "." as text
@@ -239,14 +239,14 @@ namespace docscript
 			break;
 		}
 
-		return std::make_pair(STATE_START_, true);
+		return std::make_pair(state::START_, true);
 	}
 
 	std::pair<tokenizer::state, bool> tokenizer::state_token(token tok)
 	{
 		if (tok.eof_) {
 			emit(SYM_TOKEN);
-			return std::make_pair(STATE_START_, true);
+			return std::make_pair(state::START_, true);
 		}
 
 		switch (tok.value_) {
@@ -265,20 +265,20 @@ namespace docscript
 				break;
 			}
 			emit(SYM_TOKEN);
-			return std::make_pair(STATE_START_, false);
+			return std::make_pair(state::START_, false);
 
 		case '\n':
 			emit(SYM_TOKEN);
 			if (tok.count_ > 1)	emit(symbol(SYM_PAR, 0xB6));
-			return std::make_pair(STATE_START_, true);
+			return std::make_pair(state::START_, true);
 
 		case ' ': case '\t':
 			emit(SYM_TOKEN);
-			return std::make_pair(STATE_START_, true);
+			return std::make_pair(state::START_, true);
 
 		default:
 			emit(SYM_TOKEN);
-			return std::make_pair(STATE_START_, false);
+			return std::make_pair(state::START_, false);
 		}
 		return std::make_pair(state_, true);
 	}
@@ -287,7 +287,7 @@ namespace docscript
 	{
 		if (tok.eof_) {
 			emit(SYM_NUMBER);
-			return std::make_pair(STATE_START_, true);
+			return std::make_pair(state::START_, true);
 		}
 
 		switch (tok.value_) {
@@ -300,21 +300,21 @@ namespace docscript
 		case 'n': case 'o': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'x': case 'y': case 'z':
 		case '_':
 			push(tok);
-			return std::make_pair(STATE_TEXT_, true);
+			return std::make_pair(state::TEXT_, true);
 
 		case '\n':
 			emit(SYM_NUMBER);
 			if (tok.count_ > 1)	emit(symbol(SYM_PAR, 0xB6));
 //			if (tok.count_ > 1)	emit(symbol(SYM_PAR, u8"¶"));
-			return std::make_pair(STATE_START_, true);
+			return std::make_pair(state::START_, true);
 
 		case ' ': case '\t':
 			emit(SYM_NUMBER);
-			return std::make_pair(STATE_START_, true);
+			return std::make_pair(state::START_, true);
 
 		default:
 			emit(SYM_NUMBER);
-			return std::make_pair(STATE_START_, false);
+			return std::make_pair(state::START_, false);
 		}
 		return std::make_pair(state_, true);
 	}
@@ -323,7 +323,7 @@ namespace docscript
 	{
 		if (tok.eof_) {
 			emit(SYM_DATETIME);
-			return std::make_pair(STATE_START_, true);
+			return std::make_pair(state::START_, true);
 		}
 
 		switch (tok.value_) {
@@ -337,35 +337,35 @@ namespace docscript
 			//
 			if (tmp_.size() > 23) {
 				err_(cyng::logging::severity::LEVEL_ERROR, get_state_name(state_));
-				return std::make_pair(STATE_TEXT_, false);
+				return std::make_pair(state::TEXT_, false);
 			}
 			else if ((tmp_.size() == 23) && (tmp_.at(22) != 'Z')) {
 				err_(cyng::logging::severity::LEVEL_ERROR, get_state_name(state_));
-				return std::make_pair(STATE_TEXT_, false);
+				return std::make_pair(state::TEXT_, false);
 			}
 			else if ((tmp_.size() == 20) && (tmp_.at(19) != '.')) {
 				err_(cyng::logging::severity::LEVEL_ERROR, get_state_name(state_));
-				return std::make_pair(STATE_TEXT_, false);
+				return std::make_pair(state::TEXT_, false);
 			}
 			else if ((tmp_.size() == 17) && (tmp_.at(16) != ':')) {
 				err_(cyng::logging::severity::LEVEL_ERROR, get_state_name(state_));
-				return std::make_pair(STATE_TEXT_, false);
+				return std::make_pair(state::TEXT_, false);
 			}
 			else if ((tmp_.size() == 14) && (tmp_.at(13) != ':')) {
 				err_(cyng::logging::severity::LEVEL_ERROR, get_state_name(state_));
-				return std::make_pair(STATE_TEXT_, false);
+				return std::make_pair(state::TEXT_, false);
 			}
 			else if ((tmp_.size() == 11) && (tmp_.at(10) != 'T')) {
 				err_(cyng::logging::severity::LEVEL_ERROR, get_state_name(state_));
-				return std::make_pair(STATE_TEXT_, false);
+				return std::make_pair(state::TEXT_, false);
 			}
 			else if ((tmp_.size() == 8) && (tmp_.at(7) != '-')) {
 				err_(cyng::logging::severity::LEVEL_ERROR, get_state_name(state_));
-				return std::make_pair(STATE_TEXT_, false);
+				return std::make_pair(state::TEXT_, false);
 			}
 			else if ((tmp_.size() == 5) && (tmp_.at(4) != '-')) {
 				err_(cyng::logging::severity::LEVEL_ERROR, get_state_name(state_));
-				return std::make_pair(STATE_TEXT_, false);
+				return std::make_pair(state::TEXT_, false);
 			}
 			break;
 		default:
@@ -375,7 +375,7 @@ namespace docscript
 			//
 			if ((tmp_.size() != 10) && (tmp_.size() != 19) && (tmp_.size() != 23)) {
 				err_(cyng::logging::severity::LEVEL_ERROR, get_state_name(state_));
-				return std::make_pair(STATE_TEXT_, false);
+				return std::make_pair(state::TEXT_, false);
 			}
 			else {
 				if (tmp_.size() == 10) {
@@ -386,7 +386,7 @@ namespace docscript
 				}
 				emit(SYM_DATETIME);
 			}
-			return std::make_pair(STATE_START_, false);
+			return std::make_pair(state::START_, false);
 		}
 		return std::make_pair(state_, true);
 	}
@@ -395,7 +395,7 @@ namespace docscript
 	{
 		if (tok.eof_) {
 			emit(SYM_VERBATIM);
-			return std::make_pair(STATE_START_, true);
+			return std::make_pair(state::START_, true);
 		}
 
 		switch (tok.value_) {
@@ -408,7 +408,7 @@ namespace docscript
             if ((tok.count_ % 2) == 0) return std::make_pair(state_, true);  //  keep this status
             
 			emit(SYM_VERBATIM);
-			return std::make_pair(STATE_START_, true);
+			return std::make_pair(state::START_, true);
 
 		case '\n':
 			//	multiple lines not allowed
@@ -416,7 +416,7 @@ namespace docscript
 			emit(SYM_VERBATIM);
 			if (tok.count_ > 1)	emit(symbol(SYM_PAR, 0xB6));
 //			if (tok.count_ > 1)	emit(symbol(SYM_PAR, u8"¶"));
-			return std::make_pair(STATE_START_, true);
+			return std::make_pair(state::START_, true);
 
 		default:
 			push(tok);
@@ -429,18 +429,18 @@ namespace docscript
 	{
 		if (tok.eof_) {
 			emit(SYM_TEXT);
-			return std::make_pair(STATE_START_, true);
+			return std::make_pair(state::START_, true);
 		}
 
 		switch (tok.value_) {
 		case '.':
 			push(tok);
 			emit(SYM_TEXT);	//	'.' as text after ')' and '"'
-			return std::make_pair(STATE_START_, true);
+			return std::make_pair(state::START_, true);
 		default:
 			break;
 		}
-		return std::make_pair(STATE_START_, false);
+		return std::make_pair(state::START_, false);
 	}
 
 	void tokenizer::emit(symbol&& s) const
@@ -494,13 +494,13 @@ namespace docscript
 	std::string get_state_name(tokenizer::state state)
 	{
 		switch (state) {
-		case tokenizer::STATE_ERROR_:	return "ERROR";
-		case tokenizer::STATE_START_:	return "START";
-		case tokenizer::STATE_DOT_:		return "DOT";
-		case tokenizer::STATE_NUMBER_:	return "NUMBER";
-		case tokenizer::STATE_TOKEN_:	return "TOKEN";
-		case tokenizer::STATE_QUOTE_:	return "QUOTE";
-		case tokenizer::STATE_TEXT_:	return "TEXT";
+		case tokenizer::state::ERROR_:	return "ERROR";
+		case tokenizer::state::START_:	return "START";
+		case tokenizer::state::DOT_:		return "DOT";
+		case tokenizer::state::NUMBER_:	return "NUMBER";
+		case tokenizer::state::TOKEN_:	return "TOKEN";
+		case tokenizer::state::QUOTE_:	return "QUOTE";
+		case tokenizer::state::TEXT_:	return "TEXT";
 		default:
 			break;
 		}

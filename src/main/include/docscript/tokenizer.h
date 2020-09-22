@@ -34,17 +34,17 @@ namespace docscript
 		void emit_current_line(std::size_t);
 
 	private:
-		enum state
+		enum class state
 		{
-			STATE_ERROR_,
-			STATE_START_,
-			STATE_DOT_,
-			STATE_NUMBER_,		//	0 ... 9
-			STATE_DATETIME_,	//	YYYY-MM-DD[THH:MM:SS]
-			STATE_TOKEN_,		//	lowercase characters and '_'
-			STATE_TEXT_,		//	text and punctuation
-			STATE_QUOTE_,		//	'preserve all white spaces and dots'
-			STATE_DETECT_,		//	detect . after special (entity) characters like ")" and "
+			ERROR_,
+			START_,
+			DOT_,
+			NUMBER_,		//	0 ... 9
+			DATETIME_,	//	YYYY-MM-DD[THH:MM:SS]
+			TOKEN_,		//	lowercase characters and '_'
+			TEXT_,		//	text and punctuation
+			QUOTE_,		//	'preserve all white spaces and dots'
+			DETECT_,		//	detect . after special (entity) characters like ")" and "
 		}	state_;
 
 		friend std::string get_state_name(state);

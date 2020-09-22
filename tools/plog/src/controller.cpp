@@ -401,6 +401,7 @@ namespace plog
 #endif
 			, blacklist
 			, redirects
+			, std::map<std::string, std::string>{}
 			, http_vm
 			, https_rewrite);
 
