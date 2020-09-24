@@ -376,6 +376,7 @@ namespace dom
 		DEFINE_ATTRIBUTE(controls)
 		DEFINE_ATTRIBUTE(coords)
 		DEFINE_ATTRIBUTE(data)
+		DEFINE_ATTRIBUTE(data_target)	//	bootstrap 4
 		DEFINE_ATTRIBUTE(data_toggle)	//	bootstrap 4
 		DEFINE_ATTRIBUTE(datetime)
 		DEFINE_ATTRIBUTE(declare)

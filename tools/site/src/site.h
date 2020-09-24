@@ -73,7 +73,7 @@ namespace docscript
 		void generate_menu(dict_t const&
 			, std::string const& name
 			, boost::uuids::uuid tag
-			, std::string const& brand
+			, cyng::filesystem::path brand
 			, std::string const& color_scheme
 			, cyng::vector_t&& vec
 			, cyng::filesystem::path const& out);
@@ -94,7 +94,10 @@ namespace docscript
 			, std::string const& css
 			, cyng::filesystem::path const& out);
 
-		void import_css(std::ofstream& of, page const& p, std::string const& css, cyng::filesystem::path const& out);
+		void import_css(std::ofstream& of
+			, page const& p
+			, cyng::filesystem::path css
+			, cyng::filesystem::path const& out);
 
 	private:
 		/**

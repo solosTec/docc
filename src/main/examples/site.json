@@ -1,17 +1,5 @@
 {
     "languages": [ "de", "en", "fr", "ru" ],
-    "downloads": [
-        {
-            "name": "smf-manual-de",
-            "source": "downloads/manual-de.pdf",
-            "lang": "de"
-        },
-        {
-            "name": "smf-manual-en",
-            "source": "downloads/manual-en.pdf",
-            "lang": "en"
-        }
-    ],
     "pages": [
         {
             "name": "home",
@@ -70,12 +58,24 @@
             "menu": "plog"
         }
     ],
+    "downloads": [
+        {
+            "name": "smf-manual-de",
+            "source": "downloads/manual-de.pdf",
+            "lang": "de"
+        },
+        {
+            "name": "smf-manual-en",
+            "source": "downloads/manual-en.pdf",
+            "lang": "en"
+        }
+    ],
     "menus": [
         {
             "name": "main",
             "placement": "sticky-top",
-            "color-scheme": "custom",
-            "color-scheme-unused": "dark",
+            "color-scheme": "dark",
+            "color-scheme-unused": "custom",
             "brand": "images/logo.svg",
             "items": [
                 {
@@ -140,14 +140,17 @@
             "name": "main",
             "color-scheme": "success",
             "content": "Copyright © solosTec 2018-2020"
-        } 
+        }
+    ],
+    "images": [
+        "images/logo.svg"
     ],
     "site": {
         "name": "solostec.ch",
         "tag": "ea4808e2-0b3a-48c5-b3a9-9004dbc23c8d",
         "index": "home",
         "css": "css/style.css",
-        "bootstrap": "4.5.0",
+        "bootstrap": "4.5.2",
         "pages": [ "home", "hw", "sw" ]
     }
 

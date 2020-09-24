@@ -184,12 +184,24 @@ namespace docscript
 				<< std::endl
 				<< "\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\">"
 				<< std::endl
-				<< "\t<link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css\" integrity=\"sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk\" crossorigin=\"anonymous\">"
+				<< "\t<link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css\" integrity=\"sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z\" crossorigin=\"anonymous\">"
 				<< std::endl
 				;
 
 			if (!css.empty()) {
-				import_css(ofs, p, css, out);
+				try {
+					import_css(ofs, p, cyng::filesystem::make_path(css), out);
+				}
+				catch (std::exception const& ex) {
+					std::cerr << "***error: " 
+						<< "CSS import [" 
+						<< css
+						<< "] in page ["
+						<< p.get_name()
+						<< "] failed: "
+						<< ex.what()
+						<< std::endl;
+				}
 			}
 			if (p.has_css()) {
 
@@ -219,9 +231,9 @@ namespace docscript
 				<< std::endl
 				<< "\t<script src=\"https://code.jquery.com/jquery-3.5.1.slim.min.js\" integrity=\"sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj\" crossorigin=\"anonymous\"></script>"
 				<< std::endl
-				<< "\t<script src=\"https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js\" integrity=\"sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo\" crossorigin=\"anonymous\"></script>"
+				<< "\t<script src=\"https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js\" integrity=\"sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN\" crossorigin=\"anonymous\"></script>"
 				<< std::endl
-				<< "\t<script src=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js\" integrity=\"sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI\" crossorigin=\"anonymous\"></script>"
+				<< "\t<script src=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js\" integrity=\"sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV\" crossorigin=\"anonymous\"></script>"
 				<< std::endl
 				<< "</body>"
 				<< std::endl
@@ -306,7 +318,12 @@ namespace docscript
 				<< "]"
 				<< std::endl;
 
-			generate_menu(dict, p.get_name(), p.get_tag(), brand, color_scheme, cyng::to_vector(reader.get("items")), out);
+			generate_menu(dict
+				, p.get_name()
+				, p.get_tag()
+				, cyng::filesystem::make_path(brand)
+				, color_scheme
+				, cyng::to_vector(reader.get("items")), out);
 
 		}
 
@@ -333,7 +350,7 @@ namespace docscript
 	void site::generate_menu(dict_t const& dict
 		, std::string const& page
 		, boost::uuids::uuid tag
-		, std::string const& brand
+		, cyng::filesystem::path brand
 		, std::string const& color_scheme
 		, cyng::vector_t&& vec
 		, cyng::filesystem::path const& out)
@@ -347,8 +364,32 @@ namespace docscript
 			//
 			//	copy to build directory
 			//
-			cyng::filesystem::remove(out / brand);
-			cyng::filesystem::copy(r.first, out / brand);
+			auto const full_path = out / brand;
+			auto const parent = full_path.parent_path();
+			if (!cyng::filesystem::exists(parent)) {
+
+				cyng::error_code ec;
+				cyng::filesystem::create_directories(parent, ec);
+				if (!ec) {
+					std::cerr
+						<< "***info: output path ["
+						<< parent
+						<< "] created"
+						<< std::endl;
+				}
+				else {
+					std::cerr
+						<< "***error: cannot create output path ["
+						<< parent
+						<< "] "
+						<< ec.message()
+						<< std::endl;
+				}
+			}
+
+			cyng::filesystem::remove(full_path);
+			cyng::filesystem::copy(r.first, full_path);
+
 		}
 		else {
 			std::cerr << "***error: brand [" << brand << "] not found" << std::endl;
@@ -380,7 +421,7 @@ namespace docscript
 			//
 			//	generate menu items
 			//
-			auto ul = dom::ul(dom::class_("navbar-nav ml-auto"));
+			auto ul = dom::ul(dom::class_("navbar-nav mr-auto"));	//	"ml-auto"
 			for (auto const& obj : vec) {
 
 				auto const reader = cyng::make_reader(obj);
@@ -426,22 +467,29 @@ namespace docscript
 			auto nav = dom::nav(dom::class_(cs), 
 				dom::a(dom::class_("navbar-brand")
 					, dom::href_("#")
-					, dom::img(dom::src_(brand), dom::width_(30), dom::height_(30), dom::alt_("alt"), dom::loading_("lazy"))
+					, dom::img(dom::src_(brand.generic_string()), dom::width_(30), dom::height_(30), dom::alt_("ToDo"), dom::loading_("lazy"))
 				),
 				dom::button(dom::class_("navbar-toggler")
 					, dom::type_("button")
 					, dom::data_toggle_("collapse")
+					, dom::data_target_("#" + boost::uuids::to_string(tag))
 					, dom::span(dom::class_("navbar-toggler-icon"))
 				),
-				dom::div(dom::class_("collapse navbar-collapse"), ul)
+				dom::div(dom::class_("collapse navbar-collapse"), dom::id_(tag), ul)
 			);
 
 
-			auto section = dom::section(dom::class_("container-fluid"), nav);
+			//auto section = dom::section(dom::class_("container-fluid"), nav);
+			//ofs
+			//	<< section(1)
+			//	<< std::endl
+			//	;
+
 			ofs
-				<< section(1)
+				<< nav(1)
 				<< std::endl
 				;
+
 		}
 		else {
 			std::cerr << "***error: cannot open [" << p << "]" << std::endl;
@@ -480,7 +528,10 @@ namespace docscript
 		}
 	}
 
-	void site::import_css(std::ofstream& ofs, page const& p, std::string const& css, cyng::filesystem::path const& out)
+	void site::import_css(std::ofstream& ofs
+		, page const& p
+		, cyng::filesystem::path css
+		, cyng::filesystem::path const& out)
 	{
 		//
 		//	search css file
@@ -499,8 +550,31 @@ namespace docscript
 			//
 			//	copy to build directory
 			//
-			cyng::filesystem::remove(out / css);
-			cyng::filesystem::copy(r.first, out / css);
+			auto const full_path = out / css;
+			auto const parent = full_path.parent_path();
+			if (!cyng::filesystem::exists(parent)) {
+
+				cyng::error_code ec;
+				cyng::filesystem::create_directories(parent, ec);
+				if (!ec) {
+					std::cerr
+						<< "***info: output path ["
+						<< parent
+						<< "] created"
+						<< std::endl;
+				}
+				else {
+					std::cerr
+						<< "***error: cannot create output path ["
+						<< parent
+						<< "] "
+						<< ec.message()
+						<< std::endl;
+				}
+
+			}
+			cyng::filesystem::remove(full_path);
+			cyng::filesystem::copy(r.first, full_path);
 
 			//
 			//	insert link

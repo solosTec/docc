@@ -211,6 +211,8 @@ namespace docscript
 			<< std::endl
 			<< "\t\t\tmargin: auto; "
 			<< std::endl
+			<< "\t\t\font-size: 1.1em; "
+			<< std::endl
 			<< "\t\t}"
 			<< std::endl
 
