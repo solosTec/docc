@@ -68,11 +68,13 @@ namespace docscript
 			, page const& p
 			, cyng::object menu
 			, cyng::object footer
+			, boost::uuids::name_generator_sha1& gen
 			, cyng::filesystem::path const&);
 
 		void generate_menu(dict_t const&
 			, std::string const& name
 			, boost::uuids::uuid tag
+			, boost::uuids::name_generator_sha1& gen
 			, cyng::filesystem::path brand
 			, std::string const& color_scheme
 			, cyng::vector_t&& vec

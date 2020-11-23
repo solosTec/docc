@@ -39,12 +39,12 @@ namespace docscript
 
 	token make_eof()
 	{
-		return token(std::numeric_limits<std::uint32_t>::max(), 0, true);
+		return { std::numeric_limits<std::uint32_t>::max(), 0, true };
 	}
 
 	token make_token(std::uint32_t c, std::size_t count)
 	{
-		return token(c, count, false);
+		return { c, count, false };
 	}
 
 	token make_nl()
@@ -68,34 +68,34 @@ namespace docscript
 				;
 
 			if (tok.value_ == '\n')	{
-				std::cout << "NL";
+				os << "NL";
 			}
 			else if (tok.value_ == '\r')	{
-				std::cout << "CR";
+				os << "CR";
 			}
 			else if (tok.value_ == ' ')	{
-				std::cout << "SP";
+				os << "SP";
 			}
 #if BOOST_OS_WINDOWS
 			//	codepage 1252
 			else if (tok.value_ == 0xb6) {
-				std::cout << "¶";
+				os << "¶";
 			}
 			else if (tok.value_ == 0xbd) {
-				std::cout << "1/2";
+				os << "1/2";
 			}
 			else if (tok.value_ == 0xbe) {
-				std::cout << "3/4";
+				os << "3/4";
 			}
 			else if (tok.value_ == 0xbc) {
-				std::cout << "1/4";
+				os << "1/4";
 			}
 #endif
 			else if (tok.value_ < 0xff)	{
-				std::cout << (char)tok.value_;
+				os << (char)tok.value_;
 			}
 			else {
-				std::cout << tok.value_;
+				os << tok.value_;
 			}
 		}
 

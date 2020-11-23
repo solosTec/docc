@@ -303,9 +303,18 @@ namespace docscript
 			return std::make_pair(state::TEXT_, true);
 
 		case '\n':
+			if (!tmp_.empty() && tmp_.back() == '.') {
+				//
+				//	take the last dot as an End-Of-Sentence
+				//
+				tmp_.pop_back();	//	remove the '.'
+				emit(SYM_NUMBER);
+				tmp_.append(1, '.');
+				emit(SYM_TEXT);
+				return std::make_pair(state::START_, false);
+			}
 			emit(SYM_NUMBER);
 			if (tok.count_ > 1)	emit(symbol(SYM_PAR, 0xB6));
-//			if (tok.count_ > 1)	emit(symbol(SYM_PAR, u8"¶"));
 			return std::make_pair(state::START_, true);
 
 		case ' ': case '\t':

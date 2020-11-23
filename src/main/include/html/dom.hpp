@@ -345,6 +345,7 @@ namespace dom
 		DEFINE_ATTRIBUTE(alt)
 		DEFINE_ATTRIBUTE(archive)
 		DEFINE_ATTRIBUTE(aria_hidden)
+		DEFINE_ATTRIBUTE(aria_labelledby)
 		DEFINE_ATTRIBUTE(async)
 		DEFINE_ATTRIBUTE(autocomplete)
 		DEFINE_ATTRIBUTE(autofocus)
@@ -523,6 +524,7 @@ namespace dom
 		DEFINE_ATTRIBUTE(required)
 		DEFINE_ATTRIBUTE(rev)
 		DEFINE_ATTRIBUTE(reversed)
+		DEFINE_ATTRIBUTE(role)	//	bootstrap 4
 		DEFINE_ATTRIBUTE(rows)
 		DEFINE_ATTRIBUTE(rowspan)
 		DEFINE_ATTRIBUTE(rules)

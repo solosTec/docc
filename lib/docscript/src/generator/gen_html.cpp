@@ -1586,7 +1586,7 @@ namespace docscript
 				r.append("&reg;");
 			}
 			else if (boost::algorithm::iequals(symbol, "latex")) {
-				auto const el = dom::span("L", dom::sup("A"), "T", dom::sub("E"), "X");
+				auto const el = dom::span(dom::abbr("L"), dom::sup("A"), dom::abbr("T"), dom::sub("E"), dom::abbr("X"));
 				r += el(0);
 			}
 			else if (boost::algorithm::iequals(symbol, "celsius")) {

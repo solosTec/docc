@@ -3,7 +3,7 @@
 .set(name:docc, language:C++)
 
 ;
-; Table od Contents
+; Table of Contents
 ;
 .toc(depth: 3)
 
@@ -477,3 +477,4 @@ Example:
 
 Get the current version in the format: major.minor.patch.tweak
 
+.code(language:docscript, caption:'Get version', source:'inc/example-version.docscript', linenumbers:true)

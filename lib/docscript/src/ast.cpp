@@ -507,7 +507,7 @@ namespace docscript
 			return generate_html_content(depth + 1, access_node_content(n), os, linenumber);
 		case node::NODE_SYMBOL: {
 			auto const sp = access_node_symbol(n);
-			if (sp != nullptr) generate_html_symbol(depth + 1, *access_node_symbol(n), os, linenumber);
+			if (sp != nullptr) generate_html_symbol(depth + 1, *sp, os, linenumber);
 		}
 			break;
 		case node::NODE_LIST:
@@ -610,11 +610,19 @@ namespace docscript
 
 		if (!args->empty()) {
 			//
-			//	walktrouh the paragraph
+			//	walkthrough the paragraph
 			//
+			bool first_symbol = false;
 			for (auto const& n : *args) {
 				generate_html(depth + 1, n, os, linenumber);
+				if (n.get_type() == node::NODE_SYMBOL) {
+					os
+						<< ' '
+						;
+					first_symbol = false;
+				}
 			}
+
 
 		}
 	}

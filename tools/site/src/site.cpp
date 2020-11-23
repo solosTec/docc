@@ -32,7 +32,8 @@ namespace docscript
 
 	std::pair<dom::element, bool> generate_dropdown_menu(dict_t const& dict
 		, cyng::vector_t const&
-		, std::string const& page);
+		, std::string const& page
+		, boost::uuids::uuid tag);
 
 	site::site(std::vector< std::string >const& inc
 		, int verbose)
@@ -266,7 +267,7 @@ namespace docscript
 				}
 
 				auto const footer = get_footer(footers, pos->second.get_footer());
-				generate_page(dict, pos->second, menu, footer, out);
+				generate_page(dict, pos->second, menu, footer, gen, out);
 			}
 			else {
 				std::cerr 
@@ -283,6 +284,7 @@ namespace docscript
 		, page const& p
 		, cyng::object menu
 		, cyng::object footer
+		, boost::uuids::name_generator_sha1& gen
 		, cyng::filesystem::path const& out)
 	{
 		//
@@ -321,6 +323,7 @@ namespace docscript
 			generate_menu(dict
 				, p.get_name()
 				, p.get_tag()
+				, gen
 				, cyng::filesystem::make_path(brand)
 				, color_scheme
 				, cyng::to_vector(reader.get("items")), out);
@@ -350,6 +353,7 @@ namespace docscript
 	void site::generate_menu(dict_t const& dict
 		, std::string const& page
 		, boost::uuids::uuid tag
+		, boost::uuids::name_generator_sha1& gen
 		, cyng::filesystem::path brand
 		, std::string const& color_scheme
 		, cyng::vector_t&& vec
@@ -448,16 +452,18 @@ namespace docscript
 				}
 				else {
 
+					auto const menu_tag = gen(title);
+
 					//
 					//	active path?
 					//
-					std::pair<dom::element, bool> r = generate_dropdown_menu(dict, items, page);
+					std::pair<dom::element, bool> r = generate_dropdown_menu(dict, items, page, menu_tag);
 					std::string class_li{ r.second ? "nav-item active dropdown" : "nav-item dropdown" };
+					//std::string class_li{ r.second ? "nav-item active dropdown shadow-sm" : "nav-item dropdown" };
 
 					ul += dom::li(dom::class_(class_li)
-						, dom::a(dom::class_("nav-link dropdown-toggle"), dom::href_("#"), dom::data_toggle_("dropdown"), title)
-						, r.first
-					);
+						, dom::a(dom::class_("nav-link dropdown-toggle"), dom::href_("#"), dom::id_(menu_tag), dom::data_toggle_("dropdown"), dom::role_("button"), title)
+						, r.first);	//	submenu
 				}
 			}
 
@@ -581,7 +587,7 @@ namespace docscript
 			//
 			ofs
 				<< "\t<link rel=\"stylesheet\" href=\""
-				<< css
+				<< css.generic_string()
 				<< "\">"
 				<< std::endl
 				;
@@ -628,10 +634,11 @@ namespace docscript
 
 	std::pair<dom::element, bool> generate_dropdown_menu(dict_t const& dict
 		, cyng::vector_t const& vec
-		, std::string const& page)
+		, std::string const& page
+		, boost::uuids::uuid tag)
 	{
 		bool active{ false };
-		auto div = dom::div(dom::class_("dropdown-menu"));
+		auto div = dom::div(dom::class_("dropdown-menu"), dom::aria_labelledby_(tag));
 		for (auto const& obj : vec) {
 			auto const reader = cyng::make_reader(obj);
 			auto const title = cyng::value_cast<std::string>(reader.get("title"), "?");
@@ -640,7 +647,7 @@ namespace docscript
 			//auto const items = cyng::to_vector(reader.get("items"));	//	ToDo. nested dropdown
 
 			if (boost::algorithm::equals(type, "divider")) {
-				div += dom::div(dom::class_("dropdown-divider"));
+				div += dom::div(dom::class_("dropdown-divider"), " ");	//	force closing DIV
 			}
 			else {
 
@@ -651,15 +658,23 @@ namespace docscript
 					: ref
 					;
 
-				std::string class_a{ enabled ? "dropdown-item" : "dropdown-item disabled" };
+				//
+				//	Check if entry is a reference to to the same page
+				//
+				bool const self = boost::algorithm::equals(page, ref);
+
+				std::string class_a{ enabled 
+					? (self ? "dropdown-item active" : "dropdown-item")
+					: "dropdown-item disabled" };
 				div += dom::a(dom::class_(class_a), dom::href_(file.string()), title);
 
 				//
 				//	propagate upwards that this an active path
 				//
-				if (boost::algorithm::equals(page, ref)) {
+				if (self) {
 					active = true;
 				}
+
 			}
 		}
 		return std::make_pair(div, active);

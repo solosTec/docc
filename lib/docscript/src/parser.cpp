@@ -12,6 +12,8 @@
 #include <algorithm>
 #include <sstream>
 
+#include <boost/assert.hpp>
+
 namespace docscript
 {
 	/**

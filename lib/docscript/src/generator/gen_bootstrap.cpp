@@ -94,7 +94,7 @@ namespace docscript
 	std::ofstream& gen_bootstrap::emit_file(std::ofstream& ofs, cyng::vector_t::const_iterator pos, cyng::vector_t::const_iterator end) const
 	{
 		ofs
-			<< "\t<section class=\"container-fluid\">"
+			<< "\t<section class=\"container-fluid\" style=\"height:80vh\">"
 			<< std::endl
 			;
 		emit_body(ofs, pos, end);
