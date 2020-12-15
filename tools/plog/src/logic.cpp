@@ -18,7 +18,7 @@ namespace plog
 		: logger_(logger)
 		, db_()
 	{
-		if (!node::create_table(db_, "_HTTPSession"))
+		if (!node::create_table(db_, "_HTTPSession", false))
 		{
 			CYNG_LOG_FATAL(logger_, "cannot create table _HTTPSession");
 		}
