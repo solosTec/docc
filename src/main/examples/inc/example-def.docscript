@@ -1,4 +1,0 @@
-.def(caption:'Optional title', 
-	line_numbers:'[bool] print line numbers', 
-	source:'source file',
-	language:'programming language')

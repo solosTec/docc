@@ -1,7 +1,0 @@
-> git clone https://github.com/solosTec/docc.git
-> cd docc
-> mkdir build 
-> cd build
-> cmake -G "Visual Studio 15 2017" -A x64 ..
-> REM cmake -G "Visual Studio 16 2019" -A x64 ..
-> REM start devenv.exe (Visual Studio)

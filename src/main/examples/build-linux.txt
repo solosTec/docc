@@ -1,6 +1,0 @@
-$ git clone https://github.com/solosTec/docc.git
-$ cd docc
-$ mkdir build && cd build
-$ cmake ..
-$ make
-$; sudo make install

@@ -1,0 +1,25 @@
+/*
+ * The MIT License (MIT)
+ * 
+ * Copyright (c) ${CURRENT_YEAR} Sylko Olzscher 
+ * 
+ */ 
+#pragma once
+
+#define docc_VERSION_MAJOR @docc_VERSION_MAJOR@
+#define docc_VERSION_MINOR @docc_VERSION_MINOR@
+
+namespace @PROJECT_NAME@
+{
+	constexpr char project_name[] = "@PROJECT_NAME@";
+	constexpr char version_string[] = "${docc_VERSION_MAJOR}.${docc_VERSION_MINOR}";
+
+	//
+	//	host system
+	//
+	constexpr char system_processor[] = "${CMAKE_SYSTEM_PROCESSOR}";
+	constexpr char system_name[] = "${CMAKE_SYSTEM_NAME}";
+	constexpr char system_version[] = "${CMAKE_SYSTEM_VERSION}";
+
+}
+

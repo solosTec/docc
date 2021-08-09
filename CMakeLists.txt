@@ -1,7 +1,7 @@
 #
 #
 # CMake compatibility issues: don't modify this, please!
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.16)
 
 
 #
@@ -23,26 +23,14 @@ cmake_minimum_required (VERSION 3.10)
 #	  ***                   *****      *****    
 #	                                            
 
-#                                                      
-# get timestamp and build a patch level from the year and
-# the day of the year. This is a unique number to distinguish
-# different builds
-string(TIMESTAMP THIS_YEAR "%Y")
-# Patch level as day of the year
-string(TIMESTAMP TWEAK_LEVEL "%j")	# day of the year
-
 #
 # set project name/properties
 #
-project(DOCC 
-	VERSION 0.1.${THIS_YEAR}.${TWEAK_LEVEL}
+project(docc 
+	VERSION 0.2
 	LANGUAGES CXX C
-	DESCRIPTION "Document Generator")
-#	HOMEPAGE_URL "https://solostec.ch")
-
-
-set (${PROJECT_NAME}_COPYRIGHT_YEAR ${THIS_YEAR})
-
+	DESCRIPTION "Document Generator"
+	HOMEPAGE_URL "https://solostec.ch")
 
 message(STATUS "**") 
 message(STATUS "     **                                     ") 
@@ -62,262 +50,45 @@ message(STATUS " *****       ****      *******    *******   ")
 message(STATUS "  ***                   *****      *****    ") 
 message(STATUS "**")                                        
 
-
-#
-# Collect and dump some basic information
-#
-string(TIMESTAMP NOW_UTC "%Y-%m-%dT%H:%M:%SZ")
-set (${PROJECT_NAME}_NOW_UTC ${NOW_UTC})
-
-include(ProcessorCount)
-ProcessorCount(${PROJECT_NAME}_CPU_COUNT)
-
-if (${${PROJECT_NAME}_CPU_COUNT} LESS 4)
-	set(${PROJECT_NAME}_POOL_SIZE 4)
-else()
-	set(${PROJECT_NAME}_POOL_SIZE ${${PROJECT_NAME}_CPU_COUNT})
-endif()
-
+string(TIMESTAMP CURRENT_YEAR "%Y")
 
 message(STATUS "** CMake              : v${CMAKE_VERSION}")
 message(STATUS "** Generator          : ${CMAKE_GENERATOR}")
 message(STATUS "** Platform           : ${CMAKE_SYSTEM}")
 message(STATUS "** Compiler           : ${CMAKE_CXX_COMPILER_ID} v${CMAKE_CXX_COMPILER_VERSION}")
-message(STATUS "** Timestamp          : ${${PROJECT_NAME}_NOW_UTC}")
-message(STATUS "** CPU Cores          : ${${PROJECT_NAME}_CPU_COUNT}")
-message(STATUS "** Pool Size          : ${${PROJECT_NAME}_POOL_SIZE}")
-message(STATUS "** Patchlevel         : ${PROJECT_VERSION_PATCH}")
-message(STATUS "** Tweaklevel         : ${PROJECT_VERSION_TWEAK}")
+message(STATUS "** Version            : ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
 message(STATUS "** PROJECT_SOURCE_DIR : ${PROJECT_SOURCE_DIR}")
 message(STATUS "** PROJECT_BINARY_DIR : ${PROJECT_BINARY_DIR}")
 message(STATUS "** ${PROJECT_NAME}_SOURCE_DIR    : ${${PROJECT_NAME}_SOURCE_DIR}")
 message(STATUS "** ${PROJECT_NAME}_BINARY_DIR    : ${${PROJECT_NAME}_BINARY_DIR}")
 
-if(UNIX)
-# has no meaning on VS
-# set default cmake build type to RelWithDebInfo (None Debug Release RelWithDebInfo MinSizeRel)
-if( NOT CMAKE_BUILD_TYPE )
-	set( CMAKE_BUILD_TYPE "RelWithDebInfo" )
-	message(STATUS "** Set build type  : ${CMAKE_BUILD_TYPE}")
-endif()
-message(STATUS "** Build type      : ${CMAKE_BUILD_TYPE}")
-endif(UNIX)
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_CXX_STANDARD 20)
 
-if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-	message(STATUS "** Address Model      : 64 bit")
-	set(${PROJECT_NAME}_ADDRESS_MODEL 64)
-	set(${PROJECT_NAME}_PREFERRED_BUFFER_SIZE 8192)
-elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
-	message(STATUS "** Address Model      : 32 bit")
-	set(${PROJECT_NAME}_ADDRESS_MODEL 32)
-	set(${PROJECT_NAME}_PREFERRED_BUFFER_SIZE 4096)
-else()
-	message(STATUS "** Address Model      : not supported")
-	set(${PROJECT_NAME}_ADDRESS_MODEL 16)
-	set(${PROJECT_NAME}_PREFERRED_BUFFER_SIZE 2048)
-endif()
+set(CMAKE_C_EXTENSIONS OFF)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 #
-# manage unit test: NODE_BUILD_TEST
-# default is OFF
+#	boost library
 #
-if(NOT DEFINED ${PROJECT_NAME}_BUILD_TEST)
-	set(${PROJECT_NAME}_BUILD_TEST OFF CACHE BOOL "build unit test")
-endif()
+find_package(Boost 1.76
+	REQUIRED COMPONENTS filesystem program_options system)
+if(Boost_FOUND)
 
-#
-#	setup cyng library
-#   -DCYNG_ROOT:path=...
-#	assume parallel installation - that is both projects share the same parent directory.
-#
-if(NOT CYNG_ROOT)
-    set(CYNG_ROOT "${PROJECT_SOURCE_DIR}/../cyng" CACHE PATH "CYNG_ROOT")
-	message(STATUS "** Set CYNG_ROOT: ${CYNG_ROOT}")
-endif()
+    message(STATUS "** Boost Version         : ${Boost_VERSION}")
+    message(STATUS "** Boost libaries        : ${Boost_LIBRARIES}")
 
-#
-#	This is a hack.
-#	For a better solution see the node project
-#
-get_filename_component(CYNG_INCLUDE_MAIN "${CYNG_ROOT}/src/main/include" REALPATH)
-get_filename_component(CYNG_INCLUDE_XML "${CYNG_ROOT}/lib/xml/pugixml/src" REALPATH)
-message(STATUS "** CYNG include path  : ${CYNG_INCLUDE_MAIN} AND ${CYNG_INCLUDE_XML}")
+	link_directories(${Boost_LIBRARY_DIRS})
 
-#
-#	setup cyng build directory
-#   -DCYNG_BUILD:path=...
-#	assume parallel installation - that is both projects share the same parent directory.
-#
-if (NOT CYNG_BUILD)
-    set(CYNG_BUILD "${CYNG_ROOT}/build" CACHE PATH "CYNG_BUILD")
-	message(STATUS "** Set CYNG_BUILD: ${CYNG_BUILD}")
-endif()
-
-get_filename_component(CYNG_LIBRARY_DIR ${CYNG_BUILD} REALPATH)
-message(STATUS "** CYNG library path  : ${CYNG_LIBRARY_DIR}")
-# message(STATUS "** pugixml library    : ${PUGIXML_LIBRARY}")
-
-if (UNIX)
-    link_directories(${CYNG_LIBRARY_DIR})
-    message(STATUS "** CYNG Libraries     : ${CYNG_LIBRARY_DIR}")
-else()
-	#
-	#	$(ConfigurationName) is a variable used by the MS build system
-	#
-	link_directories(${CYNG_LIBRARY_DIR}/$(ConfigurationName))
-    message(STATUS "** CYNG Libraries     : ${CYNG_LIBRARY_DIR}")
-endif()
-
-#
-#	Use CMake modules from CYNG project
-#
-get_filename_component(cyng_MODULE_PATH "${CYNG_ROOT}/src/modules/" REALPATH)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${cyng_MODULE_PATH}")
-message(STATUS "** CMake modules      : ${CMAKE_MODULE_PATH}")
-
-#
-#	setup crypto library
-#   -DCRYPT_ROOT:path=...
-#	assume parallel installation - that is both projects share the same parent directory.
-#
-if(NOT CRYPT_ROOT)
-    set(CRYPT_ROOT "${PROJECT_SOURCE_DIR}/../crypto" CACHE PATH "CRYPT_ROOT")
-	message(STATUS "** Set CRYPT_ROOT: ${CRYPT_ROOT}")
-endif()
-
-get_filename_component(CRYPT_INCLUDE_DIR "${CRYPT_ROOT}/include" REALPATH)
-# include_directories("${CRYPT_INCLUDE_DIR}")
-message(STATUS "** CRYPT include path : ${CRYPT_INCLUDE_DIR}")
-
-#
-#	setup cyng build directory
-#   -DCRYPT_BUILD:path=...
-#	assume parallel installation - that is both projects share the same parent directory.
-#
-if (NOT CRYPT_BUILD)
-    set(CRYPT_BUILD "${CRYPT_ROOT}/build" CACHE PATH "CRYPT_BUILD")
-	message(STATUS "** Set CRYPT_BUILD: ${CRYPT_BUILD}")
-endif()
-
-get_filename_component(CRYPT_LIBRARY_DIR ${CRYPT_BUILD} REALPATH)
-include_directories(${CRYPT_LIBRARY_DIR})
-message(STATUS "** CRYPT include path : ${CRYPT_LIBRARY_DIR}")
-
-if (UNIX)
-    link_directories(${CRYPT_LIBRARY_DIR})
-    message(STATUS "** CRYPT Libraries    : ${CRYPT_LIBRARY_DIR}")
-else()
-	#
-	#	$(ConfigurationName) is a variable used by the MS build system
-	#
-	link_directories(${CRYPT_LIBRARY_DIR}/$(ConfigurationName))
-    message(STATUS "** CRYPT Libraries    : ${CRYPT_LIBRARY_DIR}")
-endif()
-
-#
-#	setup node library
-#   -DNODE_ROOT:path=...
-#	assume parallel installation - that is both projects share the same parent directory.
-#
-if(NOT NODE_ROOT)
-    set(NODE_ROOT "${PROJECT_SOURCE_DIR}/../node" CACHE PATH "NODE_ROOT")
-	message(STATUS "** Set NODE_ROOT: ${NODE_ROOT}")
-endif()
-
-get_filename_component(NODE_INCLUDE_DIR "${NODE_ROOT}/src/main/include" REALPATH)
-include_directories("${NODE_INCLUDE_DIR}")
-message(STATUS "** NODE include path  : ${NODE_INCLUDE_DIR}")
-
-get_filename_component(NODE_SOURCE_DIR "${NODE_ROOT}/nodes/shared" REALPATH)
-
-#
-#	setup node build directory
-#   -DNODE_BUILD:path=...
-#	assume parallel installation - that is both projects share the same parent directory.
-#
-if (NOT NODE_BUILD)
-    set(NODE_BUILD "${NODE_ROOT}/build" CACHE PATH "NODE_BUILD")
-	message(STATUS "** Set NODE_BUILD: ${NODE_BUILD}")
-endif()
-
-get_filename_component(NODE_LIBRARY_DIR ${NODE_BUILD} REALPATH)
-# include_directories(${NODE_LIBRARY_DIR})
-message(STATUS "** NODE include path  : ${NODE_LIBRARY_DIR}")
-
-if (UNIX)
-    link_directories(${NODE_LIBRARY_DIR})
-    message(STATUS "** NODE Libraries     : ${NODE_LIBRARY_DIR}")
-else()
-	#
-	#	$(ConfigurationName) is a variable used by the MS build system
-	# D:/projects/node/build/lib/http/server/Debug/
-	#
-	link_directories(${NODE_LIBRARY_DIR}/lib/http/server/$(ConfigurationName);${NODE_LIBRARY_DIR}/lib/https/server/$(ConfigurationName);${NODE_LIBRARY_DIR}/lib/sml/protocol/$(ConfigurationName))
-    message(STATUS "** NODE Libraries     : ${NODE_LIBRARY_DIR}")
-endif()
-
-#
-#	setup compiler features
-#
-include(CPPFeatureSupport)
-
-#
-#	setup C++ compiler
-#
-if (CMAKE_COMPILER_IS_GNUCXX)
-
-	#
-	# gnu C++ select dialect
-	#
-	
-	if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS  "4.7")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11") 
-		message(STATUS "** C++ support     : C++11")
-	elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS  "5.1")
-	# default since  GCC 6.1
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14") 
-		message(STATUS "** C++ support     : C++14")
-	elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS  "8.1")
-    # partly since 5.0
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17") 
-		message(STATUS "** C++ support     : C++17")
-	else()
-    # partly since 8.0
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2a") 
-		message(STATUS "** C++ support     : C++2a")
-	endif()
-	
-	# only shared libraries
-	set(GLOBAL_LIBRARY_TYPE SHARED)
-	
-elseif(MSVC)
-
-	#
-	# Microsoft C++
-	#
-	
-	if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "18.0")
-	# 	prior Visual Studio 2013
-		message(FATAL_ERROR "Insufficient MSVC version")
-	endif()
-
-	# only static libraries
-	set(GLOBAL_LIBRARY_TYPE STATIC)
-
-	#	This is Windows 7 (and rules out windows vista)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /bigobj /std:c++latest /MP")	
-	add_definitions(-D_WIN32_WINNT=0x0601 -D_SCL_SECURE_NO_WARNINGS -D_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS -DBOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE)
-		
 else()
 
-	message( FATAL_ERROR "Unknown or missing compiler: ${CMAKE_CXX_COMPILER_ID}" )
-	
-endif()
+	message(ERROR "Boost library not found")
 
-#
-#	setup Boost library
-#
-include(SelectBoostLibrary)
+endif(Boost_FOUND)
 
 #
 #	setup SSL library
@@ -325,239 +96,122 @@ include(SelectBoostLibrary)
 find_package(OpenSSL)
 if(OPENSSL_FOUND)
 
-	# satisfy definitions for NODE header files
-   add_definitions(-DNODE_SSL_INSTALLED)
-
     message(STATUS "** openSSL Version       : ${OPENSSL_VERSION}")
     message(STATUS "** openSSL Include       : ${OPENSSL_INCLUDE_DIR}")
     message(STATUS "** openSSL crypto library: ${OPENSSL_CRYPTO_LIBRARY}")
     message(STATUS "** openSSL SSL library   : ${OPENSSL_SSL_LIBRARY}")
     message(STATUS "** openSSL Libraries     : ${OPENSSL_LIBRARIES}")
-            
+         
+else()
+
+	message(ERROR "OpenSSL library not found")
+	
 endif()
 
+# FetchContent added in CMake 3.11, downloads during the configure step
+include(FetchContent)
+# FetchContent_MakeAvailable was not added until CMake 3.14; use our shim
+# if(${CMAKE_VERSION} VERSION_LESS 3.14)
+#   include(cmake/add_FetchContent_MakeAvailable.cmake)
+# endif()
+
+# Formatting library
+# Use <format> when C++20 is available
 #
-# include directories for all C/C++ projects
+FetchContent_Declare(
+  fmtlib
+  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+  GIT_TAG 8.0.1)
+FetchContent_MakeAvailable(fmtlib)
+# Adds fmt::fmt
+
+# XML library
 #
-include_directories(src/main/include)
+FetchContent_Declare(
+  pugixml
+  GIT_REPOSITORY https://github.com/zeux/pugixml
+  GIT_TAG v1.11.4)
+FetchContent_MakeAvailable(pugixml)
+# Adds pugixml
+
+# chrono library
+#
+FetchContent_Declare(
+  date_src 
+  GIT_REPOSITORY https://github.com/HowardHinnant/date.git
+  GIT_TAG v3.0.1)
+FetchContent_MakeAvailable(date_src)
+# Adds date 
 
 #
-# configure a header file to pass some of the CMake settings
-# to the source code
+#	generate a version.hpp file
 #
-configure_file (
-  "${PROJECT_SOURCE_DIR}/src/main/templates/project_info.h.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_project_info.h"
+configure_file(src/version.hpp.in "${PROJECT_BINARY_DIR}/include/version.hpp")
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+
+find_package(CYNG REQUIRED)
+if (CYNG_FOUND)
+    message(STATUS "** CYNG_INCLUDE_DIRS     : ${CYNG_INCLUDE_DIRS}")
+    message(STATUS "** CYNG_LIBRARIES        : ${CYNG_LIBRARIES}")
+    message(STATUS "** cyng_db               : ${cyng_db}")
+    message(STATUS "** cyng_io               : ${cyng_io}")
+    message(STATUS "** cyng_log              : ${cyng_log}")
+    message(STATUS "** cyng_obj              : ${cyng_obj}")
+    message(STATUS "** cyng_store            : ${cyng_store}")
+    message(STATUS "** cyng_sys              : ${cyng_sys}")
+    message(STATUS "** cyng_task             : ${cyng_task}")
+    message(STATUS "** cyng_vm               : ${cyng_vm}")
+    message(STATUS "** cyng_sqlite3          : ${cyng_sqlite3}")
+else()
+    message(FATAL_ERROR "** CYNG library not found")
+endif()
+
+if (IS_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
+	add_subdirectory(lib)
+endif()
+
+add_executable(docc 
+    ${CMAKE_SOURCE_DIR}/src/main.cpp
+    ${CMAKE_SOURCE_DIR}/src/controller.cpp
+    ${CMAKE_SOURCE_DIR}/src/controller.h
 )
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-#
-#	html library
-#
-include (lib/html/lib.cmake)
-add_library(doc_html ${GLOBAL_LIBRARY_TYPE} ${html_lib})
-
-#
-#	docscript library
-#
-include (lib/docscript/lib.cmake)
-add_library(docscript_core ${GLOBAL_LIBRARY_TYPE} ${docscript_lib})
-target_include_directories(docscript_core
-	PRIVATE
-        ${CYNG_LIBRARY_DIR}
-        ${CYNG_INCLUDE_MAIN}
-        ${CYNG_INCLUDE_XML}
-        ${CRYPT_INCLUDE_DIR}
-#        ${NODE_LIBRARY_DIR}
-		"$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>"
-		${OPENSSL_INCLUDE_DIR}
-		${BOOST_INCLUDE_DIR}
-)
-target_link_libraries(docscript_core 
-    smf_protocol_sml
-    cyng_async
-    cyng_xml
- 	cyng_parser 
- 	cyng_json 
- 	cyng_csv
- 	cyng_table
- 	cyng_sys
-    crypto
-)
-install(TARGETS docscript_core
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib/static)
-    
-
-#
-# docscript compiler
-#
-include (tools/docc/prg.cmake)
-add_executable(docc ${docc})
 target_include_directories(docc
-	PRIVATE
-        ${CYNG_LIBRARY_DIR}
-        ${CYNG_INCLUDE_MAIN}
-# 		"$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>"
-# 		${OPENSSL_INCLUDE_DIR}
-# 		${BOOST_INCLUDE_DIR}
+	PUBLIC
+		${PROJECT_BINARY_DIR}/include
+#		${CMAKE_SOURCE_DIR}/lib/include
+ 		${OPENSSL_INCLUDE_DIR}
+ 		${Boost_INCLUDE_DIRS}
 )
-# target_compile_definitions(docc 
-#     PRIVATE
-#         $<$<CXX_COMPILER_ID:GNU>:"BOOST_NO_CXX11_SCOPED_ENUMS">
-# )
+
+target_compile_features(docc PRIVATE cxx_std_20)
+
+target_compile_options(docc 
+	PRIVATE "$<$<CXX_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Wpedantic>"
+	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/MP>"
+	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/W2>"
+)
+
+target_compile_definitions(docc
+	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:_WIN32_WINNT=0x0601>")
+
 target_link_libraries(docc 
- 	cyng_core
- 	cyng_io 
- 	cyng_log 
- 	cyng_vm 
- 	cyng_parser 
- 	cyng_sys
-	docscript_core 
-	doc_html 
-	${PUGIXML_LIBRARY}
-	${OPENSSL_LIBRARIES}
-	"$<$<PLATFORM_ID:Linux>:${Boost_FILESYSTEM_LIBRARY};${Boost_THREAD_LIBRARY};${Boost_SYSTEM_LIBRARY};${Boost_PROGRAM_OPTIONS_LIBRARY};${Boost_RANDOM_LIBRARY};pthread>"
+	PUBLIC 
+		docscript
+        fmt::fmt
+#		CYNG::CYNG
+		${CYNG_LIBRARIES}
+		${OPENSSL_LIBRARIES}
+		"$<$<PLATFORM_ID:Linux>:pthread>"
 )
+
 install(TARGETS docc
     RUNTIME
     DESTINATION bin)
 
 
-#
-# docscript batch
-#
-include (tools/batch/prg.cmake)
-add_executable(batch ${batch})
-target_include_directories(batch
-	PRIVATE
-        ${CYNG_LIBRARY_DIR}
-        ${CYNG_INCLUDE_MAIN}
-)
-target_link_libraries(batch 
- 	cyng_core
- 	cyng_io 
- 	cyng_log 
- 	cyng_vm 
- 	cyng_parser 
- 	cyng_json 
-	crypto 
-	smf_protocol_sml
-	docscript_core 
-	doc_html 
-	${OPENSSL_LIBRARIES}
-	"$<$<PLATFORM_ID:Linux>:${Boost_THREAD_LIBRARY};${Boost_SYSTEM_LIBRARY};${Boost_FILESYSTEM_LIBRARY};${Boost_PROGRAM_OPTIONS_LIBRARY};${Boost_RANDOM_LIBRARY};pthread>"
-)
-install(TARGETS batch
-    RUNTIME
-    DESTINATION bin)
 
-#
-# site generator
-#
-include (tools/site/prg.cmake)
-add_executable(site ${site})
-target_include_directories(site
-	PRIVATE
-        ${CYNG_LIBRARY_DIR}
-        ${CYNG_INCLUDE_MAIN}
-)
-
-#	"$<$<CONFIG:Debug>:__SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\">"
-
-target_compile_definitions(site
-  PRIVATE
-	"$<$<CONFIG:Debug>:__SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\">" )
-
-target_link_libraries(site
- 	cyng_core
- 	cyng_io 
- 	cyng_log 
- 	cyng_vm 
- 	cyng_parser 
- 	cyng_json 
-	crypto 
-	smf_protocol_sml
-	docscript_core 
-	doc_html 
-	${OPENSSL_LIBRARIES}
-	"$<$<PLATFORM_ID:Linux>:${Boost_THREAD_LIBRARY};${Boost_SYSTEM_LIBRARY};${Boost_FILESYSTEM_LIBRARY};${Boost_PROGRAM_OPTIONS_LIBRARY};${Boost_RANDOM_LIBRARY};pthread>"
-)
-install(TARGETS site
-    RUNTIME
-    DESTINATION bin)
-
-#
-# plog server
-# The depenency to mail library in https-server is to remove before
-# this can work again
-#
-include (tools/plog/prg.cmake)
-add_executable(plog ${plog})
-target_include_directories(plog
-	PRIVATE
-        ${CYNG_LIBRARY_DIR}
-        ${CYNG_INCLUDE_MAIN}
-        ${NODE_LIBRARY_DIR}
-		${OPENSSL_INCLUDE_DIR}
-)
-target_link_libraries(plog 
-    smf_http_srv
-    smf_https_srv
- 	cyng_core
- 	cyng_io 
- 	cyng_vm 
- 	cyng_async 
- 	cyng_log 
- 	cyng_json 
- 	cyng_parser 
-# 	cyng_xml 
-# 	cyng_csv
-    cyng_store
-    cyng_db
- 	cyng_table
-# 	cyng_sys
- 	crypto 
-# 	smf_protocol_sml
-# 	docscript_core 
-# 	doc_html 
- 	${OPENSSL_LIBRARIES}
- 	"$<$<PLATFORM_ID:Linux>:${Boost_THREAD_LIBRARY};${Boost_SYSTEM_LIBRARY};${Boost_FILESYSTEM_LIBRARY};${Boost_PROGRAM_OPTIONS_LIBRARY};${Boost_RANDOM_LIBRARY};pthread>"
-)
-install(TARGETS plog
-    RUNTIME
-    DESTINATION bin)
-
-#
-#   Generate configuration files
-#   Place service files in /etc/systemd/system/
-#
-#   some usefull commands:
-#   systemctl list-unit-files --state=enabled
-#   sudo systemctl daemon-reload
-#   journalctl -f -u node-http
-#
-if(UNIX)
-
-	# docc
-	configure_file (
-		  "${PROJECT_SOURCE_DIR}/tools/docc/templates/docc.linux.cgf.in"
-		  "${PROJECT_BINARY_DIR}/docc_v${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.cfg")
-		  
-	# plog
-	configure_file (
-		  "${PROJECT_SOURCE_DIR}/tools/plog/templates/plog.linux.cgf.in"
-		  "${PROJECT_BINARY_DIR}/plog_v${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.cfg")
-		  
-  else()
-	  configure_file (
-			"${PROJECT_SOURCE_DIR}/tools/docc/templates/docc.windows.cgf.in"
-			"${PROJECT_BINARY_DIR}/docc_v${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.cfg")
-			
-	  configure_file (
-			"${PROJECT_SOURCE_DIR}/tools/plog/templates/plog.windows.cgf.in"
-			"${PROJECT_BINARY_DIR}/plog_v${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.cfg")
-  endif()
 #
 # CPack configuration
 #
@@ -568,7 +222,7 @@ set(CPACK_PACKAGE_RELEASE 1)
 set(CPACK_PACKAGE_CONTACT "info@solostec.ch")
 set(CPACK_PACKAGE_VENDOR "solosTec")
 set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_PACKAGE_RELEASE}.${CMAKE_SYSTEM_PROCESSOR}")
-set(CPACK_RPM_PACKAGE_DESCRIPTION "CYNG library")
+set(CPACK_RPM_PACKAGE_DESCRIPTION "DOCC library")
 set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
 
 if(UNIX)

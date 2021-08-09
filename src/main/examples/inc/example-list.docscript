@@ -1,8 +1,0 @@
-.list(type:unordered
- , style: 'circle'
- , items: [
-	(CMake >= 3.13),	
-	(recent C++ compiler),
-	(Boost > 1.67), 
-	(OpenSSL), 
-	(.link(text:'cyng', url:'https://github.com/solosTec/cyng', title:'VM with dynamic data types') library)])
