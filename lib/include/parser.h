@@ -45,6 +45,7 @@ namespace docscript {
 		void state_paragraph(symbol const& sym);
 
 		void emit_function();
+		void merge_symbols(symbol const& sym);
 
 	private:
 		context& ctx_;

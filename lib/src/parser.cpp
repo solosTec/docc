@@ -130,13 +130,24 @@ namespace docscript {
                     state_.pop();   //  function
                     break;
                 case ':':
+                    //
+                    //  ToDo: parameter modus
+                    //
+                    break;
                 case ',':
+                    if (prev_ == symbol_type::TXT) {
+                        merge_symbols(sym);
+                    }
+                    else {
+                        state_.top().symbols_.push_back(sym);
+                    }
                     break;
                 default:
-                    fmt::print(
-                        stdout,
-                        fg(fmt::color::dark_orange) | fmt::emphasis::bold,
-                        "***warn : unexpected symbol \"{}\" at {}\n", sym.value_, ctx_.get_position());
+                    state_.top().symbols_.push_back(sym);
+                    //fmt::print(
+                    //    stdout,
+                    //    fg(fmt::color::dark_orange) | fmt::emphasis::bold,
+                    //    "***warn : unexpected symbol \"{}\" at {}\n", sym.value_, ctx_.get_position());
                     break;
                 }
             }
@@ -158,28 +169,73 @@ namespace docscript {
             //
             emit_function();
             break;
+        case symbol_type::SYM:
+            BOOST_ASSERT(sym.value_.size() == 1);
+            switch (sym.value_.front()) {
+            case ',':
+                if (prev_ == symbol_type::TXT) {
+                    merge_symbols(sym);
+                }
+                else {
+                    state_.top().symbols_.push_back(sym);
+                }
+                break;
+            default:
+                state_.top().symbols_.push_back(sym);
+                break;
+            }
+            break;
         default:
-            state_.top().symbols_.push_back(sym);
+            if (sym == symbol_type::TXT && sym.value_.size() == 1) {
+                switch (sym.value_.front()) {
+                    case '?':
+                    case '!':
+                    case ';':
+                        if (prev_ == symbol_type::TXT) {
+                            merge_symbols(sym);
+                        }
+                        else {
+                            state_.top().symbols_.push_back(sym);
+                        }
+                        break;
+                    default:
+                        state_.top().symbols_.push_back(sym);
+                        break;
+                }
+            }
+            else {
+                state_.top().symbols_.push_back(sym);
+            }
             break;
         }
     }
 
     void parser::emit_function() {
+        std::size_t counter{ 0 };
         for (auto pos = std::crbegin(state_.top().symbols_); pos != std::crend(state_.top().symbols_); pos++) {
             switch (pos->type_) {
             case symbol_type::FUN:
                 ctx_.emit("call ");
                 ctx_.emit(pos->value_);
+                ctx_.emit(" #");
+                ctx_.emit(std::to_string(counter));
                 ctx_.emit("\n");
                 break;
             default:
                 ctx_.emit("push ");
                 ctx_.emit(pos->value_);
                 ctx_.emit("\n");
+                ++counter;
                 break;
             }
         }
         state_.pop();
+    }
+
+    void parser::merge_symbols(symbol const& sym) {
+        auto tmp = state_.top().symbols_.back().value_ + sym.value_;
+        state_.top().symbols_.pop_back();
+        state_.top().symbols_.push_back(make_symbol(symbol_type::TXT, std::move(tmp)));
     }
 
     parser::parameter::parameter(state s) 
