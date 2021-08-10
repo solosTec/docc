@@ -203,33 +203,59 @@ namespace docscript {
 		//  format: YYYY-MM-DD[THH:MM:SS.zzZ]
 		switch (static_cast<std::uint32_t>(tok)) {
 		case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
-		case '-': case ':': case '.': case 'T': case 'Z':
+		case 'Z':
 			value_ += tok;
 			break;
 
+		case 'T':
+			if (value_.size() != 10) {
+				//	this is not a timestamp
+				return { state::START_, true };
+			}
+			value_ += tok;
+			break;
+
+		case '-':
+			switch (value_.size()) {
+			case 4:
+			case 7:
+				break;
+			default:
+				//	this is not a timestamp
+				return { state::START_, true };
+				break;
+			}
+			value_ += tok;
+			break;
+
+		case ':':
+			switch (value_.size()) {
+			case 13:
+			case 16:
+				break;
+			default:
+				//	this is not a timestamp
+				return { state::START_, true };
+				break;
+			}
+			value_ += tok;
+			break;
+
+		case '.':
+			if (value_.size() == 10) {
+				complete_ts();
+				emit(symbol_type::TST);
+			}
+			return { state::START_, false };
+
 		default:
 			if (value_.size() == 10) {
-				value_ += 'T';
-				value_ += '0';
-				value_ += '0';
-				value_ += ':';
-				value_ += '0';
-				value_ += '0';
-				value_ += ':';
-				value_ += '0';
-				value_ += '0';
-				value_ += '.';
-				value_ += '0';
-				value_ += '0';
-				value_ += 'Z';
+				complete_ts();
 				emit(symbol_type::TST);
 				return { state::START_, true };
 			}
 			else if (value_.size() == 19) {
-				value_ += '.';
-				value_ += '0';
-				value_ += '0';
-				value_ += 'Z';
+				complete_ts();
 				emit(symbol_type::TST);
 				return { state::START_, true };
 			}
@@ -246,6 +272,30 @@ namespace docscript {
 			break;
 		}
 		return { state_, true };
+	}
+
+	void tokenizer::complete_ts() {
+		if (value_.size() == 10) {
+			value_ += 'T';
+			value_ += '0';
+			value_ += '0';
+			value_ += ':';
+			value_ += '0';
+			value_ += '0';
+			value_ += ':';
+			value_ += '0';
+			value_ += '0';
+			value_ += '.';
+			value_ += '0';
+			value_ += '0';
+			value_ += 'Z';
+		}
+		else if (value_.size() == 19) {
+			value_ += '.';
+			value_ += '0';
+			value_ += '0';
+			value_ += 'Z';
+		}
 	}
 
 	std::pair<tokenizer::state, bool> tokenizer::quote(token const& tok, token const& prev)

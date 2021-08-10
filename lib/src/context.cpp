@@ -14,13 +14,30 @@ namespace docscript {
 		, std::filesystem::path out
 		, std::vector<std::filesystem::path> inc
 		, int verbose)
-		: temp_(temp)
+	: temp_(temp)
+		, ostream_(temp.string(), std::ios::trunc)
 		, out_file_(out)
 		, inc_(inc)
 		, verbose_(verbose)
 		, position_()
 		, parser_(*this)
-	{}
+	{
+		BOOST_ASSERT(ostream_.is_open());
+		if (!ostream_.is_open()) {
+			fmt::print(
+				stdout,
+				fg(fmt::color::crimson) | fmt::emphasis::bold,
+				"***info : could not open temporary output file [{}]\n", temp_.string());
+
+		}
+		else if (get_verbosity(3)) {
+			fmt::print(
+				stdout,
+				fg(fmt::color::gray) | fmt::emphasis::bold,
+				"***info : temporary output file [{}] is open\n", temp_.string());
+
+		}
+	}
 
 	bool context::push(std::filesystem::path const& p)
 	{
@@ -74,11 +91,20 @@ namespace docscript {
 				<< position_.top().file_
 				<< ']'
 				<< ' '
+				<< '#'
 				<< position_.top().line_
 				;
 			return ss.str();
 		}
 		return "";
+	}
+
+	void context::emit(std::string const& s) {
+		ostream_ << s 
+#ifdef _DEBUG
+			<< std::flush
+#endif
+			;
 	}
 
 }

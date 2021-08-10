@@ -67,6 +67,9 @@ namespace docscript {
 
 		void emit(symbol_type);
 
+		void complete_ts();
+
+
 	};
 }
 #endif //   DOCC_SCRIPT_TOKENIZER_H

@@ -101,4 +101,8 @@ namespace docscript {
 		return symbol(symbol_type::LIN, std::to_string(line));
 	}
 
+	symbol make_symbol() {
+		return symbol(symbol_type::EOD, "");
+	}
+
 }

@@ -198,7 +198,7 @@ int main(int argc, char* argv[]) {
     //
     //	generate a temporary file name for intermediate files
     //
-    auto const tmp = std::filesystem::temp_directory_path() / (std::filesystem::path(inp_file).filename().string() + ".dasm");
+    auto const tmp = std::filesystem::temp_directory_path() / (std::filesystem::path(inp_file).filename().string() + ".dsmodule");
 
     //
     //  start tasks

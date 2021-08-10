@@ -38,8 +38,6 @@ namespace docscript {
 
 		symbol();
 		symbol(symbol_type, std::string&&);
-		//symbol(symbol const&) = default;
-		//symbol(symbol&&) = default;
 
 		bool equals(char c) const;
 		bool equals(symbol_type type, char c) const;
@@ -58,6 +56,7 @@ namespace docscript {
 	symbol make_symbol(symbol_type, std::string&&);
 	symbol make_symbol(std::filesystem::path const&);
 	symbol make_symbol(std::size_t);
+	symbol make_symbol();	//	EOD
 
 	/**
 	 * Define an emit function

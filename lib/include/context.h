@@ -73,8 +73,14 @@ namespace docscript {
 		 */
 		std::string get_position() const;
 
+		/**
+		 * write to the temp file
+		 */
+		void emit(std::string const&);
+
 	private:
 		std::filesystem::path const temp_;
+		std::ofstream ostream_;	//	stream of temp file
 		std::filesystem::path const out_file_;
 		std::vector<std::filesystem::path> inc_;
 		int const verbose_;
