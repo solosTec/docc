@@ -17,28 +17,36 @@ namespace docscript {
         , ctx_(ctx)
         , prev_(make_symbol())
     {
-        state_.push(parameter(state::INITIAL_));
+        //state_.push(parameter(state::INITIAL_));
     }
 
     void parser::put(symbol const& sym)
     {
-        std::cout << ctx_.get_position() << ": " << sym << std::endl;
+        std::cout << ctx_.get_position() << ": " << sym << " $" << (state_.empty() ? make_symbol() : state_.top()) << std::endl;
 
-        switch (state_.top().state_) {
-        case state::INITIAL_:
-            state_initial(sym);
+        switch (sym.type_) {
+        case symbol_type::EOD:	//	end-of-data
+            eod();
             break;
-        case state::FUNCTION_:
-            state_function(sym);
+        case symbol_type::FUN:	//	function name
+        [[fallthrough]];    //  since C++17
+        case symbol_type::PAR:	//	paragraph - multiple NL
+            next_function(sym);
             break;
-        case state::OPEN_:
-            state_open(sym);
+        case symbol_type::TXT:	//	text
+            next_text(sym);
             break;
-        case state::PARAGRAPH_:
-            state_paragraph(sym);
+        case symbol_type::SYM:	//	special symbol like "(", ")", ",", ":"
+            next_symbol(sym);
             break;
-
+        case symbol_type::TST:	//	timestamp
+            state_.push(sym);
+            break;
+        case symbol_type::DQU:	//	double quotes: "
+            state_.push(sym);
+            break;
         default:
+            BOOST_ASSERT_MSG(false, "invalid symbol");
             break;
         }
 
@@ -49,203 +57,112 @@ namespace docscript {
 
     }
 
-    void parser::state_initial(symbol const& sym) {
-        switch (sym.type_) {
-           
-        case symbol_type::EOD:	//	end-of-data
+    void parser::next_symbol(symbol const& sym) {
+        BOOST_ASSERT_MSG(sym.value_.size() == 1, "symbol with wrong length");
+        switch (sym.value_.front()) {
+        case '(':
+            state_.push(sym);
+            //state_.push(make_symbol(0));    //  parameter count
             break;
-        case symbol_type::FUN:
-            state_.push(parameter(state::FUNCTION_, sym));
-            break;
-        case symbol_type::PAR:	//	paragraph - multiple NL
-            state_.push(parameter(state::PARAGRAPH_, make_symbol(symbol_type::FUN, "par")));
-            break;
-
-        //    TXT,	//	text
-        //    SYM,	//	special symbol like "(", ")", ",", ":"
-        //    TST,	//	timestamp
-        //    DQU,	//	double quotes: "
-
-        default:
-            ctx_.emit("emit ");
-            ctx_.emit(sym.value_);
-            ctx_.emit("\n");
-            break;
-        }
-    }
-
-    void parser::state_function(symbol const& sym) {
-        switch (sym.type_) {
-        case symbol_type::FUN:
-            state_.push(parameter(state::FUNCTION_, sym));
-            break;
-        case symbol_type::SYM:
-            BOOST_ASSERT(sym.value_.size() == 1);
-            if (sym.value_.size() == 1) {
-
-                switch (sym.value_.front()) {
-                case '(':
-                    //
-                    //  an opening bracket requires an closing bracket
-                    //
-                    state_.push(parameter(state::OPEN_, state_.top().symbols_.front()));
-                    break;
-                default:
-                    //
-                    //  "one parameter" function is complete
-                    // 
-                    emit_function();
-                    break;
-                }
-            }
-            break;
-
-        default:
-            if (state_.top().symbols_.size() == 1) {
-                state_.top().symbols_.push_back(sym);
-                //
-                //  "one parameter" function is complete
-                // 
-                emit_function();
-            }
-            break;
-        }
-    }
-
-    void parser::state_open(symbol const& sym) {
-        switch (sym.type_) {
-        case symbol_type::FUN:
-            state_.push(parameter(state::FUNCTION_, sym));
-            break;
-        case symbol_type::SYM:
-            BOOST_ASSERT(sym.value_.size() == 1);
-            if (sym.value_.size() == 1) {
-
-                switch (sym.value_.front()) {
-                case ')':
-                    //
-                    //  complete: emit instructions
-                    //
-                    emit_function();
-                    state_.pop();   //  function
-                    break;
-                case ':':
-                    //
-                    //  ToDo: parameter modus
-                    //
-                    break;
-                case ',':
-                    if (prev_ == symbol_type::TXT) {
-                        merge_symbols(sym);
-                    }
-                    else {
-                        state_.top().symbols_.push_back(sym);
-                    }
-                    break;
-                default:
-                    state_.top().symbols_.push_back(sym);
-                    //fmt::print(
-                    //    stdout,
-                    //    fg(fmt::color::dark_orange) | fmt::emphasis::bold,
-                    //    "***warn : unexpected symbol \"{}\" at {}\n", sym.value_, ctx_.get_position());
-                    break;
-                }
-            }
-            break;
-        default:
-            state_.top().symbols_.push_back(sym);
-            break;
-        }
-    }
-
-    void parser::state_paragraph(symbol const& sym) {
-        switch (sym.type_) {
-        case symbol_type::FUN:
-            state_.push(parameter(state::FUNCTION_, sym));
-            break;
-        case symbol_type::PAR:
-            //
-            //  complete: emit instructions
-            //
-            emit_function();
-            break;
-        case symbol_type::SYM:
-            BOOST_ASSERT(sym.value_.size() == 1);
-            switch (sym.value_.front()) {
-            case ',':
-                if (prev_ == symbol_type::TXT) {
-                    merge_symbols(sym);
-                }
-                else {
-                    state_.top().symbols_.push_back(sym);
-                }
-                break;
-            default:
-                state_.top().symbols_.push_back(sym);
-                break;
-            }
-            break;
-        default:
-            if (sym == symbol_type::TXT && sym.value_.size() == 1) {
-                switch (sym.value_.front()) {
-                    case '?':
-                    case '!':
-                    case ';':
-                        if (prev_ == symbol_type::TXT) {
-                            merge_symbols(sym);
-                        }
-                        else {
-                            state_.top().symbols_.push_back(sym);
-                        }
-                        break;
-                    default:
-                        state_.top().symbols_.push_back(sym);
-                        break;
+        case ')':
+            if (state_.top().equals(symbol_type::SYM) && (state_.top().value_.front() == '(')) {
+                //  parameter list complete
+                state_.pop();
+                if (state_.top().equals(symbol_type::FUN)) {
+                    //  generate function call
+                    ctx_.emit("CALL ");
+                    ctx_.emit(state_.top().value_);
+                    ctx_.emit("\n");
+                    state_.pop();
                 }
             }
             else {
-                state_.top().symbols_.push_back(sym);
+                state_.push(sym);
             }
             break;
-        }
-    }
-
-    void parser::emit_function() {
-        std::size_t counter{ 0 };
-        for (auto pos = std::crbegin(state_.top().symbols_); pos != std::crend(state_.top().symbols_); pos++) {
-            switch (pos->type_) {
-            case symbol_type::FUN:
-                ctx_.emit("call ");
-                ctx_.emit(pos->value_);
-                ctx_.emit(" #");
-                ctx_.emit(std::to_string(counter));
-                ctx_.emit("\n");
-                break;
-            default:
-                ctx_.emit("push ");
-                ctx_.emit(pos->value_);
-                ctx_.emit("\n");
-                ++counter;
-                break;
+        case ':':
+            BOOST_ASSERT(!state_.empty());
+            //  build key
+            std::cout << ctx_.get_position() << ": reduce key [" << state_.top().value_ << "]" << std::endl;
+            {
+                auto const next_sym = make_symbol(symbol_type::KEY, std::string(sym.value_));
+                state_.push(next_sym);
             }
+            break;
+        case ',':
+            BOOST_ASSERT(!state_.empty());
+            if (state_.top().equals(symbol_type::SYM) && (state_.top().value_.front() == '(')) {
+                //  build parameter list
+                std::cout << ctx_.get_position() << ": reduce list [" << state_.top().value_ << "]" << std::endl;
+                //state_.pop();
+            }
+            else {
+                state_.push(sym);
+            }
+            break;
+        default:
+            break;
+        } 
+    }
+
+    void parser::next_function(symbol const& sym) {
+        //
+        //  generate a function call
+        //
+        state_.push(sym);
+    }
+
+    void parser::next_text(symbol const& sym) {
+        //
+        //  look at stack
+        //
+        if (state_.top().type_ == symbol_type::KEY) {
+            std::cout << ctx_.get_position() << ": reduce list [" << state_.top().value_ << ":" << sym.value_ << "]" << std::endl;
+            ctx_.emit("PUSH ");
+            ctx_.emit(sym.value_);
+            ctx_.emit("\n");
+
+            state_.pop();
+
+            ctx_.emit("PARAM");
+            ctx_.emit("\n");
         }
-        state_.pop();
+        else if (state_.top().type_ == symbol_type::FUN) {
+            //
+            //  single parameter function
+            //
+            ctx_.emit("PUSH ");
+            ctx_.emit(sym.value_);
+            ctx_.emit("\n");
+
+            ctx_.emit("CALL ");
+            ctx_.emit(state_.top().value_);
+            ctx_.emit(" #1\n");
+            state_.pop();
+        }
+        else {
+            ctx_.emit("PUSH ");
+            ctx_.emit(sym.value_);
+            ctx_.emit("\n");
+        }
     }
 
-    void parser::merge_symbols(symbol const& sym) {
-        auto tmp = state_.top().symbols_.back().value_ + sym.value_;
-        state_.top().symbols_.pop_back();
-        state_.top().symbols_.push_back(make_symbol(symbol_type::TXT, std::move(tmp)));
+    void parser::eod() {
+        if (state_.top().type_ == symbol_type::PAR) {
+            ctx_.emit("CALL ");
+            ctx_.emit("\xc2\xb6");    //  pilgrow (¶)
+            ctx_.emit("\n");
+        }
+        if (state_.top().type_ == symbol_type::FUN) {
+            ctx_.emit("CALL ");
+            ctx_.emit(state_.top().value_);
+            ctx_.emit("\n");
+
+            state_.pop();
+        }
+        ctx_.emit("HALT");
+        ctx_.emit("\n");
+
     }
-
-    parser::parameter::parameter(state s) 
-        : state_(s)
-        , symbols_()
-    { }
-
-    parser::parameter::parameter(state s, symbol const& sym)
-        : state_(s)
-        , symbols_(1, sym)
-    { }
 
 }

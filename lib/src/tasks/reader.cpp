@@ -143,6 +143,9 @@ namespace docscript {
                         "***info : include [{}]\n", r.first.filename().string());
                 }
 
+                //
+                //  recursive call
+                //
                 read(r.first);
             }
             else {

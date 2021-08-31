@@ -36,6 +36,13 @@ namespace docscript {
 				fg(fmt::color::gray) | fmt::emphasis::bold,
 				"***info : temporary output file [{}] is open\n", temp_.string());
 
+			//
+			//	write BOM: 0xEF, 0xBB, 0xBF
+			//
+			ostream_.put(0xEF);
+			ostream_.put(0xBB);
+			ostream_.put(0xBF);
+
 		}
 	}
 

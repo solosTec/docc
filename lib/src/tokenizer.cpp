@@ -60,9 +60,6 @@ namespace docscript {
 		case state::QUOTE_ESC_:
 			std::tie(state_, advance) = quote_esc(tok, prev);
 			break;
-		case state::QUOTE_SPC_:
-			std::tie(state_, advance) = quote_spc(tok, prev);
-			break;
 		case state::NEWLINE_:
 			std::tie(state_, advance) = newline(tok, prev);
 			break;
@@ -302,15 +299,10 @@ namespace docscript {
 	{
 		switch (static_cast<std::uint32_t>(tok)) {
 		case '\'':
-			if ('\'' == prev) {
-				//  '' --> '
-				value_ += tok;
-				return { state::TEXT_, true };
-			}
-			return { state::QUOTE_ESC_, true };
+			return { state::TEXT_, true };
 
 		case '\\':
-			return { state::QUOTE_SPC_, true };
+			return { state::QUOTE_ESC_, true };
 
 		default:
 			break;
@@ -323,20 +315,8 @@ namespace docscript {
 	std::pair<tokenizer::state, bool> tokenizer::quote_esc(token const& tok, token const& prev)
 	{
 		switch (static_cast<std::uint32_t>(tok)) {
-		case '\'':
-			value_ += tok;
-			return { state::QUOTE_, true };
-		default:
-			break;
-		}
-		emit(symbol_type::TXT);
-		return { state::START_, false };
-	}
-
-	std::pair<tokenizer::state, bool> tokenizer::quote_spc(token const& tok, token const& prev)
-	{
-		switch (static_cast<std::uint32_t>(tok)) {
 		case '\\':
+		case '\'':
 			value_ += tok;
 			return { state::QUOTE_, true };
 		case 'n':

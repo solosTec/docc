@@ -21,35 +21,36 @@ namespace docscript {
 
         public:
 
-        constexpr token() 
-        : c_(std::numeric_limits<std::uint32_t>::max())
-        {}
+            constexpr token() 
+            : c_(std::numeric_limits<std::uint32_t>::max())
+            {}
 
-        constexpr token(std::uint32_t c)
-        : c_(c)
-        {}
+            constexpr token(std::uint32_t c)
+            : c_(c)
+            {}
 
-        constexpr token(token const& tok)
-            : c_(tok.c_)
-        {}
+            constexpr token(token const& tok)
+                : c_(tok.c_)
+            {}
 
-        constexpr bool is_eof() const
-        {
-            return std::numeric_limits<std::uint32_t>::max() == c_;
-        }
+            constexpr bool is_eof() const
+            {
+                return std::numeric_limits<std::uint32_t>::max() == c_;
+            }
 
-        constexpr bool is_nl() const
-        {
-            return '\n' == c_;
-        }
+            constexpr bool is_nl() const
+            {
+                return '\n' == c_;
+            }
 
-        constexpr operator std::uint32_t() const
-        {
-            return c_;
-        }
+            //  static_cast<std::uint32_t>(...)
+            constexpr operator std::uint32_t() const
+            {
+                return c_;
+            }
 
         private:
-        std::uint32_t const c_;
+            std::uint32_t const c_;
 
     };
 

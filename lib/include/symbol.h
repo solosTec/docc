@@ -15,7 +15,7 @@
 
 namespace docscript {
 
-	enum class symbol_type {
+	enum class symbol_type : std::uint32_t {
 		EOD,	//	end-of-data
 		FUN,	//	function name
 		TXT,	//	text
@@ -27,6 +27,11 @@ namespace docscript {
 
 		FIL,	//	file path
 		LIN,	//	line in file
+
+		//	higher order (syntax tree)
+		KEY,	//	key
+		PRM,	//	parameter
+		//LST,	//	list
 	};
 
     struct symbol 
