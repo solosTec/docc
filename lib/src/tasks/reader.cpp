@@ -114,9 +114,7 @@ namespace docscript {
                 }
             }
 
-            if (ctx_.pop()) {
-                sanitizer_.eof();
-            }
+            ctx_.pop(sanitizer_);
 
             ctl_.get_registry().dispatch("ruler", "close", p, channel_.lock()->get_id());
 

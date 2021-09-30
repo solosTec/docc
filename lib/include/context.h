@@ -8,15 +8,19 @@
 #define DOCC_SCRIPT_CONTEXT_H
 
 #include <parser.h>
+#include <method.h>
 
 #include <cstdlib>
 #include <filesystem>
 #include <vector>
 #include <stack>
+#include <map>
 #include <fstream>
+#include <optional>
 
 namespace docscript {
 
+	class sanitizer;
 	class context
 	{
 	private:
@@ -48,7 +52,7 @@ namespace docscript {
 		/**
 		 * @return true if EOF is reached (no more data)
 		 */
-		bool pop();
+		void pop(sanitizer&);
 
 		/**
 		 * update line counter of current file
@@ -78,6 +82,11 @@ namespace docscript {
 		 */
 		void emit(std::string const&);
 
+		/**
+		 * @return method with the specified name
+		 */
+		std::optional<method> lookup_method(std::string const&) const;
+
 	private:
 		std::filesystem::path const temp_;
 		std::ofstream ostream_;	//	stream of temp file
@@ -85,9 +94,13 @@ namespace docscript {
 		std::vector<std::filesystem::path> inc_;
 		int const verbose_;
 		std::stack<position>    position_;
+		std::map<std::string, method> method_table_;
 		parser parser_;
 	};
 
+	void write_bom(std::ostream&);
+	void init_method_table(std::map<std::string, method>&);
+	bool insert_method(std::map<std::string, method>& table, method&&);
 }
 
 #endif  //  DOCC_SCRIPT_CONTEXT_H

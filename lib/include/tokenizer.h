@@ -18,7 +18,7 @@ namespace docscript {
 	class tokenizer
 	{
 	public:
-		using callback = std::function<void(symbol&&)>;
+		//using callback = std::function<bool(symbol&&)>;
 
 	private:
 		enum class state : std::uint32_t
@@ -36,12 +36,12 @@ namespace docscript {
 			INCLUDE_,	//!<	include function
 		}	state_;
 
-		callback cb_;
+		emit_symbol_f cb_;
 
 		std::u32string value_;
 
 	public:
-		tokenizer(callback);
+		tokenizer(emit_symbol_f);
 
 		/**
 		 * @brief insert next token
@@ -67,6 +67,9 @@ namespace docscript {
 		void emit(symbol_type);
 
 		void complete_ts();
+
+	private:
+		symbol_type prev_sym_type_;
 
 
 	};

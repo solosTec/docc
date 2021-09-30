@@ -9,10 +9,11 @@
 
 namespace docscript {
 
-	tokenizer::tokenizer(callback cb)
+	tokenizer::tokenizer(emit_symbol_f cb)
 		: state_(state::START_)
 		, cb_(cb)
 		, value_()
+		, prev_sym_type_(symbol_type::EOD)
 	{}
 
 	bool tokenizer::put(token const& tok, token const& prev)
@@ -178,6 +179,15 @@ namespace docscript {
 		case '_':
 			value_ += tok;
 			return { state_, true };
+
+		case ' ': case '\t':
+			if (boost::algorithm::equals(value_, "p")) {
+				//	explicit paragraph with ".p"
+				emit(symbol_type::PAR);
+				value_.clear();
+				return { state::START_, false };
+			}
+
 		default:
 			break;
 		}
@@ -342,16 +352,16 @@ namespace docscript {
 			return { state::START_, true };
 
 		case '.':
+		case '!':   case '?':
 			value_ += tok;
 			emit(symbol_type::TXT);
 			return { state::START_, true };
 
 		case '(':   case ')':
-		case '[':   case ']':
-		case '{':   case '}':
-		case ',':   case ';':
-		case '!':   case '?':
-		case ':':
+		//case '[':   case ']':
+		//case '{':   case '}':
+		case ';':	case ':':
+		case ',':
 			emit(symbol_type::TXT);
 			return { state::START_, false };
 
@@ -379,7 +389,8 @@ namespace docscript {
 			break;
 		}
 
-		value_ = 0xB6;  //  pilgrow
+		value_.append({ 0xb6 });
+
 		emit(symbol_type::PAR);
 		return { state::START_, false };
 	}
@@ -402,10 +413,32 @@ namespace docscript {
 
 	void tokenizer::emit(symbol_type type)
 	{
+		switch (type) {
+		case symbol_type::PAR:
+			if (symbol_type::PAR == prev_sym_type_) {
+				//
+				//	no duplicates
+				//
+				value_.clear();
+				return;
+			}
+			break;
+		case symbol_type::TXT:
+		case symbol_type::DQU:
+			if (symbol_type::EOD == prev_sym_type_) {
+				//	first TXT symbol ever
+				//  pilgrow
+				cb_(make_symbol(symbol_type::PAR, std::string("\xc2\xb6")));
+			}
+			break;
+		default:
+			break;
+		}
 		cyng::utf8::u32_to_u8_iterator<std::u32string::const_iterator> start(value_.begin());
 		cyng::utf8::u32_to_u8_iterator<std::u32string::const_iterator> end(value_.end());
 		cb_(make_symbol(type, std::string(start, end)));
 		value_.clear();
+		prev_sym_type_ = type;
 	}
 
 }

@@ -28,10 +28,7 @@ namespace docscript {
 		FIL,	//	file path
 		LIN,	//	line in file
 
-		//	higher order (syntax tree)
-		KEY,	//	key
-		PRM,	//	parameter
-		//LST,	//	list
+		NOT,	//	nonterminal or not initialized
 	};
 
     struct symbol 
@@ -47,7 +44,11 @@ namespace docscript {
 		bool equals(char c) const;
 		bool equals(symbol_type type, char c) const;
 		bool equals(symbol_type type) const;
+
+		auto operator<=>(symbol const&) const = default;
 	};
+
+
 
 	/**
 	 * comparison

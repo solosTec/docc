@@ -1,4 +1,5 @@
 #include <context.h>
+#include <sanitizer.h>
 
 #include <utils.h>
 #include <iostream>
@@ -20,6 +21,7 @@ namespace docscript {
 		, inc_(inc)
 		, verbose_(verbose)
 		, position_()
+		, method_table_()
 		, parser_(*this)
 	{
 		BOOST_ASSERT(ostream_.is_open());
@@ -30,18 +32,17 @@ namespace docscript {
 				"***info : could not open temporary output file [{}]\n", temp_.string());
 
 		}
-		else if (get_verbosity(3)) {
-			fmt::print(
-				stdout,
-				fg(fmt::color::gray) | fmt::emphasis::bold,
-				"***info : temporary output file [{}] is open\n", temp_.string());
+		else {
+			if (get_verbosity(3)) {
+				fmt::print(
+					stdout,
+					fg(fmt::color::gray) | fmt::emphasis::bold,
+					"***info : temporary output file [{}] is open\n", temp_.string());
 
-			//
-			//	write BOM: 0xEF, 0xBB, 0xBF
-			//
-			ostream_.put(0xEF);
-			ostream_.put(0xBB);
-			ostream_.put(0xBF);
+			}
+
+			write_bom(ostream_);
+			init_method_table(method_table_);
 
 		}
 	}
@@ -58,10 +59,12 @@ namespace docscript {
 		return false;
 	}
 
-	bool context::pop()
+	void context::pop(sanitizer& san)
 	{
+		if (position_.size() == 1) {
+			san.eof();
+		}
 		position_.pop();
-		return position_.empty();
 	}
 
 	void context::nl(std::size_t line)
@@ -87,23 +90,31 @@ namespace docscript {
 	}
 
 	void context::put(symbol const& sym) {
-		parser_.put(sym);
+		std::size_t counter{ 0 };
+		while (!parser_.put(sym)) {
+			if (counter > 12) {
+				fmt::print(
+					stdout,
+					fg(fmt::color::orange) | fmt::emphasis::bold,
+					"***warn : Parser has entered an infinite loop. Stopped after [{}] iterations\n", counter);
+				break;
+			}
+			++counter;
+		};
 	}
 
 	std::string context::get_position() const {
 		if (!position_.empty()) {
 			std::stringstream ss;
 			ss
-				<< '['
 				<< position_.top().file_
-				<< ']'
-				<< ' '
-				<< '#'
+				<< '('
 				<< position_.top().line_
+				<< ')'
 				;
 			return ss.str();
 		}
-		return "";
+		return "eof";
 	}
 
 	void context::emit(std::string const& s) {
@@ -113,5 +124,62 @@ namespace docscript {
 #endif
 			;
 	}
+
+	std::optional<method> context::lookup_method(std::string const& name) const {
+		auto const pos = method_table_.find(name);
+		return (pos != method_table_.end())
+			? pos->second
+			: std::optional<method>{}
+		;
+	}
+
+	void write_bom(std::ostream& os) {
+		//
+		//	write BOM: 0xEF, 0xBB, 0xBF
+		//
+		os.put(0xEF);
+		os.put(0xBB);
+		os.put(0xBF);
+
+	}
+	void init_method_table(std::map<std::string, method>& table) {
+
+		//
+		//	predefined methods
+		//
+		insert_method(table, method("header", return_type::STRING, parameter_type::MAP, false, { "title", "level", "tag" }));
+		insert_method(table, method("h1", return_type::STRING, parameter_type::VECTOR, false));
+		insert_method(table, method("h2", return_type::STRING, parameter_type::VECTOR, false));
+		insert_method(table, method("h3", return_type::STRING, parameter_type::VECTOR, false));
+		insert_method(table, method("h4", return_type::STRING, parameter_type::VECTOR, false));
+		insert_method(table, method("h5", return_type::STRING, parameter_type::VECTOR, false));
+		insert_method(table, method("h6", return_type::STRING, parameter_type::VECTOR, false));
+
+		//	 pilgrow (¶)
+		//insert_method(table, method(std::string("\xb6"), return_type::STRING, parameter_type::VECTOR, false));
+		insert_method(table, method(std::string("\xc2\xb6"), return_type::STRING, parameter_type::VECTOR, false));
+
+		insert_method(table, method("get", return_type::STRING, parameter_type::VECTOR, true));
+		insert_method(table, method("set", return_type::STRING, parameter_type::MAP, true));	//	key, value
+		insert_method(table, method("resource", return_type::STRING, parameter_type::MAP, true, {"name", "mime", "cache", "url"}));
+		insert_method(table, method("i", return_type::STRING, parameter_type::VECTOR, true));
+		insert_method(table, method("b", return_type::STRING, parameter_type::VECTOR, true));
+		insert_method(table, method("cite", return_type::STRING, parameter_type::VECTOR, true));
+
+		//	calculate return value count requires to determine "count" value at compile time
+		insert_method(table, method("repeat", return_type::STRING, parameter_type::MAP, true, { "count", "value", "sep"}));
+
+		insert_method(table, method("true", return_type::BOOL, parameter_type::VECTOR, true));
+		insert_method(table, method("false", return_type::BOOL, parameter_type::VECTOR, true));
+		insert_method(table, method("u32", return_type::U32, parameter_type::VECTOR, true));
+		insert_method(table, method("i32", return_type::I32, parameter_type::VECTOR, true));
+		insert_method(table, method("double", return_type::DOUBLE, parameter_type::VECTOR, true));
+
+	}
+
+	bool insert_method(std::map<std::string, method>& table, method&& m) {
+		return table.emplace(m.get_name(), m).second;
+	}
+
 
 }

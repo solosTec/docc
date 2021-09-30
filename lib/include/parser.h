@@ -8,6 +8,8 @@
 #define DOCC_SCRIPT_PARSER_H
 
 #include <symbol.h>
+#include <nonterminal.h>
+#include <ast/root.h>
 
 #include <cstdint>
 #include <stack>
@@ -18,43 +20,52 @@ namespace docscript {
 	class parser
 	{
 	private:
-		//enum class state
-		//{
-		//	INITIAL_,
-		//	FUNCTION_,
-		//	OPEN_,	//!<	opening bracket
-		//	PARAGRAPH_,
-		//};
+		/**
+		 * parser state represented by non-terminals
+		 */
+		class nt_stack : public std::stack<nonterminal, std::vector<nonterminal>> {
+		public:
+			void print(std::ostream&) const;
+		} state_;
+		friend std::ostream& operator<<(std::ostream& os, const nt_stack& sym);
 
-		//struct parameter {
-		//	state const state_;
-		//	std::vector<symbol>	symbols_;
-		//	parameter(state);
-		//	parameter(state, symbol const&);
-		//};
-		std::stack<symbol> state_;
+		/**
+		 * semantic stack, ast
+		 */
 
 	public:
 		parser(context&);
-		void put(symbol const& sym);
+		bool put(symbol const& sym);
 
 	private:
-		void next_symbol(symbol const& sym);
-		void next_function(symbol const& sym);
-		void next_text(symbol const& sym);
 		void eod();
 
-		//void emit_function();
+		bool state_body(symbol const& sym);
+		bool state_list(symbol const& sym);
+		bool state_term(symbol const& sym);
+		bool state_vector(symbol const& sym);
+		bool state_map(symbol const& sym);
+		bool state_tail(symbol const& sym);
+		bool state_value(symbol const& sym);
+		bool state_svm(symbol const& sym);
+		bool state_params(symbol const& sym);
+		bool state_terminal(symbol const& sym);
 
 		/**
-		 * replace current state with this new one
+		 * @return true if a MAP is expected
 		 */
-		//void exchange(state, symbol sym);
-
+		bool assess_method_type(std::string const&);
+		/**
+		 * @return true if inline method
+		 */
+		bool is_display_inline(std::string const&);
 
 	private:
 		context& ctx_;
-		symbol prev_;
+		/**
+		 * all produced semantic elements (ast)
+		 */
+		ast::program prg_;
 	};
 }
 #endif //   DOCC_SCRIPT_PARSER_H

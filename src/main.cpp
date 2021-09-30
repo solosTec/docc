@@ -35,6 +35,11 @@ void init_console() {
             ::SetConsoleMode(h_out, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
         }
     }
+
+#ifdef _DEBUG
+    std::string s("\xc2\xb6");
+    std::cout << s << std::endl;
+#endif
 }
 #else
 void init_console() {
@@ -100,7 +105,7 @@ int main(int argc, char* argv[]) {
 
         ("source,S", boost::program_options::value(&inp_file)->default_value(inp_file), "main source file")
         ("output,O", boost::program_options::value(&out_file)->default_value(out_file), "output file")
-        ("include-path,I", boost::program_options::value< std::vector<std::string> >()->default_value(std::vector<std::string>(1, here.string()), here.string()), "include path")
+        ("include-path,I", boost::program_options::value< std::vector<std::string> >()->default_value(std::vector<std::string>(1, here.string()), here.string()), "include paths")
         //	verbose level
         ("verbose,V", boost::program_options::value<int>()->default_value(0)->implicit_value(1), "verbose level")
         ;

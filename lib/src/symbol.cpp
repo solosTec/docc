@@ -75,15 +75,9 @@ namespace docscript {
 		case symbol_type::LIN:
 			os << "LIN";
 			break;
-		case symbol_type::KEY:
-			os << "KEY";
+		case symbol_type::NOT:
+			os << "NOT";
 			break;
-		case symbol_type::PRM:
-			os << "PRM";
-			break;
-		//case symbol_type::LST:
-		//	os << "LST";
-		//	break;
 		default:
 			os << "ERR";
 			break;
