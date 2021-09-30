@@ -60,8 +60,14 @@ namespace docscript {
 		 */
 		bool is_display_inline(std::string const&);
 
+		/**
+		 * build the program to generate the document(s)
+		 */
+		void build();
+
 	private:
 		context& ctx_;
+
 		/**
 		 * all produced semantic elements (ast)
 		 */

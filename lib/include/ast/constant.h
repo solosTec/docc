@@ -25,11 +25,13 @@ namespace docscript {
 		 */
 		struct constant {
 			std::string const value_;
-			std::variant<std::string, std::chrono::system_clock::time_point> node_;
+			std::variant<std::string, std::chrono::system_clock::time_point, bool, double> node_;
 
 			void compile();
-			static constant factory(symbol const&);
-			//constant& operator=(constant&&) = default;
+
+			[[nodiscard]] static constant factory(symbol const&);
+			[[nodiscard]] static constant factory(bool);
+			[[nodiscard]] static constant factory(double);
 		};
 
 		//std::ostream& operator<<(std::ostream& os, constant c);

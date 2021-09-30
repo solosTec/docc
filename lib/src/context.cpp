@@ -159,6 +159,9 @@ namespace docscript {
 		//insert_method(table, method(std::string("\xb6"), return_type::STRING, parameter_type::VECTOR, false));
 		insert_method(table, method(std::string("\xc2\xb6"), return_type::STRING, parameter_type::VECTOR, false));
 
+		insert_method(table, method("label", return_type::STRING, parameter_type::VECTOR, true));
+		insert_method(table, method("ref", return_type::STRING, parameter_type::VECTOR, true));
+
 		insert_method(table, method("get", return_type::STRING, parameter_type::VECTOR, true));
 		insert_method(table, method("set", return_type::STRING, parameter_type::MAP, true));	//	key, value
 		insert_method(table, method("resource", return_type::STRING, parameter_type::MAP, true, {"name", "mime", "cache", "url"}));
@@ -169,8 +172,6 @@ namespace docscript {
 		//	calculate return value count requires to determine "count" value at compile time
 		insert_method(table, method("repeat", return_type::STRING, parameter_type::MAP, true, { "count", "value", "sep"}));
 
-		insert_method(table, method("true", return_type::BOOL, parameter_type::VECTOR, true));
-		insert_method(table, method("false", return_type::BOOL, parameter_type::VECTOR, true));
 		insert_method(table, method("u32", return_type::U32, parameter_type::VECTOR, true));
 		insert_method(table, method("i32", return_type::I32, parameter_type::VECTOR, true));
 		insert_method(table, method("double", return_type::DOUBLE, parameter_type::VECTOR, true));

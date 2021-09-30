@@ -35,11 +35,6 @@ void init_console() {
             ::SetConsoleMode(h_out, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
         }
     }
-
-#ifdef _DEBUG
-    std::string s("\xc2\xb6");
-    std::cout << s << std::endl;
-#endif
 }
 #else
 void init_console() {

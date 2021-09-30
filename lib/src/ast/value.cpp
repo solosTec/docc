@@ -79,6 +79,10 @@ namespace docscript {
 			return { new value_node(std::move(m)) };
 		}
 
+		value value::factory(constant&& c) {
+			return { new value_node(std::move(c)) };
+		}
+
 		void value::compile() {
 			std::cout << "value::compile()" << std::endl;
 		}

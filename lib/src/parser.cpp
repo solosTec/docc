@@ -5,11 +5,13 @@
 #ifdef _DEBUG
 #include <iostream>
 #endif
+#include <numbers>
 
 #include <fmt/core.h>
 #include <fmt/color.h>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/assert.hpp>
 
 namespace docscript {
 
@@ -28,7 +30,6 @@ namespace docscript {
         BOOST_ASSERT_MSG(!state_.empty(), "state stack is empty");
 
         switch (state_.top().nttype_) {
-        default:
         case nonterminal_type::BODY:
             return state_body(sym);
         case nonterminal_type::LIST:
@@ -49,6 +50,9 @@ namespace docscript {
             return state_svm(sym);
         case nonterminal_type::TERMINAL:
             return state_terminal(sym);
+        default:
+            BOOST_ASSERT_MSG(false, "internal error: unknown state");
+            break;
         }
 
         return true;
@@ -83,6 +87,7 @@ namespace docscript {
 
         switch (sym.type_) {
         case symbol_type::FUN:
+
             state_.push({ sym, nonterminal_type::PARAMS });
             prg_.init_function(sym.value_);
             break;
@@ -270,9 +275,57 @@ namespace docscript {
                 prg_.merge();
                 return false;
             }
+            //
+            //  lookup build-in constants
+            //
+            if (boost::algorithm::equals(sym.value_, "true")) {
+                if (state_.top().nttype_ == nonterminal_type::TAIL) { 
+                    prg_.finalize_param(true);
+                }
+                else {
+                    //
+                    //  not allowed
+                    //
+                    fmt::print(
+                        stdout,
+                        fg(fmt::color::crimson) | fmt::emphasis::bold,
+                        "{}: error: constants in value lists are not allowed [{}]\n", ctx_.get_position(), sym.value_);
+                }
+            }
+            else if (boost::algorithm::equals(sym.value_, "false")) {
+                if (state_.top().nttype_ == nonterminal_type::TAIL) {
+                    prg_.finalize_param(false);
+                }
+                else {
+                    //
+                    //  not allowed
+                    //
+                    fmt::print(
+                        stdout,
+                        fg(fmt::color::crimson) | fmt::emphasis::bold,
+                        "{}: error: constants in value lists are not allowed [{}]\n", ctx_.get_position(), sym.value_);
+                }
+            }
+            else if (boost::algorithm::equals(sym.value_, "pi")) {
+                if (state_.top().nttype_ == nonterminal_type::TAIL) {
+                    //  3.141592653589793
+                    prg_.finalize_param(std::numbers::pi_v<double>);    
+                }
+                else {
+                    //
+                    //  not allowed
+                    //
+                    fmt::print(
+                        stdout,
+                        fg(fmt::color::crimson) | fmt::emphasis::bold,
+                        "{}: error: constants in value lists are not allowed [{}]\n", ctx_.get_position(), sym.value_);
+                }
 
-            state_.push({ sym, nonterminal_type::PARAMS });
-            prg_.init_function(sym.value_);
+            }
+            else [[likely]] {
+                state_.push({ sym, nonterminal_type::PARAMS });
+                prg_.init_function(sym.value_);
+            }
 
             return true;   //  advance
         default:
@@ -345,10 +398,20 @@ namespace docscript {
 
 
     void parser::eod() {
+        //
+        //  close programm
+        //
+        auto const size = prg_.merge();
+
         fmt::print(
             stdout,
             fg(fmt::color::green_yellow) | fmt::emphasis::bold,
-            "***info : EOD\n", ctx_.get_position());
+            "***info {}: EOD - produced {} ASTs\n", ctx_.get_position(), size);
+
+        //
+        //  build the program to generate the document(s)
+        //
+        build();
 
         //if (state_.top().type_ == symbol_type::PAR) {
         //    ctx_.emit("CALL ");
@@ -383,6 +446,10 @@ namespace docscript {
                 os << e.nttype_;
             }
         }
+    }
+
+    void parser::build() {
+
     }
 
     std::ostream& operator<<(std::ostream& os, const parser::nt_stack& s) {

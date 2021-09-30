@@ -20,6 +20,14 @@ namespace docscript {
 			return constant{ sym.value_, sym.value_ };
 		}
 
+		constant constant::factory(bool b) {
+			return constant{ "bool", b };
+		}
+
+		constant constant::factory(double d) {
+			return constant{ "double", d };
+		}
+
 		void constant::compile() {
 			std::cout << "constant::compile()" << std::endl;
 

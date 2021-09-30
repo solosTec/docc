@@ -25,6 +25,7 @@ namespace docscript {
 
 		class map_method;
 		class vec_method;
+		struct constant;
 
 		/**
 		 * Hold a node with values: constant, method oder cite (" vector ")
@@ -37,14 +38,14 @@ namespace docscript {
 			//value& operator=(value&&) = default;
 			~value();
 
-			[[nodiscard]]
-			value clone() const;
+			[[nodiscard]] value clone() const;
 
 			void compile();
 
 			static value factory(symbol const& sym);
 			static value factory(map_method&&);
 			static value factory(vec_method&&);
+			static value factory(constant&&);
 
 			friend std::ostream& operator<<(std::ostream& os, value const&);
 

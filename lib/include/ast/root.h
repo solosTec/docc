@@ -59,8 +59,9 @@ namespace docscript {
 			/**
 			 * Move current term to program
 			 */
-			//std::size_t finalize_term();
 			void finalize_param(symbol const& sym);
+			void finalize_param(bool);
+			void finalize_param(double);
 
 			/**
 			 * initialize top term with a function
@@ -78,8 +79,9 @@ namespace docscript {
 			/**
 			 * append to value list (vector)
 			 */
-			void append(symbol const& sym);
-
+			bool append(symbol const& sym);
+			//bool append(bool);
+			void append(param&&);
 
 		private:
 			/**

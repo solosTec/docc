@@ -27,27 +27,45 @@ namespace docscript {
 		void program::finalize_param(symbol const& sym) {
 
 			BOOST_ASSERT_MSG(top().index() == 2, "param expected");
-			auto p = std::move(std::get<2>(top()).finish(ast::value::factory(sym)));
+			append(std::get<2>(top()).finish(ast::value::factory(sym)));
+		}
+
+		void program::finalize_param(bool b) {
+
+			BOOST_ASSERT_MSG(top().index() == 2, "param expected");
+			append(std::get<2>(top()).finish(ast::value::factory(ast::constant::factory(b))));
+		}
+
+		void program::finalize_param(double d) {
+
+			BOOST_ASSERT_MSG(top().index() == 2, "param expected");
+			append(std::get<2>(top()).finish(ast::value::factory(ast::constant::factory(d))));
+		}
+
+
+		void program::append(param&& p) {
 			fmt::print(
 				stdout,
 				fg(fmt::color::dim_gray),
 				"{}: generate parameter [{}] \n", ctx_.get_position(), p);
+
 			semantic_stack_.pop();
 
 			//
 			//  append if top declaration is of type param
 			//
+			//BOOST_ASSERT_MSG(top().index() == 2, "param expected");
 			switch (top().index()) {
 			case 2:
 				std::get<2>(top()).append(std::move(p));
 				break;
-			case 3:
 			default:
 				semantic_stack_.push(std::move(p));
 				break;
 			}
 
 		}
+
 
 		void program::init_function(std::string const& name) {
 			auto m = ctx_.lookup_method(name);
@@ -123,11 +141,18 @@ namespace docscript {
 			semantic_stack_.push(param::factory(sym));
 		}
 
-		void program::append(symbol const& sym) {
+		bool program::append(symbol const& sym) {
 			if (top().index() == 4) {
 				std::get<4>(top()).append(value::factory(sym));
+				return true;
 			}
+			return false;
 		}
+
+		//bool program::append(bool b) {
+		//	constant::factory(b);
+		//	return false;
+		//}
 
 		void program::merge_ast_param() {
 			BOOST_ASSERT_MSG(top().index() == 2, "param expected");
@@ -163,6 +188,7 @@ namespace docscript {
 				//
 				//  append to parameter list
 				semantic_stack_.pop();
+				BOOST_ASSERT_MSG(top().index() == 2, "param expected");
 				std::get<2>(top()).append(std::move(p));
 			}
 				  break;
