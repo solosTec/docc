@@ -5,7 +5,7 @@
 #ifdef _DEBUG
 #include <iostream>
 #endif
-#include <numbers>
+//#include <numbers>
 
 #include <fmt/core.h>
 #include <fmt/color.h>
@@ -231,6 +231,8 @@ namespace docscript {
         switch (sym.type_) {
         case symbol_type::TXT:
         case symbol_type::TST:
+        case symbol_type::BOL:
+        case symbol_type::NUM:
             //
             //  complete
             //
@@ -275,57 +277,8 @@ namespace docscript {
                 prg_.merge();
                 return false;
             }
-            //
-            //  lookup build-in constants
-            //
-            if (boost::algorithm::equals(sym.value_, "true")) {
-                if (state_.top().nttype_ == nonterminal_type::TAIL) { 
-                    prg_.finalize_param(true);
-                }
-                else {
-                    //
-                    //  not allowed
-                    //
-                    fmt::print(
-                        stdout,
-                        fg(fmt::color::crimson) | fmt::emphasis::bold,
-                        "{}: error: constants in value lists are not allowed [{}]\n", ctx_.get_position(), sym.value_);
-                }
-            }
-            else if (boost::algorithm::equals(sym.value_, "false")) {
-                if (state_.top().nttype_ == nonterminal_type::TAIL) {
-                    prg_.finalize_param(false);
-                }
-                else {
-                    //
-                    //  not allowed
-                    //
-                    fmt::print(
-                        stdout,
-                        fg(fmt::color::crimson) | fmt::emphasis::bold,
-                        "{}: error: constants in value lists are not allowed [{}]\n", ctx_.get_position(), sym.value_);
-                }
-            }
-            else if (boost::algorithm::equals(sym.value_, "pi")) {
-                if (state_.top().nttype_ == nonterminal_type::TAIL) {
-                    //  3.141592653589793
-                    prg_.finalize_param(std::numbers::pi_v<double>);    
-                }
-                else {
-                    //
-                    //  not allowed
-                    //
-                    fmt::print(
-                        stdout,
-                        fg(fmt::color::crimson) | fmt::emphasis::bold,
-                        "{}: error: constants in value lists are not allowed [{}]\n", ctx_.get_position(), sym.value_);
-                }
-
-            }
-            else [[likely]] {
-                state_.push({ sym, nonterminal_type::PARAMS });
-                prg_.init_function(sym.value_);
-            }
+            state_.push({ sym, nonterminal_type::PARAMS });
+            prg_.init_function(sym.value_);
 
             return true;   //  advance
         default:

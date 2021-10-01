@@ -21,6 +21,8 @@ namespace docscript {
 		TXT,	//	text
 		SYM,	//	special symbol like "(", ")", ",", ":"
 		TST,	//	timestamp
+		BOL,	//	boolean
+		NUM,	//	number (unsigned integer)
 		PAR,	//	paragraph - multiple NL
 		DQU,	//	double quotes: "
 		INC,	//	include file

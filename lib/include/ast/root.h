@@ -60,8 +60,8 @@ namespace docscript {
 			 * Move current term to program
 			 */
 			void finalize_param(symbol const& sym);
-			void finalize_param(bool);
-			void finalize_param(double);
+			//void finalize_param(bool);
+			//void finalize_param(double);
 
 			/**
 			 * initialize top term with a function

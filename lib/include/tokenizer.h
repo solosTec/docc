@@ -29,6 +29,7 @@ namespace docscript {
 			DOT_,
 			FUNCTION_,	//!<	function name
 			TIMESTAMP_,	//!<	starts with @
+			NUMBER_,	//!<	number
 			QUOTE_,		//!<	'...'
 			QUOTE_ESC_,	//!<	'..\?..'	escape from QUOTE
 			TEXT_,		//!<	anything else including numbers
@@ -57,9 +58,9 @@ namespace docscript {
 		[[nodiscard]] std::pair<state, bool> dot(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> function(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> timestamp(token const& tok, token const& prev);
+		[[nodiscard]] std::pair<state, bool> number(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> quote(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> quote_esc(token const& tok, token const& prev);
-		//[[nodiscard]] std::pair<state, bool> quote_spc(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> text(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> newline(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> include(token const& tok, token const& prev);

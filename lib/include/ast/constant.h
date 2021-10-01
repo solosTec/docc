@@ -30,8 +30,6 @@ namespace docscript {
 			void compile();
 
 			[[nodiscard]] static constant factory(symbol const&);
-			[[nodiscard]] static constant factory(bool);
-			[[nodiscard]] static constant factory(double);
 		};
 
 		//std::ostream& operator<<(std::ostream& os, constant c);

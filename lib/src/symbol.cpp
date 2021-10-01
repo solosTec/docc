@@ -60,6 +60,12 @@ namespace docscript {
 		case symbol_type::TST:
 			os << "TST";
 			break;
+		case symbol_type::BOL:	//	boolean
+			os << "BOL";
+			break;
+		case symbol_type::NUM:	//	number (unsigned integer)
+			os << "NUM";
+			break;
 		case symbol_type::PAR:
 			os << "PAR";
 			break;

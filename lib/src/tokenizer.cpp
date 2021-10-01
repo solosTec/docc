@@ -52,6 +52,9 @@ namespace docscript {
 		case state::TIMESTAMP_:
 			std::tie(state_, advance) = timestamp(tok, prev);
 			break;
+		case state::NUMBER_:
+			std::tie(state_, advance) = number(tok, prev);
+			break;
 		case state::TEXT_:
 			std::tie(state_, advance) = text(tok, prev);
 			break;
@@ -162,6 +165,9 @@ namespace docscript {
 			emit(symbol_type::TXT);
 			return { state::START_, true };
 
+		case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': case '0':
+			return { state::NUMBER_, false };
+
 		default:
 			//  "." as escape symbol - following character remains unchanged
 			value_ += tok;
@@ -181,13 +187,7 @@ namespace docscript {
 			return { state_, true };
 
 		case ' ': case '\t':
-			if (boost::algorithm::equals(value_, "p")) {
-				//	explicit paragraph with ".p"
-				emit(symbol_type::PAR);
-				value_.clear();
-				return { state::START_, false };
-			}
-
+			break;
 		default:
 			break;
 		}
@@ -201,7 +201,21 @@ namespace docscript {
 		//
 		//  function name complete
 		//
-		emit(symbol_type::FUN);
+		if (boost::algorithm::equals(value_, "p")) {
+			//	explicit paragraph with ".p"
+			emit(symbol_type::PAR);
+			value_.clear();
+			return { state::START_, false };
+		}
+		//
+		//  lookup build-in constants
+		//
+		else if (boost::algorithm::equals(value_, "true") || boost::algorithm::equals(value_, "false")) {
+			emit(symbol_type::BOL);
+		}
+		else [[likely]] {
+			emit(symbol_type::FUN);
+		}
 		return { state::START_, false };
 	}
 
@@ -303,6 +317,19 @@ namespace docscript {
 			value_ += '0';
 			value_ += 'Z';
 		}
+	}
+
+	std::pair<tokenizer::state, bool> tokenizer::number(token const& tok, token const& prev) {
+
+		switch (static_cast<std::uint32_t>(tok)) {
+		case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': case '0':
+			return { state::NUMBER_, true };
+		default:
+			break;
+		}
+
+		emit(symbol_type::NUM);
+		return { state::START_, false };
 	}
 
 	std::pair<tokenizer::state, bool> tokenizer::quote(token const& tok, token const& prev)

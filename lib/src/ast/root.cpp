@@ -30,17 +30,17 @@ namespace docscript {
 			append(std::get<2>(top()).finish(ast::value::factory(sym)));
 		}
 
-		void program::finalize_param(bool b) {
+		//void program::finalize_param(bool b) {
 
-			BOOST_ASSERT_MSG(top().index() == 2, "param expected");
-			append(std::get<2>(top()).finish(ast::value::factory(ast::constant::factory(b))));
-		}
+		//	BOOST_ASSERT_MSG(top().index() == 2, "param expected");
+		//	append(std::get<2>(top()).finish(ast::value::factory(ast::constant::factory(b))));
+		//}
 
-		void program::finalize_param(double d) {
+		//void program::finalize_param(double d) {
 
-			BOOST_ASSERT_MSG(top().index() == 2, "param expected");
-			append(std::get<2>(top()).finish(ast::value::factory(ast::constant::factory(d))));
-		}
+		//	BOOST_ASSERT_MSG(top().index() == 2, "param expected");
+		//	append(std::get<2>(top()).finish(ast::value::factory(ast::constant::factory(d))));
+		//}
 
 
 		void program::append(param&& p) {
