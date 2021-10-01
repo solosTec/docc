@@ -36,8 +36,14 @@ namespace docscript {
 
 		map_method::~map_method() = default;
 
-		void map_method::compile() {
-			std::cout << "map_method::compile()" << std::endl;
+		void map_method::compile(std::function<void(std::string const&)> emit) const {
+			//std::cout << "map_method::compile()" << std::endl;
+			if (params_) {
+				params_->compile(emit);
+			}
+			emit("CALL ");
+			emit(this->get_name());
+			emit("\n");
 		}
 
 		void map_method::set_params(param && p) {
@@ -53,8 +59,14 @@ namespace docscript {
 		//	-- vec_method
 		//	----------------------------------------------------------*
 		//
-		void vec_method::compile() {
-			std::cout << "vec_method::compile()" << std::endl;
+		void vec_method::compile(std::function<void(std::string const&)> emit) const {
+			//std::cout << "vec_method::compile()" << std::endl;
+			if (vlist_) {
+				vlist_->compile(emit);
+			}
+			emit("CALL ");
+			emit(this->get_name());
+			emit("\n");
 		}
 
 		void vec_method::append(value && v) {

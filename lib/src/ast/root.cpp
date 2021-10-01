@@ -30,19 +30,6 @@ namespace docscript {
 			append(std::get<2>(top()).finish(ast::value::factory(sym)));
 		}
 
-		//void program::finalize_param(bool b) {
-
-		//	BOOST_ASSERT_MSG(top().index() == 2, "param expected");
-		//	append(std::get<2>(top()).finish(ast::value::factory(ast::constant::factory(b))));
-		//}
-
-		//void program::finalize_param(double d) {
-
-		//	BOOST_ASSERT_MSG(top().index() == 2, "param expected");
-		//	append(std::get<2>(top()).finish(ast::value::factory(ast::constant::factory(d))));
-		//}
-
-
 		void program::append(param&& p) {
 			fmt::print(
 				stdout,
@@ -87,14 +74,13 @@ namespace docscript {
 
 		std::size_t program::merge() {
 
-			BOOST_ASSERT_MSG(!semantic_stack_.empty(), "semantic stack is empty");
 			if (semantic_stack_.size() == 1) {
 				//
 				//	transfer to program 
 				//
 				transfer_ast();
 			}
-			else {
+			else if (!semantic_stack_.empty()) {
 				merge_ast();
 				BOOST_ASSERT_MSG(!semantic_stack_.empty(), "semantic stack is empty");
 			}
@@ -224,6 +210,17 @@ namespace docscript {
 
 			merge_ast_value(value::factory(std::move(m)));
 
+		}
+
+		void program::generate() {
+			BOOST_ASSERT(semantic_stack_.empty());
+			for (auto const& decl : decls_) {
+				std::visit([&](auto const& arg) {
+					arg.compile([&](std::string const& s){
+						ctx_.emit(s);
+						});
+					}, decl);
+			}
 		}
 
 	}

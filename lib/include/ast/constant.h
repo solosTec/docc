@@ -7,14 +7,15 @@
 #ifndef DOCC_SCRIPT_AST_CONSTANT_H
 #define DOCC_SCRIPT_AST_CONSTANT_H
 
-#include <cstdint>
+#include <symbol.h>
+
 #include <limits>
-#include <iostream>
-#include <string>
 #include <chrono>
 #include <variant>
 
-#include <symbol.h>
+#include <fmt/core.h>
+#include <fmt/color.h>
+#include <fmt/ostream.h>
 
 
 namespace docscript {
@@ -27,14 +28,34 @@ namespace docscript {
 			std::string const value_;
 			std::variant<std::string, std::chrono::system_clock::time_point, bool, double> node_;
 
-			void compile();
+			void compile(std::function<void(std::string const&)>) const;
 
 			[[nodiscard]] static constant factory(symbol const&);
+
+			friend std::ostream& operator<<(std::ostream& os, constant const& c);
 		};
 
-		//std::ostream& operator<<(std::ostream& os, constant c);
 	}
 
 }
+
+namespace fmt {
+
+
+	template <>
+	struct formatter<docscript::ast::constant> {
+		template <typename ParseContext>
+		constexpr auto parse(ParseContext& ctx) {
+			return ctx.begin();
+		}
+
+		template <typename FormatContext>
+		auto format(const docscript::ast::constant& c, FormatContext& ctx) {
+			std::stringstream ss;
+			ss << c;
+			return format_to(ctx.out(), "{}", ss.str());
+		}
+	};
+}  // namespace fmt
 
 #endif

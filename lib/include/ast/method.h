@@ -10,13 +10,6 @@
 #include <ast/params.h>
 #include <method.h>
 
-#include <cstdint>
-#include <optional>
-#include <iostream>
-#include <string>
-#include <memory>
-#include <variant>
-
 namespace docscript {
 
 	namespace ast {
@@ -35,7 +28,7 @@ namespace docscript {
 			map_method(std::string const& name, std::optional<docscript::method> optm);
 			map_method(map_method&&) noexcept;
 			~map_method();
-			void compile();
+			void compile(std::function<void(std::string const&)>) const;
 			void set_params(param&&);
 			static map_method factory(std::string const&, std::optional<docscript::method>);
 		private:
@@ -50,7 +43,7 @@ namespace docscript {
 			vec_method(std::string const& name, std::optional<docscript::method> optm);
 			vec_method(vec_method&& vecm) noexcept;
 			~vec_method();
-			void compile();
+			void compile(std::function<void(std::string const&)>) const;
 			/**
 			 * append to value list (vector)
 			 */
@@ -62,7 +55,23 @@ namespace docscript {
 		};
 
 	}
-
 }
+
+namespace fmt {
+
+
+	template <>
+	struct formatter<docscript::ast::map_method> {
+		template <typename ParseContext>
+		constexpr auto parse(ParseContext& ctx) {
+			return ctx.begin();
+		}
+
+		template <typename FormatContext>
+		auto format(const docscript::ast::map_method& m, FormatContext& ctx) {
+			return format_to(ctx.out(), "map_method[{}]", m.name_);
+		}
+	};
+}  // namespace fmt
 
 #endif

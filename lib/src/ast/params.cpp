@@ -31,8 +31,21 @@ namespace docscript {
 
 		param::~param() = default;
 
-		void param::compile() {
-			std::cout << "param::compile()" << std::endl;
+		void param::compile(std::function<void(std::string const&)> emit) const {
+			//std::cout << "param::compile()" << std::endl;
+			emit("PUSH ");
+			emit(key_);
+			emit("\n");
+
+			value_.compile(emit);
+
+			emit("PARAM");
+			emit("\n");
+
+			if (next_) {
+				next_->compile(emit);
+			}
+
 		}
 
 		param param::finish(value && v) {
@@ -53,9 +66,9 @@ namespace docscript {
 		}
 
 		std::ostream& operator<<(std::ostream & os, param const& p) {
-			os << "param[" << p.key_ << ": " << p.value_;
+			os << "param[" << p.key_ << ":" << p.value_;
 			if (p.next_) {
-				os << ", next " << *(p.next_);
+				os << "->" << *(p.next_);
 			}
 			os << "]";
 			return os;

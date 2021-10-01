@@ -7,25 +7,13 @@
 #ifndef DOCC_SCRIPT_AST_VALUE_H
 #define DOCC_SCRIPT_AST_VALUE_H
 
-#include <cstdint>
-#include <limits>
-#include <iostream>
-#include <string>
-#include <chrono>
-#include <variant>
-
-#include <symbol.h>
-
-#include <fmt/core.h>
-#include <fmt/color.h>
-
+#include <ast/constant.h>
 
 namespace docscript {
 	namespace ast {
 
 		class map_method;
 		class vec_method;
-		struct constant;
 
 		/**
 		 * Hold a node with values: constant, method oder cite (" vector ")
@@ -38,9 +26,9 @@ namespace docscript {
 			//value& operator=(value&&) = default;
 			~value();
 
-			[[nodiscard]] value clone() const;
+			//[[nodiscard]] value clone() const;
 
-			void compile();
+			void compile(std::function<void(std::string const&)>) const;
 
 			static value factory(symbol const& sym);
 			static value factory(map_method&&);
@@ -64,6 +52,26 @@ namespace docscript {
 
 	}
 
+}
+
+namespace fmt {
+	template <>
+	struct formatter<docscript::ast::value> {
+		template <typename ParseContext>
+		constexpr auto parse(ParseContext& ctx) {
+			return ctx.begin();
+		}
+
+		template <typename FormatContext>
+		auto format(docscript::ast::value const& val, FormatContext& ctx) {
+			if (val.node_) {
+				std::stringstream ss;
+				ss << val;
+				return format_to(ctx.out(), "value[{}]", ss.str());
+			}
+			return format_to(ctx.out(), "value[empty]");
+		}
+	};
 }
 
 #endif

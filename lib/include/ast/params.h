@@ -7,17 +7,7 @@
 #ifndef DOCC_SCRIPT_AST_PARAMS_H
 #define DOCC_SCRIPT_AST_PARAMS_H
 
-#include <cstdint>
-#include <limits>
-#include <iostream>
-#include <string>
-#include <memory>
-
-#include <fmt/core.h>
-#include <fmt/color.h>
-
 #include <ast/value.h>
-
 
 namespace docscript {
 	struct symbol;
@@ -46,7 +36,7 @@ namespace docscript {
 			 * Append a new node to the list
 			 */
 			void append(param&&);
-			void compile();
+			void compile(std::function<void(std::string const&)>) const;
 
 			static param factory(symbol const&);
 
@@ -60,6 +50,23 @@ namespace docscript {
 
 	}
 
+}
+
+namespace fmt {
+	template <>
+	struct formatter<docscript::ast::param> {
+		template <typename ParseContext>
+		constexpr auto parse(ParseContext& ctx) {
+			return ctx.begin();
+		}
+
+		template <typename FormatContext>
+		auto format(docscript::ast::param const& p, FormatContext& ctx) {
+			std::stringstream ss;
+			ss << p;
+			return format_to(ctx.out(), "param[{}]", ss.str());
+		}
+	};
 }
 
 #endif

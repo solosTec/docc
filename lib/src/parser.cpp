@@ -366,21 +366,6 @@ namespace docscript {
         //
         build();
 
-        //if (state_.top().type_ == symbol_type::PAR) {
-        //    ctx_.emit("CALL ");
-        //    ctx_.emit("\xc2\xb6");    //  pilgrow (¶)
-        //    ctx_.emit("\n");
-        //}
-        //if (state_.top().type_ == symbol_type::FUN) {
-        //    ctx_.emit("CALL ");
-        //    ctx_.emit(state_.top().value_);
-        //    ctx_.emit("\n");
-
-        //    state_.pop();
-        //}
-        //ctx_.emit("HALT");
-        //ctx_.emit("\n");
-
     }
 
     void parser::nt_stack::print(std::ostream& os) const {
@@ -403,6 +388,21 @@ namespace docscript {
 
     void parser::build() {
 
+        prg_.generate();
+        //if (state_.top().type_ == symbol_type::PAR) {
+       //    ctx_.emit("CALL ");
+       //    ctx_.emit("\xc2\xb6");    //  pilgrow (¶)
+       //    ctx_.emit("\n");
+       //}
+       //if (state_.top().type_ == symbol_type::FUN) {
+       //    ctx_.emit("CALL ");
+       //    ctx_.emit(state_.top().value_);
+       //    ctx_.emit("\n");
+
+       //    state_.pop();
+       //}
+       ctx_.emit("HALT");
+       ctx_.emit("\n");
     }
 
     std::ostream& operator<<(std::ostream& os, const parser::nt_stack& s) {

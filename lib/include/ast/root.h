@@ -80,8 +80,12 @@ namespace docscript {
 			 * append to value list (vector)
 			 */
 			bool append(symbol const& sym);
-			//bool append(bool);
 			void append(param&&);
+
+			/**
+			 * generate the assembler code
+			 */
+			void generate();
 
 		private:
 			/**
@@ -121,59 +125,5 @@ namespace docscript {
 	}
 
 }
-namespace fmt {
-	template <>
-	struct formatter<docscript::ast::value> {
-		template <typename ParseContext>
-		constexpr auto parse(ParseContext& ctx) {
-			return ctx.begin();
-		}
-
-		template <typename FormatContext>
-		auto format(docscript::ast::value const& val, FormatContext& ctx) {
-			if (val.node_) {
-				switch (val.index()) {
-				case 0:	//	constant
-					return format_to(ctx.out(), "value[{}]", "constant");
-				case 1:
-					return format_to(ctx.out(), "value[{}]", "map-method");
-				case 2:
-					return format_to(ctx.out(), "value[{}]", "vec-method");
-				default:
-					return format_to(ctx.out(), "value[{}]", "unknown");
-				}
-			}
-			return format_to(ctx.out(), "value[{}]", "empty");
-		}
-	};
-
-	template <>
-	struct formatter<docscript::ast::param> {
-		template <typename ParseContext>
-		constexpr auto parse(ParseContext& ctx) {
-			return ctx.begin();
-		}
-
-		template <typename FormatContext>
-		auto format(docscript::ast::param const& p, FormatContext& ctx) {
-			return format_to(ctx.out(), "param[{}:{}]", p.key_, p.value_);
-		}
-	};
-
-	template <>
-	struct formatter<docscript::ast::map_method> {
-		template <typename ParseContext>
-		constexpr auto parse(ParseContext& ctx) {
-			return ctx.begin();
-		}
-
-		template <typename FormatContext>
-		auto format(const docscript::ast::map_method& m, FormatContext& ctx) {
-			return format_to(ctx.out(), "map_method[{}]", m.name_);
-		}
-	};
-
-	
-}  // namespace fmt
 
 #endif

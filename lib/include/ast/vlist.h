@@ -33,7 +33,7 @@ namespace docscript {
 
 			static vlist factory(symbol const&);
 
-			void compile();
+			void compile(std::function<void(std::string const&)>) const;
 			/**
 			 * append to value list (vector)
 			 */
