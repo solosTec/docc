@@ -60,13 +60,12 @@ namespace docscript {
 			 * Move current term to program
 			 */
 			void finalize_param(symbol const& sym);
-			//void finalize_param(bool);
-			//void finalize_param(double);
 
 			/**
 			 * initialize top term with a function
+			 * @return false if function is not defined
 			 */
-			void init_function(std::string const&);
+			bool init_function(std::string const&);
 			void init_paragraph(std::string const&);
 			void init_param(symbol const& sym);
 

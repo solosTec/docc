@@ -60,6 +60,9 @@ namespace docscript {
 		case symbol_type::TST:
 			os << "TST";
 			break;
+		case symbol_type::COL:
+			os << "COL";	//	color
+			break;
 		case symbol_type::BOL:	//	boolean
 			os << "BOL";
 			break;
@@ -70,7 +73,7 @@ namespace docscript {
 			os << "PAR";
 			break;
 		case symbol_type::DQU:
-			os << " \" ";
+			os << "DQU";
 			break;
 		case symbol_type::INC:
 			os << "INC";

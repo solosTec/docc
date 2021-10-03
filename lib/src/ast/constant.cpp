@@ -23,6 +23,8 @@ namespace docscript {
 				return constant{ sym.value_, boost::algorithm::equals(sym.value_, "true")};
 			case symbol_type::NUM:
 				return constant{ sym.value_, std::stod(sym.value_, nullptr) };
+			case symbol_type::COL:
+				return constant{ sym.value_, "color" };
 			default:
 				break;
 			}
@@ -35,7 +37,6 @@ namespace docscript {
 			ss << *this;
 
 			emit("PUSH ");
-			//emit(this->value_);
 			emit(ss.str());
 			emit("\n");
 		}

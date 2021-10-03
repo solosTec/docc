@@ -54,7 +54,7 @@ namespace docscript {
 		}
 
 
-		void program::init_function(std::string const& name) {
+		bool program::init_function(std::string const& name) {
 			auto m = ctx_.lookup_method(name);
 			if (m.has_value() && m->is_parameter_type(parameter_type::MAP)) {
 				semantic_stack_.push(map_method::factory(name, m));
@@ -62,6 +62,7 @@ namespace docscript {
 			else {
 				semantic_stack_.push(vec_method::factory(name, m));
 			}
+			return m.has_value();
 		}
 
 		void program::init_paragraph(std::string const& name) {
@@ -135,11 +136,6 @@ namespace docscript {
 			return false;
 		}
 
-		//bool program::append(bool b) {
-		//	constant::factory(b);
-		//	return false;
-		//}
-
 		void program::merge_ast_param() {
 			BOOST_ASSERT_MSG(top().index() == 2, "param expected");
 
@@ -174,8 +170,19 @@ namespace docscript {
 				//
 				//  append to parameter list
 				semantic_stack_.pop();
-				BOOST_ASSERT_MSG(top().index() == 2, "param expected");
-				std::get<2>(top()).append(std::move(p));
+				switch (top().index()) {
+				case 2: // param
+					//std::get<2>(top()).append(std::move(p));
+					semantic_stack_.push(std::move(p));
+					break;
+				case 3:
+					semantic_stack_.push(std::move(p));
+					//std::get<3>(top()).set_params(std::move(p));
+					break;
+				default:
+					BOOST_ASSERT_MSG(false, "param or map method expected");
+					break;
+				}
 			}
 				  break;
 			case 4: {

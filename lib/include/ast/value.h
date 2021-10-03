@@ -16,7 +16,7 @@ namespace docscript {
 		class vec_method;
 
 		/**
-		 * Hold a node with values: constant, method oder cite (" vector ")
+		 * Hold a node with values: constant, method oder quote (" vector ")
 		 */
 		class value {
 			friend struct fmt::formatter<value>;
@@ -26,7 +26,10 @@ namespace docscript {
 			//value& operator=(value&&) = default;
 			~value();
 
-			//[[nodiscard]] value clone() const;
+			/**
+			 * @return true if value is not set yet (undefined).
+			 */
+			bool empty() const;
 
 			void compile(std::function<void(std::string const&)>) const;
 
@@ -43,7 +46,7 @@ namespace docscript {
 			//
 			//	constant
 			//	method or
-			//	cite (" vector ")
+			//	quote (" vector ")
 			//
 			struct value_node;
 			std::unique_ptr<value_node> node_;

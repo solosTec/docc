@@ -155,8 +155,7 @@ namespace docscript {
 		insert_method(table, method("h5", return_type::STRING, parameter_type::VECTOR, false));
 		insert_method(table, method("h6", return_type::STRING, parameter_type::VECTOR, false));
 
-		//	 pilgrow (¶)
-		//insert_method(table, method(std::string("\xb6"), return_type::STRING, parameter_type::VECTOR, false));
+		//	 pilgrow (¶) = paragraph
 		insert_method(table, method(std::string("\xc2\xb6"), return_type::STRING, parameter_type::VECTOR, false));
 
 		insert_method(table, method("label", return_type::STRING, parameter_type::VECTOR, true));
@@ -167,14 +166,15 @@ namespace docscript {
 		insert_method(table, method("resource", return_type::STRING, parameter_type::MAP, true, {"name", "mime", "cache", "url"}));
 		insert_method(table, method("i", return_type::STRING, parameter_type::VECTOR, true));
 		insert_method(table, method("b", return_type::STRING, parameter_type::VECTOR, true));
-		insert_method(table, method("cite", return_type::STRING, parameter_type::VECTOR, true));
+		insert_method(table, method("quote", return_type::STRING, parameter_type::VECTOR, true));	//	same as "..."
 
 		//	calculate return value count requires to determine "count" value at compile time
 		insert_method(table, method("repeat", return_type::STRING, parameter_type::MAP, true, { "count", "value", "sep"}));
 
-		insert_method(table, method("u32", return_type::U32, parameter_type::VECTOR, true));
-		insert_method(table, method("i32", return_type::I32, parameter_type::VECTOR, true));
-		insert_method(table, method("double", return_type::DOUBLE, parameter_type::VECTOR, true));
+		insert_method(table, method("rgb", return_type::U32, parameter_type::VECTOR, true, { "r", "g", "b" }));
+		insert_method(table, method("rgba", return_type::U32, parameter_type::VECTOR, true, { "r", "g", "b", "a"}));
+
+		insert_method(table, method("now", return_type::TIMESTAMP, parameter_type::VECTOR, true));
 
 	}
 

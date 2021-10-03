@@ -52,6 +52,9 @@ namespace docscript {
 		case state::TIMESTAMP_:
 			std::tie(state_, advance) = timestamp(tok, prev);
 			break;
+		case state::COLOR_:
+			std::tie(state_, advance) = color(tok, prev);
+			break;
 		case state::NUMBER_:
 			std::tie(state_, advance) = number(tok, prev);
 			break;
@@ -103,8 +106,8 @@ namespace docscript {
 			return { state_, true };
 
 		case '(':   case ')':
-		case '[':   case ']':
-		case '{':   case '}':
+		//case '[':   case ']':
+		//case '{':   case '}':
 		case ',':
 		case ':':
 			value_ += tok;
@@ -118,6 +121,9 @@ namespace docscript {
 
 		case '@':
 			return { state::TIMESTAMP_, true };
+
+		case '#':
+			return { state::COLOR_, true };
 
 		case '\'':
 			return { state::QUOTE_, true };
@@ -221,10 +227,9 @@ namespace docscript {
 
 	std::pair<tokenizer::state, bool> tokenizer::timestamp(token const& tok, token const& prev)
 	{
-		//  format: YYYY-MM-DD[THH:MM:SS.zzZ]
+		//  format: YYYY-MM-DD[THH:MM:SS[Zzz]]
 		switch (static_cast<std::uint32_t>(tok)) {
 		case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
-		case 'Z':
 			value_ += tok;
 			break;
 
@@ -262,12 +267,12 @@ namespace docscript {
 			value_ += tok;
 			break;
 
-		case '.':
-			if (value_.size() == 10) {
-				complete_ts();
-				emit(symbol_type::TST);
+		case 'Z':
+			if (value_.size() != 19) {
+				return { state::START_, false };
 			}
-			return { state::START_, false };
+			value_ += tok;
+			break;
 
 		default:
 			if (value_.size() == 10) {
@@ -280,10 +285,10 @@ namespace docscript {
 				emit(symbol_type::TST);
 				return { state::START_, true };
 			}
-			else if (value_.size() == 23) {
-				emit(symbol_type::TST);
-				return { state::START_, true };
-			}
+			//else if (value_.size() == 22) {
+			//	emit(symbol_type::TST);
+			//	return { state::START_, true };
+			//}
 			else {
 				//  
 				//  do not interrupt the word
@@ -291,6 +296,11 @@ namespace docscript {
 				return { state::START_, false };
 			}
 			break;
+		}
+
+		if (value_.size() == 22) {
+			emit(symbol_type::TST);
+			return { state::START_, true };
 		}
 		return { state_, true };
 	}
@@ -317,6 +327,25 @@ namespace docscript {
 			value_ += '0';
 			value_ += 'Z';
 		}
+	}
+
+	std::pair<tokenizer::state, bool> tokenizer::color(token const& tok, token const& prev)
+	{	// #RRGGBBAA
+		switch (static_cast<std::uint32_t>(tok)) {
+		case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+		case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
+		case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
+			value_ += tok;
+			if (value_.size() == 8) {
+				emit(symbol_type::COL);
+				return { state::START_, false };
+			}
+			return { state_, true };
+		default:
+			break;
+		}
+		emit(symbol_type::COL);
+		return { state::START_, false };
 	}
 
 	std::pair<tokenizer::state, bool> tokenizer::number(token const& tok, token const& prev) {

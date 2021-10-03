@@ -28,6 +28,14 @@ namespace docscript {
 			~param();
 
 			/**
+			 * This is precondition to call the finish() method.
+			 *
+			 * @return true, if not only the but also the value
+			 * is defined.
+			 */
+			bool is_complete() const;
+
+			/**
 			 * Generate a complete parameter
 			 */
 			param finish(value&&);

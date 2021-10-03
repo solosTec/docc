@@ -8,6 +8,7 @@
 #define DOCC_SCRIPT_AST_CONSTANT_H
 
 #include <symbol.h>
+//#include <cyng/obj/intrinsics/color.h>
 
 #include <limits>
 #include <chrono>

@@ -72,6 +72,10 @@ namespace docscript {
 			: node_(p)
 		{}
 
+		bool value::empty() const {
+			return !node_;
+		}
+
 		std::size_t value::index() const {
 			return (node_)
 				? node_->value_.index()

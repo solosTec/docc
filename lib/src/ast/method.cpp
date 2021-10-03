@@ -41,8 +41,9 @@ namespace docscript {
 			if (params_) {
 				params_->compile(emit);
 			}
-			emit("CALL ");
+			emit("CALLMAP ");
 			emit(this->get_name());
+			emit("\n");
 			emit("\n");
 		}
 
@@ -61,11 +62,15 @@ namespace docscript {
 		//
 		void vec_method::compile(std::function<void(std::string const&)> emit) const {
 			//std::cout << "vec_method::compile()" << std::endl;
+			emit("MARKER ");
+			emit(this->get_name());
+			emit("\n");
 			if (vlist_) {
 				vlist_->compile(emit);
 			}
-			emit("CALL ");
+			emit("CALLVEC ");
 			emit(this->get_name());
+			emit("\n");
 			emit("\n");
 		}
 

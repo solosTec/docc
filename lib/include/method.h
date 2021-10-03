@@ -24,6 +24,7 @@ namespace docscript {
 		U32,
 		I32,
 		DOUBLE,
+		TIMESTAMP,
 	};
 
 	class method 

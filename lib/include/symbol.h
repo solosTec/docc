@@ -21,6 +21,7 @@ namespace docscript {
 		TXT,	//	text
 		SYM,	//	special symbol like "(", ")", ",", ":"
 		TST,	//	timestamp
+		COL,	//	color
 		BOL,	//	boolean
 		NUM,	//	number (unsigned integer)
 		PAR,	//	paragraph - multiple NL

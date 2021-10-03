@@ -1,6 +1,8 @@
 #include <ast/params.h>
 #include <symbol.h>
 
+#include <iomanip>
+
 #include <boost/assert.hpp>
 
 namespace docscript {
@@ -33,6 +35,8 @@ namespace docscript {
 
 		void param::compile(std::function<void(std::string const&)> emit) const {
 			//std::cout << "param::compile()" << std::endl;
+			BOOST_ASSERT_MSG(is_complete(), "param is incomplete");
+
 			emit("PUSH ");
 			emit(key_);
 			emit("\n");
@@ -48,7 +52,12 @@ namespace docscript {
 
 		}
 
+		bool param::is_complete() const {
+			return !value_.empty();
+		}
+
 		param param::finish(value && v) {
+			BOOST_ASSERT_MSG(!is_complete(), "already complete");
 			return { key_, std::move(v) };
 		}
 

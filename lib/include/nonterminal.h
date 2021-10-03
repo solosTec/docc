@@ -36,7 +36,7 @@
  * VALUE	: txt					{ txt }
  *			| tst
  *			| fun PARAMS
- *			| '"' VECTOR '"'		; cite
+ *			| '"' VECTOR '"'		; quotex
  * 
  * 
  */
