@@ -137,10 +137,9 @@ namespace docscript {
 		//
 		//	write BOM: 0xEF, 0xBB, 0xBF
 		//
-		os.put(0xEF);
-		os.put(0xBB);
-		os.put(0xBF);
-
+		os.put(static_cast<char>(0xEF));
+		os.put(static_cast<char>(0xBB));
+		os.put(static_cast<char>(0xBF));
 	}
 	void init_method_table(std::map<std::string, method>& table) {
 
