@@ -227,7 +227,7 @@ namespace docscript {
 
 	std::pair<tokenizer::state, bool> tokenizer::timestamp(token const& tok, token const& prev)
 	{
-		//  format: YYYY-MM-DD[THH:MM:SS[Zzz]]
+		//  format: YYYY-MM-DD[THH:MM:SS[Z|[+|-]hh::mm]]
 		switch (static_cast<std::uint32_t>(tok)) {
 		case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
 			value_ += tok;
@@ -245,6 +245,19 @@ namespace docscript {
 			switch (value_.size()) {
 			case 4:
 			case 7:
+			case 19:
+				break;
+			default:
+				//	this is not a timestamp
+				return { state::START_, true };
+				break;
+			}
+			value_ += tok;
+			break;
+
+		case '+':
+			switch (value_.size()) {
+			case 19:
 				break;
 			default:
 				//	this is not a timestamp
@@ -275,20 +288,11 @@ namespace docscript {
 			break;
 
 		default:
-			if (value_.size() == 10) {
+			if (value_.size() == 10 || value_.size() == 19 || value_.size() == 20) {
 				complete_ts();
 				emit(symbol_type::TST);
 				return { state::START_, true };
 			}
-			else if (value_.size() == 19) {
-				complete_ts();
-				emit(symbol_type::TST);
-				return { state::START_, true };
-			}
-			//else if (value_.size() == 22) {
-			//	emit(symbol_type::TST);
-			//	return { state::START_, true };
-			//}
 			else {
 				//  
 				//  do not interrupt the word
@@ -298,7 +302,7 @@ namespace docscript {
 			break;
 		}
 
-		if (value_.size() == 22) {
+		if (value_.size() == 25) {
 			emit(symbol_type::TST);
 			return { state::START_, true };
 		}
@@ -316,16 +320,6 @@ namespace docscript {
 			value_ += ':';
 			value_ += '0';
 			value_ += '0';
-			value_ += '.';
-			value_ += '0';
-			value_ += '0';
-			value_ += 'Z';
-		}
-		else if (value_.size() == 19) {
-			value_ += '.';
-			value_ += '0';
-			value_ += '0';
-			value_ += 'Z';
 		}
 	}
 

@@ -54,6 +54,9 @@ namespace docscript {
 		case symbol_type::TXT:
 			os << "TXT";
 			break;
+		case symbol_type::LIT:
+			os << "LIT";
+			break;
 		case symbol_type::LBL:
 			os << "LBL";
 			break;
@@ -78,8 +81,8 @@ namespace docscript {
 		case symbol_type::EOL:
 			os << "EOL";
 			break;
-		case symbol_type::DQU:
-			os << "DQU";
+		case symbol_type::TYP:
+			os << "TYP";
 			break;
 		//case symbol_type::INC:
 		//	os << "INC";

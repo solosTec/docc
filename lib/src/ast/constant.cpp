@@ -1,5 +1,5 @@
 #include <ast/constant.h>
-
+#include <cyng/parse/timestamp.h>
 #include  <sstream>
 
 #include <boost/assert.hpp>
@@ -16,9 +16,9 @@ namespace docscript {
 
 			switch (sym.type_) {
 			case symbol_type::TST:
-				//	ToDo: parse string with timestamp info
-				//	format: YYYY-MM-DD[THH:MM:SS.zzZ]
-				return constant{ sym.value_, std::chrono::system_clock::now() };
+				//	parse string with timestamp info
+				//	format: "YYYY-MM-DD[THH:MM:SS[Z|[+|-]hh::mm]]
+				return constant{ sym.value_, cyng::to_timestamp(sym.value_) };
 			case symbol_type::BOL:
 				return constant{ sym.value_, boost::algorithm::equals(sym.value_, "true")};
 			case symbol_type::NUM:

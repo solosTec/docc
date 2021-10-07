@@ -19,6 +19,7 @@ namespace docscript {
 		EOD,	//	end-of-data
 		DIR,	//	directive
 		TXT,	//	text
+		LIT,	//	literal
 		LBL,	//	label:
 		INS,	//	instruction
 		SYM,	//	special symbol like "(", ")", ",", ":"
@@ -27,7 +28,7 @@ namespace docscript {
 		BOL,	//	boolean
 		NUM,	//	number (unsigned integer)
 		EOL,	//	end of line (nl)
-		DQU,	//	double quotes: "
+		TYP,	//	type specifier (trail)
 		//INC,	//	include file
 
 		FIL,	//	file path

@@ -61,11 +61,17 @@ namespace docscript {
 		case state::TEXT_:
 			std::tie(state_, advance) = text(tok, prev);
 			break;
+		case state::STRING_:
+			std::tie(state_, advance) = string(tok, prev);
+			break;
+		case state::STRING_ESC_:
+			std::tie(state_, advance) = string_esc(tok, prev);
+			break;
 		case state::QUOTE_:
 			std::tie(state_, advance) = quote(tok, prev);
 			break;
-		case state::QUOTE_ESC_:
-			std::tie(state_, advance) = quote_esc(tok, prev);
+		case state::QUOTE_TRAIL_:
+			std::tie(state_, advance) = quote_trail(tok, prev);
 			break;
 		case state::NEWLINE_:
 			std::tie(state_, advance) = newline(tok, prev);
@@ -117,9 +123,10 @@ namespace docscript {
 			return { state_, true };
 
 		case '"':
-			value_ += tok;
-			emit(symbol_type::DQU);
-			return { state_, true };
+			//value_ += tok;
+			//emit(symbol_type::DQU);
+			//return { state_, true };
+			return { state::STRING_, true };
 
 		case '@':
 			return { state::TIMESTAMP_, true };
@@ -358,14 +365,14 @@ namespace docscript {
 		return { state::START_, false };
 	}
 
-	std::pair<tokenizer::state, bool> tokenizer::quote(token const& tok, token const& prev)
+	std::pair<tokenizer::state, bool> tokenizer::string(token const& tok, token const& prev)
 	{
 		switch (static_cast<std::uint32_t>(tok)) {
-		case '\'':
+		case '\"':	// complete
 			return { state::TEXT_, true };
 
 		case '\\':
-			return { state::QUOTE_ESC_, true };
+			return { state::STRING_ESC_, true };
 
 		default:
 			break;
@@ -375,23 +382,54 @@ namespace docscript {
 		return { state_, true };
 	}
 
-	std::pair<tokenizer::state, bool> tokenizer::quote_esc(token const& tok, token const& prev)
-	{
+	std::pair<tokenizer::state, bool> tokenizer::string_esc(token const& tok, token const& prev) {
+
 		switch (static_cast<std::uint32_t>(tok)) {
 		case '\\':
-		case '\'':
+		case '\"':
 			value_ += tok;
-			return { state::QUOTE_, true };
+			return { state::STRING_, true };
 		case 'n':
 			value_ += '\n';
-			return { state::QUOTE_, true };
+			return { state::STRING_, true };
 		case 't':
 			value_ += '\t';
-			return { state::QUOTE_, true };
+			return { state::STRING_, true };
 		default:
 			break;
 		}
 		emit(symbol_type::TXT);
+		return { state::START_, false };
+
+	}
+
+	std::pair<tokenizer::state, bool> tokenizer::quote(token const& tok, token const& prev)
+	{
+		switch (static_cast<std::uint32_t>(tok)) {
+		case '\'':
+			emit(symbol_type::LIT);
+			return { state::QUOTE_TRAIL_, true };
+
+		default:
+			break;
+		}
+
+		value_ += tok;
+		return { state_, true };
+	}
+
+	std::pair<tokenizer::state, bool> tokenizer::quote_trail(token const& tok, token const& prev)
+	{
+		switch (static_cast<std::uint32_t>(tok)) {
+		case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g': case 'h': case 'i': case 'j': case 'k': case 'l': case 'm':
+		case 'n': case 'o': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'x': case 'y': case 'z':
+			value_ += tok;
+			return { state_, true };
+		default:
+			break;
+		}
+		//	type specified
+		emit(symbol_type::TYP);
 		return { state::START_, false };
 	}
 
@@ -486,7 +524,7 @@ namespace docscript {
 			}
 			break;
 		case symbol_type::TXT:
-		case symbol_type::DQU:
+		//case symbol_type::DQU:
 			if (symbol_type::EOD == prev_sym_type_) {
 				//	first TXT symbol ever
 				//  pilgrow
