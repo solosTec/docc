@@ -405,6 +405,8 @@ namespace docscript {
 
 	void parser::build() {
 
+		ctx_.emit(".code");
+		ctx_.emit("\n");
 		prg_.generate();
 		ctx_.emit("HALT");
 		ctx_.emit("\n");

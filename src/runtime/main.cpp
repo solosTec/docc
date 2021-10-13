@@ -7,11 +7,12 @@
 
 #include <boost/program_options.hpp>
 #include <boost/predef.h>
+#include <boost/uuid/string_generator.hpp>
 
 #include <fmt/core.h>
 #include <fmt/color.h>
 
-#include <reader.h>
+#include "controller.h"
 
 #if BOOST_OS_WINDOWS
 #include "Windows.h"
@@ -41,43 +42,17 @@ void init_console() {
 }
 #endif
 
-std::vector<std::filesystem::path> get_include_paths(std::vector<std::string> const& vec, std::filesystem::path parent_path) {
-
-    //
-    //  convert from string to path
-    //
-    std::vector<std::filesystem::path> includes(vec.begin(), vec.end());
-
-    //
-    //	Add the path of the input file as include path, if it is not already specified
-    //
-    auto pos = std::find(vec.begin(), vec.end(), parent_path);
-    if (pos == vec.end() && !parent_path.empty()) {
-        includes.push_back(parent_path);
-    }
-
-    //
-    //	last entry is empty
-    //
-#if BOOST_OS_WINDOWS
-    includes.push_back(".\\");
-#else
-    includes.push_back("./");
-#endif
-
-    return includes;
-
-}
 
 int main(int argc, char* argv[]) {
 
 #ifdef _DEBUG
 #endif
 
-	std::string config_file = std::string("docasm-") + std::string(docc::version_string) + ".cfg";
+	std::string config_file = std::string("docrt-") + std::string(docc::version_string) + ".cfg";
 	auto const here = std::filesystem::current_path();
-    std::string inp_file = "out.docs";
-	std::string out_file = (here / "out.cyng").string();    
+    std::string inp_file = "main.cyng";
+	std::string out_file = (here / "out.html").string();    
+    std::string stag = "d28dde25-8445-4fc7-a4f0-76a33a4c6179";
     std::size_t pool_size = std::min<std::size_t>(std::thread::hardware_concurrency(), 4) * 2ul;
 
     //
@@ -100,7 +75,8 @@ int main(int argc, char* argv[]) {
 
         ("source,S", boost::program_options::value(&inp_file)->default_value(inp_file), "main source file")
         ("output,O", boost::program_options::value(&out_file)->default_value(out_file), "output file")
-        ("include-path,I", boost::program_options::value< std::vector<std::string> >()->default_value(std::vector<std::string>(1, here.string()), here.string()), "include paths")
+        ("tag,T", boost::program_options::value(&stag)->default_value(stag), "VM tag")
+        //("include-path,I", boost::program_options::value< std::vector<std::string> >()->default_value(std::vector<std::string>(1, here.string()), here.string()), "include paths")
         //	verbose level
         ("verbose,V", boost::program_options::value<int>()->default_value(0)->implicit_value(1), "verbose level")
         ;
@@ -133,7 +109,7 @@ int main(int argc, char* argv[]) {
     if (vm.count("version"))
     {
         std::cout
-            << "docScript assembler v"
+            << "docScript runtime v"
             << docc::version_string
             << std::endl
             ;
@@ -175,39 +151,21 @@ int main(int argc, char* argv[]) {
         fg(fmt::color::gray),
         "***info : verbose level = [{}]\n", verbose);
 
-    //
-    //	read specified include paths
-    //
-    auto const inc_paths = get_include_paths(
-        vm["include-path"].as< std::vector<std::string>>(),
-        std::filesystem::path(inp_file).parent_path()
-        );
-
  
-    if (verbose > 1)
-    {
-        fmt::print(
-            stdout,
-            fg(fmt::color::gray),
-            "***info : {} include paths\n", inc_paths.size());
-
-        std::copy(inc_paths.begin(), inc_paths.end(), std::ostream_iterator<std::filesystem::path>(std::cout, "\n"));
-    }
-
-
     //
-    //	generate a temporary file name for intermediate files
+    //	get VM tag
     //
-    //auto const tmp = std::filesystem::temp_directory_path() / (std::filesystem::path(inp_file).filename().string() + ".dsmodule");
+    auto const tag = boost::uuids::string_generator()(stag);
 
     //
     //  start tasks
     //
     
-    docscript::reader r(out_file,
-            inc_paths,
-            verbose);
-    r.read(std::filesystem::path(inp_file));
+    docscript::controller ctl(
+        out_file,
+        verbose
+    );
+    return ctl.run(std::filesystem::path(inp_file), pool_size, tag);
 
-    return EXIT_SUCCESS;
+    //return EXIT_SUCCESS;
 }

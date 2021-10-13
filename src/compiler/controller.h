@@ -17,8 +17,7 @@ namespace docscript {
 	class controller
 	{
 	public:
-		controller(std::filesystem::path const& temp
-			, std::filesystem::path out
+		controller(std::filesystem::path out
 			, std::vector<std::filesystem::path> inc
 			, int verbose);
 

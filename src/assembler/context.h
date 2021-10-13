@@ -7,8 +7,10 @@
 #ifndef DOCC_ASM_CONTEXT_H
 #define DOCC_ASM_CONTEXT_H
 
-//#include <parser.h>
+#include <parser.h>
 #include <symbol.h>
+
+#include <cyng/obj/object.h>
 
 #include <cstdlib>
 #include <filesystem>
@@ -31,8 +33,7 @@ namespace docscript {
 		};
 
 	public:
-		context(std::filesystem::path const&
-			, std::filesystem::path out
+		context(std::filesystem::path out
 			, std::vector<std::filesystem::path> const& inc
 			, int verbose);
 		context(context const&) = default;
@@ -80,12 +81,8 @@ namespace docscript {
 		/**
 		 * write to the temp file
 		 */
-		void emit(std::string const&);
+		void emit(cyng::object&&);
 
-		/**
-		 * @return method with the specified name
-		 */
-		//std::optional<method> lookup_method(std::string const&) const;
 
 	private:
 		std::filesystem::path const temp_;
@@ -94,11 +91,9 @@ namespace docscript {
 		std::vector<std::filesystem::path> inc_;
 		int const verbose_;
 		std::stack<position>    position_;
-		//std::map<std::string, method> method_table_;
-		//parser parser_;
+		parser parser_;
 	};
 
-	void write_bom(std::ostream&);
 	/**
 	 * @param p path
 	 * @param ext extension

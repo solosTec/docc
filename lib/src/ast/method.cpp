@@ -62,15 +62,18 @@ namespace docscript {
 		//
 		void vec_method::compile(std::function<void(std::string const&)> emit) const {
 			//std::cout << "vec_method::compile()" << std::endl;
-			emit("MARKER ");
+			emit("esba");
+			emit("\t; ");
 			emit(this->get_name());
 			emit("\n");
 			if (vlist_) {
 				vlist_->compile(emit);
 			}
-			emit("CALLVEC ");
+			emit("frm\n");
+			emit("invoke_r ");
 			emit(this->get_name());
 			emit("\n");
+			emit("pull\n");
 			emit("\n");
 		}
 

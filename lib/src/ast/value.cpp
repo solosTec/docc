@@ -105,7 +105,7 @@ namespace docscript {
 				node_->compile(emit);
 			}
 			else {
-				emit("PUSH ");
+				emit("push ");
 				emit("nil");
 				emit("\n");
 			}

@@ -1,9 +1,7 @@
 
 #include <reader.h>
-//#include <utils.h>
 
 #include <cyng/io/parser/utf-8.h>
-//#include <cyng/task/registry.h>
 
 #include <iostream>
 #include <fstream>
@@ -13,17 +11,16 @@
 
 namespace docscript {
 
-	reader::reader(std::filesystem::path const& temp
-		, std::filesystem::path out
+	reader::reader(std::filesystem::path out
 		, std::vector<std::filesystem::path> const& inc
 		, int verbose)
-	: ctx_(temp, out, inc, verbose)
+	: ctx_(verify_extension(out, "cyng"), inc, verbose)
 		, prev_('\n')
 		, tokenizer_([this](symbol&& sym) {
 			this->next_symbol(std::move(sym));
 			})
 		, sanitizer_([this](token&& tok) {
-				std::cout << tok << std::endl;
+				//std::cout << tok << std::endl;
 				//
 				//  repeat if requested
 				//
@@ -86,6 +83,11 @@ namespace docscript {
 					ctx_.nl(++line);
 				}
 			}
+			
+			//
+			//	file complete
+			//
+			ctx_.pop(sanitizer_);
 		}
 		else {
 			fmt::print(
@@ -97,7 +99,7 @@ namespace docscript {
 	}
 
 	void reader::next_symbol(symbol&& sym) {
-		std::cout << sym << std::endl;
+		//std::cout << sym << std::endl;
 		ctx_.put(sym);
 	}
 }

@@ -11,13 +11,11 @@
 #include <boost/assert.hpp>
 
 namespace docscript {
-	context::context(std::filesystem::path const& temp
-		, std::filesystem::path out
+	context::context(std::filesystem::path out
 		, std::vector<std::filesystem::path> inc
 		, int verbose)
-	: temp_(temp)
-		, ostream_(temp.string(), std::ios::trunc)
-		, out_file_(out)
+	: out_file_(out)
+		, ostream_(out_file_.string(), std::ios::trunc)
 		, inc_(inc)
 		, verbose_(verbose)
 		, position_()
@@ -29,7 +27,7 @@ namespace docscript {
 			fmt::print(
 				stdout,
 				fg(fmt::color::crimson) | fmt::emphasis::bold,
-				"***info : could not open temporary output file [{}]\n", temp_.string());
+				"***info : could not open output file [{}]\n", out_file_.string());
 
 		}
 		else {
@@ -37,7 +35,7 @@ namespace docscript {
 				fmt::print(
 					stdout,
 					fg(fmt::color::gray) | fmt::emphasis::bold,
-					"***info : temporary output file [{}] is open\n", temp_.string());
+					"***info : output file [{}] is open\n", out_file_.string());
 
 			}
 

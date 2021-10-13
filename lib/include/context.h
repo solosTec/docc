@@ -31,8 +31,7 @@ namespace docscript {
 		};
 
 	public:
-		context(std::filesystem::path const&
-			, std::filesystem::path out
+		context(std::filesystem::path out
 			, std::vector<std::filesystem::path> inc
 			, int verbose);
 		context(context const&) = default;
@@ -88,9 +87,9 @@ namespace docscript {
 		std::optional<method> lookup_method(std::string const&) const;
 
 	private:
-		std::filesystem::path const temp_;
-		std::ofstream ostream_;	//	stream of temp file
+		//std::filesystem::path const temp_;
 		std::filesystem::path const out_file_;
+		std::ofstream ostream_;	//	stream of temp file
 		std::vector<std::filesystem::path> inc_;
 		int const verbose_;
 		std::stack<position>    position_;

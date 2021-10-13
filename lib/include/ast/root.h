@@ -34,17 +34,6 @@ namespace docscript {
 
 	namespace ast {
 
-		//struct constant;
-		//class value;
-		//class map_method;
-		//class vec_method;
-
-
-
-
-
-
-
 		using decl_t = std::variant<
 			constant,	//	[0]
 			value,		//	[1]
@@ -56,6 +45,7 @@ namespace docscript {
 		class program {
 		public:
 			program(context&);
+
 			/**
 			 * Move current term to program
 			 */

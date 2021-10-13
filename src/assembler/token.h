@@ -4,8 +4,8 @@
  * Copyright (c) 2021 Sylko Olzscher 
  * 
  */ 
-#ifndef DOCC_SCRIPT_TOKEN_H
-#define DOCC_SCRIPT_TOKEN_H
+#ifndef DOCC_ASM_TOKEN_H
+#define DOCC_ASM_TOKEN_H
 
 #include <cstdint>
 #include <limits>

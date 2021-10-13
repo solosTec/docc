@@ -37,13 +37,13 @@ namespace docscript {
 			//std::cout << "param::compile()" << std::endl;
 			BOOST_ASSERT_MSG(is_complete(), "param is incomplete");
 
-			emit("PUSH ");
+			emit("push ");
 			emit(key_);
 			emit("\n");
 
 			value_.compile(emit);
 
-			emit("PARAM");
+			emit("param");
 			emit("\n");
 
 			if (next_) {

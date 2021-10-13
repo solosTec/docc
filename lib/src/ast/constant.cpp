@@ -24,6 +24,7 @@ namespace docscript {
 			case symbol_type::NUM:
 				return constant{ sym.value_, std::stod(sym.value_, nullptr) };
 			case symbol_type::COL:
+				//	ToDo:
 				return constant{ sym.value_, "color" };
 			default:
 				break;
@@ -36,7 +37,7 @@ namespace docscript {
 			std::stringstream ss;
 			ss << *this;
 
-			emit("PUSH ");
+			emit("push ");
 			emit(ss.str());
 			emit("\n");
 		}
@@ -49,7 +50,10 @@ namespace docscript {
 			std::visit(overloaded{
 			[&](double arg) { os << std::fixed << arg; },
 			[&](std::string const& arg) { os << std::quoted(arg); },
-			[&](std::chrono::system_clock::time_point const& arg) { os << "tp"; },
+			[&](std::chrono::system_clock::time_point const& arg) { 
+				const std::time_t t_c = std::chrono::system_clock::to_time_t(arg);
+				os << std::put_time(std::localtime(&t_c), "%FT%T\n");
+				},
 			[&](bool arg) { os << (arg ? "true" : "false"); }
 				}, c.node_);
 			return os;

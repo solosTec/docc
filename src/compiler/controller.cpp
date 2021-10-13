@@ -11,11 +11,10 @@
 #include <fmt/color.h>
 
 namespace docscript {
-	controller::controller(std::filesystem::path const& temp
-		, std::filesystem::path out
+	controller::controller(std::filesystem::path out
 		, std::vector<std::filesystem::path> inc
 		, int verbose)
-	: ctx_(temp, out, inc, verbose)
+	: ctx_(verify_extension(out, "docs"), inc, verbose)
 
 	{}
 

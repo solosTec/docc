@@ -69,6 +69,9 @@ namespace docscript {
 		case symbol_type::NUM:	//	number (unsigned integer)
 			os << "NUM";
 			break;
+		case symbol_type::TYP:
+			os << "TYP";
+			break;
 		case symbol_type::PAR:
 			os << "PAR";
 			break;

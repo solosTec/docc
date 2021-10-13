@@ -11,17 +11,12 @@
 #include <sanitizer.h>
 #include <tokenizer.h>
 
-//#include <cyng/task/task_fwd.h>
-//#include <cyng/task/channel.h>
-//#include <cyng/task/controller.h>
-//#include <cyng/task/stash.h>
 
 namespace docscript {
 
     class reader {
     public:
-        reader(std::filesystem::path const& temp
-            , std::filesystem::path out
+        reader(std::filesystem::path out
             , std::vector<std::filesystem::path> const& inc
             , int verbose);
         void read(std::filesystem::path);

@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
 	std::string config_file = std::string(docc::project_name)+ "-" + std::string(docc::version_string) + ".cfg";
 	auto const here = std::filesystem::current_path();
     std::string inp_file = "main.docscript";
-	std::string out_file = (here / "out.html").string();    
+	std::string out_file = (here / "out.docs").string();    
     std::size_t pool_size = std::min<std::size_t>(std::thread::hardware_concurrency(), 4) * 2ul;
 
     //
@@ -196,22 +196,15 @@ int main(int argc, char* argv[]) {
 
 
     //
-    //	generate a temporary file name for intermediate files
-    //
-    auto const tmp = std::filesystem::temp_directory_path() / (std::filesystem::path(inp_file).filename().string() + ".dsmodule");
-
-    //
     //  start tasks
     //
     
     docscript::controller ctl(
-        tmp,
         out_file,
         inc_paths,
-        verbose
-    );
+        verbose);
+
     return ctl.run(std::filesystem::path(inp_file).filename(),
         pool_size);
 
-    return 0;
 }

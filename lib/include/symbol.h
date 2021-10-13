@@ -24,6 +24,7 @@ namespace docscript {
 		COL,	//	color
 		BOL,	//	boolean
 		NUM,	//	number (unsigned integer)
+		TYP,	//	type name
 		PAR,	//	paragraph - multiple NL
 		DQU,	//	double quotes: "
 		INC,	//	include file

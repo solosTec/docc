@@ -171,6 +171,10 @@ if (IS_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 	add_subdirectory(lib)
 endif()
 
+#
+# docScript compiler
+#
+
 add_executable(docc 
     ${CMAKE_SOURCE_DIR}/src/compiler/main.cpp
     ${CMAKE_SOURCE_DIR}/src/compiler/controller.cpp
@@ -210,22 +214,12 @@ install(TARGETS docc
     RUNTIME
     DESTINATION bin)
 
+#
+# docScript assembler
+#
+include (src/assembler/prg.cmake)
 
-add_executable(docasm 
-    ${CMAKE_SOURCE_DIR}/src/assembler/main.cpp
-    ${CMAKE_SOURCE_DIR}/src/assembler/token.cpp
-    ${CMAKE_SOURCE_DIR}/src/assembler/token.h
-    ${CMAKE_SOURCE_DIR}/src/assembler/tokenizer.cpp
-    ${CMAKE_SOURCE_DIR}/src/assembler/tokenizer.h
-    ${CMAKE_SOURCE_DIR}/src/assembler/sanitizer.cpp
-    ${CMAKE_SOURCE_DIR}/src/assembler/sanitizer.h
-    ${CMAKE_SOURCE_DIR}/src/assembler/reader.cpp
-    ${CMAKE_SOURCE_DIR}/src/assembler/reader.h
-    ${CMAKE_SOURCE_DIR}/src/assembler/context.cpp
-    ${CMAKE_SOURCE_DIR}/src/assembler/context.h
-    ${CMAKE_SOURCE_DIR}/src/assembler/symbol.cpp
-    ${CMAKE_SOURCE_DIR}/src/assembler/symbol.h
-)
+add_executable(docasm ${assembler_prg})
 
 target_include_directories(docasm
 	PUBLIC
@@ -249,9 +243,7 @@ target_compile_definitions(docasm
 
 target_link_libraries(docasm 
 	PUBLIC 
-#		docscript
         fmt::fmt
-#		CYNG::CYNG
 		${CYNG_LIBRARIES}
 		${OPENSSL_LIBRARIES}
 		"$<$<PLATFORM_ID:Linux>:pthread>"
@@ -261,6 +253,44 @@ install(TARGETS docasm
     RUNTIME
     DESTINATION bin)
 
+#
+# docScript runtime
+#
+include (src/runtime/prg.cmake)
+
+add_executable(docrt ${runtime_prg})
+
+target_include_directories(docrt
+	PUBLIC
+		${CMAKE_SOURCE_DIR}/src/runtime
+        ${CYNG_INCLUDE_DIRS}
+		${PROJECT_BINARY_DIR}/include
+ 		${OPENSSL_INCLUDE_DIR}
+ 		${Boost_INCLUDE_DIRS}
+)
+
+target_compile_features(docrt PRIVATE cxx_std_20)
+
+target_compile_options(docrt 
+	PRIVATE "$<$<CXX_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Wpedantic>"
+	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/MP>"
+	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/W2>"
+)
+
+target_compile_definitions(docrt
+	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:_WIN32_WINNT=0x0601>")
+
+target_link_libraries(docrt 
+	PUBLIC 
+        fmt::fmt
+		${CYNG_LIBRARIES}
+		${OPENSSL_LIBRARIES}
+		"$<$<PLATFORM_ID:Linux>:pthread>"
+)
+
+install(TARGETS docrt
+    RUNTIME
+    DESTINATION bin)
 
 #
 # CPack configuration

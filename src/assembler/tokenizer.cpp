@@ -100,7 +100,8 @@ namespace docscript {
 		switch (static_cast<std::uint32_t>(tok))
 		{
 		case ';':
-			if (prev.is_nl()) return { state::COMMENT_, true };
+			return { state::COMMENT_, true };
+			//if (prev.is_nl()) return { state::COMMENT_, true };
 			break;
 
 		case '.':
@@ -111,7 +112,7 @@ namespace docscript {
 			return { state_, true };
 
 		case '\n':
-			if (prev.is_nl()) return { state::NEWLINE_, true };
+			if (!prev.is_nl()) return { state::NEWLINE_, true };
 			return { state_, true };
 
 		//case '(':   case ')':
@@ -285,12 +286,12 @@ namespace docscript {
 			if (value_.size() == 10) {
 				complete_ts();
 				emit(symbol_type::TST);
-				return { state::START_, true };
+				return { state::START_, false };
 			}
 			else if (value_.size() == 19) {
 				complete_ts();
 				emit(symbol_type::TST);
-				return { state::START_, true };
+				return { state::START_, false };
 			}
 			else {
 				//  
@@ -437,6 +438,8 @@ namespace docscript {
 	{
 		switch (static_cast<std::uint32_t>(tok)) {
 		case '\n':
+			emit(symbol_type::TXT);
+			return { state::START_, false };
 		case ' ':
 		case '\t':
 			emit(symbol_type::TXT);

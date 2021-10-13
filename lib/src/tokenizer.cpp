@@ -55,6 +55,9 @@ namespace docscript {
 		case state::COLOR_:
 			std::tie(state_, advance) = color(tok, prev);
 			break;
+		case state::TYPE_:
+			std::tie(state_, advance) = type(tok, prev);
+			break;
 		case state::NUMBER_:
 			std::tie(state_, advance) = number(tok, prev);
 			break;
@@ -106,8 +109,6 @@ namespace docscript {
 			return { state_, true };
 
 		case '(':   case ')':
-		//case '[':   case ']':
-		//case '{':   case '}':
 		case ',':
 		case ':':
 			value_ += tok;
@@ -124,6 +125,9 @@ namespace docscript {
 
 		case '#':
 			return { state::COLOR_, true };
+
+		case '<':
+			return { state::TYPE_, true };
 
 		case '\'':
 			return { state::QUOTE_, true };
@@ -340,6 +344,16 @@ namespace docscript {
 		}
 		emit(symbol_type::COL);
 		return { state::START_, false };
+	}
+
+	std::pair<tokenizer::state, bool> tokenizer::type(token const& tok, token const& prev)
+	{	// <type-name>
+		if (static_cast<std::uint32_t>(tok) == '>') {
+			emit(symbol_type::TYP);
+			return { state::START_, false };
+		}
+		value_ += tok;
+		return { state_, true };
 	}
 
 	std::pair<tokenizer::state, bool> tokenizer::number(token const& tok, token const& prev) {

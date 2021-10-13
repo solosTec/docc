@@ -21,7 +21,7 @@ namespace docscript {
 		TXT,	//	text
 		LIT,	//	literal
 		LBL,	//	label:
-		INS,	//	instruction
+		INS,	//	instruction (op code)
 		SYM,	//	special symbol like "(", ")", ",", ":"
 		TST,	//	timestamp
 		COL,	//	color

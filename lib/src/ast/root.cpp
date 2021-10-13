@@ -112,7 +112,6 @@ namespace docscript {
 				merge_ast_map_method();
 				break;
 			case 4:
-				//BOOST_ASSERT(semantic_stack_.size() > 1);
 				//
 				//  vec method is complete
 				//	
