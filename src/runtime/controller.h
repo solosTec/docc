@@ -8,7 +8,8 @@
 #ifndef DOCSCRIPT_RT_CONTROLLER_H
 #define DOCSCRIPT_RT_CONTROLLER_H
 
-#include <vector>
+#include <cyng/obj/intrinsics/container.h>
+
 #include <filesystem>
 
 #include <boost/uuid/uuid.hpp>
@@ -25,8 +26,9 @@ namespace docscript {
 			, boost::uuids::uuid tag);
 
 	private:
-		void quote(std::string, std::string);
-		
+		void quote(cyng::vector_t);
+		void set(cyng::param_map_t);
+
 	};
 }
 

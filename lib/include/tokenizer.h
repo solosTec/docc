@@ -17,9 +17,6 @@ namespace docscript {
 
 	class tokenizer
 	{
-	public:
-		//using callback = std::function<bool(symbol&&)>;
-
 	private:
 		enum class state : std::uint32_t
 		{
@@ -30,8 +27,11 @@ namespace docscript {
 			FUNCTION_,	//!<	function name
 			TIMESTAMP_,	//!<	starts with @
 			COLOR_,		//!<	starts with #
-			TYPE_,		//!<	starts with #
+			TYPE_,		//!<	<type>
 			NUMBER_,	//!<	number
+			INTEGER_,	//!<	unsigned integer
+			FLOAT_,		//!<	floating point
+			EXPONENT_,	//!<	specifies the magnitude of the number as a power of 10
 			QUOTE_,		//!<	'...'
 			QUOTE_ESC_,	//!<	'..\?..'	escape from QUOTE
 			TEXT_,		//!<	anything else including numbers
@@ -63,6 +63,9 @@ namespace docscript {
 		[[nodiscard]] std::pair<state, bool> color(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> type(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> number(token const& tok, token const& prev);
+		[[nodiscard]] std::pair<state, bool> integer(token const& tok, token const& prev);
+		[[nodiscard]] std::pair<state, bool> floating_point(token const& tok, token const& prev);
+		[[nodiscard]] std::pair<state, bool> exponent(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> quote(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> quote_esc(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> text(token const& tok, token const& prev);

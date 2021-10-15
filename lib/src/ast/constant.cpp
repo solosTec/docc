@@ -1,5 +1,9 @@
 #include <ast/constant.h>
+
 #include <cyng/parse/timestamp.h>
+#include <cyng/parse/color.h>
+#include <cyng/io/ostream.h>
+
 #include  <sstream>
 
 #include <boost/assert.hpp>
@@ -22,10 +26,23 @@ namespace docscript {
 			case symbol_type::BOL:
 				return constant{ sym.value_, boost::algorithm::equals(sym.value_, "true")};
 			case symbol_type::NUM:
-				return constant{ sym.value_, std::stod(sym.value_, nullptr) };
+				try {
+					return constant{ sym.value_, static_cast<std::uint64_t>(std::stoull(sym.value_, nullptr, 10)) };
+				}
+				catch (...) {
+					return constant{ sym.value_, static_cast<std::uint64_t>(0) };
+				}
+			case symbol_type::FLT:
+			case symbol_type::EXP:
+				try {
+					return constant{ sym.value_, std::stod(sym.value_, nullptr) };
+				}
+				catch (...) {
+					return constant{ sym.value_, static_cast<double>(0.0) };
+				}
 			case symbol_type::COL:
-				//	ToDo:
-				return constant{ sym.value_, "color" };
+				//	color
+				return constant{ sym.value_, cyng::to_color<std::uint8_t>(sym.value_) };
 			default:
 				break;
 			}
@@ -49,12 +66,15 @@ namespace docscript {
 		std::ostream& operator<<(std::ostream& os, constant const& c) {
 			std::visit(overloaded{
 			[&](double arg) { os << std::fixed << arg; },
+			[&](std::uint64_t arg) { os << std::dec << arg; },
 			[&](std::string const& arg) { os << std::quoted(arg); },
 			[&](std::chrono::system_clock::time_point const& arg) { 
 				const std::time_t t_c = std::chrono::system_clock::to_time_t(arg);
 				os << std::put_time(std::localtime(&t_c), "%FT%T\n");
 				},
-			[&](bool arg) { os << (arg ? "true" : "false"); }
+			[&](bool arg) { os << (arg ? "true" : "false"); },
+			[&](cyng::color_8 const& arg) { os << arg; },
+
 				}, c.node_);
 			return os;
 		}

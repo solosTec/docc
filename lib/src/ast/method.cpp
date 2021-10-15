@@ -39,9 +39,14 @@ namespace docscript {
 		void map_method::compile(std::function<void(std::string const&)> emit) const {
 			//std::cout << "map_method::compile()" << std::endl;
 			if (params_) {
-				params_->compile(emit);
+				auto const count = params_->compile(emit);
+				emit("push ");
+				emit(std::to_string(count));
+				emit("\t; parameter(s)\n");
+				emit("make_param_map\n");
 			}
-			emit("CALLMAP ");
+			emit("push 1\n");	//	make tuple with one parameter map
+			emit("invoke_r ");
 			emit(this->get_name());
 			emit("\n");
 			emit("\n");
@@ -49,6 +54,13 @@ namespace docscript {
 
 		void map_method::set_params(param && p) {
 			params_ = std::make_unique<param>(std::move(p));
+		}
+
+		std::size_t map_method::param_count() const {
+			return (params_)
+				? params_->size() + 1u
+				: 0
+				;
 		}
 
 		map_method map_method::factory(std::string const& name, std::optional<docscript::method> optm) {
@@ -70,6 +82,8 @@ namespace docscript {
 				vlist_->compile(emit);
 			}
 			emit("frm\n");
+			emit("make_vector\n");
+			emit("push 1\n");	//	make tuple with one vector
 			emit("invoke_r ");
 			emit(this->get_name());
 			emit("\n");

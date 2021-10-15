@@ -22,9 +22,6 @@
 
 namespace docscript {
 
-	void hello() {
-		std::cout << "hello, world!" << std::endl;
-	}
 	void show(std::string str) {
 		std::cout << str << std::endl;
 	}
@@ -49,14 +46,14 @@ namespace docscript {
 		//
 		//	Create VM
 		//
-		std::function<void()> f1 = std::bind(&hello);
-		std::function<void(std::string)> f2 = std::bind(&show, std::placeholders::_1);
-		std::function<void(std::string, std::string)> f3 = std::bind(&controller::quote, this, std::placeholders::_1, std::placeholders::_2);
+		std::function<void(cyng::vector_t)> f1 = std::bind(&controller::quote, this, std::placeholders::_1);
+		std::function<void(cyng::param_map_t)> f2 = std::bind(&controller::set, this, std::placeholders::_1);
+		std::function<void(std::string)> f3 = std::bind(&show, std::placeholders::_1);
 		auto vm = fabric.create_proxy(tag, f1, f2, f3);
 		std::size_t slot{ 0 };
-		vm.set_channel_name("hello", slot++);
-		vm.set_channel_name("show", slot++);
 		vm.set_channel_name("quote", slot++);
+		vm.set_channel_name("set", slot++);
+		vm.set_channel_name("show", slot++);
 
 		//
 		//	load programe
@@ -118,8 +115,12 @@ namespace docscript {
 
 	}
 
-	void controller::quote(std::string s1, std::string s2) {
-		std::cout << "QUOTE(" << s1 << ", " << s2 << ")" << std::endl;
+	void controller::quote(cyng::vector_t vec) {
+		std::cout << "QUOTE(" << vec << ")" << std::endl;
 
+	}
+
+	void controller::set(cyng::param_map_t pm) {
+		std::cout << "SET(" << pm << ")" << std::endl;
 	}
 }

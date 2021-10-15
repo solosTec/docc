@@ -32,6 +32,8 @@ namespace docscript {
 			void set_params(param&&);
 			static map_method factory(std::string const&, std::optional<docscript::method>);
 		private:
+			std::size_t param_count() const;
+		private:
 			std::unique_ptr<param> params_;
 		};
 

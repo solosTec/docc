@@ -33,23 +33,21 @@ namespace docscript {
 
 		param::~param() = default;
 
-		void param::compile(std::function<void(std::string const&)> emit) const {
+		std::size_t param::compile(std::function<void(std::string const&)> emit) const {
 			//std::cout << "param::compile()" << std::endl;
 			BOOST_ASSERT_MSG(is_complete(), "param is incomplete");
+
+			value_.compile(emit);
 
 			emit("push ");
 			emit(key_);
 			emit("\n");
 
-			value_.compile(emit);
+			emit("make_param\n");
 
-			emit("param");
-			emit("\n");
-
-			if (next_) {
-				next_->compile(emit);
-			}
-
+			return (next_) 
+				? next_->compile(emit) + 1u
+				: 1u;
 		}
 
 		bool param::is_complete() const {
@@ -69,6 +67,20 @@ namespace docscript {
 				next_ = std::make_unique<param>(std::move(p));
 			}
 		}
+
+		std::size_t param::size() const {
+			std::size_t n{ 0 };
+			auto p = next_.get();
+			while (p != nullptr) {
+				++n;
+				p = (p->next_)
+					? p->next_.get()
+					: nullptr
+					;
+			}
+			return n;
+		}
+
 
 		param param::factory(symbol const& sym) {
 			return { sym.value_ };

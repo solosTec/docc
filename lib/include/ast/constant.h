@@ -8,7 +8,8 @@
 #define DOCC_SCRIPT_AST_CONSTANT_H
 
 #include <symbol.h>
-//#include <cyng/obj/intrinsics/color.h>
+
+#include <cyng/obj/intrinsics/color.hpp>
 
 #include <limits>
 #include <chrono>
@@ -27,7 +28,7 @@ namespace docscript {
 		 */
 		struct constant {
 			std::string const value_;
-			std::variant<std::string, std::chrono::system_clock::time_point, bool, double> node_;
+			std::variant<std::string, std::chrono::system_clock::time_point, bool, std::uint64_t, double, cyng::color_8> node_;
 
 			void compile(std::function<void(std::string const&)>) const;
 

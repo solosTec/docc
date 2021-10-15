@@ -44,7 +44,8 @@ namespace docscript {
 			 * Append a new node to the list
 			 */
 			void append(param&&);
-			void compile(std::function<void(std::string const&)>) const;
+			std::size_t size() const;
+			std::size_t compile(std::function<void(std::string const&)>) const;
 
 			static param factory(symbol const&);
 

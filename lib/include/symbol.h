@@ -24,6 +24,8 @@ namespace docscript {
 		COL,	//	color
 		BOL,	//	boolean
 		NUM,	//	number (unsigned integer)
+		FLT,	//	floating point
+		EXP,	//	floating point with exponent
 		TYP,	//	type name
 		PAR,	//	paragraph - multiple NL
 		DQU,	//	double quotes: "

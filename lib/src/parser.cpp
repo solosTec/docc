@@ -245,6 +245,8 @@ namespace docscript {
 		case symbol_type::COL:
 		case symbol_type::BOL:
 		case symbol_type::NUM:
+		case symbol_type::FLT:
+		case symbol_type::EXP:
 			//
 			//  complete
 			//
@@ -405,11 +407,9 @@ namespace docscript {
 
 	void parser::build() {
 
-		ctx_.emit(".code");
-		ctx_.emit("\n");
+		ctx_.emit(".code\n");
 		prg_.generate();
-		ctx_.emit("HALT");
-		ctx_.emit("\n");
+		ctx_.emit("halt\n");
 	}
 
 	std::ostream& operator<<(std::ostream& os, const parser::nt_stack& s) {

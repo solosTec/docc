@@ -61,6 +61,15 @@ namespace docscript {
 		case state::NUMBER_:
 			std::tie(state_, advance) = number(tok, prev);
 			break;
+		case state::INTEGER_:
+			std::tie(state_, advance) = integer(tok, prev);
+			break;
+		case state::FLOAT_:
+			std::tie(state_, advance) = floating_point(tok, prev);
+			break;
+		case state::EXPONENT_:
+			std::tie(state_, advance) = exponent(tok, prev);
+			break;
 		case state::TEXT_:
 			std::tie(state_, advance) = text(tok, prev);
 			break;
@@ -361,12 +370,66 @@ namespace docscript {
 		switch (static_cast<std::uint32_t>(tok)) {
 		case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': case '0':
 			value_ += tok;
-			return { state::NUMBER_, true };
+			return { state_, true };
+		case 'i':
+		case 'u':
+			return { state::INTEGER_, true };
+		case '.':
+			return { state::FLOAT_, true };
+		case '\'':	//	digit separators make large values more readable. example: 36'000'000
+			break;
 		default:
 			break;
 		}
 
 		emit(symbol_type::NUM);
+		return { state::START_, false };
+	}
+
+	std::pair<tokenizer::state, bool> tokenizer::integer(token const& tok, token const& prev) {
+		switch (static_cast<std::uint32_t>(tok)) {
+		case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': case '0':
+			value_ += tok;
+			return { state_, true };
+
+		default:
+			break;
+		}
+
+		emit(symbol_type::NUM);
+		return { state::START_, false };
+	}
+
+	std::pair<tokenizer::state, bool> tokenizer::floating_point(token const& tok, token const& prev) {
+		switch (static_cast<std::uint32_t>(tok)) {
+		case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': case '0':
+			value_ += tok;
+			return { state_, true };
+		case 'e': case 'E':
+			value_ += tok;
+			return { state::EXPONENT_, false };
+
+		default:
+			break;
+		}
+
+		emit(symbol_type::FLT);
+		return { state::START_, false };
+	}
+
+	std::pair<tokenizer::state, bool> tokenizer::exponent(token const& tok, token const& prev) {
+		switch (static_cast<std::uint32_t>(tok)) {
+		case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': case '0':
+			value_ += tok;
+			return { state_, true };
+
+			//	ToDo: handling '-' sign 
+			//	example: 1.846e-12
+		default:
+			break;
+		}
+
+		emit(symbol_type::EXP);
 		return { state::START_, false };
 	}
 

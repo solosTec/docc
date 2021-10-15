@@ -69,6 +69,12 @@ namespace docscript {
 		case symbol_type::NUM:	//	number (unsigned integer)
 			os << "NUM";
 			break;
+		case symbol_type::FLT:	//	floating point
+			os << "FLT";
+			break;
+		case symbol_type::EXP:	//	floating point with exponent
+			os << "EXP";
+			break;
 		case symbol_type::TYP:
 			os << "TYP";
 			break;
