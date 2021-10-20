@@ -30,7 +30,7 @@ namespace docscript {
 			std::string const value_;
 			std::variant<std::string, std::chrono::system_clock::time_point, bool, std::uint64_t, double, cyng::color_8> node_;
 
-			void compile(std::function<void(std::string const&)>) const;
+			void compile(std::function<void(std::string const&)>, std::size_t depth, std::size_t index) const;
 
 			[[nodiscard]] static constant factory(symbol const&);
 

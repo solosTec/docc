@@ -107,6 +107,7 @@ namespace docscript {
 			break;
 		default:
 			//  error
+			BOOST_ASSERT_MSG(false, "TERM");
 			break;
 		}
 		return true;    //  advance
@@ -177,6 +178,7 @@ namespace docscript {
 				return false;
 			}
 
+			state_.push(nonterminal_type::VECTOR);
 			state_.push({ sym, nonterminal_type::PARAMS });
 			prg_.init_function(sym.value_);
 			return true;
@@ -278,6 +280,7 @@ namespace docscript {
 				stdout,
 				fg(fmt::color::dim_gray),
 				"{}: advance [{}] \n", ctx_.get_position(), sym.value_);
+			prg_.append(sym);
 			break;
 		case symbol_type::DQU:
 			state_.push(nonterminal(make_symbol(symbol_type::DQU, std::string(1, '"'))));
@@ -338,7 +341,7 @@ namespace docscript {
 				"{}: error: method [{}] is not a single value method (SVM)\n", ctx_.get_position(), name);
 
 		}
-		state_.push(nonterminal_type::VECTOR);
+		//state_.push(nonterminal_type::VECTOR);
 		state_.push(nonterminal_type::SVM);  //  single value method (SVM)
 		state_.push(nonterminal_type::VALUE);
 		return false;

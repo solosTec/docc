@@ -33,11 +33,11 @@ namespace docscript {
 
 		param::~param() = default;
 
-		std::size_t param::compile(std::function<void(std::string const&)> emit) const {
+		std::size_t param::compile(std::function<void(std::string const&)> emit, std::size_t depth, std::size_t index) const {
 			//std::cout << "param::compile()" << std::endl;
 			BOOST_ASSERT_MSG(is_complete(), "param is incomplete");
 
-			value_.compile(emit);
+			value_.compile(emit, depth, index);
 
 			emit("push ");
 			emit(key_);
@@ -46,7 +46,7 @@ namespace docscript {
 			emit("make_param\n");
 
 			return (next_) 
-				? next_->compile(emit) + 1u
+				? next_->compile(emit, depth, index + 1) + 1u
 				: 1u;
 		}
 

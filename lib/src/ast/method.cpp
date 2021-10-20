@@ -36,10 +36,10 @@ namespace docscript {
 
 		map_method::~map_method() = default;
 
-		void map_method::compile(std::function<void(std::string const&)> emit) const {
+		void map_method::compile(std::function<void(std::string const&)> emit, std::size_t depth, std::size_t index) const {
 			//std::cout << "map_method::compile()" << std::endl;
 			if (params_) {
-				auto const count = params_->compile(emit);
+				auto const count = params_->compile(emit, depth + 1, index);
 				emit("push ");
 				emit(std::to_string(count));
 				emit("\t; parameter(s)\n");
@@ -72,14 +72,21 @@ namespace docscript {
 		//	-- vec_method
 		//	----------------------------------------------------------*
 		//
-		void vec_method::compile(std::function<void(std::string const&)> emit) const {
-			//std::cout << "vec_method::compile()" << std::endl;
+		void vec_method::compile(std::function<void(std::string const&)> emit, std::size_t depth, std::size_t index) const {
+
+		
 			emit("esba");
 			emit("\t; ");
 			emit(this->get_name());
 			emit("\n");
 			if (vlist_) {
-				vlist_->compile(emit);
+				auto const count = vlist_->compile(emit, depth + 1, index);
+				std::cout
+					<< this->get_name()
+					<< "::compile("
+					<< count
+					<< ")"
+					<< std::endl;
 			}
 			emit("frm\n");
 			emit("make_vector\n");

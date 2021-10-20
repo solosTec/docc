@@ -295,6 +295,7 @@ namespace docscript {
 
 		case 'Z':
 			if (value_.size() != 19) {
+				emit(symbol_type::TST);
 				return { state::START_, false };
 			}
 			value_ += tok;
@@ -304,7 +305,13 @@ namespace docscript {
 			if (value_.size() == 10 || value_.size() == 19 || value_.size() == 20) {
 				complete_ts();
 				emit(symbol_type::TST);
-				return { state::START_, true };
+
+				if (static_cast<std::uint32_t>(tok) == '.') {
+					value_ += tok;
+					emit(symbol_type::TXT);
+					return { state::START_, true };
+				}
+				return { state::START_, false };
 			}
 			else {
 				//  

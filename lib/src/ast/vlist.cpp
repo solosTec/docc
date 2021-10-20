@@ -26,12 +26,23 @@ namespace docscript {
 
 		vlist::~vlist() = default;
 
-		void vlist::compile(std::function<void(std::string const&)> emit) const {
-			//std::cout << "vlist::compile()" << std::endl;
-			value_.compile(emit);
-			if (next_) {
-				next_->compile(emit);
-			}
+		std::size_t vlist::compile(std::function<void(std::string const&)> emit, std::size_t depth, std::size_t index) const {
+
+			std::cout 
+				<< "vlist::compile("
+				<< depth
+				<< ", #"
+				<< index
+				<< ": "
+				<< value_
+				<< ")" 
+				<< std::endl;
+
+			value_.compile(emit, depth, index);
+			return (next_)
+				? next_->compile(emit, depth, index + 1u) + 1u
+				: 1u
+				;
 		}
 
 		void vlist::append(value && v) {

@@ -33,7 +33,8 @@ namespace docscript {
 
 			static vlist factory(symbol const&);
 
-			void compile(std::function<void(std::string const&)>) const;
+			std::size_t compile(std::function<void(std::string const&)>, std::size_t depth, std::size_t index) const;
+
 			/**
 			 * append to value list (vector)
 			 */
@@ -44,11 +45,7 @@ namespace docscript {
 			std::unique_ptr<vlist> next_;
 
 		};
-
-		//vlist gen_vlist(symbol const&);
-
 	}
-
 }
 
 #endif

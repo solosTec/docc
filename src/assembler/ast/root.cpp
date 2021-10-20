@@ -123,33 +123,32 @@ namespace docscript {
 		}
 
 		std::ostream& operator<<(std::ostream& os, value const& v) {
-			switch (v.val_.index()) {
-			case 1:	//	string
-				std::cout << std::quoted(std::get<1>(v.val_));
-				break;
-			case 2: {//	timepoint
-				const std::time_t t_c = std::chrono::system_clock::to_time_t(std::get<2>(v.val_));
-				std::cout << std::put_time(std::localtime(&t_c), "%FT%T\n");
-			}
-				break;
-			case 3:	//	color
-				std::cout << std::get<3>(v.val_);
-				break;
-			case 4:	//	bool
-				std::cout << (std::get<4>(v.val_) ? "true" : "false");
-				break;
-			case 5:	//	u64
-				std::cout << std::get<5>(v.val_) << "u64";
-				break;
-			case 6:	//	uuid
-				std::cout << std::get<6>(v.val_);
-				break;
-			default:
-				break;
-			}
-			//std::visit([&](auto&& arg) {
-			//	//std::cout << arg << std::endl;
-			//	}, v.val_);
+			std::visit(overloaded{
+				[](auto& arg) {},
+				[&](std::string const& val) {
+					os << std::quoted(val);
+					},
+				[&](std::chrono::system_clock::time_point const& val) {
+					const std::time_t t_c = std::chrono::system_clock::to_time_t(std::get<2>(v.val_));
+					os << std::put_time(std::localtime(&t_c), "%FT%T\n");
+					},
+				[&](cyng::color_8 const& val) {
+					os << val;
+					},
+				[&](bool val) {
+					os << (val ? "true" : "false");
+					},
+				[&](std::uint64_t val) {
+					os << std::dec << val << "u64";
+					},
+				[&](boost::uuids::uuid val) {
+					os << val;
+					},
+				[&](double val) {
+					os << std::fixed << val;
+					}
+				}, v.val_);
+
 			return os;
 		}
 

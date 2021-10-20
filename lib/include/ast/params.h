@@ -45,7 +45,7 @@ namespace docscript {
 			 */
 			void append(param&&);
 			std::size_t size() const;
-			std::size_t compile(std::function<void(std::string const&)>) const;
+			std::size_t compile(std::function<void(std::string const&)>, std::size_t depth, std::size_t index) const;
 
 			static param factory(symbol const&);
 

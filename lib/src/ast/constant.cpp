@@ -49,7 +49,7 @@ namespace docscript {
 			return constant{ sym.value_, sym.value_ };
 		}
 
-		void constant::compile(std::function<void(std::string const&)> emit) const {
+		void constant::compile(std::function<void(std::string const&)> emit, std::size_t depth, std::size_t index) const {
 			//std::cout << "constant::compile()" << std::endl;
 			std::stringstream ss;
 			ss << *this;
@@ -70,7 +70,7 @@ namespace docscript {
 			[&](std::string const& arg) { os << std::quoted(arg); },
 			[&](std::chrono::system_clock::time_point const& arg) { 
 				const std::time_t t_c = std::chrono::system_clock::to_time_t(arg);
-				os << std::put_time(std::localtime(&t_c), "%FT%T\n");
+				os << std::put_time(std::localtime(&t_c), "@%FT%T\n");
 				},
 			[&](bool arg) { os << (arg ? "true" : "false"); },
 			[&](cyng::color_8 const& arg) { os << arg; },

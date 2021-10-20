@@ -165,7 +165,5 @@ int main(int argc, char* argv[]) {
         out_file,
         verbose
     );
-    return ctl.run(std::filesystem::path(inp_file), pool_size, tag);
-
-    //return EXIT_SUCCESS;
+    return ctl.run(docscript::verify_extension(inp_file, "cyng"), pool_size, tag);
 }

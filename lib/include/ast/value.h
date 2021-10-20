@@ -31,7 +31,7 @@ namespace docscript {
 			 */
 			bool empty() const;
 
-			void compile(std::function<void(std::string const&)>) const;
+			void compile(std::function<void(std::string const&)>, std::size_t depth, std::size_t index) const;
 
 			static value factory(symbol const& sym);
 			static value factory(map_method&&);

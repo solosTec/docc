@@ -293,6 +293,17 @@ install(TARGETS docrt
     DESTINATION bin)
 
 #
+# batch files
+#
+if(WIN32)
+    configure_file (
+		    "${CMAKE_CURRENT_SOURCE_DIR}/src/build.cmd.in"
+		    "${PROJECT_BINARY_DIR}/build.cmd")
+
+endif(WIN32)
+
+
+#
 # CPack configuration
 #
 set(CPACK_PACKAGE_VERSION ${VERSION})

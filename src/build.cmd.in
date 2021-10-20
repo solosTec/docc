@@ -1,0 +1,9 @@
+REM
+REM compile, assemble and build the main example document
+REM
+@echo off
+@cls
+${PROJECT_BINARY_DIR}/Debug/docc -V 10 -S main -O main
+${PROJECT_BINARY_DIR}/Debug/docasm -V 10 -S main -O main
+${PROJECT_BINARY_DIR}/Debug/docrt -S main.cyng
+@echo on

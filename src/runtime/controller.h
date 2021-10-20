@@ -26,10 +26,20 @@ namespace docscript {
 			, boost::uuids::uuid tag);
 
 	private:
-		void quote(cyng::vector_t);
-		void set(cyng::param_map_t);
+		std::string quote(cyng::vector_t);
+		std::string italic(cyng::vector_t);
+		std::string bold(cyng::vector_t);
+		std::string paragraph(cyng::vector_t);
 
+		void label(cyng::vector_t);
+		std::string ref(cyng::vector_t);
+		std::string h1(cyng::vector_t);
+
+		void set(cyng::param_map_t);
 	};
+
+	std::filesystem::path verify_extension(std::filesystem::path p, std::string const& ext);
+
 }
 
 #endif

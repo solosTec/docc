@@ -49,11 +49,11 @@ namespace docscript {
 				return os;
 			}
 
-			void compile(std::function<void(std::string const&)> emit) const {
+			void compile(std::function<void(std::string const&)> emit, std::size_t depth, std::size_t index) const {
 				std::visit([&](auto const& arg) {
 					arg.compile([&](std::string const& s) {
 						emit(s);
-						});
+						}, depth, index);
 					}, value_);
 			}
 		};
@@ -99,10 +99,10 @@ namespace docscript {
 			return { new value_node(std::move(c)) };
 		}
 
-		void value::compile(std::function<void(std::string const&)> emit) const {
+		void value::compile(std::function<void(std::string const&)> emit, std::size_t depth, std::size_t index) const {
 			//std::cout << "value::compile()" << std::endl;
 			if (node_) {
-				node_->compile(emit);
+				node_->compile(emit, depth, index + 1u);
 			}
 			else {
 				emit("push ");

@@ -28,7 +28,7 @@ namespace docscript {
 			map_method(std::string const& name, std::optional<docscript::method> optm);
 			map_method(map_method&&) noexcept;
 			~map_method();
-			void compile(std::function<void(std::string const&)>) const;
+			void compile(std::function<void(std::string const&)>, std::size_t depth, std::size_t index) const;
 			void set_params(param&&);
 			static map_method factory(std::string const&, std::optional<docscript::method>);
 		private:
@@ -45,7 +45,7 @@ namespace docscript {
 			vec_method(std::string const& name, std::optional<docscript::method> optm);
 			vec_method(vec_method&& vecm) noexcept;
 			~vec_method();
-			void compile(std::function<void(std::string const&)>) const;
+			void compile(std::function<void(std::string const&)>, std::size_t depth, std::size_t index) const;
 			/**
 			 * append to value list (vector)
 			 */

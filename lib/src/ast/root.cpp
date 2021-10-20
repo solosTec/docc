@@ -142,6 +142,22 @@ namespace docscript {
 			semantic_stack_.pop();
 
 			switch (top().index()) {
+			case 2: {
+				//
+				//	append to params
+				//
+				std::get<2>(top()).append(std::move(p));
+
+				//
+				//	finish map method
+				//
+				auto p = std::move(std::get<2>(top()));
+				semantic_stack_.pop();
+				BOOST_ASSERT_MSG(semantic_stack_.top().index() == 3, "map function expected");
+				std::get<3>(top()).set_params(std::move(p));
+
+			}
+				  break;
 			case 3: {
 				decltype(auto) name = std::get<3>(top()).get_name();
 				fmt::print(
@@ -209,13 +225,33 @@ namespace docscript {
 		}
 
 		void program::merge_ast_vec_method() {
-			BOOST_ASSERT_MSG(top().index() == 4, "vec method expected"); 
+			BOOST_ASSERT_MSG(top().index() == 4, "vec method expected");
 
 			auto m = std::move(std::get<4>(top()));
 			semantic_stack_.pop();
 
-			merge_ast_value(value::factory(std::move(m)));
-
+			//merge_ast_value(value::factory(std::move(m)));
+			switch (top().index()) {
+			case 2: {
+				//
+				//	parameter list
+				//
+				auto p = std::get<2>(top()).finish(value::factory(std::move(m)));
+				semantic_stack_.pop();
+				semantic_stack_.push(std::move(p));
+			}
+				  break;
+			case 4: {
+				//
+				//	vector method
+				//
+				std::get<4>(top()).append(value::factory(std::move(m)));
+			}
+				  break;
+			default:
+				BOOST_ASSERT(false);
+				break;
+			}
 		}
 
 		void program::generate() {
@@ -224,7 +260,7 @@ namespace docscript {
 				std::visit([&](auto const& arg) {
 					arg.compile([&](std::string const& s){
 						ctx_.emit(s);
-						});
+						}, 0, 0);
 					}, decl);
 			}
 		}
