@@ -72,6 +72,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# -fPIC
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 #
 #	boost library
 #
@@ -192,7 +195,7 @@ target_include_directories(docc
 target_compile_features(docc PRIVATE cxx_std_20)
 
 target_compile_options(docc 
-	PRIVATE "$<$<CXX_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Wpedantic>"
+	PRIVATE "$<$<CXX_COMPILER_ID:GNU,Clang>:-Wall;-Wextra;-pedantic>"
 	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/MP>"
 	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/W2>"
 )
@@ -207,7 +210,7 @@ target_link_libraries(docc
 #		CYNG::CYNG
 		${CYNG_LIBRARIES}
 		${OPENSSL_LIBRARIES}
-		"$<$<PLATFORM_ID:Linux>:pthread>"
+		"$<$<PLATFORM_ID:Linux>:pthread;${Boost_LIBRARIES}>"
 )
 
 install(TARGETS docc
@@ -233,8 +236,8 @@ target_include_directories(docasm
 target_compile_features(docasm PRIVATE cxx_std_20)
 
 target_compile_options(docasm 
-	PRIVATE "$<$<CXX_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Wpedantic>"
-	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/MP>"
+    PRIVATE "$<$<CXX_COMPILER_ID:GNU,Clang>:-Wall;-Wextra;-pedantic>"
+    PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/MP>"
 	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/W2>"
 )
 
@@ -246,7 +249,7 @@ target_link_libraries(docasm
         fmt::fmt
 		${CYNG_LIBRARIES}
 		${OPENSSL_LIBRARIES}
-		"$<$<PLATFORM_ID:Linux>:pthread>"
+		"$<$<PLATFORM_ID:Linux>:pthread;${Boost_LIBRARIES}>"
 )
 
 install(TARGETS docasm
@@ -272,7 +275,7 @@ target_include_directories(docrt
 target_compile_features(docrt PRIVATE cxx_std_20)
 
 target_compile_options(docrt 
-	PRIVATE "$<$<CXX_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Wpedantic>"
+    PRIVATE "$<$<CXX_COMPILER_ID:GNU,Clang>:-Wall;-Wextra;-pedantic>"
 	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/MP>"
 	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/W2>"
 )
@@ -285,7 +288,7 @@ target_link_libraries(docrt
         fmt::fmt
 		${CYNG_LIBRARIES}
 		${OPENSSL_LIBRARIES}
-		"$<$<PLATFORM_ID:Linux>:pthread>"
+		"$<$<PLATFORM_ID:Linux>:pthread;${Boost_LIBRARIES}>"
 )
 
 install(TARGETS docrt

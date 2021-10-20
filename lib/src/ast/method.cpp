@@ -68,7 +68,7 @@ namespace docscript {
 				//
 				//	get the required and the defined parameters
 				//
-				auto& const req = method_->get_param_names();
+				auto& req = method_->get_param_names();
 				auto const def = params_->get_param_names();
 				for (auto const& name : req) {
 					if (def.find(name) == def.end()) {

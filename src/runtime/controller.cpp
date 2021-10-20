@@ -15,6 +15,7 @@
 #include <chrono>
 #include <fstream>
 #include <functional>
+#include <iostream>
 
 namespace docscript {
 
