@@ -9,6 +9,8 @@
 
 #include <ast/value.h>
 
+#include <set>
+
 namespace docscript {
 	struct symbol;
 	namespace ast {
@@ -20,6 +22,9 @@ namespace docscript {
 		 */
 		class param {
 			friend struct fmt::formatter<param>;
+
+		public:
+			using param_names_t = std::set<std::string>;
 
 		public:
 			param(std::string const&, value&&);
@@ -46,6 +51,8 @@ namespace docscript {
 			void append(param&&);
 			std::size_t size() const;
 			std::size_t compile(std::function<void(std::string const&)>, std::size_t depth, std::size_t index) const;
+
+			param_names_t get_param_names() const;
 
 			static param factory(symbol const&);
 

@@ -99,7 +99,7 @@ int main(int argc, char* argv[]) {
     compiler.add_options()
 
         ("source,S", boost::program_options::value(&inp_file)->default_value(inp_file), "main source file")
-        ("output,O", boost::program_options::value(&out_file)->default_value(out_file), "output file")
+        ("output,O", boost::program_options::value(&out_file)->implicit_value("")->default_value(out_file), "output file")
         ("include-path,I", boost::program_options::value< std::vector<std::string> >()->default_value(std::vector<std::string>(1, here.string()), here.string()), "include paths")
         //	verbose level
         ("verbose,V", boost::program_options::value<int>()->default_value(0)->implicit_value(1), "verbose level")
@@ -200,7 +200,7 @@ int main(int argc, char* argv[]) {
     //
     
     docscript::controller ctl(
-        out_file,
+        out_file.empty() ? std::filesystem::path(inp_file).replace_extension("docs") : std::filesystem::path(out_file),
         inc_paths,
         verbose);
 

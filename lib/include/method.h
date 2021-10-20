@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <string>
 #include <set>
+//#include <ranges>
 
 namespace docscript {
 
@@ -29,6 +30,11 @@ namespace docscript {
 
 	class method 
 	{
+	public:
+		using param_names_t = std::set<std::string>;
+		using param_names_citerator = std::set<std::string>::const_iterator;
+		using param_names_range_t = std::pair<param_names_citerator, param_names_citerator>;
+
 	public:
 		method(std::string, return_type rt, parameter_type pt, bool inl, std::initializer_list<std::string> = {});
 		virtual ~method();
@@ -54,6 +60,11 @@ namespace docscript {
 		 */
 		bool is_inline() const;
 
+		/**
+		 * @return a range of all parameter names
+		 */
+		param_names_t const& get_param_names() const;
+
 	private:
 		std::string const name_;
 		return_type const rt_;
@@ -63,7 +74,7 @@ namespace docscript {
 		/**
 		 * parameter names
 		 */
-		std::set<std::string> const params_;
+		param_names_t const params_;
 	};
 
 	/**

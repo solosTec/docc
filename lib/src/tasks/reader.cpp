@@ -8,6 +8,8 @@
 #include <fmt/core.h>
 #include <fmt/color.h>
 
+#include <boost/algorithm/string.hpp>
+
 namespace docscript {
 
     reader::reader(

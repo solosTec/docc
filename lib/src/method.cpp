@@ -21,6 +21,11 @@ namespace docscript {
 		return inline_;
 	}
 
+	method::param_names_t const& method::get_param_names() const {
+		return params_;
+		//return { params_.cbegin(), params_.cend() };
+	}
+
 	method make_placeholder_method(std::string const& name) {
 		return { name, return_type::ANY, parameter_type::VECTOR, true, {} };
 	}

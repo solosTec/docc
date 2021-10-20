@@ -34,6 +34,14 @@ namespace docscript {
 		void label(cyng::vector_t);
 		std::string ref(cyng::vector_t);
 		std::string h1(cyng::vector_t);
+		std::string h2(cyng::vector_t);
+		std::string h3(cyng::vector_t);
+		std::string h4(cyng::vector_t);
+		std::string h5(cyng::vector_t);
+		std::string h6(cyng::vector_t);
+		std::string header(cyng::param_map_t);
+
+		std::string resource(cyng::param_map_t);
 
 		void set(cyng::param_map_t);
 	};

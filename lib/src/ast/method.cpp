@@ -1,5 +1,6 @@
 #include <ast/method.h>
 #include <ast/vlist.h>
+#include <ast/params.h>
 //#include <context.h>
 
 #include <boost/assert.hpp>
@@ -52,8 +53,33 @@ namespace docscript {
 			emit("\n");
 		}
 
-		void map_method::set_params(param && p) {
+		void map_method::set_params(param && p, std::string pos) {
+			//
+			//	set named parameter
+			//
+			BOOST_ASSERT_MSG(!params_, "parameters already set");
 			params_ = std::make_unique<param>(std::move(p));
+
+			//
+			//	check parameter list
+			//
+			BOOST_ASSERT_MSG(method_.has_value(), "method is unknown");
+			if (method_.has_value()) {
+				//
+				//	get the required and the defined parameters
+				//
+				auto& const req = method_->get_param_names();
+				auto const def = params_->get_param_names();
+				for (auto const& name : req) {
+					if (def.find(name) == def.end()) {
+						fmt::print(
+							stdout,
+							fg(fmt::color::crimson) | fmt::emphasis::bold,
+							"{}: error: missing parameter [{}] in method \"{}\"\n", pos, name, method_->get_name());
+
+					}
+				}
+			}
 		}
 
 		std::size_t map_method::param_count() const {

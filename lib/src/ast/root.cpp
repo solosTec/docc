@@ -66,8 +66,15 @@ namespace docscript {
 		}
 
 		void program::init_paragraph(std::string const& name) {
-			BOOST_ASSERT(semantic_stack_.size() < 2);
-			if (!semantic_stack_.empty()) {
+			//BOOST_ASSERT(semantic_stack_.size() < 2);
+			if (semantic_stack_.size() > 1) {
+				fmt::print(
+					stdout,
+					fg(fmt::color::dim_gray),
+					"{}: close open AST [{}] \n", ctx_.get_position(), semantic_stack_.size());
+
+			}
+			while (!semantic_stack_.empty()) {
 				transfer_ast();
 			}
 			semantic_stack_.push(vec_method::factory(name, ctx_.lookup_method(name)));
@@ -153,8 +160,8 @@ namespace docscript {
 				//
 				auto p = std::move(std::get<2>(top()));
 				semantic_stack_.pop();
-				BOOST_ASSERT_MSG(semantic_stack_.top().index() == 3, "map function expected");
-				std::get<3>(top()).set_params(std::move(p));
+				BOOST_ASSERT_MSG(semantic_stack_.top().index() == 3, "map function expected");				
+				std::get<3>(top()).set_params(std::move(p), ctx_.get_position());
 
 			}
 				  break;
@@ -164,7 +171,7 @@ namespace docscript {
 					stdout,
 					fg(fmt::color::dim_gray),
 					"{}: map function \"{}\" is complete \n", ctx_.get_position(), name);
-				std::get<3>(top()).set_params(std::move(p));
+				std::get<3>(top()).set_params(std::move(p), ctx_.get_position());
 			}
 				  break;
 			default:

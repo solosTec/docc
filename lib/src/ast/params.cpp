@@ -50,6 +50,16 @@ namespace docscript {
 				: 1u;
 		}
 
+		param::param_names_t param::get_param_names() const {
+			param_names_t names;
+			names.insert(key_);
+			if (next_) {
+				auto const n = next_->get_param_names();
+				names.insert(n.begin(), n.end());
+			}
+			return names;
+		}
+
 		bool param::is_complete() const {
 			return !value_.empty();
 		}

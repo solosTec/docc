@@ -7,8 +7,14 @@
 #ifndef DOCC_SCRIPT_AST_METHOD_H
 #define DOCC_SCRIPT_AST_METHOD_H
 
-#include <ast/params.h>
 #include <method.h>
+
+#include <optional>
+#include <functional>
+
+#include <fmt/core.h>
+#include <fmt/color.h>
+#include <fmt/format.h>
 
 namespace docscript {
 
@@ -22,6 +28,8 @@ namespace docscript {
 			std::optional<docscript::method>	method_;
 		};
 
+		class param;
+		class value;
 		class map_method : public method_base {
 			friend struct fmt::formatter<value>;
 		public:
@@ -29,7 +37,7 @@ namespace docscript {
 			map_method(map_method&&) noexcept;
 			~map_method();
 			void compile(std::function<void(std::string const&)>, std::size_t depth, std::size_t index) const;
-			void set_params(param&&);
+			void set_params(param&&, std::string pos);
 			static map_method factory(std::string const&, std::optional<docscript::method>);
 		private:
 			std::size_t param_count() const;

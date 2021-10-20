@@ -481,6 +481,18 @@ namespace docscript {
 	{
 		switch (static_cast<std::uint32_t>(tok)) {
 		case '\n':
+			if (prev.operator uint32_t() == ';') {
+				//
+				//	eleminate comment lines at the start
+				//	of an include file
+				//
+				value_.clear();
+				return { state::START_, false };
+			}
+			else {
+				emit(symbol_type::TXT);
+			}
+			return { state::START_, true };
 		case ' ':
 		case '\t':
 			emit(symbol_type::TXT);
@@ -493,8 +505,6 @@ namespace docscript {
 			return { state::START_, true };
 
 		case '(':   case ')':
-		//case '[':   case ']':
-		//case '{':   case '}':
 		case ';':	case ':':
 		case ',':
 			emit(symbol_type::TXT);
@@ -571,9 +581,10 @@ namespace docscript {
 		}
 		cyng::utf8::u32_to_u8_iterator<std::u32string::const_iterator> start(value_.begin());
 		cyng::utf8::u32_to_u8_iterator<std::u32string::const_iterator> end(value_.end());
-		cb_(make_symbol(type, std::string(start, end)));
+		std::string s(start, end);
 		value_.clear();
 		prev_sym_type_ = type;
+		cb_(make_symbol(type, std::move(s)));
 	}
 
 }

@@ -50,8 +50,15 @@ namespace docscript {
 		std::function<void(cyng::vector_t)> f6 = std::bind(&controller::label, this, std::placeholders::_1);
 		std::function<std::string(cyng::vector_t)> f7 = std::bind(&controller::ref, this, std::placeholders::_1);
 		std::function<std::string(cyng::vector_t)> f8 = std::bind(&controller::h1, this, std::placeholders::_1);
+		std::function<std::string(cyng::vector_t)> f9 = std::bind(&controller::h2, this, std::placeholders::_1);
+		std::function<std::string(cyng::vector_t)> f10 = std::bind(&controller::h3, this, std::placeholders::_1);
+		std::function<std::string(cyng::vector_t)> f11 = std::bind(&controller::h4, this, std::placeholders::_1);
+		std::function<std::string(cyng::vector_t)> f12 = std::bind(&controller::h5, this, std::placeholders::_1);
+		std::function<std::string(cyng::vector_t)> f13 = std::bind(&controller::h6, this, std::placeholders::_1);
+		std::function<std::string(cyng::param_map_t)> f14 = std::bind(&controller::header, this, std::placeholders::_1);
+		std::function<std::string(cyng::param_map_t)> f15 = std::bind(&controller::resource, this, std::placeholders::_1);
 		std::function<void(std::string)> f_show = std::bind(&show, std::placeholders::_1);
-		auto vm = fabric.create_proxy(tag, f1, f2, f3, f4, f5, f6, f7, f8);
+		auto vm = fabric.create_proxy(tag, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15, f_show);
 		std::size_t slot{ 0 };
 		vm.set_channel_name("quote", slot++);
 		vm.set_channel_name("set", slot++);
@@ -61,7 +68,14 @@ namespace docscript {
 		vm.set_channel_name("label", slot++);	//	label
 		vm.set_channel_name("ref", slot++);	//	ref
 		vm.set_channel_name("h1", slot++);	//	h1
-		vm.set_channel_name("show", slot++);
+		vm.set_channel_name("h2", slot++);	//	h2
+		vm.set_channel_name("h3", slot++);	//	h3
+		vm.set_channel_name("h4", slot++);	//	h4
+		vm.set_channel_name("h5", slot++);	//	h5
+		vm.set_channel_name("h6", slot++);	//	h6
+		vm.set_channel_name("header", slot++);	//	header
+		vm.set_channel_name("resource", slot++);	//	resource
+		vm.set_channel_name("show", slot++);	//	show
 
 		//
 		//	load programe
@@ -179,6 +193,55 @@ namespace docscript {
 		std::reverse(std::begin(vec), std::end(vec));
 		std::stringstream ss;
 		ss << "H1(" << vec << ")";
+		std::cout << ss.str() << std::endl;
+		return ss.str();
+	}
+	std::string controller::h2(cyng::vector_t vec) {
+		std::reverse(std::begin(vec), std::end(vec));
+		std::stringstream ss;
+		ss << "H2(" << vec << ")";
+		std::cout << ss.str() << std::endl;
+		return ss.str();
+	}
+	std::string controller::h3(cyng::vector_t vec) {
+		std::reverse(std::begin(vec), std::end(vec));
+		std::stringstream ss;
+		ss << "H3(" << vec << ")";
+		std::cout << ss.str() << std::endl;
+		return ss.str();
+	}
+	std::string controller::h4(cyng::vector_t vec) {
+		std::reverse(std::begin(vec), std::end(vec));
+		std::stringstream ss;
+		ss << "H4(" << vec << ")";
+		std::cout << ss.str() << std::endl;
+		return ss.str();
+	}
+	std::string controller::h5(cyng::vector_t vec) {
+		std::reverse(std::begin(vec), std::end(vec));
+		std::stringstream ss;
+		ss << "H5(" << vec << ")";
+		std::cout << ss.str() << std::endl;
+		return ss.str();
+	}
+	std::string controller::h6(cyng::vector_t vec) {
+		std::reverse(std::begin(vec), std::end(vec));
+		std::stringstream ss;
+		ss << "H6(" << vec << ")";
+		std::cout << ss.str() << std::endl;
+		return ss.str();
+	}
+	std::string controller::header(cyng::param_map_t pm) {
+		//std::reverse(std::begin(vec), std::end(vec));
+		std::stringstream ss;
+		ss << "HEADER(" << pm << ")";
+		std::cout << ss.str() << std::endl;
+		return ss.str();
+	}
+	std::string controller::resource(cyng::param_map_t pm) {
+		//std::reverse(std::begin(vec), std::end(vec));
+		std::stringstream ss;
+		ss << "RESOURCE(" << pm << ")";
 		std::cout << ss.str() << std::endl;
 		return ss.str();
 	}

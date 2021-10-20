@@ -107,6 +107,10 @@ namespace docscript {
 			break;
 		default:
 			//  error
+			fmt::print(
+				stdout,
+				fg(fmt::color::crimson) | fmt::emphasis::bold,
+				"{}: internal error [{}] - function or new paragraph expected\n", ctx_.get_position(), sym.value_);
 			BOOST_ASSERT_MSG(false, "TERM");
 			break;
 		}
@@ -151,7 +155,6 @@ namespace docscript {
 			//  merge
 			//
 			prg_.merge();
-			//prg_.finalize_param(sym); // ?
 			return true;
 		}
 
@@ -168,6 +171,7 @@ namespace docscript {
 				stdout,
 				fg(fmt::color::dim_gray),
 				"{}: vector complete\n", ctx_.get_position());
+			//prg_.merge();
 			return false;
 		case symbol_type::FUN:
 			if (!is_display_inline(sym.value_)) {
@@ -341,7 +345,6 @@ namespace docscript {
 				"{}: error: method [{}] is not a single value method (SVM)\n", ctx_.get_position(), name);
 
 		}
-		//state_.push(nonterminal_type::VECTOR);
 		state_.push(nonterminal_type::SVM);  //  single value method (SVM)
 		state_.push(nonterminal_type::VALUE);
 		return false;
