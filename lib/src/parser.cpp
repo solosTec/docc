@@ -25,7 +25,13 @@ namespace docscript {
 
 	bool parser::put(symbol const& sym)
 	{
-		std::cout << ctx_.get_position() << ": " << sym << " " << state_ << std::endl;
+		if (ctx_.get_verbosity(12)) {
+			fmt::print(
+				stdout,
+				fg(fmt::color::gray),
+				"{}: {} - {}\n", ctx_.get_position(), sym, state_);
+		}
+
 
 		BOOST_ASSERT_MSG(!state_.empty(), "state stack is empty");
 
@@ -88,13 +94,7 @@ namespace docscript {
 		switch (sym.type_) {
 		case symbol_type::FUN:
 			state_.push({ sym, nonterminal_type::PARAMS });
-			if (prg_.init_function(sym.value_)) {
-				fmt::print(
-					stdout,
-					fg(fmt::color::dim_gray),
-					"{}: init function [{}]\n", ctx_.get_position(), sym.value_);
-			}
-			else {
+			if (!prg_.init_function(sym.value_)) {
 				fmt::print(
 					stdout,
 					fg(fmt::color::crimson) | fmt::emphasis::bold,
@@ -147,10 +147,6 @@ namespace docscript {
 
 		if ((state_.top().nttype_ == nonterminal_type::TERMINAL) && (sym == state_.top().sym_)) {
 			state_.pop();
-			fmt::print(
-				stdout,
-				fg(fmt::color::dim_gray),
-				"{}: vector method complete\n", ctx_.get_position());
 			//
 			//  merge
 			//
@@ -167,11 +163,6 @@ namespace docscript {
 			return true;
 
 		case symbol_type::PAR:
-			fmt::print(
-				stdout,
-				fg(fmt::color::dim_gray),
-				"{}: vector complete\n", ctx_.get_position());
-			//prg_.merge();
 			return false;
 		case symbol_type::FUN:
 			if (!is_display_inline(sym.value_)) {
@@ -210,12 +201,30 @@ namespace docscript {
 			state_.push(nonterminal_type::TAIL);
 			state_.push(nonterminal_type::VALUE);
 			state_.push(make_symbol(symbol_type::SYM, std::string(1, ':')));
-			fmt::print(
-				stdout,
-				fg(fmt::color::dim_gray),
-				"{}: init parameter [{}:...] \n", ctx_.get_position(), sym.value_);
 			prg_.init_param(sym);
 			return true;    //  take key name and advance
+		case symbol_type::SYM:
+			if (sym == state_.top().sym_) {
+				state_.pop();
+				fmt::print(
+					stdout,
+					fg(fmt::color::dim_gray),
+					"{}: map method complete\n", ctx_.get_position());
+				//
+				//  merge
+				//
+				prg_.merge();
+				return true;
+			}
+			else {
+				state_.push(nonterminal_type::TAIL);
+				//	error: no symbols allowed
+				fmt::print(
+					stdout,
+					fg(fmt::color::orange) | fmt::emphasis::bold,
+					"{}: warning: no symbols allowed [{}]\n", ctx_.get_position(), sym.value_);
+			}
+			return false;
 		default:
 			fmt::print(
 				stdout,
@@ -238,7 +247,7 @@ namespace docscript {
 		//
 		//  end of map: function is complete
 		//
-		prg_.merge();
+		state_.push(nonterminal_type::MAP);
 		return false;
 	}
 
@@ -262,17 +271,17 @@ namespace docscript {
 				//  expect a param on top of the AST
 				//
 				prg_.finalize_param(sym);
-				fmt::print(
-					stdout,
-					fg(fmt::color::dim_gray),
-					"{}: param complete \"{}\"\n", ctx_.get_position(), sym.value_);
 				break;
 			default:
-				fmt::print(
-					stdout,
-					fg(fmt::color::dim_gray),
-					"{}: advance value [{}] \n", ctx_.get_position(), sym.value_);
-				prg_.append(sym);
+				if (!prg_.append(sym)) {
+					//
+					//	no vec method on semantic stack
+					//
+					fmt::print(
+						stdout,
+						fg(fmt::color::crimson) | fmt::emphasis::bold,
+						"{}: error: no vec method on semantic stack [{}]\n", ctx_.get_position(), sym.value_);
+				}
 				//
 				//  single value method (SVM)?
 				//
@@ -280,10 +289,6 @@ namespace docscript {
 			}
 			break;
 		case symbol_type::SYM:
-			fmt::print(
-				stdout,
-				fg(fmt::color::dim_gray),
-				"{}: advance [{}] \n", ctx_.get_position(), sym.value_);
 			prg_.append(sym);
 			break;
 		case symbol_type::DQU:
@@ -319,10 +324,6 @@ namespace docscript {
 
 	bool parser::state_svm(symbol const& sym) {
 		state_.pop();
-		fmt::print(
-			stdout,
-			fg(fmt::color::dim_gray),
-			"{}: svm is complete: {}\n", ctx_.get_position(), sym.value_);
 		prg_.merge();
 		return true;
 	}
@@ -358,10 +359,12 @@ namespace docscript {
 				//  TERM is complete
 				//
 				auto const size = prg_.merge();
-				fmt::print(
-					stdout,
-					fg(fmt::color::dim_gray),
-					"{}: term is complete - generated {} asts\n", ctx_.get_position(), size);
+				if (ctx_.get_verbosity(12)) {
+					fmt::print(
+						stdout,
+						fg(fmt::color::light_gray),
+						"{}: term is complete - generated {} ASTs\n", ctx_.get_position(), size);
+				}
 			}
 		}
 		else {
@@ -381,10 +384,12 @@ namespace docscript {
 		//
 		auto const size = prg_.merge();
 
-		fmt::print(
-			stdout,
-			fg(fmt::color::green_yellow) | fmt::emphasis::bold,
-			"***info {}: EOD - produced {} ASTs\n", ctx_.get_position(), size);
+		if (ctx_.get_verbosity(4)) {
+			fmt::print(
+				stdout,
+				fg(fmt::color::green_yellow) | fmt::emphasis::bold,
+				"***info {}: EOD - produced {} ASTs\n", ctx_.get_position(), size);
+		}
 
 		//
 		//  build the program to generate the document(s)

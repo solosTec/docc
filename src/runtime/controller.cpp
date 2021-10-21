@@ -25,6 +25,7 @@ namespace docscript {
 
 	controller::controller(std::filesystem::path out
 		, int verbose)
+		: vars_()
 	{}
 
 	int controller::run(std::filesystem::path&& inp
@@ -57,9 +58,10 @@ namespace docscript {
 		std::function<std::string(cyng::vector_t)> f12 = std::bind(&controller::h5, this, std::placeholders::_1);
 		std::function<std::string(cyng::vector_t)> f13 = std::bind(&controller::h6, this, std::placeholders::_1);
 		std::function<std::string(cyng::param_map_t)> f14 = std::bind(&controller::header, this, std::placeholders::_1);
-		std::function<std::string(cyng::param_map_t)> f15 = std::bind(&controller::resource, this, std::placeholders::_1);
+		std::function<void(cyng::param_map_t)> f15 = std::bind(&controller::resource, this, std::placeholders::_1);
+		std::function<std::chrono::system_clock::time_point(cyng::param_map_t)> f_now = std::bind(&controller::now, this, std::placeholders::_1);
 		std::function<void(std::string)> f_show = std::bind(&show, std::placeholders::_1);
-		auto vm = fabric.create_proxy(tag, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15, f_show);
+		auto vm = fabric.create_proxy(tag, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15, f_now, f_show);
 		std::size_t slot{ 0 };
 		vm.set_channel_name("quote", slot++);
 		vm.set_channel_name("set", slot++);
@@ -76,6 +78,7 @@ namespace docscript {
 		vm.set_channel_name("h6", slot++);	//	h6
 		vm.set_channel_name("header", slot++);	//	header
 		vm.set_channel_name("resource", slot++);	//	resource
+		vm.set_channel_name("now", slot++);	//	current time
 		vm.set_channel_name("show", slot++);	//	show
 
 		//
@@ -166,6 +169,7 @@ namespace docscript {
 
 	void controller::set(cyng::param_map_t pm) {
 		std::cout << "SET(" << pm << ")" << std::endl;
+		vars_.insert(pm.begin(), pm.end());
 	}
 
 	std::string controller::paragraph(cyng::vector_t vec) {
@@ -239,12 +243,14 @@ namespace docscript {
 		std::cout << ss.str() << std::endl;
 		return ss.str();
 	}
-	std::string controller::resource(cyng::param_map_t pm) {
-		//std::reverse(std::begin(vec), std::end(vec));
+	void controller::resource(cyng::param_map_t pm) {
+		std::cout << "RESOURCE(" << pm << ")" << std::endl;
+	}
+	std::chrono::system_clock::time_point controller::now(cyng::param_map_t pm) {
 		std::stringstream ss;
-		ss << "RESOURCE(" << pm << ")";
-		std::cout << ss.str() << std::endl;
-		return ss.str();
+		std::cout << "NOW(" << pm << ")" << std::endl;
+		return std::chrono::system_clock::now();
+		//return "NOW";
 	}
 
 

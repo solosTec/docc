@@ -171,7 +171,7 @@ namespace docscript {
 		//insert_method(table, method("rgb", return_type::U32, parameter_type::VECTOR, true, { "r", "g", "b" }));
 		//insert_method(table, method("rgba", return_type::U32, parameter_type::VECTOR, true, { "r", "g", "b", "a"}));
 
-		insert_method(table, method("now", return_type::TIMESTAMP, parameter_type::VECTOR, true));
+		insert_method(table, method("now", return_type::TIMESTAMP, parameter_type::MAP, true));
 
 	}
 

@@ -38,9 +38,9 @@ namespace docscript {
 			~map_method();
 			void compile(std::function<void(std::string const&)>, std::size_t depth, std::size_t index) const;
 			void set_params(param&&, std::string pos);
-			static map_method factory(std::string const&, std::optional<docscript::method>);
-		private:
 			std::size_t param_count() const;
+
+			static map_method factory(std::string const&, std::optional<docscript::method>);
 		private:
 			std::unique_ptr<param> params_;
 		};
@@ -57,11 +57,13 @@ namespace docscript {
 			/**
 			 * append to value list (vector)
 			 */
-			void append(value&&);
+			std::size_t append(value&&);
+			std::size_t param_count() const;
 
 			static vec_method factory(std::string const&, std::optional<docscript::method>);
 		private:
 			std::unique_ptr<vlist>  vlist_;
+			//std::vector<std::unique_ptr<value>> vlist_;
 		};
 
 	}

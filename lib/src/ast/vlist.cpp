@@ -45,13 +45,19 @@ namespace docscript {
 				;
 		}
 
-		void vlist::append(value && v) {
-			if (next_) {
-				next_->append(std::move(v));
-			}
-			else {
+		std::size_t vlist::size() const {
+			return (next_)
+				? next_->size() + 1u
+				: 1u
+				;
+		}
+
+		std::size_t vlist::append(value && v) {
+			if (!next_) {
 				next_ = std::make_unique<vlist>(std::move(v));
+				return 1;
 			}
+			return next_->append(std::move(v)) + 1;
 		}
 
 		vlist vlist::factory(symbol const& sym) {

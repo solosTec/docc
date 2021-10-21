@@ -34,11 +34,12 @@ namespace docscript {
 			static vlist factory(symbol const&);
 
 			std::size_t compile(std::function<void(std::string const&)>, std::size_t depth, std::size_t index) const;
+			std::size_t size() const;
 
 			/**
 			 * append to value list (vector)
 			 */
-			void append(value&&);
+			std::size_t append(value&&);
 
 		private:
 			value value_;

@@ -1,7 +1,6 @@
 #include <ast/method.h>
 #include <ast/vlist.h>
 #include <ast/params.h>
-//#include <context.h>
 
 #include <boost/assert.hpp>
 
@@ -46,7 +45,14 @@ namespace docscript {
 				emit("\t; parameter(s)\n");
 				emit("make_param_map\n");
 			}
-			emit("push 1\n");	//	make tuple with one parameter map
+			else {
+				//
+				//	push an empty parameter map
+				//
+				emit("push 0\t; no parameters\n");
+				emit("make_param_map\n");
+			}
+			emit("push 1\t; tuple size is always one\n");	//	make tuple with one parameter map
 			emit("invoke_r ");
 			emit(this->get_name());
 			emit("\n");
@@ -124,13 +130,19 @@ namespace docscript {
 			emit("\n");
 		}
 
-		void vec_method::append(value && v) {
-			if (vlist_) {
-				vlist_->append(std::move(v));
-			}
-			else {
+		std::size_t vec_method::append(value && v) {
+			if (!vlist_) {
 				vlist_ = std::make_unique<vlist>(std::move(v));
+				return 1;
 			}
+			return vlist_->append(std::move(v)) + 1;
+		}
+
+		std::size_t vec_method::param_count() const {
+			return  (vlist_)
+				? vlist_->size()
+				: 0u
+				;
 		}
 
 		vec_method::vec_method(std::string const& name, std::optional<docscript::method> optm)

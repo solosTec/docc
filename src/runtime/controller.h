@@ -41,9 +41,13 @@ namespace docscript {
 		std::string h6(cyng::vector_t);
 		std::string header(cyng::param_map_t);
 
-		std::string resource(cyng::param_map_t);
+		void resource(cyng::param_map_t);
+		std::chrono::system_clock::time_point now(cyng::param_map_t);
 
 		void set(cyng::param_map_t);
+
+	private:
+		cyng::param_map_t vars_;
 	};
 
 	std::filesystem::path verify_extension(std::filesystem::path p, std::string const& ext);

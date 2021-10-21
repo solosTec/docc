@@ -31,11 +31,6 @@ namespace docscript {
 		}
 
 		void program::append(param&& p) {
-			fmt::print(
-				stdout,
-				fg(fmt::color::dim_gray),
-				"{}: generate parameter [{}] \n", ctx_.get_position(), p);
-
 			semantic_stack_.pop();
 
 			//
@@ -50,9 +45,7 @@ namespace docscript {
 				semantic_stack_.push(std::move(p));
 				break;
 			}
-
 		}
-
 
 		bool program::init_function(std::string const& name) {
 			auto m = ctx_.lookup_method(name);
@@ -67,13 +60,13 @@ namespace docscript {
 
 		void program::init_paragraph(std::string const& name) {
 			//BOOST_ASSERT(semantic_stack_.size() < 2);
-			if (semantic_stack_.size() > 1) {
+			if (ctx_.get_verbosity(14)) {
 				fmt::print(
 					stdout,
 					fg(fmt::color::dim_gray),
-					"{}: close open AST [{}] \n", ctx_.get_position(), semantic_stack_.size());
-
+					"{}: start new paragraph - semantic stack size = [{}] \n", ctx_.get_position(), semantic_stack_.size());
 			}
+
 			while (!semantic_stack_.empty()) {
 				transfer_ast();
 			}
@@ -136,7 +129,13 @@ namespace docscript {
 
 		bool program::append(symbol const& sym) {
 			if (top().index() == 4) {
-				std::get<4>(top()).append(value::factory(sym));
+				auto const count = std::get<4>(top()).append(value::factory(sym));
+				if (ctx_.get_verbosity(16)) {
+					fmt::print(
+						stdout,
+						fg(fmt::color::dim_gray),
+						"{}: add parameter {}#{} to the \"{}\" method\n", ctx_.get_position(), sym.value_, count, std::get<4>(top()).get_name());
+				}
 				return true;
 			}
 			return false;
@@ -161,16 +160,31 @@ namespace docscript {
 				auto p = std::move(std::get<2>(top()));
 				semantic_stack_.pop();
 				BOOST_ASSERT_MSG(semantic_stack_.top().index() == 3, "map function expected");				
+				//p.get_param_names().size();
+				if (ctx_.get_verbosity(12)) {
+
+					decltype(auto) name = std::get<3>(top()).get_name();
+					fmt::print(
+						stdout,
+						fg(fmt::color::light_gray),
+						"{}: map function \"{}\" is complete. {} parameters specified\n", ctx_.get_position(), name, p.get_param_names().size());
+
+				}
+
 				std::get<3>(top()).set_params(std::move(p), ctx_.get_position());
 
 			}
 				  break;
 			case 3: {
 				decltype(auto) name = std::get<3>(top()).get_name();
-				fmt::print(
-					stdout,
-					fg(fmt::color::dim_gray),
-					"{}: map function \"{}\" is complete \n", ctx_.get_position(), name);
+				if (ctx_.get_verbosity(12)) {
+			
+					fmt::print(
+						stdout,
+						fg(fmt::color::light_gray),
+						"{}: map function \"{}\" is complete. {} parameters specified\n", ctx_.get_position(), name, p.get_param_names().size());
+
+				}
 				std::get<3>(top()).set_params(std::move(p), ctx_.get_position());
 			}
 				  break;
@@ -211,7 +225,14 @@ namespace docscript {
 				//
 				//	vector method
 				//
-				std::get<4>(top()).append(std::move(v));
+				auto const count = std::get<4>(top()).append(std::move(v));
+				if (ctx_.get_verbosity(16)) {
+					fmt::print(
+						stdout,
+						fg(fmt::color::dim_gray),
+						"{}: add parameter #{} to the \"{}\" method\n", ctx_.get_position(), count, std::get<4>(top()).get_name());
+				}
+
 			}
 				  break;
 			default:
@@ -227,6 +248,15 @@ namespace docscript {
 			auto m = std::move(std::get<3>(top()));
 			semantic_stack_.pop();
 
+			if (ctx_.get_verbosity(12)) {
+
+				fmt::print(
+					stdout,
+					fg(fmt::color::light_gray),
+					"{}: map function \"{}\" is complete. {} parameter(s) specified\n", ctx_.get_position(), m.get_name(), m.param_count());
+
+			}
+
 			merge_ast_value(value::factory(std::move(m)));
 
 		}
@@ -237,7 +267,15 @@ namespace docscript {
 			auto m = std::move(std::get<4>(top()));
 			semantic_stack_.pop();
 
-			//merge_ast_value(value::factory(std::move(m)));
+			if (ctx_.get_verbosity(12)) {
+
+				fmt::print(
+					stdout,
+					fg(fmt::color::light_gray),
+					"{}: vec function \"{}\" is complete. {} parameter(s) specified\n", ctx_.get_position(), m.get_name(), m.param_count());
+
+			}
+
 			switch (top().index()) {
 			case 2: {
 				//
