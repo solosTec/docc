@@ -45,7 +45,7 @@ namespace docscript {
 			std::unique_ptr<param> params_;
 		};
 
-		class vlist;
+		//enum class consider_merge : bool {};
 
 		class vec_method : public method_base {
 			friend struct fmt::formatter<value>;
@@ -57,13 +57,13 @@ namespace docscript {
 			/**
 			 * append to value list (vector)
 			 */
-			std::size_t append(value&&);
+			std::size_t append(value&&, bool consider_merge);
 			std::size_t param_count() const;
 
 			static vec_method factory(std::string const&, std::optional<docscript::method>);
 		private:
-			std::unique_ptr<vlist>  vlist_;
-			//std::vector<std::unique_ptr<value>> vlist_;
+			//std::unique_ptr<vlist>  vlist_;
+			std::vector<std::unique_ptr<value>> vlist_;
 		};
 
 	}

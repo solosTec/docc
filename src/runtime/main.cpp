@@ -1,8 +1,9 @@
+#include "controller.h"
+
 #include <version.hpp>
 
 #include <iostream>
 #include <fstream>
-#include <filesystem>
 #include <thread>
 
 #include <boost/program_options.hpp>
@@ -11,8 +12,6 @@
 
 #include <fmt/core.h>
 #include <fmt/color.h>
-
-#include "controller.h"
 
 #if BOOST_OS_WINDOWS
 #include "Windows.h"

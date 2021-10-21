@@ -56,6 +56,12 @@ namespace docscript {
 						}, depth, index);
 					}, value_);
 			}
+
+			constexpr bool is_constant_txt() const noexcept {
+				return (value_.index() == 0) && (std::get<0>(value_).node_.index() == 0);
+			}
+
+
 		};
 
 		value::value() noexcept
@@ -74,6 +80,19 @@ namespace docscript {
 
 		bool value::empty() const {
 			return !node_;
+		}
+
+		bool value::is_constant_txt() const {
+			return (!empty()) 
+				? node_->is_constant_txt()
+				: false
+				;
+		}
+
+		void value::merge(value&& v) {
+			auto txt = std::get<0>(std::get<0>(node_->value_).node_).append(std::get<0>(std::get<0>(v.node_->value_).node_));
+			auto val = factory(constant::factory(symbol(symbol_type::TXT, std::move(txt))));
+			node_.swap(val.node_);
 		}
 
 		std::size_t value::index() const {

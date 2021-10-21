@@ -23,7 +23,6 @@
 
 #include <ast/constant.h>
 #include <ast/value.h>
-#include <ast/vlist.h>
 #include <ast/params.h>
 #include <ast/method.h>
 

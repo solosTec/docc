@@ -129,7 +129,7 @@ namespace docscript {
 
 		bool program::append(symbol const& sym) {
 			if (top().index() == 4) {
-				auto const count = std::get<4>(top()).append(value::factory(sym));
+				auto const count = std::get<4>(top()).append(value::factory(sym), sym.equals(symbol_type::SYM, ','));
 				if (ctx_.get_verbosity(16)) {
 					fmt::print(
 						stdout,
@@ -225,7 +225,7 @@ namespace docscript {
 				//
 				//	vector method
 				//
-				auto const count = std::get<4>(top()).append(std::move(v));
+				auto const count = std::get<4>(top()).append(std::move(v), false);
 				if (ctx_.get_verbosity(16)) {
 					fmt::print(
 						stdout,
@@ -290,7 +290,7 @@ namespace docscript {
 				//
 				//	vector method
 				//
-				std::get<4>(top()).append(value::factory(std::move(m)));
+				std::get<4>(top()).append(value::factory(std::move(m)), false);
 			}
 				  break;
 			default:

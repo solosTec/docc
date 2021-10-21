@@ -8,6 +8,7 @@
 #define DOCC_SCRIPT_AST_VALUE_H
 
 #include <ast/constant.h>
+//#include <symbol.h>
 
 namespace docscript {
 	namespace ast {
@@ -23,7 +24,6 @@ namespace docscript {
 		public:
 			value() noexcept;
 			value(value&&) noexcept;
-			//value& operator=(value&&) = default;
 			~value();
 
 			/**
@@ -40,8 +40,15 @@ namespace docscript {
 
 			friend std::ostream& operator<<(std::ostream& os, value const&);
 
+			/**
+			 * @return true if value is a constant of the specified symbol type
+			 */
+			bool is_constant_txt() const;
+			void merge(value&&);
+
 		private:
 			std::size_t index() const;
+
 		private:
 			//
 			//	constant

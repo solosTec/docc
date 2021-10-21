@@ -39,8 +39,8 @@ set (docscript_ast
      ${PROJECT_SOURCE_DIR}/src/ast/constant.cpp
      ${PROJECT_SOURCE_DIR}/include/ast/value.h
      ${PROJECT_SOURCE_DIR}/src/ast/value.cpp
-     ${PROJECT_SOURCE_DIR}/include/ast/vlist.h
-     ${PROJECT_SOURCE_DIR}/src/ast/vlist.cpp
+#     ${PROJECT_SOURCE_DIR}/include/ast/vlist.h
+#     ${PROJECT_SOURCE_DIR}/src/ast/vlist.cpp
      ${PROJECT_SOURCE_DIR}/include/ast/params.h
      ${PROJECT_SOURCE_DIR}/src/ast/params.cpp
      ${PROJECT_SOURCE_DIR}/include/ast/method.h

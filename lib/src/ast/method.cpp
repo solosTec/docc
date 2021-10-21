@@ -1,5 +1,5 @@
 #include <ast/method.h>
-#include <ast/vlist.h>
+//#include <ast/vlist.h>
 #include <ast/params.h>
 
 #include <boost/assert.hpp>
@@ -59,7 +59,7 @@ namespace docscript {
 			emit("\n");
 		}
 
-		void map_method::set_params(param && p, std::string pos) {
+		void map_method::set_params(param&& p, std::string pos) {
 			//
 			//	set named parameter
 			//
@@ -106,23 +106,20 @@ namespace docscript {
 		//
 		void vec_method::compile(std::function<void(std::string const&)> emit, std::size_t depth, std::size_t index) const {
 
-		
+
 			emit("esba");
 			emit("\t; ");
 			emit(this->get_name());
 			emit("\n");
-			if (vlist_) {
-				auto const count = vlist_->compile(emit, depth + 1, index);
-				std::cout
-					<< this->get_name()
-					<< "::compile("
-					<< count
-					<< ")"
-					<< std::endl;
+
+			for (auto& p : vlist_) {
+				BOOST_ASSERT(!!p);
+				if (p) (*p).compile(emit, depth + 1, index);
 			}
+
 			emit("frm\n");
 			emit("make_vector\n");
-			emit("push 1\n");	//	make tuple with one vector
+			emit("push 1\t; one vector\n");	//	make tuple with one vector
 			emit("invoke_r ");
 			emit(this->get_name());
 			emit("\n");
@@ -130,26 +127,26 @@ namespace docscript {
 			emit("\n");
 		}
 
-		std::size_t vec_method::append(value && v) {
-			if (!vlist_) {
-				vlist_ = std::make_unique<vlist>(std::move(v));
-				return 1;
+		std::size_t vec_method::append(value&& v, bool consider_merge) {
+			if (consider_merge && !vlist_.empty() && vlist_.back()->is_constant_txt()) {
+				BOOST_ASSERT(v.is_constant_txt());
+				vlist_.back()->merge(std::move(v));
 			}
-			return vlist_->append(std::move(v)) + 1;
+			else {
+				vlist_.push_back(std::make_unique<value>(std::move(v)));
+			}
+			return vlist_.size();
 		}
 
 		std::size_t vec_method::param_count() const {
-			return  (vlist_)
-				? vlist_->size()
-				: 0u
-				;
+			return vlist_.size();
 		}
 
 		vec_method::vec_method(std::string const& name, std::optional<docscript::method> optm)
 			: method_base(name, optm)
 			, vlist_()
 		{}
-		vec_method::vec_method(vec_method && vecm) noexcept
+		vec_method::vec_method(vec_method&& vecm) noexcept
 			: method_base(vecm.name_, vecm.method_)
 			, vlist_(std::move(vecm.vlist_))
 		{}
