@@ -144,34 +144,36 @@ namespace docscript {
 		//
 		//	predefined methods
 		//
-		insert_method(table, method("header", return_type::STRING, parameter_type::MAP, false, { "title", "level", "tag" }));
-		insert_method(table, method("h1", return_type::STRING, parameter_type::VECTOR, false));
-		insert_method(table, method("h2", return_type::STRING, parameter_type::VECTOR, false));
-		insert_method(table, method("h3", return_type::STRING, parameter_type::VECTOR, false));
-		insert_method(table, method("h4", return_type::STRING, parameter_type::VECTOR, false));
-		insert_method(table, method("h5", return_type::STRING, parameter_type::VECTOR, false));
-		insert_method(table, method("h6", return_type::STRING, parameter_type::VECTOR, false));
+		insert_method(table, method("header", parameter_type::MAP, false, { "title", "level", "tag" }));
+		insert_method(table, method("h1", parameter_type::VECTOR, false));
+		insert_method(table, method("h2", parameter_type::VECTOR, false));
+		insert_method(table, method("h3", parameter_type::VECTOR, false));
+		insert_method(table, method("h4", parameter_type::VECTOR, false));
+		insert_method(table, method("h5", parameter_type::VECTOR, false));
+		insert_method(table, method("h6", parameter_type::VECTOR, false));
 
 		//	 pilgrow (¶) = paragraph
-		insert_method(table, method(std::string("\xc2\xb6"), return_type::STRING, parameter_type::VECTOR, false));
+		insert_method(table, method(std::string("\xc2\xb6"), parameter_type::VECTOR, false));
 
-		insert_method(table, method("label", return_type::STRING, parameter_type::VECTOR, true));
-		insert_method(table, method("ref", return_type::STRING, parameter_type::VECTOR, true));
+		insert_method(table, method("label", parameter_type::VECTOR, true));
+		insert_method(table, method("ref", parameter_type::VECTOR, true));
 
-		insert_method(table, method("get", return_type::STRING, parameter_type::VECTOR, true));
-		insert_method(table, method("set", return_type::STRING, parameter_type::MAP, true));	//	key, value
-		insert_method(table, method("resource", return_type::STRING, parameter_type::MAP, true, {"name", "mime", "cache", "url"}));
-		insert_method(table, method("i", return_type::STRING, parameter_type::VECTOR, true));
-		insert_method(table, method("b", return_type::STRING, parameter_type::VECTOR, true));
-		insert_method(table, method("quote", return_type::STRING, parameter_type::VECTOR, true));	//	same as "..."
+		insert_method(table, method("get", parameter_type::VECTOR, true));
+		insert_method(table, method("set", parameter_type::MAP, true));	//	key, value
+		insert_method(table, method("range", parameter_type::VECTOR, true));	//	collect a vector
+
+		insert_method(table, method("resource", parameter_type::MAP, true, {"name", "mime", "cache", "url"}));
+		insert_method(table, method("i", parameter_type::VECTOR, true));
+		insert_method(table, method("b", parameter_type::VECTOR, true));
+		insert_method(table, method("quote", parameter_type::VECTOR, true));	//	same as "..."
 
 		//	calculate return value count requires to determine "count" value at compile time
-		insert_method(table, method("repeat", return_type::STRING, parameter_type::MAP, true, { "count", "value", "sep"}));
+		insert_method(table, method("repeat", parameter_type::MAP, true, { "count", "value", "sep"}));
 
 		//insert_method(table, method("rgb", return_type::U32, parameter_type::VECTOR, true, { "r", "g", "b" }));
 		//insert_method(table, method("rgba", return_type::U32, parameter_type::VECTOR, true, { "r", "g", "b", "a"}));
 
-		insert_method(table, method("now", return_type::TIMESTAMP, parameter_type::MAP, true));
+		insert_method(table, method("now", parameter_type::MAP, true));
 
 	}
 

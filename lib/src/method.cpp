@@ -2,9 +2,8 @@
 
 namespace docscript {
 
-	method::method(std::string name, return_type rt, parameter_type pt, bool inl, std::initializer_list<std::string> params)
+	method::method(std::string name, parameter_type pt, bool inl, std::initializer_list<std::string> params)
 		: name_(name)
-		, rt_(rt)
 		, pt_(pt)
 		, inline_(inl)
 		, params_(params.begin(), params.end())
@@ -27,7 +26,7 @@ namespace docscript {
 	}
 
 	method make_placeholder_method(std::string const& name) {
-		return { name, return_type::ANY, parameter_type::VECTOR, true, {} };
+		return { name, parameter_type::VECTOR, true, {} };
 	}
 
 }

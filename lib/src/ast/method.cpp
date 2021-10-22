@@ -1,8 +1,8 @@
 #include <ast/method.h>
-//#include <ast/vlist.h>
 #include <ast/params.h>
 
 #include <boost/assert.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace docscript {
 	namespace ast {
@@ -106,25 +106,31 @@ namespace docscript {
 		//
 		void vec_method::compile(std::function<void(std::string const&)> emit, std::size_t depth, std::size_t index) const {
 
-
-			emit("esba");
-			emit("\t; ");
-			emit(this->get_name());
-			emit("\n");
-
-			for (auto& p : vlist_) {
-				BOOST_ASSERT(!!p);
-				if (p) (*p).compile(emit, depth + 1, index);
+			if (boost::algorithm::equals(this->get_name(), std::string("\xc2\xb6")) && vlist_.empty()) {
+				emit("; skip empty paragraph\n");	//	
 			}
+			else {
+				emit("esba");
+				emit("\t; ");
+				emit(this->get_name());
+				emit("\n");
 
-			emit("frm\n");
-			emit("make_vector\n");
-			emit("push 1\t; one vector\n");	//	make tuple with one vector
-			emit("invoke_r ");
-			emit(this->get_name());
-			emit("\n");
-			emit("pull\n");
-			emit("\n");
+				for (auto& p : vlist_) {
+					BOOST_ASSERT(!!p);
+					if (p) (*p).compile(emit, depth + 1, index);
+				}
+
+				emit("frm\n");
+				emit("make_vector\t; ");
+				emit(std::to_string(vlist_.size()));
+				emit("\n");
+				emit("push 1\t; one vector\n");	//	make tuple with one vector
+				emit("invoke_r ");
+				emit(this->get_name());
+				emit("\n");
+				emit("pull\n");
+				emit("\n");
+			}
 		}
 
 		std::size_t vec_method::append(value&& v, bool consider_merge) {

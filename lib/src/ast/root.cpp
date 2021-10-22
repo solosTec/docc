@@ -187,7 +187,7 @@ namespace docscript {
 				}
 				std::get<3>(top()).set_params(std::move(p), ctx_.get_position());
 			}
-				  break;
+			break;
 			default:
 				BOOST_ASSERT_MSG(false, "map function expected");
 				break;
@@ -280,17 +280,29 @@ namespace docscript {
 			case 2: {
 				//
 				//	parameter list
+				//	MODIFIED!
 				//
 				auto p = std::get<2>(top()).finish(value::factory(std::move(m)));
 				semantic_stack_.pop();
-				semantic_stack_.push(std::move(p));
+				if (top().index() == 2) {
+					std::get<2>(top()).append(std::move(p));
+				}
+				else {
+					semantic_stack_.push(std::move(p));
+				}
 			}
 				  break;
 			case 4: {
 				//
 				//	vector method
 				//
-				std::get<4>(top()).append(value::factory(std::move(m)), false);
+				auto const count = std::get<4>(top()).append(value::factory(std::move(m)), false);
+				if (ctx_.get_verbosity(16)) {
+					fmt::print(
+						stdout,
+						fg(fmt::color::dim_gray),
+						"{}: add parameter #{} to the \"{}\" method\n", ctx_.get_position(), count, std::get<4>(top()).get_name());
+				}
 			}
 				  break;
 			default:

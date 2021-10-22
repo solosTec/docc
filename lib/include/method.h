@@ -18,15 +18,6 @@ namespace docscript {
 		VECTOR,
 		MAP,
 	};
-	enum class return_type {
-		ANY,
-		STRING,
-		BOOL,
-		U32,
-		I32,
-		DOUBLE,
-		TIMESTAMP,
-	};
 
 	class method 
 	{
@@ -36,7 +27,7 @@ namespace docscript {
 		using param_names_range_t = std::pair<param_names_citerator, param_names_citerator>;
 
 	public:
-		method(std::string, return_type rt, parameter_type pt, bool inl, std::initializer_list<std::string> = {});
+		method(std::string, parameter_type pt, bool inl, std::initializer_list<std::string> = {});
 		virtual ~method();
 
 		/**
@@ -67,7 +58,6 @@ namespace docscript {
 
 	private:
 		std::string const name_;
-		return_type const rt_;
 		parameter_type const pt_;
 		bool const inline_;
 

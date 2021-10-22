@@ -62,7 +62,6 @@ namespace docscript {
 
 			static vec_method factory(std::string const&, std::optional<docscript::method>);
 		private:
-			//std::unique_ptr<vlist>  vlist_;
 			std::vector<std::unique_ptr<value>> vlist_;
 		};
 

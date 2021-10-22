@@ -44,30 +44,38 @@ namespace docscript {
 		//
 		//	Create VM
 		//
-		std::function<std::string(cyng::vector_t)> f1 = std::bind(&controller::quote, this, std::placeholders::_1);
-		std::function<void(cyng::param_map_t)> f2 = std::bind(&controller::set, this, std::placeholders::_1);
-		std::function<std::string(cyng::vector_t)> f3 = std::bind(&controller::paragraph, this, std::placeholders::_1);
-		std::function<std::string(cyng::vector_t)> f4 = std::bind(&controller::italic, this, std::placeholders::_1);
-		std::function<std::string(cyng::vector_t)> f5 = std::bind(&controller::bold, this, std::placeholders::_1);
-		std::function<void(cyng::vector_t)> f6 = std::bind(&controller::label, this, std::placeholders::_1);
-		std::function<std::string(cyng::vector_t)> f7 = std::bind(&controller::ref, this, std::placeholders::_1);
-		std::function<std::string(cyng::vector_t)> f8 = std::bind(&controller::h1, this, std::placeholders::_1);
-		std::function<std::string(cyng::vector_t)> f9 = std::bind(&controller::h2, this, std::placeholders::_1);
-		std::function<std::string(cyng::vector_t)> f10 = std::bind(&controller::h3, this, std::placeholders::_1);
-		std::function<std::string(cyng::vector_t)> f11 = std::bind(&controller::h4, this, std::placeholders::_1);
-		std::function<std::string(cyng::vector_t)> f12 = std::bind(&controller::h5, this, std::placeholders::_1);
-		std::function<std::string(cyng::vector_t)> f13 = std::bind(&controller::h6, this, std::placeholders::_1);
-		std::function<std::string(cyng::param_map_t)> f14 = std::bind(&controller::header, this, std::placeholders::_1);
-		std::function<void(cyng::param_map_t)> f15 = std::bind(&controller::resource, this, std::placeholders::_1);
-		std::function<std::chrono::system_clock::time_point(cyng::param_map_t)> f_now = std::bind(&controller::now, this, std::placeholders::_1);
-		std::function<void(std::string)> f_show = std::bind(&show, std::placeholders::_1);
-		auto vm = fabric.create_proxy(tag, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15, f_now, f_show);
+		auto vm = fabric.create_proxy(tag
+			, f_quote()
+			, f_set()
+			, f_get()
+			, f_meta()
+			, f_paragraph()
+			, f_italic()
+			, f_bold()
+			, f_typewriter()
+			, f_label()
+			, f_ref()
+			, f_h1()
+			, f_h2()
+			, f_h3()
+			, f_h4()
+			, f_h5()
+			, f_h6()
+			, f_header()
+			, f_resource()
+			, f_now()
+			, f_range()
+			, f_show()
+		);
 		std::size_t slot{ 0 };
 		vm.set_channel_name("quote", slot++);
 		vm.set_channel_name("set", slot++);
+		vm.set_channel_name("get", slot++);
+		vm.set_channel_name("meta", slot++);
 		vm.set_channel_name(std::string("\xc2\xb6"), slot++);	//	paragraph
 		vm.set_channel_name("i", slot++);	//	italic
 		vm.set_channel_name("b", slot++);	//	bold
+		vm.set_channel_name("tt", slot++);	//	typewriter
 		vm.set_channel_name("label", slot++);	//	label
 		vm.set_channel_name("ref", slot++);	//	ref
 		vm.set_channel_name("h1", slot++);	//	h1
@@ -79,6 +87,7 @@ namespace docscript {
 		vm.set_channel_name("header", slot++);	//	header
 		vm.set_channel_name("resource", slot++);	//	resource
 		vm.set_channel_name("now", slot++);	//	current time
+		vm.set_channel_name("range", slot++);	//	build an vector
 		vm.set_channel_name("show", slot++);	//	show
 
 		//
@@ -163,13 +172,33 @@ namespace docscript {
 		std::reverse(std::begin(vec), std::end(vec));
 		std::stringstream ss;
 		ss << "BOLD(" << vec << ")";
-		//std::cout << ss.str() << std::endl;
+		return ss.str();
+	}
+
+	std::string controller::typewriter(cyng::vector_t vec) {
+		std::reverse(std::begin(vec), std::end(vec));
+		std::stringstream ss;
+		ss << "TYPEWRITER(" << vec << ")";
 		return ss.str();
 	}
 
 	void controller::set(cyng::param_map_t pm) {
 		std::cout << "SET(" << pm << ")" << std::endl;
 		vars_.insert(pm.begin(), pm.end());
+	}
+	void controller::meta(cyng::param_map_t pm) {
+		std::cout << "META(" << pm << ")" << std::endl;
+	}
+
+	cyng::vector_t controller::get(cyng::vector_t vec) {
+		cyng::vector_t res;
+		for (auto const& v : vec) {
+			auto const pos = vars_.find(cyng::io::to_plain(v));
+			if (pos != vars_.end()) {
+				res.push_back(pos->second);
+			}
+		}
+		return res;
 	}
 
 	std::string controller::paragraph(cyng::vector_t vec) {
@@ -250,9 +279,81 @@ namespace docscript {
 		std::stringstream ss;
 		std::cout << "NOW(" << pm << ")" << std::endl;
 		return std::chrono::system_clock::now();
-		//return "NOW";
+	}
+	cyng::vector_t controller::range(cyng::vector_t vec) {
+		return vec;
+	}
+	//		insert_method(table, method("repeat", parameter_type::MAP, true, { "count", "value", "sep"}));
+	std::string controller::repeat(cyng::param_map_t pm) {
+		return "";
 	}
 
+	std::function<std::string(cyng::vector_t)> controller::f_quote() {
+		return std::bind(&controller::quote, this, std::placeholders::_1);
+	}
+
+	std::function<void(cyng::param_map_t)> controller::f_set() {
+		return std::bind(&controller::set, this, std::placeholders::_1);
+	}
+	std::function<cyng::vector_t(cyng::vector_t)> controller::f_get() {
+		return std::bind(&controller::get, this, std::placeholders::_1);
+	}
+	std::function<void(cyng::param_map_t)> controller::f_meta() {
+		return std::bind(&controller::meta, this, std::placeholders::_1);
+	}
+
+	std::function<std::string(cyng::vector_t)> controller::f_paragraph() {
+		return std::bind(&controller::paragraph, this, std::placeholders::_1);
+	}
+	std::function<std::string(cyng::vector_t)> controller::f_italic() {
+		return std::bind(&controller::italic, this, std::placeholders::_1);
+	}
+	std::function<std::string(cyng::vector_t)> controller::f_bold() {
+		return std::bind(&controller::bold, this, std::placeholders::_1);
+	}
+	std::function<std::string(cyng::vector_t)> controller::f_typewriter() {
+		return std::bind(&controller::typewriter, this, std::placeholders::_1);
+	}
+	std::function<void(cyng::vector_t)> controller::f_label() {
+		return std::bind(&controller::label, this, std::placeholders::_1);
+	}
+	std::function<std::string(cyng::vector_t)> controller::f_ref() {
+		return std::bind(&controller::ref, this, std::placeholders::_1);
+	}
+	std::function<std::string(cyng::vector_t)> controller::f_h1() {
+		return std::bind(&controller::h1, this, std::placeholders::_1);
+	}
+	std::function<std::string(cyng::vector_t)> controller::f_h2() {
+		return std::bind(&controller::h2, this, std::placeholders::_1);
+	}
+	std::function<std::string(cyng::vector_t)> controller::f_h3() {
+		return std::bind(&controller::h3, this, std::placeholders::_1);
+	}
+	std::function<std::string(cyng::vector_t)> controller::f_h4() {
+		return std::bind(&controller::h4, this, std::placeholders::_1);
+	}
+	std::function<std::string(cyng::vector_t)> controller::f_h5() {
+		return std::bind(&controller::h5, this, std::placeholders::_1);
+	}
+	std::function<std::string(cyng::vector_t)> controller::f_h6() {
+		return std::bind(&controller::h6, this, std::placeholders::_1);
+	}
+
+	std::function<std::string(cyng::param_map_t)> controller::f_header() {
+		return std::bind(&controller::header, this, std::placeholders::_1);
+	}
+	std::function<void(cyng::param_map_t)> controller::f_resource() {
+		return std::bind(&controller::resource, this, std::placeholders::_1);
+	}
+	std::function<std::chrono::system_clock::time_point(cyng::param_map_t)> controller::f_now() {
+		return std::bind(&controller::now, this, std::placeholders::_1);
+	}
+	std::function<cyng::vector_t(cyng::vector_t)> controller::f_range() {
+		return std::bind(&controller::range, this, std::placeholders::_1);
+	}
+	std::function<void(std::string)> controller::f_show() {
+		return std::bind(&show, std::placeholders::_1);
+	}
 
 	std::filesystem::path verify_extension(std::filesystem::path p, std::string const& ext)
 	{

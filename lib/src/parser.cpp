@@ -206,10 +206,6 @@ namespace docscript {
 		case symbol_type::SYM:
 			if (sym == state_.top().sym_) {
 				state_.pop();
-				fmt::print(
-					stdout,
-					fg(fmt::color::dim_gray),
-					"{}: map method complete\n", ctx_.get_position());
 				//
 				//  merge
 				//
