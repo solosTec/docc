@@ -65,6 +65,8 @@ namespace docscript {
 			, f_resource()
 			, f_now()
 			, f_range()
+			, f_repeat()
+			, f_currency()
 			, f_show()
 		);
 		std::size_t slot{ 0 };
@@ -88,6 +90,8 @@ namespace docscript {
 		vm.set_channel_name("resource", slot++);	//	resource
 		vm.set_channel_name("now", slot++);	//	current time
 		vm.set_channel_name("range", slot++);	//	build an vector
+		vm.set_channel_name("repeat", slot++);
+		vm.set_channel_name("currency", slot++);
 		vm.set_channel_name("show", slot++);	//	show
 
 		//
@@ -293,6 +297,13 @@ namespace docscript {
 		return "";
 	}
 
+	std::string controller::currency(cyng::param_map_t pm) {
+		//	https://www.fileformat.info/info/unicode/category/Sc/list.htm
+		//	https://www.w3schools.com/charsets/ref_utf_currency.asp
+		//return std::string("\xE2\x82\xB9");	//	indian rupee
+		return std::string("42 \xE2\x82\xAC");	//	euro
+	}
+
 	std::function<std::string(cyng::vector_t)> controller::f_quote() {
 		return std::bind(&controller::quote, this, std::placeholders::_1);
 	}
@@ -356,6 +367,14 @@ namespace docscript {
 	std::function<cyng::vector_t(cyng::vector_t)> controller::f_range() {
 		return std::bind(&controller::range, this, std::placeholders::_1);
 	}
+	std::function<std::string(cyng::param_map_t pm)> controller::f_repeat() {
+		return std::bind(&controller::repeat, this, std::placeholders::_1);
+	}
+
+	std::function<std::string(cyng::param_map_t)> controller::f_currency() {
+		return std::bind(&controller::currency, this, std::placeholders::_1);
+	}
+
 	std::function<void(std::string)> controller::f_show() {
 		return std::bind(&show, std::placeholders::_1);
 	}

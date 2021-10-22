@@ -51,6 +51,7 @@ namespace docscript {
 		cyng::vector_t get(cyng::vector_t);
 		cyng::vector_t range(cyng::vector_t);
 		std::string repeat(cyng::param_map_t pm);
+		std::string currency(cyng::param_map_t pm);
 
 	private:
 		std::function<std::string(cyng::vector_t)> f_quote();
@@ -73,6 +74,8 @@ namespace docscript {
 		std::function<void(cyng::param_map_t)> f_resource();
 		std::function<std::chrono::system_clock::time_point(cyng::param_map_t)> f_now();
 		std::function<cyng::vector_t(cyng::vector_t)> f_range();
+		std::function<std::string(cyng::param_map_t pm)> f_repeat();
+		std::function<std::string(cyng::param_map_t)> f_currency();
 		std::function<void(std::string)> f_show();
 
 	private:

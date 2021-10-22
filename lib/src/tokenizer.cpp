@@ -175,13 +175,15 @@ namespace docscript {
 
 		case ' ':
 			// no-break space: 0xC2 0xA0
-			value_ += 0xC2A0;
+			cb_(make_symbol(symbol_type::TXT, std::string("\xC2\xA0")));
 			return { state::START_, true };
 
 		case '\t':
 			//  arrow: ↦
-			value_ += 0x21A6;
-			emit(symbol_type::TXT);
+			cb_(make_symbol(symbol_type::TXT, std::string("\xE2\x86\xA6")));
+			return { state::START_, true };
+		case '\n':
+			cb_(make_symbol(symbol_type::TXT, std::string(".")));
 			return { state::START_, true };
 
 		case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': case '0':

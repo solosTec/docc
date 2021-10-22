@@ -169,6 +169,7 @@ namespace docscript {
 
 		//	calculate return value count requires to determine "count" value at compile time
 		insert_method(table, method("repeat", parameter_type::MAP, true, { "count", "value", "sep"}));
+		insert_method(table, method("currency", parameter_type::MAP, true, { "name", "value" }));
 
 		//insert_method(table, method("rgb", return_type::U32, parameter_type::VECTOR, true, { "r", "g", "b" }));
 		//insert_method(table, method("rgba", return_type::U32, parameter_type::VECTOR, true, { "r", "g", "b", "a"}));
