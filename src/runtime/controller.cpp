@@ -204,7 +204,12 @@ namespace docscript {
 	std::string controller::paragraph(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
 		std::stringstream ss;
-		ss << "PARAGRAPH(" << vec << ")";
+		ss << "PARAGRAPH(";
+		//<< vec
+		for (auto const& v : vec) {
+			ss << v << ' ';
+		}
+		ss << ")";
 		std::cout << ss.str() << std::endl;
 		return ss.str();
 	}

@@ -128,8 +128,16 @@ namespace docscript {
 				emit("invoke_r ");
 				emit(this->get_name());
 				emit("\n");
+				//
+				//	range produces a vector that should be splitted
+				//	
+				//if (boost::algorithm::equals(this->get_name(), "range")) {
+				//	emit("split\t; dissect vector\n");
+				//	emit("pop\t; remove size info\n");
+				//}
 				emit("pull\n");
 				emit("\n");
+
 			}
 		}
 

@@ -265,6 +265,7 @@ namespace docscript {
 			BOOST_ASSERT_MSG(top().index() == 4, "vec method expected");
 
 			auto m = std::move(std::get<4>(top()));
+			auto const name = std::get<4>(top()).get_name();	//	function name
 			semantic_stack_.pop();
 
 			if (ctx_.get_verbosity(12)) {
@@ -301,7 +302,7 @@ namespace docscript {
 					fmt::print(
 						stdout,
 						fg(fmt::color::dim_gray),
-						"{}: add parameter #{} to the \"{}\" method\n", ctx_.get_position(), count, std::get<4>(top()).get_name());
+						"{}: add parameter \"{}\"#{} to the \"{}\" method\n", ctx_.get_position(), name, count, std::get<4>(top()).get_name());
 				}
 			}
 				  break;

@@ -285,7 +285,15 @@ namespace docscript {
 			}
 			break;
 		case symbol_type::SYM:
-			prg_.append(sym);
+			if (sym.equals(')')) {
+				//	")" has a special meaning: end of vector
+				state_.pop();
+				prg_.merge();
+				return false;
+			}
+			else {
+				prg_.append(sym);
+			}
 			break;
 		case symbol_type::DQU:
 			state_.push(nonterminal(make_symbol(symbol_type::DQU, std::string(1, '"'))));

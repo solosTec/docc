@@ -320,16 +320,6 @@ namespace docscript {
 			value_ += ':';
 			value_ += '0';
 			value_ += '0';
-			value_ += '.';
-			value_ += '0';
-			value_ += '0';
-			value_ += 'Z';
-		}
-		else if (value_.size() == 19) {
-			value_ += '.';
-			value_ += '0';
-			value_ += '0';
-			value_ += 'Z';
 		}
 	}
 
