@@ -208,7 +208,6 @@ namespace docscript {
 				semantic_stack_.pop();
 				switch (top().index()) {
 				case 2: // param
-					//std::get<2>(top()).append(std::move(p));
 					semantic_stack_.push(std::move(p));
 					break;
 				case 3:

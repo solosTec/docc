@@ -159,7 +159,18 @@ namespace docscript {
 	std::string controller::quote(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
 		std::stringstream ss;
-		ss << "QUOTE(" << vec << ")";
+		ss << "QUOTE(\"";
+		bool init = false;
+		for (auto const& v : vec) {
+			if (init) {
+				ss << ' ';
+			}
+			else {
+				init = true;
+			}
+			ss << v;
+		}
+		ss << "\")";
 		//std::cout << ss.str() << std::endl;
 		return ss.str();
 	}
@@ -208,10 +219,16 @@ namespace docscript {
 	std::string controller::paragraph(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
 		std::stringstream ss;
-		ss << "PARAGRAPH(";
-		//<< vec
+		ss << "PARAGRAPH*" << vec.size() << "(";
+		bool init = false;
 		for (auto const& v : vec) {
-			ss << v << ' ';
+			if (init) {
+				ss << ' ';
+			}
+			else {
+				init = true;
+			}
+			ss << v;
 		}
 		ss << ")";
 		std::cout << ss.str() << std::endl;
@@ -235,14 +252,36 @@ namespace docscript {
 	std::string controller::h1(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
 		std::stringstream ss;
-		ss << "H1(" << vec << ")";
+		ss << "H1*" << vec.size() << "(";
+		bool init = false;
+		for (auto const& v : vec) {
+			if (init) {
+				ss << ' ';
+			}
+			else {
+				init = true;
+			}
+			ss << v;
+		}
+		ss << ")";
 		std::cout << ss.str() << std::endl;
 		return ss.str();
 	}
 	std::string controller::h2(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
 		std::stringstream ss;
-		ss << "H2(" << vec << ")";
+		ss << "H2*" << vec.size() << "(";
+		bool init = false;
+		for (auto const& v : vec) {
+			if (init) {
+				ss << ' ';
+			}
+			else {
+				init = true;
+			}
+			ss << v;
+		}
+		ss << ")";
 		std::cout << ss.str() << std::endl;
 		return ss.str();
 	}

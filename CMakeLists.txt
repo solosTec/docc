@@ -170,8 +170,12 @@ else()
     message(FATAL_ERROR "** CYNG library not found")
 endif()
 
+#
+#	libraries
+#
 if (IS_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
-	add_subdirectory(lib)
+	add_subdirectory(lib/compiler)
+	add_subdirectory(lib/assembler)
 endif()
 
 #
@@ -222,9 +226,9 @@ install(TARGETS docc
 #
 include (src/assembler/prg.cmake)
 
-add_executable(docasm ${assembler_prg})
+add_executable(doca ${assembler_prg})
 
-target_include_directories(docasm
+target_include_directories(doca
 	PUBLIC
 		${CMAKE_SOURCE_DIR}/src/assembler
         ${CYNG_INCLUDE_DIRS}
@@ -233,26 +237,27 @@ target_include_directories(docasm
  		${Boost_INCLUDE_DIRS}
 )
 
-target_compile_features(docasm PRIVATE cxx_std_20)
+target_compile_features(doca PRIVATE cxx_std_20)
 
-target_compile_options(docasm 
+target_compile_options(doca 
     PRIVATE "$<$<CXX_COMPILER_ID:GNU,Clang>:-Wall;-Wextra;-pedantic>"
     PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/MP>"
 	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/W2>"
 )
 
-target_compile_definitions(docasm
+target_compile_definitions(doca
 	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:_WIN32_WINNT=0x0601>")
 
-target_link_libraries(docasm 
+target_link_libraries(doca 
 	PUBLIC 
+		docasm
         fmt::fmt
 		${CYNG_LIBRARIES}
 		${OPENSSL_LIBRARIES}
 		"$<$<PLATFORM_ID:Linux>:pthread;${Boost_LIBRARIES}>"
 )
 
-install(TARGETS docasm
+install(TARGETS doca
     RUNTIME
     DESTINATION bin)
 
