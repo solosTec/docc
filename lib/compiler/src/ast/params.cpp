@@ -1,5 +1,6 @@
 #include <ast/params.h>
 #include <symbol.h>
+#include <context.h>
 
 #include <iomanip>
 
@@ -49,6 +50,7 @@ namespace docscript {
 				? next_->compile(emit, depth, index + 1) + 1u
 				: 1u;
 		}
+		void param::transform(context const&) {}
 
 		param::param_names_t param::get_param_names() const {
 			param_names_t names;

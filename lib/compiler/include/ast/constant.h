@@ -21,6 +21,7 @@
 
 
 namespace docscript {
+	class context;
 	namespace ast {
 
 		/**
@@ -31,8 +32,10 @@ namespace docscript {
 			std::variant<std::string, std::chrono::system_clock::time_point, bool, std::uint64_t, double, cyng::color_8> node_;
 
 			void compile(std::function<void(std::string const&)>, std::size_t depth, std::size_t index) const;
+			void transform(context const&);
 
 			[[nodiscard]] static constant factory(symbol const&);
+			[[nodiscard]] static constant factory(std::string const&);
 
 			friend std::ostream& operator<<(std::ostream& os, constant const& c);
 		};

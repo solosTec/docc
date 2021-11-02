@@ -129,7 +129,7 @@ namespace docscript {
 
 		bool program::append(symbol const& sym) {
 			if (top().index() == 4) {
-				auto const count = std::get<4>(top()).append(value::factory(sym), sym.equals(symbol_type::SYM, ','));
+				auto const count = std::get<4>(top()).append(value::factory(sym));
 				if (ctx_.get_verbosity(16)) {
 					fmt::print(
 						stdout,
@@ -160,7 +160,6 @@ namespace docscript {
 				auto p = std::move(std::get<2>(top()));
 				semantic_stack_.pop();
 				BOOST_ASSERT_MSG(semantic_stack_.top().index() == 3, "map function expected");				
-				//p.get_param_names().size();
 				if (ctx_.get_verbosity(12)) {
 
 					decltype(auto) name = std::get<3>(top()).get_name();
@@ -224,7 +223,7 @@ namespace docscript {
 				//
 				//	vector method
 				//
-				auto const count = std::get<4>(top()).append(std::move(v), false);
+				auto const count = std::get<4>(top()).append(std::move(v));
 				if (ctx_.get_verbosity(16)) {
 					fmt::print(
 						stdout,
@@ -296,7 +295,7 @@ namespace docscript {
 				//
 				//	vector method
 				//
-				auto const count = std::get<4>(top()).append(value::factory(std::move(m)), false);
+				auto const count = std::get<4>(top()).append(value::factory(std::move(m)));
 				if (ctx_.get_verbosity(16)) {
 					fmt::print(
 						stdout,
@@ -313,6 +312,17 @@ namespace docscript {
 
 		void program::generate() {
 			BOOST_ASSERT(semantic_stack_.empty());
+			//
+			//	transform
+			//
+			for (auto & decl : decls_) {
+				std::visit([&](auto& arg) {
+					arg.transform(ctx_);
+					}, decl);
+			}
+			//
+			//	generate assembler code
+			//
 			for (auto const& decl : decls_) {
 				std::visit([&](auto const& arg) {
 					arg.compile([&](std::string const& s){

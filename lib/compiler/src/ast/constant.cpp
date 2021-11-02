@@ -1,4 +1,5 @@
 #include <ast/constant.h>
+#include <context.h>
 
 #include <cyng/parse/timestamp.h>
 #include <cyng/parse/color.h>
@@ -46,8 +47,13 @@ namespace docscript {
 			default:
 				break;
 			}
-			return constant{ sym.value_, sym.value_ };
+			return constant::factory(sym.value_);
 		}
+
+		constant constant::factory(std::string const& s) {
+			return constant{ s, s };
+		}
+
 
 		void constant::compile(std::function<void(std::string const&)> emit, std::size_t depth, std::size_t index) const {
 			//std::cout << "constant::compile()" << std::endl;
@@ -58,6 +64,7 @@ namespace docscript {
 			emit(ss.str());
 			emit("\n");
 		}
+		void constant::transform(context const&) {}
 
 		template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 		// explicit deduction guide (not needed as of C++20)

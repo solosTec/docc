@@ -8,9 +8,9 @@
 #define DOCC_SCRIPT_AST_VALUE_H
 
 #include <ast/constant.h>
-//#include <symbol.h>
 
 namespace docscript {
+	class context;
 	namespace ast {
 
 		class map_method;
@@ -32,6 +32,7 @@ namespace docscript {
 			bool empty() const;
 
 			void compile(std::function<void(std::string const&)>, std::size_t depth, std::size_t index) const;
+			void transform(context const&);
 
 			static value factory(symbol const& sym);
 			static value factory(map_method&&);
@@ -41,9 +42,9 @@ namespace docscript {
 			friend std::ostream& operator<<(std::ostream& os, value const&);
 
 			/**
-			 * @return true if value is a constant of the specified symbol type
+			 * @return true if value is a constant of a string type
 			 */
-			bool is_constant_txt() const;
+			std::pair<std::string, bool> is_constant_txt() const;
 			void merge(value&&);
 
 		private:

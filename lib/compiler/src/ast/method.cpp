@@ -1,5 +1,6 @@
 #include <ast/method.h>
 #include <ast/params.h>
+#include <context.h>
 
 #include <boost/assert.hpp>
 #include <boost/algorithm/string.hpp>
@@ -59,6 +60,10 @@ namespace docscript {
 			emit("\n");
 		}
 
+		void map_method::transform(context const&) {
+
+		}
+
 		void map_method::set_params(param&& p, std::string pos) {
 			//
 			//	set named parameter
@@ -115,7 +120,10 @@ namespace docscript {
 				emit(this->get_name());
 				emit("\n");
 
-				for (auto& p : vlist_) {
+				//
+				//	generate assembler code
+				//
+				for (auto const& p : vlist_) {
 					BOOST_ASSERT(!!p);
 					if (p) (*p).compile(emit, depth + 1, index);
 				}
@@ -141,14 +149,43 @@ namespace docscript {
 			}
 		}
 
-		std::size_t vec_method::append(value&& v, bool consider_merge) {
-			if (consider_merge && !vlist_.empty() && vlist_.back()->is_constant_txt()) {
-				BOOST_ASSERT(v.is_constant_txt());
-				vlist_.back()->merge(std::move(v));
+		void vec_method::transform(context const& ctx) {
+			transform_concatenations(ctx);
+		}
+
+		void vec_method::transform_concatenations(context const& ctx) {
+			//
+			//	Find the trailing punctuation marks.
+			//
+			for (auto pos = vlist_.begin(); pos != vlist_.end(); ) {
+				auto const r = (*pos)->is_constant_txt();
+
+				if (r.second) {
+					if (boost::algorithm::equals(r.first, ".")
+						|| boost::algorithm::equals(r.first, ",")
+						|| boost::algorithm::equals(r.first, "?")
+						|| boost::algorithm::equals(r.first, "!")) {
+						//std::cout << get_name() << " CAT #" << std::distance(vlist_.begin(), pos) << " - " << **(pos - 1) << r.first << std::endl;
+
+						//
+						//	substitute this by a cat() function
+						//
+						std::string const cat("cat");
+						auto m = factory(cat, ctx.lookup_method(cat));
+						m.append(std::move(**(pos - 1)));
+						m.append(std::move(**(pos)));
+
+						pos = vlist_.erase(pos - 1);
+						pos = vlist_.erase(pos);
+						pos = vlist_.emplace(pos, std::make_unique<value>(value::factory(std::move(m))));
+					}
+				}
+				++pos;
 			}
-			else {
-				vlist_.push_back(std::make_unique<value>(std::move(v)));
-			}
+		}
+
+		std::size_t vec_method::append(value&& v) {
+			vlist_.push_back(std::make_unique<value>(std::move(v)));
 			return vlist_.size();
 		}
 

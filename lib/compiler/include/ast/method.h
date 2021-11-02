@@ -17,8 +17,9 @@
 #include <fmt/format.h>
 
 namespace docscript {
-
+	class context;
 	namespace ast {
+
 		class method_base {
 		public:
 			method_base(std::string const& name, std::optional<docscript::method> optm);
@@ -37,6 +38,7 @@ namespace docscript {
 			map_method(map_method&&) noexcept;
 			~map_method();
 			void compile(std::function<void(std::string const&)>, std::size_t depth, std::size_t index) const;
+			void transform(context const&);
 			void set_params(param&&, std::string pos);
 			std::size_t param_count() const;
 
@@ -54,13 +56,19 @@ namespace docscript {
 			vec_method(vec_method&& vecm) noexcept;
 			~vec_method();
 			void compile(std::function<void(std::string const&)>, std::size_t depth, std::size_t index) const;
+			void transform(context const&);
+
 			/**
 			 * append to value list (vector)
 			 */
-			std::size_t append(value&&, bool consider_merge);
+			std::size_t append(value&&);
 			std::size_t param_count() const;
 
 			static vec_method factory(std::string const&, std::optional<docscript::method>);
+
+		private:
+			void transform_concatenations(context const&);
+
 		private:
 			std::vector<std::unique_ptr<value>> vlist_;
 		};

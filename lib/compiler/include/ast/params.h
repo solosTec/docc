@@ -13,6 +13,7 @@
 
 namespace docscript {
 	struct symbol;
+	class context;
 	namespace ast {
 
 		class value;
@@ -51,6 +52,7 @@ namespace docscript {
 			void append(param&&);
 			std::size_t size() const;
 			std::size_t compile(std::function<void(std::string const&)>, std::size_t depth, std::size_t index) const;
+			void transform(context const&);
 
 			param_names_t get_param_names() const;
 

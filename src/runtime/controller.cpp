@@ -65,6 +65,7 @@ namespace docscript {
 			, f_resource()
 			, f_now()
 			, f_range()
+			, f_cat()
 			, f_repeat()
 			, f_currency()
 			, f_show()
@@ -90,6 +91,7 @@ namespace docscript {
 		vm.set_channel_name("resource", slot++);	//	resource
 		vm.set_channel_name("now", slot++);	//	current time
 		vm.set_channel_name("range", slot++);	//	build an vector
+		vm.set_channel_name("cat", slot++);	//	concatenate without spaces
 		vm.set_channel_name("repeat", slot++);
 		vm.set_channel_name("currency", slot++);
 		vm.set_channel_name("show", slot++);	//	show
@@ -331,6 +333,18 @@ namespace docscript {
 	cyng::vector_t controller::range(cyng::vector_t vec) {
 		return vec;
 	}
+	std::string controller::cat(cyng::vector_t vec) {
+		std::reverse(std::begin(vec), std::end(vec));
+		std::stringstream ss;
+		ss << "CAT*" << vec.size() << "(";
+		for (auto const& v : vec) {
+			ss << v;
+		}
+		ss << ")";
+		std::cout << ss.str() << std::endl;
+		return ss.str();
+	}
+
 	//		insert_method(table, method("repeat", parameter_type::MAP, true, { "count", "value", "sep"}));
 	std::string controller::repeat(cyng::param_map_t pm) {
 		return "";
@@ -405,6 +419,9 @@ namespace docscript {
 	}
 	std::function<cyng::vector_t(cyng::vector_t)> controller::f_range() {
 		return std::bind(&controller::range, this, std::placeholders::_1);
+	}
+	std::function<std::string(cyng::vector_t)> controller::f_cat() {
+		return std::bind(&controller::cat, this, std::placeholders::_1);
 	}
 	std::function<std::string(cyng::param_map_t pm)> controller::f_repeat() {
 		return std::bind(&controller::repeat, this, std::placeholders::_1);

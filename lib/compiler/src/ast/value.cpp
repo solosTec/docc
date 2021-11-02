@@ -82,10 +82,10 @@ namespace docscript {
 			return !node_;
 		}
 
-		bool value::is_constant_txt() const {
-			return (!empty()) 
-				? node_->is_constant_txt()
-				: false
+		std::pair<std::string, bool> value::is_constant_txt() const {
+			return (!empty() && node_->is_constant_txt())
+				? std::make_pair(std::get<0>(node_->value_).value_, true)
+				: std::make_pair("", false)
 				;
 		}
 
@@ -129,6 +129,7 @@ namespace docscript {
 				emit("\n");
 			}
 		}
+		void value::transform(context const&) {}
 
 		std::ostream& operator<<(std::ostream & os, value const& v) {
 			//os << "value[" << "]";

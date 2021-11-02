@@ -160,12 +160,13 @@ namespace docscript {
 
 		insert_method(table, method("get", parameter_type::VECTOR, true));
 		insert_method(table, method("set", parameter_type::MAP, true));	//	key, value
-		insert_method(table, method("range", parameter_type::VECTOR, true));	//	collect a vector
 
 		insert_method(table, method("resource", parameter_type::MAP, true, {"name", "mime", "cache", "url"}));
 		insert_method(table, method("i", parameter_type::VECTOR, true));
 		insert_method(table, method("b", parameter_type::VECTOR, true));
 		insert_method(table, method("quote", parameter_type::VECTOR, true));	//	same as "..."
+		insert_method(table, method("range", parameter_type::VECTOR, true));	//	collect a vector
+		insert_method(table, method("cat", parameter_type::VECTOR, true));		//	concatenate without spaces
 
 		//	calculate return value count requires to determine "count" value at compile time
 		insert_method(table, method("repeat", parameter_type::MAP, true, { "count", "value", "sep"}));
