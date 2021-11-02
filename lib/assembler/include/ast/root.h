@@ -13,72 +13,17 @@
 #include <ast/value.h>
 #include <ast/push.h>
 #include <ast/invoke.h>
+#include <ast/forward.h>
+#include <ast/jump.h>
 #include <symbol.h>
 
-#include <cyng/obj/intrinsics/op.h>
-#include <cyng/obj/intrinsics/color.hpp>
-
-#include <string>
-#include <iostream>
-#include <variant>
 #include <stack>
-#include <chrono>
-#include <map>
 
-#include <boost/uuid/uuid.hpp>
 #include <boost/uuid/string_generator.hpp>
 
-namespace docscript {
+namespace docasm {
 	class context;
 	namespace ast {
-
-		//
-		//	----------------------------------------------------------*
-		//	-- forward
-		//	----------------------------------------------------------*
-		//
-		struct forward {
-
-			boost::uuids::uuid const tag_;
-
-			[[nodiscard]] static forward factory();
-
-			friend std::ostream& operator<<(std::ostream& os, forward const& c);
-
-			/**
-			 * Generate a complete forward operation
-			 */
-			[[nodiscard]] forward finish(boost::uuids::uuid);
-
-
-			std::size_t size() const;
-			void generate(context&, label_list_t const&) const;
-		};
-
-		//
-		//	----------------------------------------------------------*
-		//	-- jump
-		//	----------------------------------------------------------*
-		//
-		struct jump {
-
-			cyng::op const code_;
-			std::string const label_;
-
-			[[nodiscard]] static jump factory(cyng::op);
-
-			friend std::ostream& operator<<(std::ostream& os, jump const& c);
-
-			/**
-			 * Generate a complete forward operation
-			 */
-			[[nodiscard]] jump finish(std::string const&);
-
-
-			std::size_t size() const;
-			void generate(context&, label_list_t const&) const;
-		};
-
 
 		using decl_t = std::variant<
 			label,		//	[0]

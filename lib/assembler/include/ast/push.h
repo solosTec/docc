@@ -7,26 +7,9 @@
 #ifndef DOCC_ASM_AST_PUSH_H
 #define DOCC_ASM_AST_PUSH_H
 
-//#include <ast/label.h>
-//#include <ast/literal.h>
-//#include <ast/operation.h>
 #include <ast/value.h>
-//#include <symbol.h>
-//
-//#include <cyng/obj/intrinsics/op.h>
-//#include <cyng/obj/intrinsics/color.hpp>
-//
-//#include <string>
-//#include <iostream>
-//#include <variant>
-//#include <stack>
-//#include <chrono>
-//#include <map>
-//
-//#include <boost/uuid/uuid.hpp>
-//#include <boost/uuid/string_generator.hpp>
 
-namespace docscript {
+namespace docasm {
 	class context;
 	namespace ast {
 

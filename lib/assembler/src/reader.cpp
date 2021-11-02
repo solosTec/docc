@@ -9,7 +9,7 @@
 #include <fmt/core.h>
 #include <fmt/color.h>
 
-namespace docscript {
+namespace docasm {
 
 	reader::reader(std::filesystem::path out
 		, std::vector<std::filesystem::path> const& inc

@@ -1,7 +1,7 @@
 #include <nonterminal.h>
 #include <boost/assert.hpp>
 
-namespace docscript {
+namespace docasm {
 
 	nonterminal::nonterminal(symbol sym) 
 		: sym_(sym)

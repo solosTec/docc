@@ -20,7 +20,7 @@
 #include <fstream>
 #include <optional>
 
-namespace docscript {
+namespace docasm {
 
 	class sanitizer;
 	class context

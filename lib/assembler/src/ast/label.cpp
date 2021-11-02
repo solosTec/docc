@@ -2,7 +2,7 @@
 
 #include <boost/assert.hpp>
 
-namespace docscript {
+namespace docasm {
 	namespace ast {
 
 		//

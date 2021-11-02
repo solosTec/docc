@@ -34,6 +34,8 @@ set (docasm_ast
      ${PROJECT_SOURCE_DIR}/include/ast/value.h
      ${PROJECT_SOURCE_DIR}/include/ast/push.h
      ${PROJECT_SOURCE_DIR}/include/ast/invoke.h
+     ${PROJECT_SOURCE_DIR}/include/ast/forward.h
+     ${PROJECT_SOURCE_DIR}/include/ast/jump.h
      ${PROJECT_SOURCE_DIR}/src/ast/root.cpp
      ${PROJECT_SOURCE_DIR}/src/ast/label.cpp
      ${PROJECT_SOURCE_DIR}/src/ast/literal.cpp
@@ -41,6 +43,8 @@ set (docasm_ast
      ${PROJECT_SOURCE_DIR}/src/ast/value.cpp
      ${PROJECT_SOURCE_DIR}/src/ast/push.cpp
      ${PROJECT_SOURCE_DIR}/src/ast/invoke.cpp
+     ${PROJECT_SOURCE_DIR}/src/ast/forward.cpp
+     ${PROJECT_SOURCE_DIR}/src/ast/jump.cpp
 )
 
 

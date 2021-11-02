@@ -1,21 +1,9 @@
 #include <ast/literal.h>
 #include <context.h>
 
-//#include <cyng/io/ostream.h>
-//#include <cyng/parse/timestamp.h>
 #include <cyng/obj/factory.hpp>
-//
-//#include <fmt/core.h>
-//#include <fmt/color.h>
-//
-//#include <utility>
-//
-//#include <boost/assert.hpp>
-//#include <boost/algorithm/string.hpp>
-//#include <boost/uuid/string_generator.hpp>
-//#include <boost/uuid/uuid_io.hpp>
 
-namespace docscript {
+namespace docasm {
 	namespace ast {
 
 		//

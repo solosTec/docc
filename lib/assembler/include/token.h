@@ -13,7 +13,7 @@
 #include <string>
 #include <functional>
 
-namespace docscript {
+namespace docasm {
 
     class token 
     {

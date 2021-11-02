@@ -11,7 +11,7 @@
 #include <map>
 #include <iostream>
 
-namespace docscript {
+namespace docasm {
 	class context;
 	namespace ast {
 

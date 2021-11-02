@@ -13,7 +13,7 @@
 #include <functional>
 #include <filesystem>
 
-namespace docscript {
+namespace docasm {
 
 	enum class symbol_type : std::uint32_t {
 		EOD,	//	end-of-data

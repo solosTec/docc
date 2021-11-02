@@ -13,7 +13,8 @@
 
 #include <boost/assert.hpp>
 
-namespace docscript {
+namespace docasm {
+
 	context::context(std::filesystem::path out
 		, std::vector<std::filesystem::path> const& inc
 		, int verbose)

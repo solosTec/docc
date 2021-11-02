@@ -9,7 +9,7 @@
 
 #include <ast/label.h>
 
-namespace docscript {
+namespace docasm {
 	class context;
 	namespace ast {
 

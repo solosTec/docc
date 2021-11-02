@@ -1,7 +1,7 @@
 #include <symbol.h>
 #include <boost/assert.hpp>
 
-namespace docscript {
+namespace docasm {
 
 	symbol::symbol()
 		: type_(symbol_type::EOD)

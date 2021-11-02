@@ -48,7 +48,7 @@
 
 #include <symbol.h>
 
-namespace docscript {
+namespace docasm {
 
 	enum class nonterminal_type : std::uint32_t {
 		BODY,		//	

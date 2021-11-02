@@ -2,7 +2,7 @@
 #ifdef _DEBUG
 #include <iostream>
 #endif
-namespace docscript {
+namespace docasm {
 
     sanitizer::sanitizer(callback cb)
         : cb_(cb)

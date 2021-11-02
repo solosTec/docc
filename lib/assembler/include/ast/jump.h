@@ -4,10 +4,11 @@
  * Copyright (c) 2021 Sylko Olzscher 
  * 
  */ 
-#ifndef DOCC_ASM_AST_OPERATION_H
-#define DOCC_ASM_AST_OPERATION_H
+#ifndef DOCC_ASM_AST_JUMP_H
+#define DOCC_ASM_AST_JUMP_H
 
 #include <ast/label.h>
+
 #include <cyng/obj/intrinsics/op.h>
 
 namespace docasm {
@@ -16,19 +17,28 @@ namespace docasm {
 
 		//
 		//	----------------------------------------------------------*
-		//	-- operation
+		//	-- jump
 		//	----------------------------------------------------------*
 		//
-		struct operation {
+		struct jump {
+
 			cyng::op const code_;
+			std::string const label_;
 
-			[[nodiscard]] static operation factory(cyng::op);
+			[[nodiscard]] static jump factory(cyng::op);
 
-			friend std::ostream& operator<<(std::ostream& os, operation const& c);
+			friend std::ostream& operator<<(std::ostream& os, jump const& c);
+
+			/**
+			 * Generate a complete forward operation
+			 */
+			[[nodiscard]] jump finish(std::string const&);
+
 
 			std::size_t size() const;
 			void generate(context&, label_list_t const&) const;
 		};
+
 
 	}
 }

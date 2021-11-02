@@ -7,7 +7,7 @@
 
 #include <boost/algorithm/string.hpp>
 
-namespace docscript {
+namespace docasm {
 
 	tokenizer::tokenizer(emit_symbol_f cb)
 		: state_(state::START_)

@@ -12,20 +12,14 @@
 //#include <ast/operation.h>
 #include <symbol.h>
 
-//#include <cyng/obj/intrinsics/op.h>
 #include <cyng/obj/intrinsics/color.hpp>
-//
-//#include <string>
-//#include <iostream>
-#include <variant>
-//#include <stack>
-#include <chrono>
-//#include <map>
-//
-#include <boost/uuid/uuid.hpp>
-//#include <boost/uuid/string_generator.hpp>
 
-namespace docscript {
+#include <variant>
+#include <chrono>
+
+#include <boost/uuid/uuid.hpp>
+
+namespace docasm {
 	class context;
 	namespace ast {
 

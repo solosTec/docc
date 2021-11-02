@@ -17,7 +17,7 @@
 #include <map>
 
 
-namespace docscript {
+namespace docasm {
 
 	class context;
 	class parser

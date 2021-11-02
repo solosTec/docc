@@ -1,16 +1,13 @@
 #include <parser.h>
 #include <context.h>
 
-//#include <cyng/obj/factory.hpp>
-//#include <cyng/parse/timestamp.h>
-
 #include <fmt/core.h>
 #include <fmt/color.h>
 
 #include <boost/assert.hpp>
 #include <boost/algorithm/string.hpp>
 
-namespace docscript {
+namespace docasm {
 
 	parser::parser(context& ctx)
 		: state_()

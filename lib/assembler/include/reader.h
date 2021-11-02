@@ -12,7 +12,7 @@
 #include <tokenizer.h>
 
 
-namespace docscript {
+namespace docasm {
 
     class reader {
     public:

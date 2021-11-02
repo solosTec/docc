@@ -1,7 +1,7 @@
 #include <token.h>
 #include <boost/assert.hpp>
 
-namespace docscript {
+namespace docasm {
 
     std::ostream& operator<<(std::ostream& os, const token& tok)
 	{

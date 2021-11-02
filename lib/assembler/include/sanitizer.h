@@ -12,7 +12,7 @@
 #include <cstdint>
 #include <functional>
 
-namespace docscript {
+namespace docasm {
 
 	class sanitizer
 	{

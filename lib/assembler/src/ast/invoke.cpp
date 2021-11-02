@@ -3,7 +3,7 @@
 
 #include <cyng/obj/factory.hpp>
 
-namespace docscript {
+namespace docasm {
 	namespace ast {
 
 		template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };

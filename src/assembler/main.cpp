@@ -204,7 +204,7 @@ int main(int argc, char* argv[]) {
     //  start tasks
     //
     
-    docscript::reader r(out_file,
+    docasm::reader r(out_file,
             inc_paths,
             verbose);
     r.read(std::filesystem::path(inp_file));

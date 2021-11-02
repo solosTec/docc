@@ -4,13 +4,12 @@
  * Copyright (c) 2021 Sylko Olzscher 
  * 
  */ 
-#ifndef DOCC_ASM_AST_LITERAL_H
-#define DOCC_ASM_AST_LITERAL_H
+#ifndef DOCC_ASM_AST_FORWARD_H
+#define DOCC_ASM_AST_FORWARD_H
 
 #include <ast/label.h>
 
-#include <string>
-#include <iostream>
+#include <boost/uuid/uuid.hpp>
 
 namespace docasm {
 	class context;
@@ -18,15 +17,22 @@ namespace docasm {
 
 		//
 		//	----------------------------------------------------------*
-		//	-- literal
+		//	-- forward
 		//	----------------------------------------------------------*
 		//
-		struct literal {
-			std::string const value_;
+		struct forward {
 
-			[[nodiscard]] static literal factory(std::string const&);
+			boost::uuids::uuid const tag_;
 
-			friend std::ostream& operator<<(std::ostream& os, literal const& c);
+			[[nodiscard]] static forward factory();
+
+			friend std::ostream& operator<<(std::ostream& os, forward const& c);
+
+			/**
+			 * Generate a complete forward operation
+			 */
+			[[nodiscard]] forward finish(boost::uuids::uuid);
+
 
 			std::size_t size() const;
 			void generate(context&, label_list_t const&) const;
