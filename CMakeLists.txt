@@ -263,7 +263,7 @@ install(TARGETS doca
     DESTINATION bin)
 
 #
-# docScript runtime
+# generic docScript runtime
 #
 include (src/runtime/prg.cmake)
 
@@ -299,6 +299,126 @@ target_link_libraries(docrt
 )
 
 install(TARGETS docrt
+    RUNTIME
+    DESTINATION bin)
+
+#
+# HTML doc2html generator
+#
+include (src/runtime/html/prg.cmake)
+
+add_executable(doc2html ${doc2html_prg})
+
+target_include_directories(doc2html
+	PUBLIC
+		${CMAKE_SOURCE_DIR}/src/runtime
+        ${CYNG_INCLUDE_DIRS}
+		${PROJECT_BINARY_DIR}/include
+ 		${OPENSSL_INCLUDE_DIR}
+ 		${Boost_INCLUDE_DIRS}
+)
+
+target_compile_features(doc2html PRIVATE cxx_std_20)
+
+target_compile_options(doc2html 
+    PRIVATE "$<$<CXX_COMPILER_ID:GNU,Clang>:-Wall;-Wextra;-pedantic>"
+	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/MP>"
+	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/W2>"
+)
+
+target_compile_definitions(doc2html
+	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:_WIN32_WINNT=0x0601>")
+
+target_link_libraries(doc2html 
+	PUBLIC 
+		docruntime
+        fmt::fmt
+		${CYNG_LIBRARIES}
+		${OPENSSL_LIBRARIES}
+		"$<$<PLATFORM_ID:Linux>:pthread;${Boost_LIBRARIES}>"
+)
+
+install(TARGETS doc2html
+    RUNTIME
+    DESTINATION bin)
+
+#
+# LaTeX doc2LaTeX generator
+#
+include (src/runtime/LaTeX/prg.cmake)
+
+add_executable(doc2LaTeX ${doc2LaTeX_prg})
+
+target_include_directories(doc2LaTeX
+	PUBLIC
+		${CMAKE_SOURCE_DIR}/src/runtime
+        ${CYNG_INCLUDE_DIRS}
+		${PROJECT_BINARY_DIR}/include
+ 		${OPENSSL_INCLUDE_DIR}
+ 		${Boost_INCLUDE_DIRS}
+)
+
+target_compile_features(doc2LaTeX PRIVATE cxx_std_20)
+
+target_compile_options(doc2LaTeX 
+    PRIVATE "$<$<CXX_COMPILER_ID:GNU,Clang>:-Wall;-Wextra;-pedantic>"
+	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/MP>"
+	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/W2>"
+)
+
+target_compile_definitions(doc2LaTeX
+	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:_WIN32_WINNT=0x0601>")
+
+target_link_libraries(doc2LaTeX 
+	PUBLIC 
+		docruntime
+        fmt::fmt
+		${CYNG_LIBRARIES}
+		${OPENSSL_LIBRARIES}
+		"$<$<PLATFORM_ID:Linux>:pthread;${Boost_LIBRARIES}>"
+)
+
+install(TARGETS doc2LaTeX
+    RUNTIME
+    DESTINATION bin)
+
+#
+# markdown doc2md generator
+#
+include (src/runtime/markdown/prg.cmake)
+
+add_executable(doc2md ${doc2md_prg})
+
+target_include_directories(doc2md
+	PUBLIC
+		${CMAKE_SOURCE_DIR}/src/runtime
+        ${CYNG_INCLUDE_DIRS}
+		${PROJECT_BINARY_DIR}/include
+ 		${OPENSSL_INCLUDE_DIR}
+ 		${Boost_INCLUDE_DIRS}
+)
+
+target_compile_features(doc2md PRIVATE cxx_std_20)
+
+target_compile_options(doc2md 
+    PRIVATE "$<$<CXX_COMPILER_ID:GNU,Clang>:-Wall;-Wextra;-pedantic>"
+	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/MP>"
+	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/W2>"
+)
+
+target_compile_definitions(doc2md
+	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:_WIN32_WINNT=0x0601>")
+
+target_link_libraries(doc2md 
+	PUBLIC 
+		docruntime
+        fmt::fmt
+		${CYNG_LIBRARIES}
+		${OPENSSL_LIBRARIES}
+		"$<$<PLATFORM_ID:Linux>:pthread;${Boost_LIBRARIES}>"
+)
+
+install(TARGETS doc2md
     RUNTIME
     DESTINATION bin)
 

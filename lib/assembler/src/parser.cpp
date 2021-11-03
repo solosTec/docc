@@ -19,7 +19,7 @@ namespace docasm {
 
 	bool parser::put(symbol const& sym)
 	{
-		std::cout << ctx_.get_position() << ": " << sym << " " << state_ << std::endl;
+		//std::cout << ctx_.get_position() << ": " << sym << " " << state_ << std::endl;
 
 		BOOST_ASSERT_MSG(!state_.empty(), "state stack is empty");
 
