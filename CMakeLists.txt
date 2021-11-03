@@ -176,6 +176,7 @@ endif()
 if (IS_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 	add_subdirectory(lib/compiler)
 	add_subdirectory(lib/assembler)
+	add_subdirectory(lib/runtime)
 endif()
 
 #
@@ -290,6 +291,7 @@ target_compile_definitions(docrt
 
 target_link_libraries(docrt 
 	PUBLIC 
+		docruntime
         fmt::fmt
 		${CYNG_LIBRARIES}
 		${OPENSSL_LIBRARIES}
