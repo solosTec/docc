@@ -8,6 +8,7 @@
 #define DOCC_SCRIPT_AST_VALUE_H
 
 #include <ast/constant.h>
+#include <method.h>
 
 namespace docscript {
 	class context;
@@ -45,6 +46,13 @@ namespace docscript {
 			 * @return true if value is a constant of a string type
 			 */
 			std::pair<std::string, bool> is_constant_txt() const;
+
+			/**
+			 * @return true if value is a vector method
+			 */
+			std::pair<std::string, bool> is_vec_method() const;
+			void rename(docscript::method);
+
 			void merge(value&&);
 
 		private:

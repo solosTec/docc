@@ -5,6 +5,7 @@
 #include <iomanip>
 
 #include <boost/assert.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace docscript {
 	namespace ast {
@@ -50,7 +51,19 @@ namespace docscript {
 				? next_->compile(emit, depth, index + 1) + 1u
 				: 1u;
 		}
-		void param::transform(context const&) {}
+		void param::transform(context const& ctx) {
+			auto const r = value_.is_vec_method();
+			if (r.second && boost::algorithm::equals(r.first, "quote")) {
+				//std::cout << "SUBSTITUTE " << key_ << ": " << r.first << std::endl;
+				auto optm = ctx.lookup_method("range");
+				if (optm) {
+					value_.rename(*optm);
+				}
+			}
+			if (next_) {
+				next_->transform(ctx);
+			}
+		}
 
 		param::param_names_t param::get_param_names() const {
 			param_names_t names;

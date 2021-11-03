@@ -21,6 +21,11 @@ namespace docscript {
 			return name_;
 		}
 
+		void method_base::rename(docscript::method m) {
+			name_ = m.get_name();
+			method_.emplace(m);
+		}
+
 		//
 		//	----------------------------------------------------------*
 		//	-- map_method
@@ -60,8 +65,17 @@ namespace docscript {
 			emit("\n");
 		}
 
-		void map_method::transform(context const&) {
+		void map_method::transform(context const& ctx) {
+			transform_quote(ctx);
+		}
 
+		void map_method::transform_quote(context const& ctx) {
+			//
+			//	replace quote() calls on values with range() calls
+			//
+			if (params_) {
+				params_->transform(ctx);
+			}
 		}
 
 		void map_method::set_params(param&& p, std::string pos) {
@@ -159,13 +173,13 @@ namespace docscript {
 			//
 			for (auto pos = vlist_.begin(); pos != vlist_.end(); ) {
 				auto const r = (*pos)->is_constant_txt();
-
-				if (r.second) {
+				auto const idx = std::distance(vlist_.begin(), pos);
+				if (r.second && idx != 0) {
 					if (boost::algorithm::equals(r.first, ".")
 						|| boost::algorithm::equals(r.first, ",")
 						|| boost::algorithm::equals(r.first, "?")
 						|| boost::algorithm::equals(r.first, "!")) {
-						//std::cout << get_name() << " CAT #" << std::distance(vlist_.begin(), pos) << " - " << **(pos - 1) << r.first << std::endl;
+						//std::cout << get_name() << " CAT #" << idx << " - " << **(pos - 1) << r.first << std::endl;
 
 						//
 						//	substitute this by a cat() function

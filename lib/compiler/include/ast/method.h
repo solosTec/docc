@@ -24,8 +24,9 @@ namespace docscript {
 		public:
 			method_base(std::string const& name, std::optional<docscript::method> optm);
 			std::string const& get_name() const;
+			void rename(docscript::method);
 		protected:
-			std::string const name_;
+			std::string name_;
 			std::optional<docscript::method>	method_;
 		};
 
@@ -43,6 +44,8 @@ namespace docscript {
 			std::size_t param_count() const;
 
 			static map_method factory(std::string const&, std::optional<docscript::method>);
+		private:
+			void transform_quote(context const&);
 		private:
 			std::unique_ptr<param> params_;
 		};

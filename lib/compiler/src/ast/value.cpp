@@ -57,10 +57,31 @@ namespace docscript {
 					}, value_);
 			}
 
+			void transform(context const& ctx) {
+				std::visit([&](auto& arg) {
+					arg.transform(ctx);
+				}, value_);
+			}
+
+			void rename(docscript::method m) {
+				std::visit(overloaded{
+					[&](constant& arg) { ; },
+					[&](map_method& arg) { arg.rename(m); },
+					[&](vec_method& arg) { arg.rename(m); }
+				}, value_);
+			}
+
 			constexpr bool is_constant_txt() const noexcept {
 				return (value_.index() == 0) && (std::get<0>(value_).node_.index() == 0);
 			}
 
+			constexpr bool is_map_method() const noexcept {
+				return value_.index() == 1;
+			}
+
+			constexpr bool is_vec_method() const noexcept {
+				return value_.index() == 2;
+			}
 
 		};
 
@@ -88,6 +109,20 @@ namespace docscript {
 				: std::make_pair("", false)
 				;
 		}
+
+		std::pair<std::string, bool> value::is_vec_method() const {	
+			return (!empty() && node_->is_vec_method())
+				? std::make_pair(std::get<2>(node_->value_).get_name(), true)
+				: std::make_pair("", false)
+				;
+		}
+
+		void value::rename(docscript::method m) {
+			if (!empty()/* && (node_->is_vec_method() || node_->is_map_method())*/) {
+				node_->rename(m);
+			}
+		}
+
 
 		void value::merge(value&& v) {
 			auto txt = std::get<0>(std::get<0>(node_->value_).node_).append(std::get<0>(std::get<0>(v.node_->value_).node_));
@@ -129,7 +164,11 @@ namespace docscript {
 				emit("\n");
 			}
 		}
-		void value::transform(context const&) {}
+		void value::transform(context const& ctx) {
+			if (node_) {
+				node_->transform(ctx);
+			}
+		}
 
 		std::ostream& operator<<(std::ostream & os, value const& v) {
 			//os << "value[" << "]";

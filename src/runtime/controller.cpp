@@ -341,7 +341,7 @@ namespace docscript {
 			ss << v;
 		}
 		ss << ")";
-		std::cout << ss.str() << std::endl;
+		//std::cout << ss.str() << std::endl;
 		return ss.str();
 	}
 
