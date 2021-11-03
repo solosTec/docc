@@ -1,5 +1,6 @@
 
 #include "controller.h"
+#include <currency.h>
 
 #include <cyng/task/controller.h>
 #include <cyng/task/scheduler.h>
@@ -8,6 +9,8 @@
 #include <cyng/io/parser/parser.h>
 #include <cyng/io/ostream.h>
 #include <cyng/io/serialize.h>
+#include <cyng/obj/algorithm/reader.hpp>
+#include <cyng/obj/numeric_cast.hpp>
 
 #include <fmt/core.h>
 #include <fmt/color.h>
@@ -17,7 +20,7 @@
 #include <functional>
 #include <iostream>
 
-namespace docscript {
+namespace docruntime {
 
 	void show(std::string str) {
 		std::cout << str << std::endl;
@@ -26,6 +29,8 @@ namespace docscript {
 	controller::controller(std::filesystem::path out
 		, int verbose)
 		: vars_()
+		, toc_()
+		, uuid_gen_()
 	{}
 
 	int controller::run(std::filesystem::path&& inp
@@ -62,8 +67,10 @@ namespace docscript {
 			, f_h5()
 			, f_h6()
 			, f_header()
+			, f_figure()
 			, f_resource()
 			, f_now()
+			, f_uuid()
 			, f_range()
 			, f_cat()
 			, f_repeat()
@@ -88,8 +95,10 @@ namespace docscript {
 		vm.set_channel_name("h5", slot++);	//	h5
 		vm.set_channel_name("h6", slot++);	//	h6
 		vm.set_channel_name("header", slot++);	//	header
+		vm.set_channel_name("figure", slot++);	//	figure
 		vm.set_channel_name("resource", slot++);	//	resource
 		vm.set_channel_name("now", slot++);	//	current time
+		vm.set_channel_name("uuid", slot++);	//	random uuid v4
 		vm.set_channel_name("range", slot++);	//	build an vector
 		vm.set_channel_name("cat", slot++);	//	concatenate without spaces
 		vm.set_channel_name("repeat", slot++);
@@ -128,6 +137,7 @@ namespace docscript {
 			// 
 			vm.load(std::move(deq));
 			vm.run();
+
 		}
 		else {
 			fmt::print(
@@ -146,6 +156,13 @@ namespace docscript {
 		ctl.stop();
 		//ctl.shutdown();
 
+		std::cout << "TOC:" << std::endl;
+		std::cout << toc_ << std::endl;
+
+		//	JSON
+		//auto const vec = to_vector(toc_);
+		//std::cout << cyng::io::to_json_pretty(cyng::make_object(vec)) << std::endl;
+
 		auto const delta = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - now);
 
 		fmt::print(
@@ -154,8 +171,6 @@ namespace docscript {
 			"***info : complete after {} milliseconds\n", delta.count());
 
 		return EXIT_SUCCESS;
-		//return EXIT_FAILURE;
-
 	}
 
 	std::string controller::quote(cyng::vector_t vec) {
@@ -267,6 +282,7 @@ namespace docscript {
 		}
 		ss << ")";
 		std::cout << ss.str() << std::endl;
+		toc_.add(0, uuid_gen_(), cyng::to_string(vec));
 		return ss.str();
 	}
 	std::string controller::h2(cyng::vector_t vec) {
@@ -285,6 +301,7 @@ namespace docscript {
 		}
 		ss << ")";
 		std::cout << ss.str() << std::endl;
+		toc_.add(1, uuid_gen_(), cyng::to_string(vec));
 		return ss.str();
 	}
 	std::string controller::h3(cyng::vector_t vec) {
@@ -292,6 +309,7 @@ namespace docscript {
 		std::stringstream ss;
 		ss << "H3(" << vec << ")";
 		std::cout << ss.str() << std::endl;
+		toc_.add(2, uuid_gen_(), cyng::to_string(vec));
 		return ss.str();
 	}
 	std::string controller::h4(cyng::vector_t vec) {
@@ -299,6 +317,7 @@ namespace docscript {
 		std::stringstream ss;
 		ss << "H4(" << vec << ")";
 		std::cout << ss.str() << std::endl;
+		toc_.add(3, uuid_gen_(), cyng::to_string(vec));
 		return ss.str();
 	}
 	std::string controller::h5(cyng::vector_t vec) {
@@ -306,6 +325,7 @@ namespace docscript {
 		std::stringstream ss;
 		ss << "H5(" << vec << ")";
 		std::cout << ss.str() << std::endl;
+		toc_.add(4, uuid_gen_(), cyng::to_string(vec));
 		return ss.str();
 	}
 	std::string controller::h6(cyng::vector_t vec) {
@@ -313,23 +333,43 @@ namespace docscript {
 		std::stringstream ss;
 		ss << "H6(" << vec << ")";
 		std::cout << ss.str() << std::endl;
+		toc_.add(5, uuid_gen_(), cyng::to_string(vec));
 		return ss.str();
 	}
 	std::string controller::header(cyng::param_map_t pm) {
-		//std::reverse(std::begin(vec), std::end(vec));
 		std::stringstream ss;
 		ss << "HEADER(" << pm << ")";
 		std::cout << ss.str() << std::endl;
+
+		//	"level":0000000000000001),("tag":<uuid>'79bf3ba0-2362-4ea5-bcb5-ed93844ac59a'),("title":[Basics]))
+		auto const reader = cyng::make_reader(pm);
+		auto const level = cyng::numeric_cast<std::size_t>(reader.get("level"), 0);
+		auto const tag = cyng::value_cast(reader.get("tag"), uuid_gen_());
+		auto const title = cyng::io::to_plain(reader.get("title"));
+
+		toc_.add(level, tag, title);
 		return ss.str();
 	}
+
+	std::string controller::figure(cyng::param_map_t pm) {
+		std::stringstream ss;
+		ss << "FIGURE(" << pm << ")";
+		std::cout << ss.str() << std::endl;
+		return ss.str();
+	}
+
 	void controller::resource(cyng::param_map_t pm) {
 		std::cout << "RESOURCE(" << pm << ")" << std::endl;
 	}
 	std::chrono::system_clock::time_point controller::now(cyng::param_map_t pm) {
-		std::stringstream ss;
-		std::cout << "NOW(" << pm << ")" << std::endl;
+		//std::stringstream ss;
+		//std::cout << "NOW(" << pm << ")" << std::endl;
 		return std::chrono::system_clock::now();
 	}
+	boost::uuids::uuid controller::uuid(cyng::param_map_t) {
+		return uuid_gen_();
+	}
+
 	cyng::vector_t controller::range(cyng::vector_t vec) {
 		return vec;
 	}
@@ -354,7 +394,12 @@ namespace docscript {
 		//	https://www.fileformat.info/info/unicode/category/Sc/list.htm
 		//	https://www.w3schools.com/charsets/ref_utf_currency.asp
 		//return std::string("\xE2\x82\xB9");	//	indian rupee
-		return std::string("42 \xE2\x82\xAC");	//	euro
+
+		auto const reader = cyng::make_reader(pm);
+		auto const value = cyng::numeric_cast<std::size_t>(reader.get("value"), 0);
+		auto const name = cyng::value_cast<std::string>(reader.get("name"), "euro");
+
+		return docruntime::currency(value, name);
 	}
 
 	std::function<std::string(cyng::vector_t)> controller::f_quote() {
@@ -411,11 +456,17 @@ namespace docscript {
 	std::function<std::string(cyng::param_map_t)> controller::f_header() {
 		return std::bind(&controller::header, this, std::placeholders::_1);
 	}
+	std::function<std::string(cyng::param_map_t)> controller::f_figure() {
+		return std::bind(&controller::figure, this, std::placeholders::_1);
+	}
 	std::function<void(cyng::param_map_t)> controller::f_resource() {
 		return std::bind(&controller::resource, this, std::placeholders::_1);
 	}
 	std::function<std::chrono::system_clock::time_point(cyng::param_map_t)> controller::f_now() {
 		return std::bind(&controller::now, this, std::placeholders::_1);
+	}
+	std::function<boost::uuids::uuid(cyng::param_map_t)> controller::f_uuid() {
+		return std::bind(&controller::uuid, this, std::placeholders::_1);
 	}
 	std::function<cyng::vector_t(cyng::vector_t)> controller::f_range() {
 		return std::bind(&controller::range, this, std::placeholders::_1);

@@ -160,9 +160,9 @@ int main(int argc, char* argv[]) {
     //  start tasks
     //
     
-    docscript::controller ctl(
+    docruntime::controller ctl(
         out_file,
         verbose
     );
-    return ctl.run(docscript::verify_extension(inp_file, "cyng"), pool_size, tag);
+    return ctl.run(docruntime::verify_extension(inp_file, "cyng"), pool_size, tag);
 }

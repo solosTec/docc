@@ -152,6 +152,8 @@ namespace docscript {
 		insert_method(table, method("h5", parameter_type::VECTOR, false));
 		insert_method(table, method("h6", parameter_type::VECTOR, false));
 
+		insert_method(table, method("figure", parameter_type::MAP, false, { "caption", "source", "tag", "alt" }));
+
 		//	 pilgrow (¶) = paragraph
 		insert_method(table, method(std::string("\xc2\xb6"), parameter_type::VECTOR, false));
 
@@ -164,6 +166,7 @@ namespace docscript {
 		insert_method(table, method("resource", parameter_type::MAP, true, {"name", "mime", "cache", "url"}));
 		insert_method(table, method("i", parameter_type::VECTOR, true));
 		insert_method(table, method("b", parameter_type::VECTOR, true));
+
 		insert_method(table, method("quote", parameter_type::VECTOR, true));	//	same as "..."
 		insert_method(table, method("range", parameter_type::VECTOR, true));	//	collect a vector
 		insert_method(table, method("cat", parameter_type::VECTOR, true));		//	concatenate without spaces
@@ -172,10 +175,11 @@ namespace docscript {
 		insert_method(table, method("repeat", parameter_type::MAP, true, { "count", "value", "sep"}));
 		insert_method(table, method("currency", parameter_type::MAP, true, { "name", "value" }));
 
-		//insert_method(table, method("rgb", return_type::U32, parameter_type::VECTOR, true, { "r", "g", "b" }));
-		//insert_method(table, method("rgba", return_type::U32, parameter_type::VECTOR, true, { "r", "g", "b", "a"}));
+		//insert_method(table, method("rgb", parameter_type::MAP, true, { "r", "g", "b" }));
+		//insert_method(table, method("rgba", parameter_type::MAP, true, { "r", "g", "b", "a"}));
 
 		insert_method(table, method("now", parameter_type::MAP, true));
+		insert_method(table, method("uuid", parameter_type::MAP, true));
 
 	}
 

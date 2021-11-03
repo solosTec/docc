@@ -8,14 +8,17 @@
 #ifndef DOCSCRIPT_RT_CONTROLLER_H
 #define DOCSCRIPT_RT_CONTROLLER_H
 
+#include <toc.h>
+
 #include <cyng/obj/object.h>
 #include <cyng/obj/intrinsics/container.h>
 
 #include <filesystem>
 
 #include <boost/uuid/uuid.hpp>
+#include <boost/uuid/random_generator.hpp>
 
-namespace docscript {
+namespace docruntime {
 
 	class controller
 	{
@@ -43,8 +46,11 @@ namespace docscript {
 		std::string h6(cyng::vector_t);
 		std::string header(cyng::param_map_t);
 
+		std::string figure(cyng::param_map_t);
+
 		void resource(cyng::param_map_t);
 		std::chrono::system_clock::time_point now(cyng::param_map_t);
+		boost::uuids::uuid uuid(cyng::param_map_t);
 
 		void set(cyng::param_map_t);
 		void meta(cyng::param_map_t);
@@ -72,8 +78,10 @@ namespace docscript {
 		std::function<std::string(cyng::vector_t)> f_h5();
 		std::function<std::string(cyng::vector_t)> f_h6();
 		std::function<std::string(cyng::param_map_t)> f_header();
+		std::function<std::string(cyng::param_map_t)> f_figure();
 		std::function<void(cyng::param_map_t)> f_resource();
 		std::function<std::chrono::system_clock::time_point(cyng::param_map_t)> f_now();
+		std::function<boost::uuids::uuid(cyng::param_map_t)> f_uuid();
 		std::function<cyng::vector_t(cyng::vector_t)> f_range();
 		std::function<std::string(cyng::vector_t)> f_cat();
 		std::function<std::string(cyng::param_map_t pm)> f_repeat();
@@ -82,6 +90,8 @@ namespace docscript {
 
 	private:
 		cyng::param_map_t vars_;
+		docruntime::toc toc_;
+		boost::uuids::random_generator	uuid_gen_;	//	basic_random_generator<mt19937>
 	};
 
 	std::filesystem::path verify_extension(std::filesystem::path p, std::string const& ext);
