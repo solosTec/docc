@@ -49,61 +49,34 @@ namespace docruntime {
 		//
 		//	Create VM
 		//
-		auto vm = fabric.create_proxy(tag
-			, f_quote()
-			, f_set()
-			, f_get()
-			, f_meta()
-			, f_paragraph()
-			, f_italic()
-			, f_bold()
-			, f_typewriter()
-			, f_label()
-			, f_ref()
-			, f_h1()
-			, f_h2()
-			, f_h3()
-			, f_h4()
-			, f_h5()
-			, f_h6()
-			, f_header()
-			, f_figure()
-			, f_resource()
-			, f_now()
-			, f_uuid()
-			, f_range()
-			, f_cat()
-			, f_repeat()
-			, f_currency()
-			, f_show()
+		auto vm = fabric.make_proxy(tag
+			, cyng::make_description("quote", f_quote())
+			, cyng::make_description("set", f_set())
+			, cyng::make_description("get", f_get())
+			, cyng::make_description("meta", f_meta())
+			, cyng::make_description(std::string("\xc2\xb6"), f_paragraph())
+			, cyng::make_description("i", f_italic())
+			, cyng::make_description("b", f_bold())
+			, cyng::make_description("tt", f_typewriter())
+			, cyng::make_description("label", f_label())
+			, cyng::make_description("ref", f_ref())
+			, cyng::make_description("h1", f_h1())
+			, cyng::make_description("h2", f_h2())
+			, cyng::make_description("h3", f_h3())
+			, cyng::make_description("h4", f_h4())
+			, cyng::make_description("h5", f_h5())
+			, cyng::make_description("h6", f_h6())
+			, cyng::make_description("header", f_header())
+			, cyng::make_description("figure", f_figure())
+			, cyng::make_description("resource", f_resource())
+			, cyng::make_description("now", f_now())
+			, cyng::make_description("uuid", f_uuid())
+			, cyng::make_description("range", f_range())
+			, cyng::make_description("cat", f_cat())
+			, cyng::make_description("repeat", f_repeat())
+			, cyng::make_description("currency", f_currency())
+			, cyng::make_description("show", f_show())
 		);
-		std::size_t slot{ 0 };
-		vm.set_channel_name("quote", slot++);
-		vm.set_channel_name("set", slot++);
-		vm.set_channel_name("get", slot++);
-		vm.set_channel_name("meta", slot++);
-		vm.set_channel_name(std::string("\xc2\xb6"), slot++);	//	paragraph
-		vm.set_channel_name("i", slot++);	//	italic
-		vm.set_channel_name("b", slot++);	//	bold
-		vm.set_channel_name("tt", slot++);	//	typewriter
-		vm.set_channel_name("label", slot++);	//	label
-		vm.set_channel_name("ref", slot++);	//	ref
-		vm.set_channel_name("h1", slot++);	//	h1
-		vm.set_channel_name("h2", slot++);	//	h2
-		vm.set_channel_name("h3", slot++);	//	h3
-		vm.set_channel_name("h4", slot++);	//	h4
-		vm.set_channel_name("h5", slot++);	//	h5
-		vm.set_channel_name("h6", slot++);	//	h6
-		vm.set_channel_name("header", slot++);	//	header
-		vm.set_channel_name("figure", slot++);	//	figure
-		vm.set_channel_name("resource", slot++);	//	resource
-		vm.set_channel_name("now", slot++);	//	current time
-		vm.set_channel_name("uuid", slot++);	//	random uuid v4
-		vm.set_channel_name("range", slot++);	//	build an vector
-		vm.set_channel_name("cat", slot++);	//	concatenate without spaces
-		vm.set_channel_name("repeat", slot++);
-		vm.set_channel_name("currency", slot++);
-		vm.set_channel_name("show", slot++);	//	show
 
 		//
 		//	load programe
