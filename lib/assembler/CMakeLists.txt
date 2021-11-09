@@ -12,6 +12,27 @@ project(docasm
 	DESCRIPTION "docasm Library"
 	HOMEPAGE_URL "https://solostec.ch")
 
+
+message(STATUS "**")                                                            
+message(STATUS "        **              *******         *****   **    **   ")
+message(STATUS "     *****            *       ***    ******  ***** *****   ")
+message(STATUS "    *  ***           *         **   **   *  *  ***** ***** ")
+message(STATUS "       ***           **        *   *    *  *   * **  * **  ")
+message(STATUS "      *  **           ***              *  *    *     *     ")
+message(STATUS "      *  **          ** ***           ** **    *     *     ")
+message(STATUS "     *    **          *** ***         ** **    *     *     ")
+message(STATUS "     *    **            *** ***       ** **    *     *     ")
+message(STATUS "    *      **             *** ***     ** **    *     *     ")
+message(STATUS "    *********               ** ***    ** **    *     **    ")
+message(STATUS "   *        **               ** **    *  **    *     **    ")
+message(STATUS "   *        **                * *        *     *      **   ")
+message(STATUS "  *****      **     ***        *     ****      *      **   ")
+message(STATUS " *   ****    ** *  *  *********     *  *****           **  ")
+message(STATUS "*     **      **  *     *****      *     **                ")
+message(STATUS "*                 *                *                       ")
+message(STATUS " **                **               **                     ")
+message(STATUS "**")                                                            
+                                                           
 string(TIMESTAMP CURRENT_YEAR "%Y")
 
 message(STATUS "** CMake              : v${CMAKE_VERSION}")

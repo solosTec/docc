@@ -9,6 +9,7 @@
 #define DOCSCRIPT_RT_CONTROLLER_H
 
 #include <toc.h>
+#include <context.h>
 
 #include <cyng/obj/object.h>
 #include <cyng/obj/intrinsics/container.h>
