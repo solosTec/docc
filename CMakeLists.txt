@@ -173,10 +173,10 @@ endif()
 #
 #	libraries
 #
-if (IS_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
-	add_subdirectory(lib/compiler)
-	add_subdirectory(lib/assembler)
-	add_subdirectory(lib/runtime)
+if (IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src/lib)
+	add_subdirectory(src/lib/compiler)
+	add_subdirectory(src/lib/assembler)
+	add_subdirectory(src/lib/runtime)
 endif()
 
 #
@@ -252,6 +252,7 @@ target_compile_definitions(doca
 target_link_libraries(doca 
 	PUBLIC 
 		docasm
+		docscript
         fmt::fmt
 		${CYNG_LIBRARIES}
 		${OPENSSL_LIBRARIES}
@@ -292,6 +293,7 @@ target_compile_definitions(docrt
 target_link_libraries(docrt 
 	PUBLIC 
 		docruntime
+		docscript
         fmt::fmt
 		${CYNG_LIBRARIES}
 		${OPENSSL_LIBRARIES}
@@ -332,6 +334,7 @@ target_compile_definitions(doc2html
 target_link_libraries(doc2html 
 	PUBLIC 
 		docscript
+		docasm
 		docruntime
         fmt::fmt
 		${CYNG_LIBRARIES}

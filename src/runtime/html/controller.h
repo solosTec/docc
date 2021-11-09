@@ -8,8 +8,9 @@
 #ifndef DOCSCRIPT_RT_CONTROLLER_H
 #define DOCSCRIPT_RT_CONTROLLER_H
 
-#include <toc.h>
-#include <context.h>
+#include <rt/toc.h>
+#include <docc/context.h>
+#include <asm/reader.h>
 
 #include <cyng/obj/object.h>
 #include <cyng/obj/intrinsics/container.h>
@@ -26,6 +27,7 @@ namespace docruntime {
 	public:
 		controller(std::filesystem::path out
 			, std::vector<std::filesystem::path> inc
+			, std::filesystem::path const& tmp
 			, int verbose);
 
 		int run(std::filesystem::path&& inp, std::size_t pool_size
@@ -94,6 +96,8 @@ namespace docruntime {
 		cyng::param_map_t vars_;
 		docruntime::toc toc_;
 		boost::uuids::random_generator	uuid_gen_;	//	basic_random_generator<mt19937>
+		docscript::context ctx_;
+		docasm::reader	assembler_;
 	};
 
 	std::filesystem::path verify_extension(std::filesystem::path p, std::string const& ext);

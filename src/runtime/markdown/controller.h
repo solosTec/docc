@@ -8,7 +8,7 @@
 #ifndef DOCSCRIPT_RT_CONTROLLER_H
 #define DOCSCRIPT_RT_CONTROLLER_H
 
-#include <toc.h>
+#include <rt/toc.h>
 
 #include <cyng/obj/object.h>
 #include <cyng/obj/intrinsics/container.h>

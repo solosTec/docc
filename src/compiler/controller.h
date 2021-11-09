@@ -8,7 +8,7 @@
 #ifndef DOCSCRIPT_CONTROLLER_H
 #define DOCSCRIPT_CONTROLLER_H
 
-#include <context.h>
+#include <docc/context.h>
 
 #include <vector>
 

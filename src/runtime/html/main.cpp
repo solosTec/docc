@@ -1,6 +1,6 @@
 #include "controller.h"
 
-#include <utils.h>
+#include <docc/utils.h>
 #include <version.hpp>
 
 #include <iostream>
@@ -24,9 +24,9 @@ int main(int argc, char* argv[]) {
 
     auto tag = boost::uuids::random_generator()();	//	basic_random_generator<mt19937>
 
-	std::string config_file = std::string("do2html-") + std::string(docc::version_string) + ".cfg";
+	std::string config_file = std::string("doc2html-") + std::string(docc::version_string) + ".cfg";
 	auto const here = std::filesystem::current_path();
-    std::string inp_file = "main.cyng";
+    std::string inp_file = "main.docscript";
 	std::string out_file = (here / "out.html").string();    
     std::string stag = boost::uuids::to_string(tag);
     std::size_t pool_size = std::min<std::size_t>(std::thread::hardware_concurrency(), 4) * 2ul;
@@ -135,8 +135,7 @@ int main(int argc, char* argv[]) {
         std::filesystem::path(inp_file).parent_path()
     );
 
-    if (verbose > 1)
-    {
+    if (verbose > 1)    {
         fmt::print(
             stdout,
             fg(fmt::color::gray),
@@ -151,13 +150,25 @@ int main(int argc, char* argv[]) {
     tag = boost::uuids::string_generator()(stag);
 
     //
-    //  start tasks
+    //	generate some temporary file names for intermediate files
+    //
+    std::filesystem::path const tmp = std::filesystem::temp_directory_path() / (std::filesystem::path(inp_file).filename().string() + ".docs");
+    if (verbose > 12)   {
+        fmt::print(
+            stdout,
+            fg(fmt::color::gray),
+            "***info : temporary files {}\n", tmp.string());
+    }
+
+    //
+    //  start compiler
     //
     
     docruntime::controller ctl(
         out_file.empty() ? std::filesystem::path(inp_file).replace_extension("html") : std::filesystem::path(out_file),
         inc_paths,
+        tmp,
         verbose
     );
-    return ctl.run(docruntime::verify_extension(inp_file, "cyng"), pool_size, tag);
+    return ctl.run(docruntime::verify_extension(inp_file, "doscript"), pool_size, tag);
 }

@@ -1,8 +1,8 @@
 
 #include "controller.h"
 
-#include <utils.h>
-#include <reader.h>
+#include <docc/utils.h>
+#include <docc/reader.h>
 
 #include <fmt/core.h>
 #include <fmt/color.h>

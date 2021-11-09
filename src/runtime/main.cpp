@@ -1,6 +1,7 @@
 #include "controller.h"
 
 #include <version.hpp>
+#include <docc/utils.h>
 
 #include <iostream>
 #include <fstream>
@@ -12,34 +13,6 @@
 
 #include <fmt/core.h>
 #include <fmt/color.h>
-
-#if BOOST_OS_WINDOWS
-#include "Windows.h"
-//
-//	set console outpt code page to UTF-8
-//	requires a TrueType font like Lucida 
-//
-void init_console() {
-    if (::SetConsoleOutputCP(65001) == 0)
-    {
-        std::cerr
-            << "Cannot set console code page"
-            << std::endl
-            ;
-
-    }
-    auto h_out = ::GetStdHandle(STD_OUTPUT_HANDLE);
-    if (h_out != INVALID_HANDLE_VALUE) {
-        DWORD dwMode = 0;
-        if (::GetConsoleMode(h_out, &dwMode)) {
-            ::SetConsoleMode(h_out, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
-        }
-    }
-}
-#else
-void init_console() {
-}
-#endif
 
 
 int main(int argc, char* argv[]) {
@@ -115,7 +88,7 @@ int main(int argc, char* argv[]) {
         return EXIT_SUCCESS;
     }
 
-    init_console();
+    docscript::init_console();
 
     std::ifstream ifs(config_file);
     if (!ifs)

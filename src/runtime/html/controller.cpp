@@ -1,6 +1,8 @@
 
 #include "controller.h"
-#include <currency.h>
+#include <docc/utils.h>
+#include <docc/reader.h>
+#include <rt/currency.h>
 
 #include <cyng/task/controller.h>
 #include <cyng/task/scheduler.h>
@@ -26,12 +28,16 @@ namespace docruntime {
 		std::cout << str << std::endl;
 	}
 
+
 	controller::controller(std::filesystem::path out
 		, std::vector<std::filesystem::path> inc
+		, std::filesystem::path const& tmp
 		, int verbose)
-		: vars_()
+	: vars_()
 		, toc_()
 		, uuid_gen_()
+		, ctx_(docscript::verify_extension(tmp, "docs"), inc, verbose)
+		, assembler_(std::filesystem::path(ctx_.get_output_path()).replace_extension("cyng"), inc, verbose)
 	{}
 
 	int controller::run(std::filesystem::path&& inp
@@ -40,49 +46,37 @@ namespace docruntime {
 
 		auto const now = std::chrono::high_resolution_clock::now();
 
-		//
-		//	Create an scheduler with specified size
-		//	of the thread pool.
-		//
-		cyng::controller ctl(pool_size);
-		cyng::mesh fabric(ctl);
+		auto const r = ctx_.lookup(inp);
+		if (!r.second) return EXIT_FAILURE;
+
+		docscript::reader compiler(ctx_);
+		compiler.read(r.first);
+
+		if (ctx_.get_verbosity(2)) {
+
+			fmt::print(
+				stdout,
+				fg(fmt::color::forest_green),
+				"***info : intermediate file {} complete\n", ctx_.get_output_path());
+		}
 
 		//
-		//	Create VM
+		//	generate program from assembler
 		//
-		auto vm = fabric.make_proxy(tag
-			, cyng::make_description("quote", f_quote())
-			, cyng::make_description("set", f_set())
-			, cyng::make_description("get", f_get())
-			, cyng::make_description("meta", f_meta())
-			, cyng::make_description(std::string("\xc2\xb6"), f_paragraph())
-			, cyng::make_description("i", f_italic())
-			, cyng::make_description("b", f_bold())
-			, cyng::make_description("tt", f_typewriter())
-			, cyng::make_description("label", f_label())
-			, cyng::make_description("ref", f_ref())
-			, cyng::make_description("h1", f_h1())
-			, cyng::make_description("h2", f_h2())
-			, cyng::make_description("h3", f_h3())
-			, cyng::make_description("h4", f_h4())
-			, cyng::make_description("h5", f_h5())
-			, cyng::make_description("h6", f_h6())
-			, cyng::make_description("header", f_header())
-			, cyng::make_description("figure", f_figure())
-			, cyng::make_description("resource", f_resource())
-			, cyng::make_description("now", f_now())
-			, cyng::make_description("uuid", f_uuid())
-			, cyng::make_description("range", f_range())
-			, cyng::make_description("cat", f_cat())
-			, cyng::make_description("repeat", f_repeat())
-			, cyng::make_description("currency", f_currency())
-			, cyng::make_description("show", f_show())
-		);
+		assembler_.read(std::filesystem::path(ctx_.get_output_path()));
+
+		if (ctx_.get_verbosity(2)) {
+
+			fmt::print(
+				stdout,
+				fg(fmt::color::forest_green),
+				"***info : program {} complete\n", assembler_.get_output_path().string());
+		}
 
 		//
 		//	load program
 		//
-		std::ifstream ifs(inp.string(), std::ios::binary);
+		std::ifstream ifs(assembler_.get_output_path().string(), std::ios::binary);
 		if (ifs.is_open()) {
 			ifs.unsetf(std::ios::skipws);
 
@@ -98,13 +92,59 @@ namespace docruntime {
 
 			buffer.insert(buffer.begin(), pos, end);
 
+			//
+			//	Create an scheduler with specified size
+			//	of the thread pool.
+			//
+			cyng::controller ctl(pool_size);
+			cyng::mesh fabric(ctl);
+
+			//
+			//	Create VM
+			//
+			auto vm = fabric.make_proxy(tag
+				, cyng::make_description("quote", f_quote())
+				, cyng::make_description("set", f_set())
+				, cyng::make_description("get", f_get())
+				, cyng::make_description("meta", f_meta())
+				, cyng::make_description(std::string("\xc2\xb6"), f_paragraph())
+				, cyng::make_description("i", f_italic())
+				, cyng::make_description("b", f_bold())
+				, cyng::make_description("tt", f_typewriter())
+				, cyng::make_description("label", f_label())
+				, cyng::make_description("ref", f_ref())
+				, cyng::make_description("h1", f_h1())
+				, cyng::make_description("h2", f_h2())
+				, cyng::make_description("h3", f_h3())
+				, cyng::make_description("h4", f_h4())
+				, cyng::make_description("h5", f_h5())
+				, cyng::make_description("h6", f_h6())
+				, cyng::make_description("header", f_header())
+				, cyng::make_description("figure", f_figure())
+				, cyng::make_description("resource", f_resource())
+				, cyng::make_description("now", f_now())
+				, cyng::make_description("uuid", f_uuid())
+				, cyng::make_description("range", f_range())
+				, cyng::make_description("cat", f_cat())
+				, cyng::make_description("repeat", f_repeat())
+				, cyng::make_description("currency", f_currency())
+				, cyng::make_description("show", f_show())
+			);
+
 			cyng::deque_t deq;
 			cyng::io::parser p([&](cyng::object&& obj) -> void {
-				std::cout << cyng::io::to_typed(obj) << std::endl;
+				//std::cout << cyng::io::to_typed(obj) << std::endl;
 				deq.push_back(std::move(obj));
 				});
 			p.read(std::begin(buffer), std::end(buffer));
 
+			if (ctx_.get_verbosity(4)) {
+
+				fmt::print(
+					stdout,
+					fg(fmt::color::forest_green),
+					"***info : load program of {} bytes with {} instructions\n", buffer.size(), deq.size());
+			}
 
 			//
 			//	execute program
@@ -112,26 +152,35 @@ namespace docruntime {
 			vm.load(std::move(deq));
 			vm.run();
 
+			//
+			//	wait for pending requests
+			//
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			vm.stop();
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			ctl.cancel();
+			ctl.stop();
+			//ctl.shutdown();
+
+
 		}
 		else {
 			fmt::print(
 				stdout,
 				fg(fmt::color::dark_orange) | fmt::emphasis::bold,
 				"***info : input file [{}] not found\n", inp.string());
+			return EXIT_FAILURE;
 		}
 
-		//
-		//	wait for pending requests
-		//
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-		vm.stop();
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-		ctl.cancel();
-		ctl.stop();
-		//ctl.shutdown();
+		if (ctx_.get_verbosity(4)) {
 
-		std::cout << "TOC:" << std::endl;
-		std::cout << toc_ << std::endl;
+			fmt::print(
+				stdout,
+				fg(fmt::color::forest_green),
+				"***info : TOC:\n");
+
+			std::cout << toc_ << std::endl;
+		}
 
 		//	JSON
 		//auto const vec = to_vector(toc_);
