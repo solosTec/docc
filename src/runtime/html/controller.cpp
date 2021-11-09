@@ -27,6 +27,7 @@ namespace docruntime {
 	}
 
 	controller::controller(std::filesystem::path out
+		, std::vector<std::filesystem::path> inc
 		, int verbose)
 		: vars_()
 		, toc_()
@@ -79,7 +80,7 @@ namespace docruntime {
 		);
 
 		//
-		//	load programe
+		//	load program
 		//
 		std::ifstream ifs(inp.string(), std::ios::binary);
 		if (ifs.is_open()) {

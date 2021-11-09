@@ -13,6 +13,7 @@ set (docscript_cpp
      ${PROJECT_SOURCE_DIR}/src/parser.cpp
      ${PROJECT_SOURCE_DIR}/src/nonterminal.cpp
      ${PROJECT_SOURCE_DIR}/src/method.cpp
+     ${PROJECT_SOURCE_DIR}/src/reader.cpp
 )
     
 set (docscript_h
@@ -25,6 +26,7 @@ set (docscript_h
      ${PROJECT_SOURCE_DIR}/include/parser.h
      ${PROJECT_SOURCE_DIR}/include/nonterminal.h
      ${PROJECT_SOURCE_DIR}/include/method.h
+     ${PROJECT_SOURCE_DIR}/include/reader.h
 )
 
 set (docscript_tasks
@@ -39,8 +41,6 @@ set (docscript_ast
      ${PROJECT_SOURCE_DIR}/src/ast/constant.cpp
      ${PROJECT_SOURCE_DIR}/include/ast/value.h
      ${PROJECT_SOURCE_DIR}/src/ast/value.cpp
-#     ${PROJECT_SOURCE_DIR}/include/ast/vlist.h
-#     ${PROJECT_SOURCE_DIR}/src/ast/vlist.cpp
      ${PROJECT_SOURCE_DIR}/include/ast/params.h
      ${PROJECT_SOURCE_DIR}/src/ast/params.cpp
      ${PROJECT_SOURCE_DIR}/include/ast/method.h
@@ -50,13 +50,13 @@ set (docscript_ast
 )
 
 
-source_group("tasks" FILES ${docscript_tasks})
+#source_group("tasks" FILES ${docscript_tasks})
 source_group("ast" FILES ${docscript_ast})
 
 set (docscript_lib
   ${docscript_cpp}
   ${docscript_h}
-  ${docscript_tasks}
+#  ${docscript_tasks}
   ${docscript_ast}
 )
 

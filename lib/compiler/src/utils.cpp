@@ -1,5 +1,11 @@
 #include <utils.h>
-//#include <docc.h>
+
+#include <iostream>
+
+#include <boost/predef.h>
+
+#if BOOST_OS_WINDOWS
+#include "Windows.h"
 
 namespace docscript {
     std::filesystem::path verify_extension(std::filesystem::path p, std::string const& ext)
@@ -34,5 +40,59 @@ namespace docscript {
 		return std::make_pair(p, false);
 
 	}
+
+	//
+	//	set console outpt code page to UTF-8
+	//	requires a TrueType font like Lucida 
+	//
+	std::vector<std::filesystem::path> get_include_paths(std::vector<std::string> const& vec, std::filesystem::path parent_path) {
+
+		//
+		//  convert from string to path
+		//
+		std::vector<std::filesystem::path> includes(vec.begin(), vec.end());
+
+		//
+		//	Add the path of the input file as include path, if it is not already specified
+		//
+		auto pos = std::find(vec.begin(), vec.end(), parent_path);
+		if (pos == vec.end() && !parent_path.empty()) {
+			includes.push_back(parent_path);
+		}
+
+		//
+		//	last entry is empty
+		//
+#if BOOST_OS_WINDOWS
+		includes.push_back(".\\");
+#else
+		includes.push_back("./");
+#endif
+
+		return includes;
+
+	}
+
+	void init_console() {
+		if (::SetConsoleOutputCP(65001) == 0)
+		{
+			std::cerr
+				<< "Cannot set console code page"
+				<< std::endl
+				;
+
+		}
+		auto h_out = ::GetStdHandle(STD_OUTPUT_HANDLE);
+		if (h_out != INVALID_HANDLE_VALUE) {
+			DWORD dwMode = 0;
+			if (::GetConsoleMode(h_out, &dwMode)) {
+				::SetConsoleMode(h_out, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+			}
+		}
+	}
+#else
+	void init_console() {
+	}
+#endif
 
 }

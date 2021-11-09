@@ -1,5 +1,6 @@
 #include "controller.h"
 
+#include <utils.h>
 #include <version.hpp>
 
 #include <iostream>
@@ -9,49 +10,23 @@
 #include <boost/program_options.hpp>
 #include <boost/predef.h>
 #include <boost/uuid/string_generator.hpp>
+#include <boost/uuid/random_generator.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 #include <fmt/core.h>
 #include <fmt/color.h>
-
-#if BOOST_OS_WINDOWS
-#include "Windows.h"
-//
-//	set console outpt code page to UTF-8
-//	requires a TrueType font like Lucida 
-//
-void init_console() {
-    if (::SetConsoleOutputCP(65001) == 0)
-    {
-        std::cerr
-            << "Cannot set console code page"
-            << std::endl
-            ;
-
-    }
-    auto h_out = ::GetStdHandle(STD_OUTPUT_HANDLE);
-    if (h_out != INVALID_HANDLE_VALUE) {
-        DWORD dwMode = 0;
-        if (::GetConsoleMode(h_out, &dwMode)) {
-            ::SetConsoleMode(h_out, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
-        }
-    }
-}
-#else
-void init_console() {
-}
-#endif
-
 
 int main(int argc, char* argv[]) {
 
 #ifdef _DEBUG
 #endif
 
-	std::string config_file = std::string("do2html-") + std::string(docc::version_string) + ".cfg";
+    auto tag = boost::uuids::random_generator()();	//	basic_random_generator<mt19937>
+    std::string config_file = std::string("do2html-") + std::string(docc::version_string) + ".cfg";
 	auto const here = std::filesystem::current_path();
     std::string inp_file = "main.cyng";
 	std::string out_file = (here / "out.html").string();    
-    std::string stag = "d28dde25-8445-4fc7-a4f0-76a33a4c6179";
+    std::string stag = boost::uuids::to_string(tag);
     std::size_t pool_size = std::min<std::size_t>(std::thread::hardware_concurrency(), 4) * 2ul;
 
     //
@@ -75,7 +50,7 @@ int main(int argc, char* argv[]) {
         ("source,S", boost::program_options::value(&inp_file)->default_value(inp_file), "main source file")
         ("output,O", boost::program_options::value(&out_file)->default_value(out_file), "output file")
         ("tag,T", boost::program_options::value(&stag)->default_value(stag), "VM tag")
-        //("include-path,I", boost::program_options::value< std::vector<std::string> >()->default_value(std::vector<std::string>(1, here.string()), here.string()), "include paths")
+        ("include-path,I", boost::program_options::value< std::vector<std::string> >()->default_value(std::vector<std::string>(1, here.string()), here.string()), "include paths")
         //	verbose level
         ("verbose,V", boost::program_options::value<int>()->default_value(0)->implicit_value(1), "verbose level")
         ;
@@ -115,7 +90,7 @@ int main(int argc, char* argv[]) {
         return EXIT_SUCCESS;
     }
 
-    init_console();
+    docscript::init_console();
 
     std::ifstream ifs(config_file);
     if (!ifs)
@@ -150,11 +125,28 @@ int main(int argc, char* argv[]) {
         fg(fmt::color::gray),
         "***info : verbose level = [{}]\n", verbose);
 
- 
+    //
+   //	read specified include paths
+   //
+    auto const inc_paths = docscript::get_include_paths(
+        vm["include-path"].as< std::vector<std::string>>(),
+        std::filesystem::path(inp_file).parent_path()
+    );
+
+    if (verbose > 1)
+    {
+        fmt::print(
+            stdout,
+            fg(fmt::color::gray),
+            "***info : {} include paths\n", inc_paths.size());
+
+        std::copy(inc_paths.begin(), inc_paths.end(), std::ostream_iterator<std::filesystem::path>(std::cout, "\n"));
+    }
+
     //
     //	get VM tag
     //
-    auto const tag = boost::uuids::string_generator()(stag);
+    tag = boost::uuids::string_generator()(stag);
 
     //
     //  start tasks

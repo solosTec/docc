@@ -24,6 +24,14 @@ namespace docscript {
 	 */
 	std::pair<std::filesystem::path, bool> resolve_path(std::vector< std::filesystem::path >const& inc, std::filesystem::path p);
 
+    std::vector<std::filesystem::path> get_include_paths(std::vector<std::string> const& vec, std::filesystem::path parent_path);
+
+    //
+    //	set console outpt code page to UTF-8
+    //	requires a TrueType font like Lucida 
+    //
+    void init_console();
+
 }
 
 #endif

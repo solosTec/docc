@@ -1,11 +1,8 @@
 
 #include "controller.h"
-#include <tasks/ruler.h>
-#include <utils.h>
 
-#include <cyng/task/stash.h>
-#include <cyng/task/scheduler.h>
-#include <cyng/task/task.hpp>
+#include <utils.h>
+#include <reader.h>
 
 #include <fmt/core.h>
 #include <fmt/color.h>
@@ -33,26 +30,8 @@ namespace docscript {
 					"***info : input file [{}]\n", r.first.generic_string());
 			}
 
-			//
-			//	Create an I/O controller with specified size
-			//	of the thread pool.
-			//
-			cyng::controller ctl(pool_size);
-			cyng::stash channels(ctl.get_ctx());
-
-			//
-			//  start task
-			//
-			auto channel = ctl.create_named_channel_with_ref<ruler>("ruler", ctl, channels, ctx_);
-			BOOST_ASSERT(channel->is_open());
-			channel->dispatch("read", r.first);
-			channels.lock(channel);
-
-			//
-			//	wait for pending requests
-			//
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
-			ctl.stop();
+			reader inp(ctx_);
+			inp.read(r.first);
 
 			auto const delta = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - now);
 

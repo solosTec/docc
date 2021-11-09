@@ -17,36 +17,38 @@
 #include <cyng/task/stash.h>
 
 namespace docscript {
+    namespace task {
 
-    class reader {
-        template <typename T> friend class cyng::task;
+        class reader {
+            template <typename T> friend class cyng::task;
 
-        using signatures_t = std::tuple<
-            std::function<void(std::filesystem::path)>,
-            std::function<void(cyng::eod)>
-        >;
+            using signatures_t = std::tuple<
+                std::function<void(std::filesystem::path)>,
+                std::function<void(cyng::eod)>
+            >;
 
-    public:
-        reader(
-            cyng::channel_weak,
-            cyng::controller&,
-            cyng::stash&,
-            context&);
+        public:
+            reader(
+                cyng::channel_weak,
+                cyng::controller&,
+                cyng::stash&,
+                context&);
 
-    private:
-        void stop(cyng::eod);
-        void read(std::filesystem::path);
-        void next_symbol(symbol&& sym);
-    private:
-        signatures_t sigs_;
-        cyng::channel_weak channel_;
-        cyng::controller& ctl_;
-        cyng::stash& stash_;
-        context& ctx_;
-        token prev_;
-        tokenizer tokenizer_;
-        sanitizer sanitizer_;
-    };
+        private:
+            void stop(cyng::eod);
+            void read(std::filesystem::path);
+            void next_symbol(symbol&& sym);
+        private:
+            signatures_t sigs_;
+            cyng::channel_weak channel_;
+            cyng::controller& ctl_;
+            cyng::stash& stash_;
+            context& ctx_;
+            token prev_;
+            tokenizer tokenizer_;
+            sanitizer sanitizer_;
+        };
+    }
 }
 
 #endif  //  DOCC_SCRIPT_TASK_RULER_H

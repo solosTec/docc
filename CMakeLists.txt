@@ -331,6 +331,7 @@ target_compile_definitions(doc2html
 
 target_link_libraries(doc2html 
 	PUBLIC 
+		docscript
 		docruntime
         fmt::fmt
 		${CYNG_LIBRARIES}
@@ -370,7 +371,8 @@ target_compile_definitions(doc2LaTeX
 	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:_WIN32_WINNT=0x0601>")
 
 target_link_libraries(doc2LaTeX 
-	PUBLIC 
+	PRIVATE 
+		docscript
 		docruntime
         fmt::fmt
 		${CYNG_LIBRARIES}
@@ -411,6 +413,7 @@ target_compile_definitions(doc2md
 
 target_link_libraries(doc2md 
 	PUBLIC 
+		docscript
 		docruntime
         fmt::fmt
 		${CYNG_LIBRARIES}

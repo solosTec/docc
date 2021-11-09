@@ -79,7 +79,7 @@ namespace docruntime {
 		);
 
 		//
-		//	load programe
+		//	load program
 		//
 		std::ifstream ifs(inp.string(), std::ios::binary);
 		if (ifs.is_open()) {

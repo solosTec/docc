@@ -15,37 +15,39 @@
 #include <cyng/task/stash.h>
 
 namespace docscript {
+    namespace task {
 
-    class ruler {
-        template <typename T> friend class cyng::task;
+        class ruler {
+            template <typename T> friend class cyng::task;
 
-        using signatures_t = std::tuple<
-            std::function<void(std::filesystem::path)>,
-            std::function<void(std::filesystem::path, std::size_t)>,
-            std::function<void(std::filesystem::path, std::size_t)>,
-            std::function<void(cyng::eod)>
-        >;
+            using signatures_t = std::tuple<
+                std::function<void(std::filesystem::path)>,
+                std::function<void(std::filesystem::path, std::size_t)>,
+                std::function<void(std::filesystem::path, std::size_t)>,
+                std::function<void(cyng::eod)>
+            >;
 
-    public:
-        ruler(
-            cyng::channel_weak,
-            cyng::controller&,
-            cyng::stash&,
-            context&);
+        public:
+            ruler(
+                cyng::channel_weak,
+                cyng::controller&,
+                cyng::stash&,
+                context&);
 
-    private:
-        void stop(cyng::eod);
-        void read(std::filesystem::path);
-        void open(std::filesystem::path, std::size_t);
-        void close(std::filesystem::path, std::size_t);
-    private:
-        signatures_t sigs_;
-        cyng::controller& ctl_;
-        cyng::stash& stash_;
-        cyng::channel_weak channel_;
-        context& ctx_;
-        std::size_t counter_;   //!< running reader
-    };
+        private:
+            void stop(cyng::eod);
+            void read(std::filesystem::path);
+            void open(std::filesystem::path, std::size_t);
+            void close(std::filesystem::path, std::size_t);
+        private:
+            signatures_t sigs_;
+            cyng::controller& ctl_;
+            cyng::stash& stash_;
+            cyng::channel_weak channel_;
+            context& ctx_;
+            std::size_t counter_;   //!< running reader
+        };
+    }
 }
 
 #endif  //  DOCC_SCRIPT_TASK_RULER_H

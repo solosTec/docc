@@ -24,6 +24,7 @@ namespace docruntime {
 	{
 	public:
 		controller(std::filesystem::path out
+			, std::vector<std::filesystem::path> inc
 			, int verbose);
 
 		int run(std::filesystem::path&& inp, std::size_t pool_size
