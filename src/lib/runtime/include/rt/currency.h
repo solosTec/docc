@@ -23,6 +23,7 @@ namespace docruntime
 	 * @param name currency
 	 */
 	std::string currency(std::size_t value, std::string const& name);
+	std::string currency_html(std::size_t value, std::string const& name);
 }
 
 #endif

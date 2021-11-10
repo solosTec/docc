@@ -177,6 +177,7 @@ if (IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src/lib)
 	add_subdirectory(src/lib/compiler)
 	add_subdirectory(src/lib/assembler)
 	add_subdirectory(src/lib/runtime)
+	add_subdirectory(src/lib/dom)
 endif()
 
 #
@@ -425,8 +426,7 @@ target_link_libraries(doc2md
 )
 
 install(TARGETS doc2md
-    RUNTIME
-    DESTINATION bin)
+    RUNTIME DESTINATION bin)
 
 #
 # batch files

@@ -57,11 +57,19 @@ int main(int argc, char* argv[]) {
         ("verbose,V", boost::program_options::value<int>()->default_value(0)->implicit_value(1), "verbose level")
         ;
 
+    boost::program_options::options_description gen("generator");
+    gen.add_options()
+        ("generator.body", boost::program_options::bool_switch()->default_value(false), "generate (HTML) body only")
+        ("generator.meta", boost::program_options::bool_switch()->default_value(true), "generate a JSON file with meta data")
+        ("generator.index", boost::program_options::bool_switch()->default_value(true), "generate an index file \"index.json\"")
+        ("generator.type,Y", boost::program_options::value<std::string>()->default_value("report"), "og:type (article/report/blog/...)")
+        ;
+
     //
     //	all you can grab from the command line
     //
     boost::program_options::options_description cmdline_options;
-    cmdline_options.add(generic).add(compiler);
+    cmdline_options.add(generic).add(compiler).add(gen);
 
     //
     //	positional arguments
@@ -152,13 +160,14 @@ int main(int argc, char* argv[]) {
     //
     //	generate some temporary file names for intermediate files
     //
-    std::filesystem::path const tmp = std::filesystem::temp_directory_path() / (std::filesystem::path(inp_file).filename().string() + ".docs");
+    std::filesystem::path const tmp_asm = std::filesystem::temp_directory_path() / ("doc2html-" + std::filesystem::path(inp_file).filename().string() + ".docs");
     if (verbose > 12)   {
         fmt::print(
             stdout,
             fg(fmt::color::gray),
-            "***info : temporary files {}\n", tmp.string());
+            "***info : temporary files {}\n", tmp_asm.string());
     }
+    std::filesystem::path const tmp_html = std::filesystem::temp_directory_path() / ("doc2html-" + stag + ".html");
 
     //
     //  start compiler
@@ -167,8 +176,15 @@ int main(int argc, char* argv[]) {
     docruntime::controller ctl(
         out_file.empty() ? std::filesystem::path(inp_file).replace_extension("html") : std::filesystem::path(out_file),
         inc_paths,
-        tmp,
+        tmp_asm,
+        tmp_html,
         verbose
     );
-    return ctl.run(docruntime::verify_extension(inp_file, "doscript"), pool_size, tag);
+    return ctl.run(docruntime::verify_extension(inp_file, "doscript")
+        , pool_size
+        , tag
+        , vm["generator.body"].as< bool >()
+        , vm["generator.meta"].as< bool >()
+        , vm["generator.index"].as< bool >()
+        , vm["generator.type"].as< std::string >());
 }

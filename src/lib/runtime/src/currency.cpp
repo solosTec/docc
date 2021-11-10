@@ -22,7 +22,7 @@ namespace docruntime
 			ss << value << std::string(" \xEF\xBF\xA5");
 		}
 		else if (boost::algorithm::equals(name, "rupee")) {
-			//	indian rupee sign: ₨
+			//	indian rupee sign: ₹
 			ss << value << std::string(" \xE2\x82\xA8");
 		}
 		else if (boost::algorithm::equals(name, "dram")) {
@@ -48,13 +48,70 @@ namespace docruntime
 			//	mongolian currency: ₮
 			ss << value << std::string(" \xE2\x82\xAE");
 		}
+		else if (boost::algorithm::equals(name, "rial")) {
+			//	iranian currency: ﷼
+			ss << value << std::string(" \xEF\xB7\xBC");
+		}
 		else {
 			//	euro
 			ss << value << std::string(" \xE2\x82\xAC");
 		}
 		return ss.str();
+	}
+
+	std::string currency_html(std::size_t value, std::string const& name) {
+		std::stringstream ss;
+		if (boost::algorithm::equals(name, "dollar")) {
+			ss << "&#x24; " << value;
+		}
+		else if (boost::algorithm::equals(name, "cent")) {
+			ss << value << " &#xa2;";
+		}
+		else if (boost::algorithm::equals(name, "pound")) {
+			ss << value << "&#xa3;";	// £ == \xC2\xA3
+		}
+		else if (boost::algorithm::equals(name, "yen")) {
+			ss << value << " &#xa5;";
+		}
+		else if (boost::algorithm::equals(name, "rupee")) {
+			//	indian rupee sign: ₹
+			ss << value << " &#x20B9;";
+		}
+		else if (boost::algorithm::equals(name, "dram")) {
+			//	armenian dram
+			ss << value << " &#x58f;";
+		}
+		else if (boost::algorithm::equals(name, "afghani")) {
+			//	afghani: ؋
+			ss << value << " &#x60b;";
+		}
+		else if (boost::algorithm::equals(name, "bitcoin")) {
+			ss << value << " &#x20BF;";
+		}
+		else if (boost::algorithm::equals(name, "pfennig")) {
+			//	deutscher Pfennig: ₰
+			ss << value << " &#x20B0;";
+		}
+		else if (boost::algorithm::equals(name, "sheqel")) {
+			//	new sheqel: ₪
+			ss << value << " &#x20AA";
+		}
+		else if (boost::algorithm::equals(name, "tugrik")) {
+			//	mongolian currency: ₮
+			ss << value << " &#x20AE;";
+		}
+		else if (boost::algorithm::equals(name, "rial")) {
+			//	iranian currency: ﷼
+			ss << value << " &#xFDFC";
+		}
+		else {
+			//	euro
+			ss << value << " &#x20AC;";
+		}
+		return ss.str();
 
 	}
+
 
 }
 

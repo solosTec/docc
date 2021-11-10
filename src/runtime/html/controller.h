@@ -27,11 +27,16 @@ namespace docruntime {
 	public:
 		controller(std::filesystem::path out
 			, std::vector<std::filesystem::path> inc
-			, std::filesystem::path const& tmp
+			, std::filesystem::path const& tmp_asm
+			, std::filesystem::path const& tmp_html
 			, int verbose);
 
 		int run(std::filesystem::path&& inp, std::size_t pool_size
-			, boost::uuids::uuid tag);
+			, boost::uuids::uuid tag
+			, bool generate_body_only
+			, bool generate_meta
+			, bool generate_index
+			, std::string type);
 
 	private:
 		std::string quote(cyng::vector_t);
@@ -64,6 +69,8 @@ namespace docruntime {
 		std::string repeat(cyng::param_map_t pm);
 		std::string currency(cyng::param_map_t pm);
 
+		void emit_header();
+
 	private:
 		std::function<std::string(cyng::vector_t)> f_quote();
 		std::function<void(cyng::param_map_t)> f_set();
@@ -94,7 +101,10 @@ namespace docruntime {
 
 	private:
 		std::ofstream ofs_;
+		std::ofstream tmp_html_;
+		std::filesystem::path const tmp_html_path_;
 		cyng::param_map_t vars_;
+		cyng::param_map_t meta_;
 		docruntime::toc toc_;
 		boost::uuids::random_generator	uuid_gen_;	//	basic_random_generator<mt19937>
 		docscript::context ctx_;
@@ -102,6 +112,12 @@ namespace docruntime {
 	};
 
 	std::filesystem::path verify_extension(std::filesystem::path p, std::string const& ext);
+
+	/**
+	 * convert an object vectr
+	 */
+	void to_html(std::ostream& os, cyng::vector_t const& vec);
+	void emit_styles(std::size_t depth, std::ostream& ofs);
 
 }
 
