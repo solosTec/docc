@@ -6,6 +6,7 @@
 
 #if BOOST_OS_WINDOWS
 #include "Windows.h"
+#endif
 
 namespace docscript {
     std::filesystem::path verify_extension(std::filesystem::path p, std::string const& ext)
@@ -73,6 +74,7 @@ namespace docscript {
 
 	}
 
+#if BOOST_OS_WINDOWS
 	void init_console() {
 		if (::SetConsoleOutputCP(65001) == 0)
 		{
