@@ -93,6 +93,7 @@ namespace docruntime {
 		std::function<void(std::string)> f_show();
 
 	private:
+		std::ofstream ofs_;
 		cyng::param_map_t vars_;
 		docruntime::toc toc_;
 		boost::uuids::random_generator	uuid_gen_;	//	basic_random_generator<mt19937>

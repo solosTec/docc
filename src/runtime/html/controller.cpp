@@ -33,7 +33,8 @@ namespace docruntime {
 		, std::vector<std::filesystem::path> inc
 		, std::filesystem::path const& tmp
 		, int verbose)
-	: vars_()
+	: ofs_(out.string())
+		, vars_()
 		, toc_()
 		, uuid_gen_()
 		, ctx_(docscript::verify_extension(tmp, "docs"), inc, verbose)
@@ -44,7 +45,19 @@ namespace docruntime {
 		, std::size_t pool_size
 		, boost::uuids::uuid tag) {
 
+		//
+		//	check output file
+		//
+		if (!ofs_.is_open()) {
+			fmt::print(
+				stdout,
+				fg(fmt::color::dark_orange) | fmt::emphasis::bold,
+				"***info : cannot open output file\n");
+			return EXIT_FAILURE;
+		}
+
 		auto const now = std::chrono::high_resolution_clock::now();
+
 
 		auto const r = ctx_.lookup(inp);
 		if (!r.second) return EXIT_FAILURE;
@@ -199,7 +212,11 @@ namespace docruntime {
 	std::string controller::quote(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
 		std::stringstream ss;
-		ss << "QUOTE(\"";
+		//ss << "QUOTE(\"";
+		//
+		//	dependend from language (see meta data)
+		//
+		ss << "&bdquo;";
 		bool init = false;
 		for (auto const& v : vec) {
 			if (init) {
@@ -210,7 +227,8 @@ namespace docruntime {
 			}
 			ss << v;
 		}
-		ss << "\")";
+		ss << "&ldquo;";
+		//ss << "\")";
 		//std::cout << ss.str() << std::endl;
 		return ss.str();
 	}
@@ -218,15 +236,40 @@ namespace docruntime {
 	std::string controller::italic(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
 		std::stringstream ss;
-		ss << "ITALIC(" << vec << ")";
-		//std::cout << ss.str() << std::endl;
+		//ss << "ITALIC(" << vec << ")";
+		ss << "<span style=\"font-weight: bold;\">";
+		bool init = false;
+		for (auto const& v : vec) {
+			if (init) {
+				ss << ' ';
+			}
+			else {
+				init = true;
+			}
+			ss << v;
+		}
+
+		ss << "</span>";
+		std::cout << ss.str() << std::endl;
 		return ss.str();
 	}
 
 	std::string controller::bold(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
 		std::stringstream ss;
-		ss << "BOLD(" << vec << ")";
+		//ss << "BOLD(" << vec << ")";
+		ss << "<span style=\"font-style: italic;\">";
+		bool init = false;
+		for (auto const& v : vec) {
+			if (init) {
+				ss << ' ';
+			}
+			else {
+				init = true;
+			}
+			ss << v;
+		}
+		ss << "</span>";
 		return ss.str();
 	}
 
@@ -258,21 +301,22 @@ namespace docruntime {
 
 	std::string controller::paragraph(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
-		std::stringstream ss;
-		ss << "PARAGRAPH*" << vec.size() << "(";
+		//std::stringstream ss;
+		//ss << "PARAGRAPH*" << vec.size() << "(";
+		ofs_ << "<p>";
 		bool init = false;
 		for (auto const& v : vec) {
 			if (init) {
-				ss << ' ';
+				ofs_ << ' ';
 			}
 			else {
 				init = true;
 			}
-			ss << v;
+			ofs_ << v;
 		}
-		ss << ")";
-		std::cout << ss.str() << std::endl;
-		return ss.str();
+		ofs_ << "</p>" << std::endl;
+		//std::cout << ss.str() << std::endl;
+		return "";
 	}
 
 	void controller::label(cyng::vector_t vec) {
@@ -291,41 +335,39 @@ namespace docruntime {
 	}
 	std::string controller::h1(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
-		std::stringstream ss;
-		ss << "H1*" << vec.size() << "(";
+		ofs_ << "<h1>";
 		bool init = false;
 		for (auto const& v : vec) {
 			if (init) {
-				ss << ' ';
+				ofs_ << ' ';
 			}
 			else {
 				init = true;
 			}
-			ss << v;
+			ofs_ << v;
 		}
-		ss << ")";
-		std::cout << ss.str() << std::endl;
+		ofs_ << "</h1>" << std::endl;
+		//std::cout << ss.str() << std::endl;
 		toc_.add(0, uuid_gen_(), cyng::to_string(vec));
-		return ss.str();
+		return "";
 	}
 	std::string controller::h2(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
-		std::stringstream ss;
-		ss << "H2*" << vec.size() << "(";
+		ofs_ << "<h2>";
 		bool init = false;
 		for (auto const& v : vec) {
 			if (init) {
-				ss << ' ';
+				ofs_ << ' ';
 			}
 			else {
 				init = true;
 			}
-			ss << v;
+			ofs_ << v;
 		}
-		ss << ")";
-		std::cout << ss.str() << std::endl;
+		ofs_ << "</h2>" << std::endl;
+		//std::cout << ss.str() << std::endl;
 		toc_.add(1, uuid_gen_(), cyng::to_string(vec));
-		return ss.str();
+		return "";
 	}
 	std::string controller::h3(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
@@ -399,11 +441,11 @@ namespace docruntime {
 	std::string controller::cat(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
 		std::stringstream ss;
-		ss << "CAT*" << vec.size() << "(";
+		//ss << "CAT*" << vec.size() << "(";
 		for (auto const& v : vec) {
 			ss << v;
 		}
-		ss << ")";
+		//ss << ")";
 		//std::cout << ss.str() << std::endl;
 		return ss.str();
 	}

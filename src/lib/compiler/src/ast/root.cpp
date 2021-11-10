@@ -185,6 +185,15 @@ namespace docscript {
 
 				}
 				std::get<3>(top()).set_params(std::move(p), ctx_.get_position());
+
+				//
+				//	merge down if possible
+				//
+				if (semantic_stack_.size() > 1) {
+					auto m = std::move(std::get<3>(top()));
+					semantic_stack_.pop();
+					merge_ast_value(value::factory(std::move(m)));
+				}
 			}
 			break;
 			default:
