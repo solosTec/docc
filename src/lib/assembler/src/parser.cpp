@@ -164,6 +164,8 @@ namespace docasm {
 		case symbol_type::COL:
 		case symbol_type::BOL:
 		case symbol_type::NUM:
+		case symbol_type::INT:
+		case symbol_type::EXP:
 			prg_.finalize_statement(sym);
 			break;
 		case symbol_type::LIT:

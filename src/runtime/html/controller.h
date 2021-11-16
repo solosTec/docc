@@ -43,17 +43,18 @@ namespace docruntime {
 		std::string italic(cyng::vector_t);
 		std::string bold(cyng::vector_t);
 		std::string typewriter(cyng::vector_t);
+		//std::string number(cyng::vector_t);
 		std::string paragraph(cyng::vector_t);
 
 		void label(cyng::vector_t);
 		std::string ref(cyng::vector_t);
-		std::string h1(cyng::vector_t);
-		std::string h2(cyng::vector_t);
-		std::string h3(cyng::vector_t);
-		std::string h4(cyng::vector_t);
-		std::string h5(cyng::vector_t);
-		std::string h6(cyng::vector_t);
-		std::string header(cyng::param_map_t);
+		void h1(cyng::vector_t);
+		void h2(cyng::vector_t);
+		void h3(cyng::vector_t);
+		void h4(cyng::vector_t);
+		void h5(cyng::vector_t);
+		void h6(cyng::vector_t);
+		void header(cyng::param_map_t);
 
 		std::string figure(cyng::param_map_t);
 
@@ -80,15 +81,16 @@ namespace docruntime {
 		std::function<std::string(cyng::vector_t)> f_italic();
 		std::function<std::string(cyng::vector_t)> f_bold();
 		std::function<std::string(cyng::vector_t)> f_typewriter();
+		//std::function<std::string(cyng::vector_t)> f_number();
 		std::function<void(cyng::vector_t)> f_label();
 		std::function<std::string(cyng::vector_t)> f_ref();
-		std::function<std::string(cyng::vector_t)> f_h1();
-		std::function<std::string(cyng::vector_t)> f_h2();
-		std::function<std::string(cyng::vector_t)> f_h3();
-		std::function<std::string(cyng::vector_t)> f_h4();
-		std::function<std::string(cyng::vector_t)> f_h5();
-		std::function<std::string(cyng::vector_t)> f_h6();
-		std::function<std::string(cyng::param_map_t)> f_header();
+		std::function<void(cyng::vector_t)> f_h1();
+		std::function<void(cyng::vector_t)> f_h2();
+		std::function<void(cyng::vector_t)> f_h3();
+		std::function<void(cyng::vector_t)> f_h4();
+		std::function<void(cyng::vector_t)> f_h5();
+		std::function<void(cyng::vector_t)> f_h6();
+		std::function<void(cyng::param_map_t)> f_header();
 		std::function<std::string(cyng::param_map_t)> f_figure();
 		std::function<void(cyng::param_map_t)> f_resource();
 		std::function<std::chrono::system_clock::time_point(cyng::param_map_t)> f_now();
@@ -116,7 +118,7 @@ namespace docruntime {
 	/**
 	 * convert an object vectr
 	 */
-	void to_html(std::ostream& os, cyng::vector_t const& vec);
+	void to_html(std::ostream& os, cyng::vector_t const& vec, std::string sep);
 	void emit_styles(std::size_t depth, std::ostream& ofs);
 
 }

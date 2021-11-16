@@ -40,6 +40,10 @@ namespace docscript {
 			}
 
 			write_bom(ostream_);
+
+			const std::time_t t_c = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+			ostream_ << "; created at " << std::put_time(std::localtime(&t_c), "@%FT%T\n") << std::endl;
+
 			init_method_table(method_table_);
 
 		}
@@ -172,6 +176,7 @@ namespace docscript {
 		insert_method(table, method("i", parameter_type::VECTOR, true));
 		insert_method(table, method("b", parameter_type::VECTOR, true));
 		insert_method(table, method("tt", parameter_type::VECTOR, true));	//	mono font
+		//insert_method(table, method("number", parameter_type::VECTOR, true));	//	<number>
 
 		insert_method(table, method("quote", parameter_type::VECTOR, true));	//	same as "..."
 		insert_method(table, method("range", parameter_type::VECTOR, true));	//	collect a vector

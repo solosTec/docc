@@ -3,6 +3,7 @@
 #include <docc/utils.h>
 #include <docc/reader.h>
 #include <rt/currency.h>
+#include <html/formatting.h>
 
 #include <cyng/task/controller.h>
 #include <cyng/task/scheduler.h>
@@ -106,8 +107,11 @@ namespace docruntime {
 
 			cyng::buffer_t buffer;
 			
-			ifs.seekg(0, std::ios::end);
-			buffer.reserve(ifs.tellg());
+			//	https://stackoverflow.com/a/22986486
+			ifs.ignore(std::numeric_limits<std::streamsize>::max());
+			auto const length = ifs.gcount();
+			buffer.reserve(length);
+			ifs.clear();
 			ifs.seekg(0, std::ios::beg);
 
 
@@ -135,6 +139,7 @@ namespace docruntime {
 				, cyng::make_description("i", f_italic())
 				, cyng::make_description("b", f_bold())
 				, cyng::make_description("tt", f_typewriter())
+				//, cyng::make_description("number", f_number())
 				, cyng::make_description("label", f_label())
 				, cyng::make_description("ref", f_ref())
 				, cyng::make_description("h1", f_h1())
@@ -157,7 +162,9 @@ namespace docruntime {
 
 			cyng::deque_t deq;
 			cyng::io::parser p([&](cyng::object&& obj) -> void {
-				//std::cout << cyng::io::to_typed(obj) << std::endl;
+#ifdef _DEBUG
+				//std::cout << "load: " << cyng::io::to_typed(obj) << std::endl;
+#endif
 				deq.push_back(std::move(obj));
 				});
 			p.read(std::begin(buffer), std::end(buffer));
@@ -255,7 +262,7 @@ namespace docruntime {
 		//
 		ss << "&bdquo;";
 		bool init = false;
-		to_html(ss, vec);
+		to_html(ss, vec, " ");
 		ss << "&ldquo;";
 		return ss.str();
 	}
@@ -264,7 +271,7 @@ namespace docruntime {
 		std::reverse(std::begin(vec), std::end(vec));
 		std::stringstream ss;
 		ss << "<span style=\"font-style: italic;\">";
-		to_html(ss, vec);
+		to_html(ss, vec, " ");
 		ss << "</span>";
 		return ss.str();
 	}
@@ -273,7 +280,7 @@ namespace docruntime {
 		std::reverse(std::begin(vec), std::end(vec));
 		std::stringstream ss;
 		ss << "<span style=\"font-weight: bold;\">";
-		to_html(ss, vec);
+		to_html(ss, vec, " ");
 		ss << "</span>";
 		return ss.str();
 	}
@@ -282,10 +289,15 @@ namespace docruntime {
 		std::reverse(std::begin(vec), std::end(vec));
 		std::stringstream ss;
 		ss << "<span style=\"font-family: monospace;\">";
-		to_html(ss, vec);
+		to_html(ss, vec, " ");
 		ss << "</span>";
 		return ss.str();
 	}
+
+	//std::string controller::number(cyng::vector_t vec) {
+	//	return "NUMBER";
+	//}
+
 
 	void controller::set(cyng::param_map_t pm) {
 		//std::cout << "SET(" << pm << ")" << std::endl;
@@ -312,7 +324,7 @@ namespace docruntime {
 		//std::stringstream ss;
 		//ss << "PARAGRAPH*" << vec.size() << "(";
 		tmp_html_ << "<p>";
-		to_html(tmp_html_, vec);
+		to_html(tmp_html_, vec, " ");
 		tmp_html_ << "</p>" << std::endl;
 		//std::cout << ss.str() << std::endl;
 		return "";
@@ -332,69 +344,64 @@ namespace docruntime {
 		std::cout << ss.str() << std::endl;
 		return ss.str();
 	}
-	std::string controller::h1(cyng::vector_t vec) {
+	void controller::h1(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
-		tmp_html_ << "<h1>";
-		to_html(tmp_html_, vec);
+		//std::cout << ss.str() << std::endl;
+		auto const r = toc_.add(0, uuid_gen_(), cyng::to_string(vec));
+		tmp_html_ << "<h1>" << r.first << "&nbsp;";
+		to_html(tmp_html_, vec, " ");
 		tmp_html_ << "</h1>" << std::endl;
-		//std::cout << ss.str() << std::endl;
-		toc_.add(0, uuid_gen_(), cyng::to_string(vec));
-		return "";
 	}
-	std::string controller::h2(cyng::vector_t vec) {
+	void controller::h2(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
-		tmp_html_ << "<h2>";
-		to_html(tmp_html_, vec);
-		tmp_html_ << "</h2>" << std::endl;
 		//std::cout << ss.str() << std::endl;
-		toc_.add(1, uuid_gen_(), cyng::to_string(vec));
-		return "";
+		auto const r = toc_.add(1, uuid_gen_(), cyng::to_string(vec));
+		tmp_html_ << "<h2>" << r.first << "&nbsp;";
+		to_html(tmp_html_, vec, " ");
+		tmp_html_ << "</h2>" << std::endl;
 	}
-	std::string controller::h3(cyng::vector_t vec) {
+	void controller::h3(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
 		tmp_html_ << "<h3>";
-		to_html(tmp_html_, vec);
+		to_html(tmp_html_, vec, " ");
 		tmp_html_ << "</h3>" << std::endl;
 		toc_.add(2, uuid_gen_(), cyng::to_string(vec));
-		return "";
 	}
-	std::string controller::h4(cyng::vector_t vec) {
+	void controller::h4(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
 		tmp_html_ << "<h4>";
-		to_html(tmp_html_, vec);
+		to_html(tmp_html_, vec, " ");
 		tmp_html_ << "</h4>" << std::endl;
 		toc_.add(3, uuid_gen_(), cyng::to_string(vec));
-		return "";
 	}
-	std::string controller::h5(cyng::vector_t vec) {
+	void controller::h5(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
 		tmp_html_ << "<h5>";
-		to_html(tmp_html_, vec);
+		to_html(tmp_html_, vec, " ");
 		tmp_html_ << "</h5>" << std::endl;
 		toc_.add(4, uuid_gen_(), cyng::to_string(vec));
-		return "";
 	}
-	std::string controller::h6(cyng::vector_t vec) {
+	void controller::h6(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
 		tmp_html_ << "<h6>";
-		to_html(tmp_html_, vec);
+		to_html(tmp_html_, vec, " ");
 		tmp_html_ << "</h6>" << std::endl;
 		toc_.add(5, uuid_gen_(), cyng::to_string(vec));
-		return "";
 	}
-	std::string controller::header(cyng::param_map_t pm) {
-		std::stringstream ss;
-		ss << "HEADER(" << pm << ")";
-		std::cout << ss.str() << std::endl;
-
+	void controller::header(cyng::param_map_t pm) {
 		//	"level":0000000000000001),("tag":<uuid>'79bf3ba0-2362-4ea5-bcb5-ed93844ac59a'),("title":[Basics]))
 		auto const reader = cyng::make_reader(pm);
 		auto const level = cyng::numeric_cast<std::size_t>(reader.get("level"), 0);
 		auto const tag = cyng::value_cast(reader.get("tag"), uuid_gen_());
 		auto const title = cyng::io::to_plain(reader.get("title"));
 
-		toc_.add(level, tag, title);
-		return ss.str();
+		auto const r = toc_.add(level - 1, tag, title);
+		if (r.second) {
+			tmp_html_ << r.first << "&nbsp;" << title << std::endl;
+		}
+		else {
+			tmp_html_ << title << std::endl;
+		}
 	}
 
 	std::string controller::figure(cyng::param_map_t pm) {
@@ -422,12 +429,7 @@ namespace docruntime {
 	std::string controller::cat(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
 		std::stringstream ss;
-		//ss << "CAT*" << vec.size() << "(";
-		for (auto const& v : vec) {
-			ss << v;
-		}
-		//ss << ")";
-		//std::cout << ss.str() << std::endl;
+		to_html(ss, vec, "");	//	empty separator here
 		return ss.str();
 	}
 
@@ -511,32 +513,35 @@ namespace docruntime {
 	std::function<std::string(cyng::vector_t)> controller::f_typewriter() {
 		return std::bind(&controller::typewriter, this, std::placeholders::_1);
 	}
+	//std::function<std::string(cyng::vector_t)> controller::f_number() {
+	//	return std::bind(&controller::number, this, std::placeholders::_1);
+	//}
 	std::function<void(cyng::vector_t)> controller::f_label() {
 		return std::bind(&controller::label, this, std::placeholders::_1);
 	}
 	std::function<std::string(cyng::vector_t)> controller::f_ref() {
 		return std::bind(&controller::ref, this, std::placeholders::_1);
 	}
-	std::function<std::string(cyng::vector_t)> controller::f_h1() {
+	std::function<void(cyng::vector_t)> controller::f_h1() {
 		return std::bind(&controller::h1, this, std::placeholders::_1);
 	}
-	std::function<std::string(cyng::vector_t)> controller::f_h2() {
+	std::function<void(cyng::vector_t)> controller::f_h2() {
 		return std::bind(&controller::h2, this, std::placeholders::_1);
 	}
-	std::function<std::string(cyng::vector_t)> controller::f_h3() {
+	std::function<void(cyng::vector_t)> controller::f_h3() {
 		return std::bind(&controller::h3, this, std::placeholders::_1);
 	}
-	std::function<std::string(cyng::vector_t)> controller::f_h4() {
+	std::function<void(cyng::vector_t)> controller::f_h4() {
 		return std::bind(&controller::h4, this, std::placeholders::_1);
 	}
-	std::function<std::string(cyng::vector_t)> controller::f_h5() {
+	std::function<void(cyng::vector_t)> controller::f_h5() {
 		return std::bind(&controller::h5, this, std::placeholders::_1);
 	}
-	std::function<std::string(cyng::vector_t)> controller::f_h6() {
+	std::function<void(cyng::vector_t)> controller::f_h6() {
 		return std::bind(&controller::h6, this, std::placeholders::_1);
 	}
 
-	std::function<std::string(cyng::param_map_t)> controller::f_header() {
+	std::function<void(cyng::param_map_t)> controller::f_header() {
 		return std::bind(&controller::header, this, std::placeholders::_1);
 	}
 	std::function<std::string(cyng::param_map_t)> controller::f_figure() {
@@ -578,11 +583,12 @@ namespace docruntime {
 		return p;
 	}
 
-	void to_html(std::ostream& os, cyng::vector_t const& vec) {
+	void to_html(std::ostream& os, cyng::vector_t const& vec, std::string sep) {
 		bool init = false;
 		for (auto const& obj : vec) {
 			if (init) {
-				os << ' ';
+				//os << ' ';
+				os << sep;
 			}
 			else {
 				init = true;
@@ -590,10 +596,36 @@ namespace docruntime {
 
 			switch (obj.rtti().tag()) {
 			case cyng::TC_VECTOR:
-				to_html(os, cyng::container_cast<cyng::vector_t>(obj));
+				to_html(os, cyng::container_cast<cyng::vector_t>(obj), " ");
+				break;
+			case cyng::TC_UINT64:
+				//os << "UINT64";
+				os 
+					<< "<span class=\"math\">" 
+					<< cyng::numeric_cast<std::uint64_t>(obj, 0)
+					<< "</span>"
+					;
+				break;
+			case cyng::TC_INT64:
+				//os << "INT64";
+				os
+					<< "<span class=\"math\">"
+					<< cyng::numeric_cast<std::int64_t>(obj, 0)
+					<< "</span>"
+					;
+				break;
+			case cyng::TC_DOUBLE:
+				dom::to_html(os, cyng::numeric_cast<double>(obj, 0.0));
+				break;
+			case cyng::TC_STRING:
+				os << obj;
+				break;
+			case cyng::TC_TIME_POINT:
+				dom::to_html(os, cyng::value_cast(obj, std::chrono::system_clock::now()));
+				//os << obj;
 				break;
 			default:
-				os << obj;
+				os << obj << ':' << obj.rtti().type_name();
 				break;
 			}
 		}
@@ -887,10 +919,14 @@ namespace docruntime {
 			<< std::endl
 			<< std::string(depth + 2, '\t') << "padding-left: 0.7em;"
 			<< std::endl
-				<< std::string(depth + 1, '\t') << "}" << std::endl
+			<< std::string(depth + 1, '\t') << "}" << std::endl
 
-			<< std::string(depth, '\t') << "</style>" << std::endl
+			//	math class
+			<< std::string(depth + 2, '\t') << ".math {"
+			<< std::string(depth + 2, '\t') << "font-family: 'Latin Modern Math', Palatino, 'Asana Math';" << std::endl
+			<< std::string(depth + 1, '\t') << "}" << std::endl
 
-			;
+			<< std::string(depth, '\t') << "</style>" << std::endl;
+				
 	}
 }

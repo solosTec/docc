@@ -31,6 +31,11 @@ namespace docasm {
 			TIMESTAMP_,	//!<	starts with @
 			COLOR_,		//!<	starts with #
 			NUMBER_,	//!<	number
+			INTEGER_,	//!<	signed
+			UNSIGNED_,	//!<	unsigned
+			FLOAT_,		//!<	nnn.
+			SIGN_,		//!<	[+|-]
+			EXPONENT_,	//!<	scientific notation: n.nnn[+|-]En
 			STRING_,	//!<	"..."
 			STRING_ESC_,	//!<	"..\?."
 			QUOTE_,		//!<	'...'
@@ -64,6 +69,11 @@ namespace docasm {
 		[[nodiscard]] std::pair<state, bool> timestamp(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> color(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> number(token const& tok, token const& prev);
+		[[nodiscard]] std::pair<state, bool> signed_int(token const& tok, token const& prev);
+		[[nodiscard]] std::pair<state, bool> unsigned_int(token const& tok, token const& prev);
+		[[nodiscard]] std::pair<state, bool> floating_point(token const& tok, token const& prev);
+		[[nodiscard]] std::pair<state, bool> sign(token const& tok, token const& prev);
+		[[nodiscard]] std::pair<state, bool> exponent(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> quote(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> quote_trail(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> string(token const& tok, token const& prev);

@@ -42,6 +42,30 @@ namespace docasm {
 					return { static_cast<std::uint64_t>(0) };
 				}
 				break;
+			case symbol_type::INT:	//	number (signed integer)
+				try {
+					return { static_cast<std::int64_t>(std::stoll(sym.value_, nullptr, 10)) };
+				}
+				catch (...) {
+					//fmt::print(
+					//	stdout,
+					//	fg(fmt::color::orange) | fmt::emphasis::bold,
+					//	"{}: warning: invalid number [{}]\n", ctx_.get_position(), sym.value_);
+					return { static_cast<std::int64_t>(0) };
+				}
+				break;
+			case symbol_type::EXP:	//	floating point with exponent
+				try {
+					return { std::stod(sym.value_, nullptr) };
+				}
+				catch (...) {
+					//fmt::print(
+					//	stdout,
+					//	fg(fmt::color::orange) | fmt::emphasis::bold,
+					//	"{}: warning: invalid number [{}]\n", ctx_.get_position(), sym.value_);
+					return { static_cast<double>(0.0) };
+				}
+				break;
 			default:
 				break;
 			}
@@ -53,7 +77,7 @@ namespace docasm {
 		}
 
 		std::ostream& operator<<(std::ostream& os, value const& v) {
-			std::visit(overloaded{
+			std::visit(overloaded {
 				[](auto& arg) {},
 				[&](std::string const& val) {
 					os << std::quoted(val);
@@ -71,11 +95,14 @@ namespace docasm {
 				[&](std::uint64_t val) {
 					os << std::dec << val << "u64";
 					},
-				[&](boost::uuids::uuid val) {
-					os << val;
+				[&](std::int64_t val) {
+					os << std::dec << val << "i64";
 					},
 				[&](double val) {
-					os << std::fixed << val;
+					os << std::scientific << val;
+					},
+				[&](boost::uuids::uuid val) {
+					os << val;
 					}
 				}, v.val_);
 

@@ -193,7 +193,7 @@ namespace docasm {
 
 				std::visit([&](auto&& arg) {
 #ifdef _DEBUG
-					std::cout << arg << std::endl;
+					//std::cout << arg << std::endl;
 #endif
 					arg.generate(ctx_, ll);
 					}, s);

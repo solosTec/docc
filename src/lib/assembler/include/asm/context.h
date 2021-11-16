@@ -104,6 +104,7 @@ namespace docasm {
 
 	/**
 	 * Scan all provided directories for p
+	 * ToDo: replace by docscript utility function
 	 */
 	std::pair<std::filesystem::path, bool> resolve_path(std::vector< std::filesystem::path >const& inc, std::filesystem::path p);
 }

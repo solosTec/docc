@@ -68,6 +68,8 @@ namespace docasm {
 				fg(fmt::color::green_yellow) | fmt::emphasis::bold,
 				"***info {}: EOD -> {}\n", get_position(), temp_.string());
 			san.eof();
+			ostream_.flush();
+			ostream_.close();
 		}
 		position_.pop();
 	}
@@ -123,10 +125,11 @@ namespace docasm {
 	}
 
 	void context::emit(cyng::object&& obj) {
+		auto const bytes = cyng::io::serialize_binary(ostream_, obj);
 #ifdef _DEBUG
-		std::cout << cyng::io::to_typed(obj) << std::endl;
+		//std::cout << "asm.emit " << bytes << " bytes: " << cyng::io::to_typed(obj) << std::endl;
+		ostream_.flush();
 #endif
-		cyng::io::serialize_binary(ostream_, obj);
 	}
 
 	std::filesystem::path verify_extension(std::filesystem::path p, std::string const& ext)

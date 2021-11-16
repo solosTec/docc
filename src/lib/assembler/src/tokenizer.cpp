@@ -59,6 +59,21 @@ namespace docasm {
 		case state::NUMBER_:
 			std::tie(state_, advance) = number(tok, prev);
 			break;
+		case state::INTEGER_:
+			std::tie(state_, advance) = signed_int(tok, prev);
+			break;
+		case state::UNSIGNED_:
+			std::tie(state_, advance) = unsigned_int(tok, prev);
+			break;
+		case state::FLOAT_:
+			std::tie(state_, advance) = floating_point(tok, prev);
+			break;
+		case state::SIGN_:
+			std::tie(state_, advance) = sign(tok, prev);
+			break;
+		case state::EXPONENT_:
+			std::tie(state_, advance) = exponent(tok, prev);
+			break;
 		case state::TEXT_:
 			std::tie(state_, advance) = text(tok, prev);
 			break;
@@ -116,7 +131,6 @@ namespace docasm {
 			if (!prev.is_nl()) return { state::NEWLINE_, true };
 			return { state_, true };
 
-		//case '(':   case ')':
 		case '[':   case ']':
 		case ',':
 		case ':':
@@ -125,9 +139,6 @@ namespace docasm {
 			return { state_, true };
 
 		case '"':
-			//value_ += tok;
-			//emit(symbol_type::DQU);
-			//return { state_, true };
 			return { state::STRING_, true };
 
 		case '@':
@@ -141,6 +152,11 @@ namespace docasm {
 
 		case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': case '0':
 			return { state::NUMBER_, false };
+
+		case '-':
+		case '+':
+			value_ += tok;
+			return { state::NUMBER_, true };
 
 		default:
 			break;
@@ -345,15 +361,105 @@ namespace docasm {
 
 	std::pair<tokenizer::state, bool> tokenizer::number(token const& tok, token const& prev) {
 
+		//
+		//	detect floating point values too
+		//
 		switch (static_cast<std::uint32_t>(tok)) {
 		case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': case '0':
 			value_ += tok;
-			return { state::NUMBER_, true };
+			return { state_, true };
+		case 'i':
+			value_ += tok;
+			return { state::INTEGER_, true };
+		case 'u':
+			value_ += tok;
+			return { state::UNSIGNED_, true };
+		case '.':
+			value_ += tok;
+			return { state::FLOAT_, true };
+		case 'e':
+		case 'E':
+			value_ += 'e';
+			return { state::SIGN_, true };
+		case '\'':	//	digit separators make large values more readable. example: 36'000'000
+		case '_':	//	digit separators make large values more readable. example: 36_000_000
+			break;
 		default:
 			break;
 		}
 
 		emit(symbol_type::NUM);
+		return { state::START_, false };
+	}
+
+	std::pair<tokenizer::state, bool> tokenizer::signed_int(token const& tok, token const& prev) {
+		switch (static_cast<std::uint32_t>(tok)) {
+		case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': case '0':
+			value_ += tok;
+			return { state_, true };
+		default:
+			break;
+		}
+
+		emit(symbol_type::INT);
+		return { state::START_, false };
+	}
+
+	std::pair<tokenizer::state, bool> tokenizer::unsigned_int(token const& tok, token const& prev) {
+		switch (static_cast<std::uint32_t>(tok)) {
+		case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': case '0':
+			value_ += tok;
+			return { state_, true };
+		default:
+			break;
+		}
+
+		emit(symbol_type::NUM);
+		return { state::START_, false };
+	}
+
+	std::pair<tokenizer::state, bool> tokenizer::floating_point(token const& tok, token const& prev) {
+		switch (static_cast<std::uint32_t>(tok)) {
+		case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': case '0':
+			value_ += tok;
+			return { state_, true };
+		case 'e':
+		case 'E':
+			value_ += 'e';
+			return { state::SIGN_, true };
+		default:
+			break;
+		}
+
+		emit(symbol_type::EXP);
+		return { state::START_, false };
+	}
+
+	std::pair<tokenizer::state, bool> tokenizer::sign(token const& tok, token const& prev) {
+		switch (static_cast<std::uint32_t>(tok)) {
+		case '+': 
+		case '-':
+			value_ += tok;
+			return { state::EXPONENT_, true };
+		default:
+			break;
+		}
+
+		//	not a number
+		emit(symbol_type::EXP);
+		return { state::START_, false };
+	}
+
+	std::pair<tokenizer::state, bool> tokenizer::exponent(token const& tok, token const& prev) {
+		switch (static_cast<std::uint32_t>(tok)) {
+		case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': case '0':
+			value_ += tok;
+			return { state_, true };
+		default:
+			break;
+		}
+
+		emit(symbol_type::EXP);
 		return { state::START_, false };
 	}
 

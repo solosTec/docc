@@ -34,7 +34,9 @@ namespace docasm {
 				cyng::color_8,		//	[3]
 				bool,				//	[4]
 				std::uint64_t,		//	[5]
-				boost::uuids::uuid	//	[6]
+				std::int64_t,		//	[6]
+				double,				//	[7]
+				boost::uuids::uuid	//	[8]
 			> val_;
 
 			[[nodiscard]] static value factory(symbol const&);

@@ -337,6 +337,7 @@ target_link_libraries(doc2html
 		docscript
 		docasm
 		docruntime
+		dom
         fmt::fmt
 		${CYNG_LIBRARIES}
 		${OPENSSL_LIBRARIES}

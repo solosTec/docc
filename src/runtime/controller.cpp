@@ -99,7 +99,9 @@ namespace docruntime {
 
 			cyng::deque_t deq;
 			cyng::io::parser p([&](cyng::object&& obj) -> void {
-				std::cout << cyng::io::to_typed(obj) << std::endl;
+#ifdef _DEBUG
+				//std::cout << cyng::io::to_typed(obj) << std::endl;
+#endif
 				deq.push_back(std::move(obj));
 				});
 			p.read(std::begin(buffer), std::end(buffer));
@@ -188,11 +190,12 @@ namespace docruntime {
 	}
 
 	void controller::set(cyng::param_map_t pm) {
-		std::cout << "SET(" << pm << ")" << std::endl;
+		//std::cout << "SET(" << pm << ")" << std::endl;
 		vars_.insert(pm.begin(), pm.end());
 	}
 	void controller::meta(cyng::param_map_t pm) {
 		std::cout << "META(" << pm << ")" << std::endl;
+		//meta_.insert(pm.begin(), pm.end());
 	}
 
 	cyng::vector_t controller::get(cyng::vector_t vec) {

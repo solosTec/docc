@@ -19,9 +19,6 @@
 
 int main(int argc, char* argv[]) {
 
-#ifdef _DEBUG
-#endif
-
     auto tag = boost::uuids::random_generator()();	//	basic_random_generator<mt19937>
 
 	std::string config_file = std::string("doc2html-") + std::string(docc::version_string) + ".cfg";

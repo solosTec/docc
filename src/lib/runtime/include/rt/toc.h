@@ -69,7 +69,7 @@ namespace docruntime
 		toc();
 		toc(boost::uuids::uuid, std::string);
 
-		bool add(std::size_t level, boost::uuids::uuid, std::string);
+		std::pair<std::string, bool> add(std::size_t level, boost::uuids::uuid, std::string);
 
 		friend cyng::vector_t to_vector(toc const&);
 		friend cyng::vector_t to_vector(toc const&, std::vector<std::size_t>);
@@ -80,6 +80,9 @@ namespace docruntime
 		 */
 		friend std::ostream& operator<<(std::ostream& os, toc const&);
 		friend void serialize(std::ostream& os, toc const&, std::vector<std::size_t>);
+
+	private:
+		std::pair<std::string, bool> add(std::size_t level, boost::uuids::uuid, std::string, std::vector<std::size_t>);
 
 	private:
 		std::list<entry>	headings_;

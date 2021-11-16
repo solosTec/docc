@@ -15,6 +15,9 @@
 
 namespace docasm {
 
+	/**
+	 * If extending this enum insert this new states in asm::value class too.
+	 */
 	enum class symbol_type : std::uint32_t {
 		EOD,	//	end-of-data
 		DIR,	//	directive
@@ -27,6 +30,8 @@ namespace docasm {
 		COL,	//	color
 		BOL,	//	boolean
 		NUM,	//	number (unsigned integer)
+		INT,	//	number (signed integer)
+		EXP,	//	floating point with exponent
 		EOL,	//	end of line (nl)
 		TYP,	//	type specifier (trail)
 		//INC,	//	include file

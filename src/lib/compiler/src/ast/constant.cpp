@@ -27,12 +27,18 @@ namespace docscript {
 			case symbol_type::BOL:
 				return constant{ sym.value_, boost::algorithm::equals(sym.value_, "true")};
 			case symbol_type::NUM:
-				try {
-					return constant{ sym.value_, static_cast<std::uint64_t>(std::stoull(sym.value_, nullptr, 10)) };
+				if (!sym.value_.empty()) {
+					try {
+						return (sym.value_.at(0) == '-')
+							? constant{ sym.value_, static_cast<std::int64_t>(std::stoll(sym.value_, nullptr, 10)) }
+							: constant{ sym.value_, static_cast<std::uint64_t>(std::stoull(sym.value_, nullptr, 10)) }
+						;
+					}
+					catch (...) {
+						return constant{ sym.value_, static_cast<std::uint64_t>(0) };
+					}
 				}
-				catch (...) {
-					return constant{ sym.value_, static_cast<std::uint64_t>(0) };
-				}
+				break;
 			case symbol_type::FLT:
 			case symbol_type::EXP:
 				try {
@@ -72,17 +78,27 @@ namespace docscript {
 
 		std::ostream& operator<<(std::ostream& os, constant const& c) {
 			std::visit(overloaded{
-			[&](double arg) { os << std::fixed << arg; },
-			[&](std::uint64_t arg) { os << std::dec << arg; },
-			[&](std::string const& arg) { os << std::quoted(arg); },
+			[&](double arg) { os << std::scientific << arg; },	//	1.000000e-02
+			[&](std::int64_t arg) { 
+					os << std::dec << (arg > 0 ? "+" : "") << arg << "i64";
+				},
+			[&](std::uint64_t arg) { 
+					os << std::dec << '+' << arg << "u64"; 
+				},
+			[&](std::string const& arg) { 
+					os << std::quoted(arg) << "\t; " << arg.size() << " bytes";
+				},
 			[&](std::chrono::system_clock::time_point const& arg) { 
 				const std::time_t t_c = std::chrono::system_clock::to_time_t(arg);
-				os << std::put_time(std::localtime(&t_c), "@%FT%T\n");
+				os << std::put_time(std::localtime(&t_c), "@%FT%T");
 				},
-			[&](bool arg) { os << (arg ? "true" : "false"); },
-			[&](cyng::color_8 const& arg) { os << arg; },
-
-				}, c.node_);
+			[&](bool arg) { 
+					os << (arg ? "true" : "false"); 
+				},
+			[&](cyng::color_8 const& arg) { 
+					os << arg << "\t; color";
+				},
+			}, c.node_);
 			return os;
 		}
 

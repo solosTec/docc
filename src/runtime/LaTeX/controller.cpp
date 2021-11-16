@@ -99,7 +99,7 @@ namespace docruntime {
 
 			cyng::deque_t deq;
 			cyng::io::parser p([&](cyng::object&& obj) -> void {
-				std::cout << cyng::io::to_typed(obj) << std::endl;
+				//std::cout << cyng::io::to_typed(obj) << std::endl;
 				deq.push_back(std::move(obj));
 				});
 			p.read(std::begin(buffer), std::end(buffer));

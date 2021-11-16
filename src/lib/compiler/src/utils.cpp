@@ -42,10 +42,6 @@ namespace docscript {
 
 	}
 
-	//
-	//	set console outpt code page to UTF-8
-	//	requires a TrueType font like Lucida 
-	//
 	std::vector<std::filesystem::path> get_include_paths(std::vector<std::string> const& vec, std::filesystem::path parent_path) {
 
 		//
@@ -75,6 +71,10 @@ namespace docscript {
 	}
 
 #if BOOST_OS_WINDOWS
+	//
+	//	set console outpt code page to UTF-8
+	//	requires a TrueType font like Lucida 
+	//
 	void init_console() {
 		if (::SetConsoleOutputCP(65001) == 0)
 		{

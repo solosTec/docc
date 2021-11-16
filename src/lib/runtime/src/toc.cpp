@@ -40,36 +40,6 @@ namespace docruntime
 		return text_;
 	}
 
-	toc::toc()
-		: headings_()
-	{}
-	toc::toc(boost::uuids::uuid tag, std::string title)
-		: headings_({ entry(tag, title) })
-	{}
-
-	bool toc::add(std::size_t level, boost::uuids::uuid tag, std::string title) {
-		if (level == 0) {
-			headings_.emplace_back(tag, title);
-		}
-		else {
-			if (headings_.empty()) return false;
-
-			if (!headings_.back().sub_) {
-				BOOST_ASSERT_MSG(level == 1, "missing toc level");
-				headings_.back().sub_ = std::make_shared<toc>(tag, title);
-			}
-			else {
-				headings_.back().sub_->add(level - 1, tag, title);
-			}
-		}
-		return true;
-	}
-
-	toc::entry::entry(boost::uuids::uuid tag, std::string s)
-		: element(tag, s)
-		, sub_()
-	{}
-
 	namespace {	//	static linkage
 
 		std::vector<std::size_t> inc(std::vector<std::size_t> vec) {
@@ -77,6 +47,54 @@ namespace docruntime
 			return vec;
 		}
 	}
+
+	toc::toc()
+		: headings_()
+	{}
+	toc::toc(boost::uuids::uuid tag, std::string title)
+		: headings_({ entry(tag, title) })
+	{}
+
+	std::pair<std::string, bool> toc::add(std::size_t level, boost::uuids::uuid tag, std::string title) {
+
+		std::vector<std::size_t> index{ 1 };	//	initial
+		return add(level, tag, title, index);
+	}
+
+	std::pair<std::string, bool> toc::add(std::size_t level, boost::uuids::uuid tag, std::string title, std::vector<std::size_t> index) {
+
+		if (level == 0) {
+			//	complete
+			headings_.emplace_back(tag, title);
+			index.back() = headings_.size();
+		}
+		else {
+			//
+			//	missing level
+			//
+			if (headings_.empty()) return { get_numbering(index), false };
+
+			if (!headings_.back().sub_) {
+				BOOST_ASSERT_MSG(level == 1, "missing toc level");
+				headings_.back().sub_ = std::make_shared<toc>(tag, title);
+
+				index.back() = headings_.size();
+				return { get_numbering(inc(index)), true };
+			}
+			else {
+				headings_.back().sub_->add(level - 1, tag, title, inc(index));
+			}
+
+			//++index.back();
+		}
+		return { get_numbering(index), true };
+	}
+
+	toc::entry::entry(boost::uuids::uuid tag, std::string s)
+		: element(tag, s)
+		, sub_()
+	{}
+
 
 	cyng::vector_t to_vector(toc const& t) {
 		std::vector<std::size_t> index{ 1 };

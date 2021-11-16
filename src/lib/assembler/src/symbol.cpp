@@ -79,6 +79,12 @@ namespace docasm {
 		case symbol_type::NUM:	//	number (unsigned integer)
 			os << "NUM";
 			break;
+		case symbol_type::INT:	//	number (signed integer)
+			os << "INT";
+			break;
+		case symbol_type::EXP:	//	floating point with exponent
+			os << "EXP";
+			break;
 		case symbol_type::EOL:
 			os << "EOL";
 			break;

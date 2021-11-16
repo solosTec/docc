@@ -190,6 +190,10 @@ namespace docscript {
 		case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': case '0':
 			return { state::NUMBER_, false };
 
+		case '-':
+			value_ += tok;
+			return { state::NUMBER_, true };
+
 		default:
 			//  "." as escape symbol - following character remains unchanged
 			value_ += tok;
@@ -385,8 +389,14 @@ namespace docscript {
 		case 'u':
 			return { state::INTEGER_, true };
 		case '.':
+			value_ += tok;
 			return { state::FLOAT_, true };
+		case 'e':
+		case 'E':
+			value_ += 'e';
+			return { state::EXPONENT_, true };
 		case '\'':	//	digit separators make large values more readable. example: 36'000'000
+		case '_':	//	digit separators make large values more readable. example: 36_000_000
 			break;
 		default:
 			break;
@@ -416,8 +426,8 @@ namespace docscript {
 			value_ += tok;
 			return { state_, true };
 		case 'e': case 'E':
-			value_ += tok;
-			return { state::EXPONENT_, false };
+			value_ += 'e';
+			return { state::EXPONENT_, true };
 
 		default:
 			break;
@@ -433,8 +443,13 @@ namespace docscript {
 			value_ += tok;
 			return { state_, true };
 
+		case '+':
+		case '-':
 			//	ToDo: handling '-' sign 
 			//	example: 1.846e-12
+			value_ += tok;
+			return { state_, true };
+
 		default:
 			break;
 		}

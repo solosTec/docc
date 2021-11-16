@@ -50,9 +50,23 @@ namespace docscript {
 		bool program::init_function(std::string const& name) {
 			auto m = ctx_.lookup_method(name);
 			if (m.has_value() && m->is_parameter_type(parameter_type::MAP)) {
+
+				if (ctx_.get_verbosity(14)) {
+					fmt::print(
+						stdout,
+						fg(fmt::color::dim_gray),
+						"{}: init map method = [{}] \n", ctx_.get_position(), name);
+				}
+
 				semantic_stack_.push(map_method::factory(name, m));
 			}
 			else {
+				if (ctx_.get_verbosity(14)) {
+					fmt::print(
+						stdout,
+						fg(fmt::color::dim_gray),
+						"{}: init vec method = [{}] \n", ctx_.get_position(), name);
+				}
 				semantic_stack_.push(vec_method::factory(name, m));
 			}
 			return m.has_value();
