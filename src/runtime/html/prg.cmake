@@ -7,10 +7,12 @@ set (doc2html_cpp
     
     ${PROJECT_SOURCE_DIR}/src/runtime/html/main.cpp
     ${PROJECT_SOURCE_DIR}/src/runtime/html/controller.cpp
+    ${PROJECT_SOURCE_DIR}/src/runtime/html/generator.cpp
 )
     
 set (doc2html_h
     ${PROJECT_SOURCE_DIR}/src/runtime/html/controller.h
+    ${PROJECT_SOURCE_DIR}/src/runtime/html/generator.h
 )
 
 set (doc2html_prg

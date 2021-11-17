@@ -1,6 +1,12 @@
 
 #include <html/formatting.h>
 
+#include <cyng/obj/tag.hpp>
+#include <cyng/obj/numeric_cast.hpp>
+#include <cyng/obj/container_cast.hpp>
+#include <cyng/io/ostream.h>
+#include <cyng/io/serialize.h>
+
 #include <cmath>
 #include <sstream>
 #include <iomanip>
@@ -39,7 +45,7 @@ namespace dom
 				<< parts.at(0)
 				<< '.'
 				<< parts.at(1)
-				<< "&nbsp;&middot;&nbsp;10<sup>"
+				<< "&thinsp;&middot;&thinsp;10<sup>"
 				<< ((d < 1) ? '-' : '+')
 				<< parts.at(2)
 				<< "</sup></span>"
@@ -50,6 +56,61 @@ namespace dom
 	void to_html(std::ostream& os, std::chrono::system_clock::time_point tp) {
 		const std::time_t t_c = std::chrono::system_clock::to_time_t(tp);
 		os << std::put_time(std::localtime(&t_c), "%c");
+	}
+
+	void to_html(std::ostream& os, cyng::vector_t const& vec, std::string sep) {
+		bool init = false;
+		for (auto const& obj : vec) {
+			if (init) {
+				//os << ' ';
+				os << sep;
+			}
+			else {
+				init = true;
+			}
+
+			switch (obj.rtti().tag()) {
+			case cyng::TC_VECTOR:
+				to_html(os, cyng::container_cast<cyng::vector_t>(obj), " ");
+				break;
+			case cyng::TC_UINT64:
+				//os << "UINT64";
+				os
+					<< "<span class=\"math\">"
+					<< cyng::numeric_cast<std::uint64_t>(obj, 0)
+					<< "</span>"
+					;
+				break;
+			case cyng::TC_INT64:
+				//os << "INT64";
+				os
+					<< "<span class=\"math\">"
+					<< cyng::numeric_cast<std::int64_t>(obj, 0)
+					<< "</span>"
+					;
+				break;
+			case cyng::TC_DOUBLE:
+				dom::to_html(os, cyng::numeric_cast<double>(obj, 0.0));
+				break;
+			case cyng::TC_STRING:
+				os << obj;
+				break;
+			case cyng::TC_TIME_POINT:
+				dom::to_html(os, cyng::value_cast(obj, std::chrono::system_clock::now()));
+				//os << obj;
+				break;
+			default:
+				os << obj << ':' << obj.rtti().type_name();
+				break;
+			}
+		}
+
+	}
+
+	std::string to_html(cyng::vector_t const& vec, std::string sep) {
+		std::stringstream ss;
+		to_html(ss, vec, sep);
+		return ss.str();
 	}
 
 }
