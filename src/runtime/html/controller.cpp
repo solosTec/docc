@@ -272,6 +272,7 @@ namespace docruntime {
 			// oction
 
 			<< std::string(depth + 1, '\t') << "a.oction {" << std::endl
+			<< std::string(depth + 2, '\t') << "margin-left: 6px;" << std::endl
 			<< std::string(depth + 2, '\t') << "opacity: 0;" << std::endl
 			<< std::string(depth + 2, '\t') << "transition: opacity 0.2s;"
 			<< std::endl

@@ -177,11 +177,6 @@ namespace docruntime {
 		return ss.str();
 	}
 
-	//std::string generator::number(cyng::vector_t vec) {
-	//	return "NUMBER";
-	//}
-
-
 	void generator::set(cyng::param_map_t pm) {
 		//std::cout << "SET(" << pm << ")" << std::endl;
 		vars_.insert(pm.begin(), pm.end());
@@ -204,12 +199,9 @@ namespace docruntime {
 
 	std::string generator::paragraph(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
-		//std::stringstream ss;
-		//ss << "PARAGRAPH*" << vec.size() << "(";
 		os_ << "<p>";
 		dom::to_html(os_, vec, " ");
 		os_ << "</p>" << std::endl;
-		//std::cout << ss.str() << std::endl;
 		return "";
 	}
 
@@ -280,17 +272,17 @@ namespace docruntime {
 			<< "<h"
 			<< level + 1
 			<< ">"
-			//<a id="fb8cb774-6981-4727-8c16-d3e9913012d7" aria-hidden="true" href="fb8cb774-6981-4727-8c16-d3e9913012d7" style="margin-right: 6px;" class="oction">
-			<< "<a id=\""
-			<< tag 
-			<< "\" aria-hidden=\"true\" "
-			<< "href=\""
-			<< tag 
-			<< "\""
-			<< "</a>"
 			<< num
 			<< "&nbsp;"
 			<< title
+			//<a id="fb8cb774-6981-4727-8c16-d3e9913012d7" aria-hidden="true" href="fb8cb774-6981-4727-8c16-d3e9913012d7" style="margin-right: 6px;" class="oction">
+			<< "<a id=\""
+			<< tag
+			<< "\" aria-hidden=\"true\" "
+			<< "href=\"#" << tag << "\""
+			<< "class=\"oction\">"
+			<< "<svg viewBox=\"0 0 16 16\" version=\"1.1\" width=\"16\" height=\"16\" aria-hidden=\"true\"><path fill-rule=\"evenodd\" d=\"M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z\"></path></svg>"
+			<< "</a>"
 			<< "</h"
 			<< level + 1
 			<< ">"
@@ -309,8 +301,6 @@ namespace docruntime {
 		std::cout << "RESOURCE(" << pm << ")" << std::endl;
 	}
 	std::chrono::system_clock::time_point generator::now(cyng::param_map_t pm) {
-		//std::stringstream ss;
-		//std::cout << "NOW(" << pm << ")" << std::endl;
 		return std::chrono::system_clock::now();
 	}
 	boost::uuids::uuid generator::uuid(cyng::param_map_t) {
@@ -329,6 +319,7 @@ namespace docruntime {
 
 	//		insert_method(table, method("repeat", parameter_type::MAP, true, { "count", "value", "sep"}));
 	std::string generator::repeat(cyng::param_map_t pm) {
+		//	ToDo: read CSV file
 		return "";
 	}
 
