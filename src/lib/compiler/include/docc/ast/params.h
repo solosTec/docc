@@ -56,6 +56,11 @@ namespace docscript {
 
 			param_names_t get_param_names() const;
 
+			/**
+			 * build-in checks
+			 */
+			void verify(context& ctx, std::string const&);
+
 			static param factory(symbol const&);
 
 			friend std::ostream& operator<<(std::ostream& os, param const&);

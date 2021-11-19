@@ -86,7 +86,8 @@ namespace docscript {
 					os << std::dec << '+' << arg << "u64"; 
 				},
 			[&](std::string const& arg) { 
-					os << std::quoted(arg) << "\t; " << arg.size() << " bytes";
+					//os << std::quoted(arg) << "\t; " << arg.size() << " bytes";
+					os << std::quoted(arg);
 				},
 			[&](std::chrono::system_clock::time_point const& arg) { 
 				const std::time_t t_c = std::chrono::system_clock::to_time_t(arg);

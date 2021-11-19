@@ -1,6 +1,7 @@
 #include <docc/ast/value.h>
 #include <docc/ast/constant.h>
 #include <docc/ast/method.h>
+#include <docc/context.h>
 
 #include <sstream>
 
@@ -43,8 +44,8 @@ namespace docscript {
 			friend std::ostream& operator<<(std::ostream& os, value_node const& vn) {
 				std::visit(overloaded{
 					[&](constant const& arg) { os << arg << ' '; },
-					[&](map_method const& arg) { os << "map_method" << ' '; },
-					[&](vec_method const& arg) { os << "vec_method" << ' '; }
+					[&](map_method const& arg) { os << arg.get_name() << ' '; },
+					[&](vec_method const& arg) { os << arg.get_name() << ' '; }
 					}, vn.value_);
 				return os;
 			}
@@ -83,6 +84,19 @@ namespace docscript {
 				return value_.index() == 2;
 			}
 
+			std::string to_str() const {
+				std::stringstream ss;
+				ss << *this;	//	assembler output
+				return ss.str();
+			}
+
+			std::pair<std::filesystem::path, bool>  resolve_path(context& ctx) {
+				auto s = to_str();
+				//	unquote
+				s.erase(remove(s.begin(), s.end(), '"'), s.end());
+				return ctx.lookup(s);
+			}
+
 		};
 
 		value::value() noexcept
@@ -118,9 +132,16 @@ namespace docscript {
 		}
 
 		void value::rename(docscript::method m) {
-			if (!empty()/* && (node_->is_vec_method() || node_->is_map_method())*/) {
+			if (!empty()) {
 				node_->rename(m);
 			}
+		}
+
+		std::pair<std::filesystem::path, bool>  value::resolve_path(context& ctx) {
+			if (!empty()) {
+				return node_->resolve_path(ctx);
+			}
+			return { "", false};
 		}
 
 

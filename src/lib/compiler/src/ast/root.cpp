@@ -8,6 +8,7 @@
 #include <fmt/color.h>
 
 #include <boost/assert.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace docscript {
 	namespace ast {
@@ -148,7 +149,7 @@ namespace docscript {
 					fmt::print(
 						stdout,
 						fg(fmt::color::dim_gray),
-						"{}: add parameter {}#{} to the \"{}\" method\n", ctx_.get_position(), sym.value_, count, std::get<4>(top()).get_name());
+						"{}: add parameter {}#{} to the \"{}\" vec-method\n", ctx_.get_position(), sym.value_, count, std::get<4>(top()).get_name());
 				}
 				return true;
 			}
@@ -180,7 +181,7 @@ namespace docscript {
 					fmt::print(
 						stdout,
 						fg(fmt::color::light_gray),
-						"{}: map function \"{}\" is complete. {} parameters specified\n", ctx_.get_position(), name, p.get_param_names().size());
+						"{}: map-function \"{}\" is complete. {} parameters specified\n", ctx_.get_position(), name, p.get_param_names().size());
 
 				}
 
@@ -195,9 +196,14 @@ namespace docscript {
 					fmt::print(
 						stdout,
 						fg(fmt::color::light_gray),
-						"{}: map function \"{}\" is complete. {} parameters specified\n", ctx_.get_position(), name, p.get_param_names().size());
+						"{}: map-function \"{}\" is complete. {} parameters specified\n", ctx_.get_position(), name, p.get_param_names().size());
 
 				}
+
+				//
+				//	build-in checks
+				//
+				p.verify(ctx_, name);
 				std::get<3>(top()).set_params(std::move(p), ctx_.get_position());
 
 				//

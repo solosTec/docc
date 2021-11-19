@@ -182,7 +182,7 @@ namespace docruntime {
 		vars_.insert(pm.begin(), pm.end());
 	}
 	void generator::meta(cyng::param_map_t pm) {
-		std::cout << "META(" << pm << ")" << std::endl;
+		//std::cout << "META(" << pm << ")" << std::endl;
 		meta_.insert(pm.begin(), pm.end());
 	}
 
@@ -294,6 +294,27 @@ namespace docruntime {
 		std::stringstream ss;
 		ss << "FIGURE(" << pm << ")";
 		std::cout << ss.str() << std::endl;
+
+		auto const reader = cyng::make_reader(pm);
+		auto const vec = cyng::container_cast<cyng::vector_t>(reader.get("caption"));
+		auto const caption = dom::to_html(vec, " ");
+		auto const alt = cyng::value_cast(reader.get("alt"), caption);
+		auto const tag = cyng::value_cast(reader.get("tag"), uuid_gen_());
+		auto const source = cyng::value_cast(reader.get("source"), "");
+
+		//	generate unique tag for SVG
+		auto const id = boost::uuids::to_string(tag);
+		auto const scale = cyng::numeric_cast(reader.get("scale"), 1.0);
+
+		if (scale > 1.0 || scale < 0.01) {
+			std::cerr
+				<< "***warning: unusual scaling factor ["
+				<< scale
+				<< "] for figure: "
+				<< source
+				<< std::endl;
+		}
+
 		return ss.str();
 	}
 

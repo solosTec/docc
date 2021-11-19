@@ -79,7 +79,7 @@ namespace docscript {
 		return verbose_ > level;
 	}
 
-	std::pair<std::filesystem::path, bool> context::lookup(std::filesystem::path const& inp) {
+	std::pair<std::filesystem::path, bool> context::lookup(std::filesystem::path const& inp) const {
 		auto const p = verify_extension(inp, "docscript");
 		return resolve_path(inc_, p);
 	}
@@ -160,7 +160,7 @@ namespace docscript {
 		insert_method(table, method("h5", parameter_type::VECTOR, false));
 		insert_method(table, method("h6", parameter_type::VECTOR, false));
 
-		insert_method(table, method("figure", parameter_type::MAP, false, { "caption", "source", "tag", "alt" }));
+		insert_method(table, method("figure", parameter_type::MAP, false, { "caption", "source" }));
 
 		//	 pilgrow (¶) = paragraph
 		insert_method(table, method(std::string("\xc2\xb6"), parameter_type::VECTOR, false));

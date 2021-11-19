@@ -11,8 +11,7 @@
 namespace docscript {
     std::filesystem::path verify_extension(std::filesystem::path p, std::string const& ext)
 	{
-		if (!p.has_extension())
-		{
+		if (!p.has_extension())	{
 			p.replace_extension(ext);
 		}
 		return p;	
@@ -23,8 +22,7 @@ namespace docscript {
 		//
 		//	search all include paths for the specified file path
 		//
-		for (auto const& dir : inc)
-		{
+		for (auto const& dir : inc)	{
 			if (std::filesystem::exists(dir / p))	return std::make_pair((dir / p), true);
 		}
 
@@ -32,8 +30,7 @@ namespace docscript {
 		//	not found - try harder
 		//	search all include paths for the specified file name
 		//
-		for (auto const& dir : inc)
-		{
+		for (auto const& dir : inc) {
 			//	ignore path
 			if (std::filesystem::exists(dir / p.filename()))	return std::make_pair((dir / p.filename()), true);
 		}

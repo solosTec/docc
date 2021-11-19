@@ -177,6 +177,7 @@ namespace docscript {
 				if (r.second && idx != 0) {
 					if (boost::algorithm::equals(r.first, ".")
 						|| boost::algorithm::equals(r.first, ",")
+						|| boost::algorithm::equals(r.first, ";")
 						|| boost::algorithm::equals(r.first, "?")
 						|| boost::algorithm::equals(r.first, "!")) {
 						//std::cout << get_name() << " CAT #" << idx << " - " << **(pos - 1) << r.first << std::endl;
