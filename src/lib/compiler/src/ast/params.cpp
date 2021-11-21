@@ -98,7 +98,7 @@ namespace docscript {
 					//
 					//	substitute value
 					//
-					value_.merge(value::factory(constant::factory(r.first.string())));
+					value_.swap(value::factory(constant::factory(r.first.string())));
 				}
 			}
 			if (next_) {

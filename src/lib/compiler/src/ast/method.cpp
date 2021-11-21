@@ -180,13 +180,13 @@ namespace docscript {
 						|| boost::algorithm::equals(r.first, ";")
 						|| boost::algorithm::equals(r.first, "?")
 						|| boost::algorithm::equals(r.first, "!")) {
-						//std::cout << get_name() << " CAT #" << idx << " - " << **(pos - 1) << r.first << std::endl;
+						//std::cout << get_name() << " FUSE #" << idx << " - " << **(pos - 1) << r.first << std::endl;
 
 						//
-						//	substitute this by a cat() function
+						//	substitute this by a fuse() function
 						//
-						std::string const cat("cat");
-						auto m = factory(cat, ctx.lookup_method(cat));
+						std::string const fuse("fuse");
+						auto m = factory(fuse, ctx.lookup_method(fuse));
 						m.append(std::move(**(pos - 1)));
 						m.append(std::move(**(pos)));
 

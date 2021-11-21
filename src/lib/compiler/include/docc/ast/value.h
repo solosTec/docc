@@ -55,6 +55,7 @@ namespace docscript {
 			std::pair<std::filesystem::path, bool> resolve_path(context&);
 
 			void merge(value&&);
+			void swap(value&&);
 
 		private:
 			std::size_t index() const;

@@ -99,6 +99,9 @@ namespace dom
 				dom::to_html(os, cyng::value_cast(obj, std::chrono::system_clock::now()));
 				//os << obj;
 				break;
+			case cyng::TC_FS_PATH:
+				os << cyng::value_cast(obj, std::filesystem::current_path()).string();
+				break;
 			default:
 				os << obj << ':' << obj.rtti().type_name();
 				break;

@@ -151,6 +151,10 @@ namespace docscript {
 			node_.swap(val.node_);
 		}
 
+		void value::swap(value&& v) {
+			node_.swap(v.node_);
+		}
+
 		std::size_t value::index() const {
 			return (node_)
 				? node_->value_.index()

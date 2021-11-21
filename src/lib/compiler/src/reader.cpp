@@ -85,8 +85,6 @@ namespace docscript {
 
 			ctx_.pop(sanitizer_);
 
-			//ctl_.get_registry().dispatch("ruler", "close", p, channel_.lock()->get_id());
-
 		}
 		else {
 			fmt::print(

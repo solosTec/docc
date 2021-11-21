@@ -180,7 +180,8 @@ namespace docscript {
 
 		insert_method(table, method("quote", parameter_type::VECTOR, true));	//	same as "..."
 		insert_method(table, method("range", parameter_type::VECTOR, true));	//	collect a vector
-		insert_method(table, method("cat", parameter_type::VECTOR, true));		//	concatenate without spaces
+		insert_method(table, method("fuse", parameter_type::VECTOR, true));		//	concatenate without spaces
+		insert_method(table, method("cat", parameter_type::MAP, true, { "sep", "text" }));	//	concatenate with separator
 
 		//	calculate return value count requires to determine "count" value at compile time
 		insert_method(table, method("repeat", parameter_type::MAP, true, { "count", "value", "sep"}));

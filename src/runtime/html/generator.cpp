@@ -1,20 +1,19 @@
 
 #include "generator.h"
-//#include <docc/utils.h>
-//#include <docc/reader.h>
 #include <rt/currency.h>
+#include <rt/stream.h>
 #include <html/formatting.h>
-//
-//#include <cyng/task/controller.h>
-//#include <cyng/task/scheduler.h>
+#include <html/dom.hpp>
+
 #include <cyng/vm/vm.h>
-//#include <cyng/vm/mesh.h>
 #include <cyng/io/parser/parser.h>
 #include <cyng/io/ostream.h>
 #include <cyng/io/serialize.h>
 #include <cyng/obj/algorithm/reader.hpp>
 #include <cyng/obj/numeric_cast.hpp>
 #include <cyng/obj/container_cast.hpp>
+
+#include <smfsec/hash/base64.h>
 
 #include <fmt/core.h>
 #include <fmt/color.h>
@@ -23,6 +22,8 @@
 #include <fstream>
 #include <functional>
 #include <iostream>
+
+#include <boost/uuid/uuid_io.hpp>
 
 namespace docruntime {
 
@@ -65,6 +66,7 @@ namespace docruntime {
 			, cyng::make_description("now", f_now())
 			, cyng::make_description("uuid", f_uuid())
 			, cyng::make_description("range", f_range())
+			, cyng::make_description("fuse", f_fuse())
 			, cyng::make_description("cat", f_cat())
 			, cyng::make_description("repeat", f_repeat())
 			, cyng::make_description("currency", f_currency())
@@ -90,20 +92,7 @@ namespace docruntime {
 		//
 		//	load program into buffer
 		//
-		cyng::buffer_t buffer;
-
-		//	https://stackoverflow.com/a/22986486
-		is_.ignore(std::numeric_limits<std::streamsize>::max());
-		auto const length = is_.gcount();
-		buffer.reserve(length);
-		is_.clear();
-		is_.seekg(0, std::ios::beg);
-
-
-		auto pos = std::istream_iterator<char>(is_);
-		auto end = std::istream_iterator<char>();
-
-		buffer.insert(buffer.begin(), pos, end);
+		auto [buffer, length] = stream_to_buffer(is_);
 
 		cyng::deque_t deq;
 		cyng::io::parser p([&](cyng::object&& obj) -> void {
@@ -290,17 +279,17 @@ namespace docruntime {
 			;
 	}
 
-	std::string generator::figure(cyng::param_map_t pm) {
-		std::stringstream ss;
-		ss << "FIGURE(" << pm << ")";
-		std::cout << ss.str() << std::endl;
+	void generator::figure(cyng::param_map_t pm) {
+		//std::stringstream ss;
+		//ss << "FIGURE(" << pm << ")";
+		std::cout << "FIGURE(" << pm << ")" << std::endl;
 
 		auto const reader = cyng::make_reader(pm);
 		auto const vec = cyng::container_cast<cyng::vector_t>(reader.get("caption"));
 		auto const caption = dom::to_html(vec, " ");
 		auto const alt = cyng::value_cast(reader.get("alt"), caption);
 		auto const tag = cyng::value_cast(reader.get("tag"), uuid_gen_());
-		auto const source = cyng::value_cast(reader.get("source"), "");
+		std::filesystem::path const source = cyng::value_cast(reader.get("source"), "");
 
 		//	generate unique tag for SVG
 		auto const id = boost::uuids::to_string(tag);
@@ -315,8 +304,52 @@ namespace docruntime {
 				<< std::endl;
 		}
 
-		return ss.str();
+		auto const ext = get_extension(source);
+		if (boost::algorithm::iequals(ext, "svg")) {
+			//
+			//	embed SVG
+			//
+			embed_svg(caption, alt, tag, source, scale);
+		}
+		else {
+			//
+			//	base64 encoded images
+			//
+			embed_base64(caption, alt, tag, source, ext, scale);
+		}
 	}
+
+	void generator::embed_svg(std::string const& caption, std::string const& alt, boost::uuids::uuid tag, std::filesystem::path const& source, double scale) {
+		os_ << "<div>SVG</div>" << std::endl;
+	}
+	void generator::embed_base64(std::string const& caption
+		, std::string const& alt
+		, boost::uuids::uuid tag
+		, std::filesystem::path const& source
+		, std::string const& ext
+		, double scale) {
+
+		//os_ << "<div>BASE64</div>" << std::endl;
+
+		std::ifstream ifs(source.string(), std::ios::binary | std::ios::ate);
+		ifs.unsetf(std::ios::skipws);
+
+		//
+		//	load image into buffer
+		//
+		auto [buffer, length] = stream_to_buffer(ifs);
+
+		//
+		//	create HTML structure
+		//
+		auto const id = boost::uuids::to_string(tag);
+		auto const max_width = std::to_string(scale * 100.0) + "%";
+		//	ToDo: compute title (number + caption)
+		auto const title = caption;
+		auto const figure = dom::figure(dom::id_(id), dom::img(dom::alt_(alt), dom::title_(caption), dom::class_("docscript-img"), dom::style_("max-width: " + max_width), dom::src_("data:image/" + ext + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size()))), dom::figcaption(title));
+		figure.serialize(os_);
+	}
+
 
 	void generator::resource(cyng::param_map_t pm) {
 		std::cout << "RESOURCE(" << pm << ")" << std::endl;
@@ -331,11 +364,17 @@ namespace docruntime {
 	cyng::vector_t generator::range(cyng::vector_t vec) {
 		return vec;
 	}
-	std::string generator::cat(cyng::vector_t vec) {
+	std::string generator::fuse(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
 		std::stringstream ss;
 		dom::to_html(ss, vec, "");	//	empty separator here
 		return ss.str();
+	}
+	std::string generator::cat(cyng::param_map_t pm) {
+		//std::reverse(std::begin(vec), std::end(vec));
+		//std::stringstream ss;
+		//dom::to_html(ss, vec, "SEP");	//	separator here
+		return "CAT(SEP)";
 	}
 
 	//		insert_method(table, method("repeat", parameter_type::MAP, true, { "count", "value", "sep"}));
@@ -410,7 +449,7 @@ namespace docruntime {
 	std::function<void(cyng::param_map_t)> generator::f_header() {
 		return std::bind(&generator::header, this, std::placeholders::_1);
 	}
-	std::function<std::string(cyng::param_map_t)> generator::f_figure() {
+	std::function<void(cyng::param_map_t)> generator::f_figure() {
 		return std::bind(&generator::figure, this, std::placeholders::_1);
 	}
 	std::function<void(cyng::param_map_t)> generator::f_resource() {
@@ -425,7 +464,10 @@ namespace docruntime {
 	std::function<cyng::vector_t(cyng::vector_t)> generator::f_range() {
 		return std::bind(&generator::range, this, std::placeholders::_1);
 	}
-	std::function<std::string(cyng::vector_t)> generator::f_cat() {
+	std::function<std::string(cyng::vector_t)> generator::f_fuse() {
+		return std::bind(&generator::fuse, this, std::placeholders::_1);
+	}
+	std::function<std::string(cyng::param_map_t)> generator::f_cat() {
 		return std::bind(&generator::cat, this, std::placeholders::_1);
 	}
 	std::function<std::string(cyng::param_map_t pm)> generator::f_repeat() {

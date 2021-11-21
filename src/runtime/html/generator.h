@@ -57,7 +57,15 @@ namespace docruntime {
 		void h6(cyng::vector_t);
 		void header(cyng::param_map_t);
 
-		std::string figure(cyng::param_map_t);
+		void figure(cyng::param_map_t);
+		void embed_svg(std::string const& caption, std::string const& alt, boost::uuids::uuid tag, std::filesystem::path const& source, double scale);
+		void embed_base64(std::string const& caption
+			, std::string const& alt
+			, boost::uuids::uuid tag
+			, std::filesystem::path const& source
+			, std::string const& ext
+			, double scale);
+
 
 		void resource(cyng::param_map_t);
 		std::chrono::system_clock::time_point now(cyng::param_map_t);
@@ -67,7 +75,8 @@ namespace docruntime {
 		void meta(cyng::param_map_t);
 		cyng::vector_t get(cyng::vector_t);
 		cyng::vector_t range(cyng::vector_t);
-		std::string cat(cyng::vector_t);
+		std::string fuse(cyng::vector_t);
+		std::string cat(cyng::param_map_t pm);
 		std::string repeat(cyng::param_map_t pm);
 		std::string currency(cyng::param_map_t pm);
 
@@ -92,12 +101,13 @@ namespace docruntime {
 		std::function<void(cyng::vector_t)> f_h5();
 		std::function<void(cyng::vector_t)> f_h6();
 		std::function<void(cyng::param_map_t)> f_header();
-		std::function<std::string(cyng::param_map_t)> f_figure();
+		std::function<void(cyng::param_map_t)> f_figure();
 		std::function<void(cyng::param_map_t)> f_resource();
 		std::function<std::chrono::system_clock::time_point(cyng::param_map_t)> f_now();
 		std::function<boost::uuids::uuid(cyng::param_map_t)> f_uuid();
 		std::function<cyng::vector_t(cyng::vector_t)> f_range();
-		std::function<std::string(cyng::vector_t)> f_cat();
+		std::function<std::string(cyng::vector_t)> f_fuse();
+		std::function<std::string(cyng::param_map_t)> f_cat();
 		std::function<std::string(cyng::param_map_t pm)> f_repeat();
 		std::function<std::string(cyng::param_map_t)> f_currency();
 		std::function<void(std::string)> f_show();

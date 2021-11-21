@@ -142,47 +142,7 @@ namespace dom
 
 	void element::serialize(std::ostream& os) const
 	{
-		os
-			<< '<'
-			<< tag_.get()
-			;
-
-		for (auto const& attr : attr_) {
-			os << ' ';
-			attr.serialize(os);
-		}
-
-		if (children_.empty()) {
-			if (text_) {
-
-				os << ">";
-				text_.serialize(os);
-				os
-					<< "</"
-					<< tag_.get()
-					<< ">"
-					;
-			}
-			else {
-				os << ' ' << '/' << '>';
-			}
-		}
-		else {
-
-			//
-			//	serialize attributes
-			//
-			bool initialized{ false };
-			for (auto const child : children_) {
-				if (initialized) {
-					os << ' ';
-				}
-				else {
-					initialized = true;
-				}
-				child.serialize(os);
-			}
-		}
+		serialize(os, 0);
 	}
 
 	void element::serialize(std::ostream& os, std::size_t depth) const

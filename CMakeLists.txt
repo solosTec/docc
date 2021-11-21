@@ -170,6 +170,14 @@ else()
     message(FATAL_ERROR "** CYNG library not found")
 endif()
 
+find_package(SMFSEC REQUIRED)
+if (SMFSEC_FOUND)
+    message(STATUS "** SMFSEC_INCLUDE_DIRS   : ${SMFSEC_INCLUDE_DIRS}")
+    message(STATUS "** SMFSEC_LIBRARIES      : ${SMFSEC_LIBRARIES}")
+else()
+    message(FATAL_ERROR "** SMFSEC library not found")
+endif()
+
 #
 #	libraries
 #
@@ -213,7 +221,6 @@ target_link_libraries(docc
 	PUBLIC 
 		docscript
         fmt::fmt
-#		CYNG::CYNG
 		${CYNG_LIBRARIES}
 		${OPENSSL_LIBRARIES}
 		"$<$<PLATFORM_ID:Linux>:pthread;${Boost_LIBRARIES}>"
@@ -316,6 +323,7 @@ target_include_directories(doc2html
 	PUBLIC
 		${CMAKE_SOURCE_DIR}/src/runtime
         ${CYNG_INCLUDE_DIRS}
+		${SMFSEC_INCLUDE_DIRS}
 		${PROJECT_BINARY_DIR}/include
  		${OPENSSL_INCLUDE_DIR}
  		${Boost_INCLUDE_DIRS}
@@ -339,6 +347,7 @@ target_link_libraries(doc2html
 		docruntime
 		dom
         fmt::fmt
+		SMFSEC::SMFSEC
 		${CYNG_LIBRARIES}
 		${OPENSSL_LIBRARIES}
 		"$<$<PLATFORM_ID:Linux>:pthread;${Boost_LIBRARIES}>"

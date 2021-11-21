@@ -72,7 +72,7 @@ namespace docruntime {
 			, cyng::make_description("now", f_now())
 			, cyng::make_description("uuid", f_uuid())
 			, cyng::make_description("range", f_range())
-			, cyng::make_description("cat", f_cat())
+			, cyng::make_description("fuse", f_fuse())
 			, cyng::make_description("repeat", f_repeat())
 			, cyng::make_description("currency", f_currency())
 			, cyng::make_description("show", f_show())
@@ -349,15 +349,14 @@ namespace docruntime {
 	cyng::vector_t controller::range(cyng::vector_t vec) {
 		return vec;
 	}
-	std::string controller::cat(cyng::vector_t vec) {
+	std::string controller::fuse(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
 		std::stringstream ss;
-		ss << "CAT*" << vec.size() << "(";
+		ss << "FUSE*" << vec.size() << "(";
 		for (auto const& v : vec) {
 			ss << v;
 		}
 		ss << ")";
-		//std::cout << ss.str() << std::endl;
 		return ss.str();
 	}
 
@@ -447,8 +446,8 @@ namespace docruntime {
 	std::function<cyng::vector_t(cyng::vector_t)> controller::f_range() {
 		return std::bind(&controller::range, this, std::placeholders::_1);
 	}
-	std::function<std::string(cyng::vector_t)> controller::f_cat() {
-		return std::bind(&controller::cat, this, std::placeholders::_1);
+	std::function<std::string(cyng::vector_t)> controller::f_fuse() {
+		return std::bind(&controller::fuse, this, std::placeholders::_1);
 	}
 	std::function<std::string(cyng::param_map_t pm)> controller::f_repeat() {
 		return std::bind(&controller::repeat, this, std::placeholders::_1);
