@@ -52,7 +52,7 @@ namespace docscript {
 			 */
 			std::pair<std::string, bool> is_vec_method() const;
 			void rename(docscript::method);
-			std::pair<std::filesystem::path, bool> resolve_path(context&);
+			std::pair<std::filesystem::path, bool> resolve_path(context&, std::string ext);
 
 			void merge(value&&);
 			void swap(value&&);

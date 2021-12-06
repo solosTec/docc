@@ -64,7 +64,7 @@ namespace docscript {
 		 * search for the specified filename in all include
 		 * directories.
 		 */
-		std::pair<std::filesystem::path, bool> lookup(std::filesystem::path const&) const;
+		std::pair<std::filesystem::path, bool> lookup(std::filesystem::path const&, std::string ext) const;
 
 		/**
 		 * feed the parser

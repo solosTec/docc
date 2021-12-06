@@ -2,6 +2,7 @@
 #include "generator.h"
 #include <rt/currency.h>
 #include <rt/stream.h>
+#include <rt/i18n.h>
 #include <html/formatting.h>
 #include <html/dom.hpp>
 
@@ -12,6 +13,7 @@
 #include <cyng/obj/algorithm/reader.hpp>
 #include <cyng/obj/numeric_cast.hpp>
 #include <cyng/obj/container_cast.hpp>
+#include <cyng/xml/node.h>
 
 #include <smfsec/hash/base64.h>
 
@@ -42,6 +44,9 @@ namespace docruntime {
 		, vars_()
 		, meta_()
 		, toc_()
+		, footnotes_()
+		, figures_()
+		, tables_()
 		, uuid_gen_()
 		, vm_(fabric.make_proxy(tag
 			, cyng::make_description("quote", f_quote())
@@ -280,47 +285,92 @@ namespace docruntime {
 	}
 
 	void generator::figure(cyng::param_map_t pm) {
-		//std::stringstream ss;
-		//ss << "FIGURE(" << pm << ")";
-		std::cout << "FIGURE(" << pm << ")" << std::endl;
+		//std::cout << "FIGURE(" << pm << ")" << std::endl;
 
 		auto const reader = cyng::make_reader(pm);
-		auto const vec = cyng::container_cast<cyng::vector_t>(reader.get("caption"));
-		auto const caption = dom::to_html(vec, " ");
-		auto const alt = cyng::value_cast(reader.get("alt"), caption);
+		//	no HTML code allowed
+		//auto const vec = cyng::container_cast<cyng::vector_t>(reader.get("caption"));
+		//auto const caption = dom::to_html(vec, " ");
 		auto const tag = cyng::value_cast(reader.get("tag"), uuid_gen_());
+		auto const caption = cyng::value_cast(reader.get("caption"), boost::uuids::to_string(tag));
+		auto const alt = cyng::value_cast(reader.get("alt"), caption);
 		std::filesystem::path const source = cyng::value_cast(reader.get("source"), "");
+		auto const r = ctx_.lookup(source, "png");
+		if (r.second) {
 
-		//	generate unique tag for SVG
-		auto const id = boost::uuids::to_string(tag);
-		auto const scale = cyng::numeric_cast(reader.get("scale"), 1.0);
+			//	generate unique tag for SVG
+			auto const id = boost::uuids::to_string(tag);
+			auto const scale = cyng::numeric_cast(reader.get("scale"), 1.0);
 
-		if (scale > 1.0 || scale < 0.01) {
-			std::cerr
-				<< "***warning: unusual scaling factor ["
-				<< scale
-				<< "] for figure: "
-				<< source
-				<< std::endl;
-		}
+			if (scale > 1.0 || scale < 0.01) {
+				std::cerr
+					<< "***warning: unusual scaling factor ["
+					<< scale
+					<< "] for figure: "
+					<< source
+					<< std::endl;
+			}
 
-		auto const ext = get_extension(source);
-		if (boost::algorithm::iequals(ext, "svg")) {
-			//
-			//	embed SVG
-			//
-			embed_svg(caption, alt, tag, source, scale);
+			auto const ext = get_extension(r.first);
+			if (boost::algorithm::iequals(ext, "svg")) {
+				//
+				//	embed SVG
+				//
+				embed_svg(caption, alt, tag, r.first, scale);
+			}
+			else {
+				//
+				//	base64 encoded images
+				//
+				embed_base64(caption, alt, tag, r.first, ext, scale);
+			}
 		}
 		else {
-			//
-			//	base64 encoded images
-			//
-			embed_base64(caption, alt, tag, source, ext, scale);
+			os_
+				<< "<p>"
+				<< source
+				<< " not found</p>"
+				<< std::endl
+				;
 		}
 	}
 
 	void generator::embed_svg(std::string const& caption, std::string const& alt, boost::uuids::uuid tag, std::filesystem::path const& source, double scale) {
-		os_ << "<div>SVG</div>" << std::endl;
+
+		//
+		//	embedding SVG 
+		//	<figure>
+		//		<svg>...</svg>
+		//		<figcaption>CAPTION</figcaption>
+		//	</figure>
+		//
+		//	* remove <XML> trailer 
+		//	* add title info (aria-labelledby="title")
+
+		cyng::xml::document doc;
+		auto svg = doc.read_file(source.string(), "svg");
+		if (!svg.empty()) {
+			svg.set_attribute("aria-labelledby", "title");
+			svg.add_leaf("title", caption);
+			//auto node = svg.prepend_child("title");
+			//node.append_child(pugi::node_pcdata).set_value(caption.c_str());
+			auto const id = boost::uuids::to_string(tag);
+			svg.set_attribute("id", id);
+
+			auto const max_width = std::to_string(scale * 100.0) + "%";
+			svg.set_attribute("width", max_width);
+			//	https://www.w3.org/TR/SVG/types.html#DataTypeLength
+			svg.set_attribute("height", "100%");
+			//	remove private data
+			svg.del_attribute("inkscape:export-filename");
+			auto const src = doc.to_str();
+			auto const title = compute_title_figure(tag, caption);
+			auto const figure = dom::figure(dom::id_(id), dom::div(dom::class_("smf-svg"), src), dom::figcaption(title));
+			figure.serialize(os_);
+		}
+		else {
+			os_ << "<div>SVG not found</div>" << std::endl;
+		}
 	}
 	void generator::embed_base64(std::string const& caption
 		, std::string const& alt
@@ -344,8 +394,8 @@ namespace docruntime {
 		//
 		auto const id = boost::uuids::to_string(tag);
 		auto const max_width = std::to_string(scale * 100.0) + "%";
-		//	ToDo: compute title (number + caption)
-		auto const title = caption;
+		//	compute title (number + caption)
+		auto const title = compute_title_figure(tag, caption);
 		auto const figure = dom::figure(dom::id_(id), dom::img(dom::alt_(alt), dom::title_(caption), dom::class_("docscript-img"), dom::style_("max-width: " + max_width), dom::src_("data:image/" + ext + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size()))), dom::figcaption(title));
 		figure.serialize(os_);
 	}
@@ -481,4 +531,63 @@ namespace docruntime {
 	std::function<void(std::string)> generator::f_show() {
 		return std::bind(&show, std::placeholders::_1);
 	}
+
+	std::string generator::compute_title_figure(boost::uuids::uuid tag, std::string caption) {
+		//
+		// append to figure list
+		//
+		figures_.emplace_back(tag, caption);
+
+		auto const idx = figures_.size();
+
+		std::stringstream ss;
+		ss
+			<< get_name(get_language_code(), i18n::FIGURE)
+			<< ": "
+			<< idx
+			<< " - "
+			<< caption
+			;
+
+		return ss.str();
+	}
+
+	std::string generator::compute_title_table(boost::uuids::uuid tag, std::string caption) {
+		//
+		// append to table list
+		//
+		tables_.emplace_back(tag, caption);
+
+		auto const idx = tables_.size();
+
+		std::stringstream ss;
+		ss
+			<< get_name(get_language_code(), i18n::TABLE)
+			<< ": "
+			<< idx
+			<< " - "
+			<< caption
+			;
+
+		return ss.str();
+	}
+
+	cyng::io::language_codes generator::get_language_code() const {
+		auto const lang = get_language();
+		return (lang.size() == 2)
+			? cyng::io::get_language_code(lang.at(0), lang.at(1))
+			: cyng::io::LC_EN
+			;
+	}
+
+	std::string generator::get_language() const
+	{
+		auto const reader = cyng::make_reader(meta_);
+		auto const lang = cyng::value_cast<std::string>(reader.get("language"), "en");
+		return (lang.size() == 2)
+			? boost::algorithm::to_lower_copy(lang)
+			: "en"
+			;
+	}
+
 }

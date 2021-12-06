@@ -8,7 +8,7 @@ namespace docruntime
 	std::string get_name(cyng::io::language_codes lc, i18n::word_id id)
 	{
 		switch (id) {
-		case i18n::WID_FIGURE:
+		case i18n::FIGURE:
 			switch (lc) {
 			case cyng::io::LC_ES: return "gráfica";
 			case cyng::io::LC_SV: return "illustration";
@@ -49,7 +49,7 @@ namespace docruntime
 				break;
 			}
 			return "figure";
-		case i18n::WID_TABLE:
+		case i18n::TABLE:
 			switch (lc) {
 			case cyng::io::LC_ES: return "mesa";
 			case cyng::io::LC_SV: return "bord";
@@ -90,7 +90,7 @@ namespace docruntime
 				break;
 			}
 			return "table";
-		case i18n::WID_TOC:
+		case i18n::TOC:
 			switch (lc) {
 			case cyng::io::LC_ES: return "Tabla de contenido";
 			case cyng::io::LC_SV: return "Innehållsförteckning";

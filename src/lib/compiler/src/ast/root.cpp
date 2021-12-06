@@ -203,7 +203,7 @@ namespace docscript {
 				//
 				//	build-in checks
 				//
-				p.verify(ctx_, name);
+				//p.verify(ctx_, name);
 				std::get<3>(top()).set_params(std::move(p), ctx_.get_position());
 
 				//

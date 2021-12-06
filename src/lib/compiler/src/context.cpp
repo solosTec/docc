@@ -79,8 +79,9 @@ namespace docscript {
 		return verbose_ > level;
 	}
 
-	std::pair<std::filesystem::path, bool> context::lookup(std::filesystem::path const& inp) const {
-		auto const p = verify_extension(inp, "docscript");
+	std::pair<std::filesystem::path, bool> context::lookup(std::filesystem::path const& inp, std::string ext) const {
+		//	ext = "docscript"
+		auto const p = verify_extension(inp, ext);
 		return resolve_path(inc_, p);
 	}
 

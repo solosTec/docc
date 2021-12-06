@@ -59,7 +59,7 @@ namespace docscript {
 			/**
 			 * build-in checks
 			 */
-			void verify(context& ctx, std::string const&);
+			//void verify(context& ctx, std::string const&);
 
 			static param factory(symbol const&);
 

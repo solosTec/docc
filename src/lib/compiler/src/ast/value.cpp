@@ -90,11 +90,11 @@ namespace docscript {
 				return ss.str();
 			}
 
-			std::pair<std::filesystem::path, bool>  resolve_path(context& ctx) {
+			std::pair<std::filesystem::path, bool>  resolve_path(context& ctx, std::string ext) {
 				auto s = to_str();
 				//	unquote
 				s.erase(remove(s.begin(), s.end(), '"'), s.end());
-				return ctx.lookup(s);
+				return ctx.lookup(s, ext);
 			}
 
 		};
@@ -137,9 +137,9 @@ namespace docscript {
 			}
 		}
 
-		std::pair<std::filesystem::path, bool>  value::resolve_path(context& ctx) {
+		std::pair<std::filesystem::path, bool>  value::resolve_path(context& ctx, std::string ext) {
 			if (!empty()) {
-				return node_->resolve_path(ctx);
+				return node_->resolve_path(ctx, ext);
 			}
 			return { "", false};
 		}
@@ -147,8 +147,9 @@ namespace docscript {
 
 		void value::merge(value&& v) {
 			auto txt = std::get<0>(std::get<0>(node_->value_).node_).append(std::get<0>(std::get<0>(v.node_->value_).node_));
-			auto val = factory(constant::factory(symbol(symbol_type::TXT, std::move(txt))));
-			node_.swap(val.node_);
+			//auto val = factory(constant::factory(symbol(symbol_type::TXT, std::move(txt))));
+			//node_.swap(val.node_);
+			swap(factory(constant::factory(symbol(symbol_type::TXT, std::move(txt)))));
 		}
 
 		void value::swap(value&& v) {

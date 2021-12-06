@@ -78,42 +78,45 @@ namespace docscript {
 			return names;
 		}
 
-		void param::verify(context& ctx, std::string const& fn) {
-			if (boost::algorithm::equals(fn, "figure") && boost::algorithm::equals(key_, "source")) {
-				//
-				//	resolve path
-				//
-				auto const r = value_.resolve_path(ctx);
-				if (!r.second) {
-					//
-					//	emit error
-					//
-					fmt::print(
-						stdout,
-						fg(fmt::color::crimson) | fmt::emphasis::bold,
-						"{}: error: cannot resolve path [{}]\n", ctx.get_position(), r.first.string());
+		//void param::verify(context& ctx, std::string const& fn) {
+		//	//
+		//	//	ToDo: What if the source is produced by a method?
+		//	//
+		//	if (boost::algorithm::equals(fn, "figure") && boost::algorithm::equals(key_, "source")) {
+		//		//
+		//		//	resolve path
+		//		//
+		//		auto const r = value_.resolve_path(ctx, "png");
+		//		if (!r.second) {
+		//			//
+		//			//	emit error
+		//			//
+		//			fmt::print(
+		//				stdout,
+		//				fg(fmt::color::crimson) | fmt::emphasis::bold,
+		//				"{}: error: cannot resolve path [{}]\n", ctx.get_position(), r.first.string());
 
-				}
-				else {
-					//
-					//	substitute value
-					//
-					value_.swap(value::factory(constant::factory(r.first.string())));
-				}
-			}
-			if (next_) {
-				next_->verify(ctx, fn);
-			}
+		//		}
+		//		else {
+		//			//
+		//			//	substitute value
+		//			//
+		//			value_.swap(value::factory(constant::factory(r.first.string())));
+		//		}
+		//	}
+		//	if (next_) {
+		//		next_->verify(ctx, fn);
+		//	}
 
-			//
-			//	check parameters
-			// ToDo: This check is executed on every level!
-			//
-			//auto names = get_param_names();
-			//if (names.find("scale") == names.end()) {
-			//	append(param("scale", value::factory(make_symbol(symbol_type::FLT, "1.0"))));
-			//}
-		}
+		//	//
+		//	//	check parameters
+		//	// ToDo: This check is executed on every level!
+		//	//
+		//	//auto names = get_param_names();
+		//	//if (names.find("scale") == names.end()) {
+		//	//	append(param("scale", value::factory(make_symbol(symbol_type::FLT, "1.0"))));
+		//	//}
+		//}
 
 		bool param::is_complete() const {
 			return !value_.empty();

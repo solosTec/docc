@@ -105,7 +105,7 @@ int main(int argc, char* argv[]) {
         fmt::print(
             stdout,
             fg(fmt::color::dark_orange) | fmt::emphasis::bold,
-            "***info : config file [{}] not found\n", config_file);
+            "***warn  : config file [{}] not found\n", config_file);
     }
     else
     {
@@ -158,13 +158,17 @@ int main(int argc, char* argv[]) {
     //	generate some temporary file names for intermediate files
     //
     std::filesystem::path const tmp_asm = std::filesystem::temp_directory_path() / ("doc2html-" + std::filesystem::path(inp_file).filename().string() + ".docs");
-    if (verbose > 12)   {
+    std::filesystem::path const tmp_html = std::filesystem::temp_directory_path() / ("doc2html-" + stag + ".html");
+    if (verbose > 2)   {
         fmt::print(
             stdout,
             fg(fmt::color::gray),
             "***info : temporary files {}\n", tmp_asm.string());
+        fmt::print(
+            stdout,
+            fg(fmt::color::gray),
+            "***info : temporary files {}\n", tmp_html.string());
     }
-    std::filesystem::path const tmp_html = std::filesystem::temp_directory_path() / ("doc2html-" + stag + ".html");
 
     //
     //  start compiler
@@ -177,7 +181,7 @@ int main(int argc, char* argv[]) {
         tmp_html,
         verbose
     );
-    return ctl.run(docruntime::verify_extension(inp_file, "doscript")
+    return ctl.run(docruntime::verify_extension(inp_file, "docscript")
         , pool_size
         , tag
         , vm["generator.body"].as< bool >()

@@ -6,4 +6,5 @@ REM
 ${PROJECT_BINARY_DIR}/Debug/docc -V 10 -S main -O main
 ${PROJECT_BINARY_DIR}/Debug/doca -V 10 -S main -O main
 ${PROJECT_BINARY_DIR}/Debug/docrt -S main.cyng
+${PROJECT_BINARY_DIR}/Debug/doc2html -V 20 -S main -O main.html
 @echo on

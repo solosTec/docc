@@ -98,7 +98,7 @@ namespace docscript {
 	void reader::next_symbol(symbol&& sym) {
 		if (sym == symbol_type::INC) {
 
-			auto const r = ctx_.lookup(sym.value_);
+			auto const r = ctx_.lookup(sym.value_, "docscript");
 			if (r.second) {
 
 				if (ctx_.get_verbosity(2)) {

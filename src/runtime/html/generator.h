@@ -10,16 +10,15 @@
 
 #include <docc/context.h>
 #include <rt/toc.h>
- //#include <asm/reader.h>
- //
+
 #include <cyng/obj/intrinsics/container.h>
 #include <cyng/obj/object.h>
 #include <cyng/vm/mesh.h>
 #include <cyng/vm/vm.h>
+#include <cyng/io/iso_639_1.h>
 
 #include <filesystem>
 
-//#include <boost/uuid/uuid.hpp>
 #include <boost/uuid/random_generator.hpp>
 
 namespace docruntime {
@@ -112,12 +111,20 @@ namespace docruntime {
 		std::function<std::string(cyng::param_map_t)> f_currency();
 		std::function<void(std::string)> f_show();
 
+		std::string compute_title_figure(boost::uuids::uuid tag, std::string caption);
+		std::string compute_title_table(boost::uuids::uuid tag, std::string caption);
+		cyng::io::language_codes get_language_code() const;
+		std::string get_language() const;
+
 	private:
 		std::istream& is_;
 		std::ostream& os_;
 		cyng::param_map_t vars_;
 		cyng::param_map_t meta_;
-		docruntime::toc toc_;
+		toc toc_;
+		footnotes_t footnotes_;
+		figures_t figures_;
+		tables_t tables_;
 		boost::uuids::random_generator uuid_gen_; //	basic_random_generator<mt19937>
 		cyng::vm_proxy vm_;
 		docscript::context& ctx_;

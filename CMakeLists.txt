@@ -75,6 +75,12 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # -fPIC
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+if(MSVC)
+	set(GLOBAL_LIBRARY_TYPE STATIC)
+else()
+	set(GLOBAL_LIBRARY_TYPE SHARED)
+endif()
+
 #
 #	boost library
 #
@@ -145,6 +151,15 @@ FetchContent_Declare(
   GIT_TAG v3.0.1)
 FetchContent_MakeAvailable(date_src)
 # Adds date 
+
+# cyng library
+#
+#FetchContent_Declare(
+#  cyng 
+#  GIT_REPOSITORY https://github.com/solosTec/cyng.git
+#  GIT_TAG v0.9)
+#FetchContent_MakeAvailable(cyng)
+# Adds cyng
 
 #
 #	generate a version.hpp file
@@ -467,7 +482,7 @@ if(UNIX)
 	set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 	set(CPACK_GENERATOR "DEB")
 	set( CPACK_DEBIAN_PACKAGE_MAINTAINER "solosTec" )
-	set( CPACK_DEBIAN_PACKAGE_DEPENDS "libboost-dev (>= 1.76), cmake (>= 3.16)" )
+#	set( CPACK_DEBIAN_PACKAGE_DEPENDS "libboost-dev (>= 1.76), cmake (>= 3.16)" )
 
 #	set(CPACK_RPM_PACKAGE_REQUIRES "libboost-dev >= 1.76, cmake >= 3.16")
 elseif(WIN32)

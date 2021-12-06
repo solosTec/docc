@@ -19,9 +19,9 @@ namespace docruntime
 {
 	namespace i18n {
 		enum word_id {
-			WID_FIGURE,
-			WID_TABLE,
-			WID_TOC,
+			FIGURE,
+			TABLE,
+			TOC,
 		};
 	}
 

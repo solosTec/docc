@@ -98,7 +98,7 @@ int main(int argc, char* argv[]) {
         fmt::print(
             stdout,
             fg(fmt::color::dark_orange) | fmt::emphasis::bold,
-            "***info : config file [{}] not found\n", config_file);
+            "***warn : config file [{}] not found\n", config_file);
     }
     else
     {

@@ -8,7 +8,8 @@ namespace docruntime
 	std::pair<cyng::buffer_t, std::streamsize> prepare_buffer(std::istream& is) {
 	
 		//	https://stackoverflow.com/a/22986486
-		//is.ignore(std::numeric_limits<std::streamsize>::max());
+		//	This test is disabled in the special case when count equals std::numeric_limits<std::streamsize>::max()
+		//is.ignore(std::numeric_limits<std::streamsize>::max() - 1);
 		//auto const length = is.gcount();
 		is.seekg(0, std::ios_base::end);
 		auto const length = is.tellg();

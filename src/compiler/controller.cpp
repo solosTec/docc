@@ -17,7 +17,7 @@ namespace docscript {
 
 	int controller::run(std::filesystem::path&& inp, std::size_t pool_size) {
 
-		auto const r = ctx_.lookup(inp);
+		auto const r = ctx_.lookup(inp, "docscript");
 		if (r.second) {
 
 			auto const now = std::chrono::high_resolution_clock::now();

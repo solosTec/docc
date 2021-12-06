@@ -8,15 +8,11 @@
 #include <rt/currency.h>
 
 #include <cyng/io/ostream.h>
-//#include <cyng/io/parser/parser.h>
 #include <cyng/io/serialize.h>
-//#include <cyng/obj/algorithm/reader.hpp>
 #include <cyng/obj/container_cast.hpp>
 #include <cyng/obj/numeric_cast.hpp>
 #include <cyng/task/controller.h>
-#include <cyng/task/scheduler.h>
 #include <cyng/vm/mesh.h>
-#include <cyng/vm/vm.h>
 
 #include <fmt/color.h>
 #include <fmt/core.h>
@@ -67,9 +63,20 @@ namespace docruntime {
 		//
 		//	check input file
 		//
-		auto const r = ctx_.lookup(inp);
-		if (!r.second)
+		auto const r = ctx_.lookup(inp, "docscript");
+		if (!r.second) {
+			fmt::print(stdout,
+				fg(fmt::color::dark_orange) | fmt::emphasis::bold,
+				"***error: input file [{}] not found\n", inp.string());
 			return EXIT_FAILURE;
+		}
+		if (ctx_.get_verbosity(2)) {
+			fmt::print(
+				stdout,
+				fg(fmt::color::gray),
+				"***info : input file [{}]\n", r.first.string());
+		}
+
 
 		//
 		//	start compiler and generate an assembler file
@@ -92,7 +99,7 @@ namespace docruntime {
 		if (ctx_.get_verbosity(2)) {
 
 			fmt::print(stdout, fg(fmt::color::forest_green),
-				"***info : program {} complete\n",
+				"***info : program {} is loaded\n",
 				assembler_.get_output_path().string());
 		}
 
@@ -117,8 +124,6 @@ namespace docruntime {
 			//
 			//	wait for pending requests
 			//
-			//std::this_thread::sleep_for(std::chrono::milliseconds(10));
-			//vm.stop();
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			ctl.cancel();
 			ctl.stop();
@@ -310,16 +315,19 @@ namespace docruntime {
 
 			//
 			//	figure
+			//	{display: table;} and { display: table-caption; caption-side: bottom;} is required
+			//	that <figcaption> matches the width of the <img> inside its <figure> tag.
 			//
 			<< std::string(depth + 1, '\t') << "figure {" << std::endl
 			<< std::string(depth + 2, '\t') << "margin: 2%;" << std::endl
+			<< std::string(depth + 2, '\t') << "display: table;" << std::endl
 			<< std::string(depth + 1, '\t') << "}" << std::endl
 			<< std::string(depth + 1, '\t') << "figure > figcaption {"
 			<< std::endl
-			<< std::string(depth + 2, '\t') << "background-color: #ddd;"
-			<< std::endl
-			<< std::string(depth + 2, '\t') << "font-style: italic;"
-			<< std::endl
+			<< std::string(depth + 2, '\t') << "background-color: #ddd;" << std::endl
+			<< std::string(depth + 2, '\t') << "display: table-caption;" << std::endl
+			<< std::string(depth + 2, '\t') << "caption-side: bottom;" << std::endl
+			<< std::string(depth + 2, '\t') << "font-style: italic;" << std::endl
 			<< std::string(depth + 1, '\t') << "}" << std::endl
 
 			<< std::string(depth + 1, '\t') << "img {"
@@ -340,7 +348,8 @@ namespace docruntime {
 			//
 			<< std::string(depth + 1, '\t') << "div.gallery {" << std::endl
 			<< std::string(depth + 2, '\t') << "display: grid;" << std::endl
-			<< std::string(depth + 2, '\t') << "grid-gap: 12px;" << std::endl
+			<< std::string(depth + 2, '\t') << "grid-row-gap: 12px;" << std::endl
+			<< std::string(depth + 2, '\t') << "row-gap: 12px;" << std::endl
 			<< std::string(depth + 2, '\t') << "background-color: #eee;"
 			<< std::endl
 			<< std::string(depth + 1, '\t') << "}" << std::endl
