@@ -85,10 +85,10 @@ namespace docscript {
 		return resolve_path(inc_, p);
 	}
 
-	std::istream_iterator<char> context::get_stream_iterator() {
+	std::pair<std::istream_iterator<char>, std::istream_iterator<char>> context::get_stream_range() {
 		return (position_.empty())
-			? std::istream_iterator<char>()
-			: std::istream_iterator<char>(position_.top().stream_)
+			? std::make_pair(std::istream_iterator<char>(), std::istream_iterator<char>())
+			: std::make_pair(std::istream_iterator<char>(position_.top().stream_), std::istream_iterator<char>())
 			;
 	}
 
@@ -193,6 +193,9 @@ namespace docscript {
 
 		insert_method(table, method("now", parameter_type::MAP, true));
 		insert_method(table, method("uuid", parameter_type::MAP, true));
+
+		//	linenumber is optional (block)
+		insert_method(table, method("code", parameter_type::MAP, false, { "language", "source" }));
 
 	}
 

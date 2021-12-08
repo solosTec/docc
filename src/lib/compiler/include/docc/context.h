@@ -46,7 +46,7 @@ namespace docscript {
 		 * @return stream iterator of file on the top of the
 		 * position stack.
 		 */
-		std::istream_iterator<char> get_stream_iterator();
+		std::pair<std::istream_iterator<char>, std::istream_iterator<char>> get_stream_range();
 
 		/**
 		 * @return true if EOF is reached (no more data)

@@ -46,8 +46,7 @@ namespace docscript {
 			//ctl_.get_registry().dispatch("ruler", "open", std::filesystem::path(p), channel_.lock()->get_id());
 
 
-			std::istream_iterator<char> a = ctx_.get_stream_iterator();
-			std::istream_iterator<char> b;
+			auto [a, b] = ctx_.get_stream_range();
 			BOOST_ASSERT(a != b);
 
 			//  test BOM

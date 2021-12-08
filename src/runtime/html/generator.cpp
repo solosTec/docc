@@ -5,6 +5,7 @@
 #include <rt/i18n.h>
 #include <html/formatting.h>
 #include <html/dom.hpp>
+#include <html/code.h>
 
 #include <cyng/vm/vm.h>
 #include <cyng/io/parser/parser.h>
@@ -14,6 +15,7 @@
 #include <cyng/obj/numeric_cast.hpp>
 #include <cyng/obj/container_cast.hpp>
 #include <cyng/xml/node.h>
+#include <cyng/sys/locale.h>
 
 #include <smfsec/hash/base64.h>
 
@@ -29,9 +31,9 @@
 
 namespace docruntime {
 
-	void show(std::string str) {
-		std::cout << str << std::endl;
-	}
+	//void show(std::string str) {
+	//	std::cout << str << std::endl;
+	//}
 
 
 	generator::generator(std::istream& is
@@ -39,7 +41,7 @@ namespace docruntime {
 		, cyng::mesh& fabric
 		, boost::uuids::uuid tag
 		, docscript::context& ctx)
-		: is_(is)
+	: is_(is)
 		, os_(os)
 		, vars_()
 		, meta_()
@@ -48,6 +50,7 @@ namespace docruntime {
 		, figures_()
 		, tables_()
 		, uuid_gen_()
+		, name_gen_(tag)
 		, vm_(fabric.make_proxy(tag
 			, cyng::make_description("quote", f_quote())
 			, cyng::make_description("set", f_set())
@@ -75,11 +78,27 @@ namespace docruntime {
 			, cyng::make_description("cat", f_cat())
 			, cyng::make_description("repeat", f_repeat())
 			, cyng::make_description("currency", f_currency())
-			, cyng::make_description("show", f_show())
+			//, cyng::make_description("show", f_show())
+			, cyng::make_description("code", f_code())
 		))
 		, ctx_(ctx)
 	{
 		meta_.emplace("build", cyng::make_object(std::chrono::system_clock::now()));
+
+		auto const loc = cyng::sys::get_system_locale();
+		if (ctx_.get_verbosity(4)) {
+
+			fmt::print(
+				stdout,
+				fg(fmt::color::forest_green),
+				"***info : default language is [{}]\n", loc.at(cyng::sys::info::LANGUAGE));
+		}
+
+		meta_.emplace("locale", cyng::make_object(loc.at(cyng::sys::info::NAME)));
+		meta_.emplace("country", cyng::make_object(loc.at(cyng::sys::info::COUNTRY)));
+		meta_.emplace("language", cyng::make_object(loc.at(cyng::sys::info::LANGUAGE)));
+		meta_.emplace("encoding", cyng::make_object(loc.at(cyng::sys::info::ENCODING)));
+
 	}
 
 	cyng::param_map_t& generator::get_vars() {
@@ -177,7 +196,10 @@ namespace docruntime {
 	}
 	void generator::meta(cyng::param_map_t pm) {
 		//std::cout << "META(" << pm << ")" << std::endl;
-		meta_.insert(pm.begin(), pm.end());
+		//meta_.insert(pm.begin(), pm.end());
+		for (auto const& v : pm) {
+			meta_.insert_or_assign(v.first, v.second);
+		}
 	}
 
 	cyng::vector_t generator::get(cyng::vector_t vec) {
@@ -201,9 +223,27 @@ namespace docruntime {
 
 	void generator::label(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
+		//
+		//	write an anchor
+		//	generate a UUID from the text and use this
+		//	as id.
+		//
+
 		std::stringstream ss;
-		ss << "LABEL(" << vec << ")";
-		std::cout << ss.str() << std::endl;
+		dom::to_html(ss, vec, ":");
+
+		auto const id = name_gen_(ss.str());
+
+		os_ 
+			<< "<a id=\""
+			<< boost::uuids::to_string(id)
+			<< "\" style = \"display:inline;\" href=\""
+			<< ss.str()
+			<< "\"></a>";
+		//auto const href = ss.str();
+
+		//auto const anchor = dom::a(dom::href_(href));
+		//anchor.serialize(os_);
 	}
 
 	std::string generator::ref(cyng::vector_t vec) {
@@ -216,46 +256,52 @@ namespace docruntime {
 	void generator::h1(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
 		auto const title = dom::to_html(vec, " ");
-		auto const r = toc_.add(0, uuid_gen_(), title);
-		emit_header(0, uuid_gen_(), r.first, title);
+		auto const id = name_gen_(title);
+		auto const r = toc_.add(0, id, title);
+		emit_header(0, id, r.first, title);
 	}
 	void generator::h2(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
 		auto const title = dom::to_html(vec, " ");
-		auto const r = toc_.add(1, uuid_gen_(), title);
-		emit_header(1, uuid_gen_(), r.first, title);
+		auto const id = name_gen_(title);
+		auto const r = toc_.add(1, id, title);
+		emit_header(1, id, r.first, title);
 	}
 	void generator::h3(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
 		auto const title = dom::to_html(vec, " ");
-		auto const r = toc_.add(2, uuid_gen_(), title);
-		emit_header(2, uuid_gen_(), r.first, title);
+		auto const id = name_gen_(title);
+		auto const r = toc_.add(2, id, title);
+		emit_header(2, id, r.first, title);
 	}
 	void generator::h4(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
 		auto const title = dom::to_html(vec, " ");
-		auto const r = toc_.add(3, uuid_gen_(), title);
-		emit_header(3, uuid_gen_(), r.first, title);
+		auto const id = name_gen_(title);
+		auto const r = toc_.add(3, id, title);
+		emit_header(3, id, r.first, title);
 	}
 	void generator::h5(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
 		auto const title = dom::to_html(vec, " ");
-		auto const r = toc_.add(4, uuid_gen_(), title);
-		emit_header(4, uuid_gen_(), r.first, title);
+		auto const id = name_gen_(title);
+		auto const r = toc_.add(4, id, title);
+		emit_header(4, id, r.first, title);
 	}
 	void generator::h6(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
 		auto const title = dom::to_html(vec, " ");
-		auto const r = toc_.add(5, uuid_gen_(), title);
-		emit_header(5, uuid_gen_(), r.first, title);
+		auto const id = name_gen_(title);
+		auto const r = toc_.add(5, id, title);
+		emit_header(5, id, r.first, title);
 	}
 	void generator::header(cyng::param_map_t pm) {
 		//	"level":0000000000000001),("tag":<uuid>'79bf3ba0-2362-4ea5-bcb5-ed93844ac59a'),("title":[Basics]))
 		auto const reader = cyng::make_reader(pm);
 		auto const level = cyng::numeric_cast<std::size_t>(reader.get("level"), 0);
-		auto const tag = cyng::value_cast(reader.get("tag"), uuid_gen_());
 		auto const vec = cyng::container_cast<cyng::vector_t>(reader.get("title"));
 		auto const title = dom::to_html(vec, " ");
+		auto const tag = cyng::value_cast(reader.get("tag"), name_gen_(title));
 		auto const r = toc_.add(level - 1, tag, title);
 		emit_header(level - 1, tag, r.first, title);
 	}
@@ -289,8 +335,6 @@ namespace docruntime {
 
 		auto const reader = cyng::make_reader(pm);
 		//	no HTML code allowed
-		//auto const vec = cyng::container_cast<cyng::vector_t>(reader.get("caption"));
-		//auto const caption = dom::to_html(vec, " ");
 		auto const tag = cyng::value_cast(reader.get("tag"), uuid_gen_());
 		auto const caption = cyng::value_cast(reader.get("caption"), boost::uuids::to_string(tag));
 		auto const alt = cyng::value_cast(reader.get("alt"), caption);
@@ -324,6 +368,8 @@ namespace docruntime {
 				//
 				embed_base64(caption, alt, tag, r.first, ext, scale);
 			}
+			os_ << std::endl;
+
 		}
 		else {
 			os_
@@ -352,8 +398,6 @@ namespace docruntime {
 		if (!svg.empty()) {
 			svg.set_attribute("aria-labelledby", "title");
 			svg.add_leaf("title", caption);
-			//auto node = svg.prepend_child("title");
-			//node.append_child(pugi::node_pcdata).set_value(caption.c_str());
 			auto const id = boost::uuids::to_string(tag);
 			svg.set_attribute("id", id);
 
@@ -379,8 +423,6 @@ namespace docruntime {
 		, std::string const& ext
 		, double scale) {
 
-		//os_ << "<div>BASE64</div>" << std::endl;
-
 		std::ifstream ifs(source.string(), std::ios::binary | std::ios::ate);
 		ifs.unsetf(std::ios::skipws);
 
@@ -398,6 +440,28 @@ namespace docruntime {
 		auto const title = compute_title_figure(tag, caption);
 		auto const figure = dom::figure(dom::id_(id), dom::img(dom::alt_(alt), dom::title_(caption), dom::class_("docscript-img"), dom::style_("max-width: " + max_width), dom::src_("data:image/" + ext + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size()))), dom::figcaption(title));
 		figure.serialize(os_);
+	}
+
+	void generator::code(cyng::param_map_t pm) {
+		//std::cout << "CODE(" << pm << ")" << std::endl;
+		auto const reader = cyng::make_reader(pm);
+		auto const source = reader.get("source", "main.cpp");
+		auto const lang = reader.get("language", get_extension(source));
+		auto const numbers = reader.get("linenumbers", true);
+		auto const caption = reader.get("caption", "");
+
+		auto const r = ctx_.lookup(source, lang);
+		if (r.second) {
+			//os_ << "<div>source file</div>" << std::endl;
+			dom::code_to_html(os_, r.first, lang, numbers, caption);
+		}
+		else {
+			fmt::print(
+				fg(fmt::color::dark_orange) | fmt::emphasis::bold,
+				"***error: source file [{}] not found\n", source);
+			os_ << "<div>source file not found</div>" << std::endl;
+
+		}
 	}
 
 
@@ -528,9 +592,14 @@ namespace docruntime {
 		return std::bind(&generator::currency, this, std::placeholders::_1);
 	}
 
-	std::function<void(std::string)> generator::f_show() {
-		return std::bind(&show, std::placeholders::_1);
+	//std::function<void(std::string)> generator::f_show() {
+	//	return std::bind(&show, std::placeholders::_1);
+	//}
+
+	std::function<void(cyng::param_map_t)> generator::f_code() {
+		return std::bind(&generator::code, this, std::placeholders::_1);
 	}
+
 
 	std::string generator::compute_title_figure(boost::uuids::uuid tag, std::string caption) {
 		//

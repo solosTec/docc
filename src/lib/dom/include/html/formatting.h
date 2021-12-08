@@ -19,6 +19,7 @@ namespace dom
 {
 	void to_html(std::ostream&, double);
 	void to_html(std::ostream& os, std::chrono::system_clock::time_point);
+
 	/**
 	 * convert an object vector
 	 */

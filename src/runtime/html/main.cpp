@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <thread>
+#include <locale>
 
 #include <boost/program_options.hpp>
 #include <boost/predef.h>

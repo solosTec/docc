@@ -20,6 +20,7 @@
 #include <filesystem>
 
 #include <boost/uuid/random_generator.hpp>
+#include <boost/uuid/name_generator.hpp>
 
 namespace docruntime {
 
@@ -65,6 +66,7 @@ namespace docruntime {
 			, std::string const& ext
 			, double scale);
 
+		void code(cyng::param_map_t);
 
 		void resource(cyng::param_map_t);
 		std::chrono::system_clock::time_point now(cyng::param_map_t);
@@ -109,7 +111,8 @@ namespace docruntime {
 		std::function<std::string(cyng::param_map_t)> f_cat();
 		std::function<std::string(cyng::param_map_t pm)> f_repeat();
 		std::function<std::string(cyng::param_map_t)> f_currency();
-		std::function<void(std::string)> f_show();
+		//std::function<void(std::string)> f_show();
+		std::function<void(cyng::param_map_t)> f_code();
 
 		std::string compute_title_figure(boost::uuids::uuid tag, std::string caption);
 		std::string compute_title_table(boost::uuids::uuid tag, std::string caption);
@@ -126,6 +129,7 @@ namespace docruntime {
 		figures_t figures_;
 		tables_t tables_;
 		boost::uuids::random_generator uuid_gen_; //	basic_random_generator<mt19937>
+		boost::uuids::name_generator_latest name_gen_;	//	basic_name_generator<detail::sha1>
 		cyng::vm_proxy vm_;
 		docscript::context& ctx_;
 	};
