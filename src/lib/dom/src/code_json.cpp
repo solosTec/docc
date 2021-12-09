@@ -126,7 +126,7 @@ namespace dom
 			else os_ << ' ';
 
 			os_
-				<< "<span class=\"docc-key\">"
+				<< "<span class=\"docc-keyword\">"
 				<< "\""
 				<< name
 				<< "\""
@@ -169,7 +169,7 @@ namespace dom
 			cyng::traverse(obj, w);
 			});
 
-		os << "<table style=\"tab-size: 2;\">" << std::endl << "<tbody style=\"white-space: pre;\">" << std::endl;
+		os << "<table style=\"tab-size: 2;\" class=\"docc-code\" >" << std::endl << "<tbody style=\"white-space: pre;\">" << std::endl;
 		jp.read(start, end);
 		os << "</tbody>" << std::endl << "</table>" << std::endl;
 

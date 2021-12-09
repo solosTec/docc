@@ -247,6 +247,40 @@ namespace docruntime {
 			<< std::string(depth + 2, '\t') << "box-sizing: border-box;" << std::endl
 			<< std::string(depth + 1, '\t') << "}" << std::endl
 
+			//	colors
+			<< std::string(depth + 1, '\t') << ":root {" << std::endl
+			<< std::string(depth + 2, '\t') << "--color-code-keyword: #0000FF;" << std::endl	//	void, private, bool, ...
+			<< std::string(depth + 2, '\t') << "--color-code-control: #8F08C4;" << std::endl	//	if, else, switch, ...
+			<< std::string(depth + 2, '\t') << "--color-code-template: #8191AF;" << std::endl	//	class template
+			<< std::string(depth + 2, '\t') << "--color-code-enum: #2F4F4F;" << std::endl
+			<< std::string(depth + 2, '\t') << "--color-code-event: #000000;" << std::endl
+			<< std::string(depth + 2, '\t') << "--color-code-function: #74531F;" << std::endl	//	function and function templates
+			<< std::string(depth + 2, '\t') << "--color-code-label: #000000;" << std::endl
+			<< std::string(depth + 2, '\t') << "--color-code-variable: #1F377F;" << std::endl	//	local variable
+			<< std::string(depth + 2, '\t') << "--color-code-macro: #8A1BFF;" << std::endl
+			<< std::string(depth + 2, '\t') << "--color-code-member-function: #74531F;" << std::endl
+			<< std::string(depth + 2, '\t') << "--color-code-operator-function: #008080;" << std::endl
+			<< std::string(depth + 2, '\t') << "--color-code-namespace: #000000;" << std::endl
+			<< std::string(depth + 2, '\t') << "--color-code-new-delete: #0000FF;" << std::endl
+			<< std::string(depth + 2, '\t') << "--color-code-parameter: #808080;" << std::endl
+			<< std::string(depth + 2, '\t') << "--color-code-string: #E21F1F;" << std::endl
+			<< std::string(depth + 2, '\t') << "--color-code-escape: #B776FB;" << std::endl	//	string escape \n\t
+			<< std::string(depth + 2, '\t') << "--color-code-comment: #008000;" << std::endl
+			<< std::string(depth + 2, '\t') << "--color-code-bg-selected: #0078D7;" << std::endl
+			<< std::string(depth + 2, '\t') << "--color-code-bg-hover: rgba(255, 165, 0, 0.4);" << std::endl	//	orange
+			<< std::string(depth + 2, '\t') << "--color-fg-default: #24292f;" << std::endl
+			<< std::string(depth + 2, '\t') << "--color-fg-muted: #57606a;" << std::endl
+			<< std::string(depth + 2, '\t') << "--color-fg-subtle: #6e7781;" << std::endl
+			<< std::string(depth + 2, '\t') << "--color-border: #d0d7de;" << std::endl
+			<< std::string(depth + 1, '\t') << "}" << std::endl
+
+			<< std::string(depth + 1, '\t') << ".docc-keyword {" << std::endl
+			<< std::string(depth + 1, '\t') << "    color: var(--color-code-keyword);" << std::endl
+			<< std::string(depth + 1, '\t') << "}" << std::endl
+			<< std::string(depth + 1, '\t') << ".docc-string {" << std::endl
+			<< std::string(depth + 1, '\t') << "    color: var(--color-code-string);" << std::endl
+			<< std::string(depth + 1, '\t') << "}" << std::endl
+
 			<< std::string(depth + 1, '\t') << "body { " << std::endl
 			//	Georgia,Cambria,serif;
 			<< std::string(depth + 2, '\t')
@@ -505,13 +539,28 @@ namespace docruntime {
 
 			//	source code
 
+			//	.docc-code (table)
+			<< std::string(depth + 1, '\t') << ".docc-code {" << std::endl
+			<< std::string(depth + 2, '\t') << "overflow: visible;" << std::endl
+			<< std::string(depth + 2, '\t') << "font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;" << std::endl
+			<< std::string(depth + 2, '\t') << "font-size: 12px;" << std::endl
+			<< std::string(depth + 2, '\t') << "line-height: 18px;" << std::endl
+			<< std::string(depth + 2, '\t') << "color: var(--color-fg-default);" << std::endl
+			<< std::string(depth + 2, '\t') << "word-wrap: normal;" << std::endl
+			<< std::string(depth + 2, '\t') << "white-space: pre;" << std::endl
+			<< std::string(depth + 1, '\t') << "}" << std::endl
+
+			<< std::string(depth + 1, '\t') << ".docc-code tr:hover {" << std::endl
+			<< std::string(depth + 2, '\t') << "background-color: var(--color-code-bg-hover);" << std::endl
+			<< std::string(depth + 1, '\t') << "}" << std::endl
+
 			//	.docc-num
 			<< std::string(depth + 1, '\t') << ".docc-num {" << std::endl
 			<< std::string(depth + 2, '\t') << "width: 1%;" << std::endl
 			<< std::string(depth + 2, '\t') << "min-width: 50px;" << std::endl
 			<< std::string(depth + 2, '\t') << "padding-right: 10px;" << std::endl
 			<< std::string(depth + 2, '\t') << "padding-left: 10px;" << std::endl
-			<< std::string(depth + 2, '\t') << "font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;" << std::endl
+			<< std::string(depth + 2, '\t') << "font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;" << std::endl
 			<< std::string(depth + 2, '\t') << "font-size: 12px;" << std::endl
 			<< std::string(depth + 2, '\t') << "line-height: 18px;" << std::endl
 			<< std::string(depth + 2, '\t') << "color: var(--color-fg-subtle);" << std::endl
@@ -520,48 +569,14 @@ namespace docruntime {
 			<< std::string(depth + 2, '\t') << "vertical-align: top;" << std::endl
 			<< std::string(depth + 2, '\t') << "cursor: pointer;" << std::endl
 			<< std::string(depth + 2, '\t') << "user-select: none;" << std::endl
+			<< std::string(depth + 2, '\t') << "border-right: 1px solid var(--color-border);" << std::endl
 			<< std::string(depth + 1, '\t') << "}" << std::endl
 
 			<< std::string(depth + 1, '\t') << ".docc-num::before {" << std::endl
 			<< std::string(depth + 2, '\t') << "content: attr(data-line-number);" << std::endl
 			<< std::string(depth + 1, '\t') << "}" << std::endl
 
-			//	.docc-code
-			<< std::string(depth + 1, '\t') << ".docc-code {" << std::endl
-			<< std::string(depth + 2, '\t') << "overflow: visible;" << std::endl
-			<< std::string(depth + 2, '\t') << "font-family: ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace;" << std::endl
-			<< std::string(depth + 2, '\t') << "font-size: 12px;" << std::endl
-			<< std::string(depth + 2, '\t') << "line-height: 18px;" << std::endl
-			<< std::string(depth + 2, '\t') << "color: var(--color-fg-default);" << std::endl
-			<< std::string(depth + 2, '\t') << "word-wrap: normal;" << std::endl
-			<< std::string(depth + 2, '\t') << "white-space: pre;" << std::endl
-			<< std::string(depth + 1, '\t') << "}" << std::endl
 
-			//	colors
-			<< std::string(depth + 1, '\t') << ":root {" << std::endl
-			<< std::string(depth + 2, '\t') << "--color-diffstat-addition-bg: #2da44e;" << std::endl
-			<< std::string(depth + 2, '\t') << "--color-search-keyword-hl: #fff8c5;" << std::endl
-			<< std::string(depth + 2, '\t') << "--color-fg-default: #24292f;" << std::endl
-			<< std::string(depth + 2, '\t') << "--color-fg-muted: #57606a;" << std::endl
-			<< std::string(depth + 2, '\t') << "--color-fg-subtle: #6e7781;" << std::endl
-			<< std::string(depth + 2, '\t') << "--color-prettylights-syntax-comment: #6e7781;" << std::endl
-			<< std::string(depth + 2, '\t') << "--color-prettylights-syntax-constant: #0550ae;" << std::endl
-			<< std::string(depth + 2, '\t') << "--color-prettylights-syntax-entity: #8250df;" << std::endl
-			<< std::string(depth + 2, '\t') << "--color-prettylights-syntax-storage-modifier-import: #24292f;" << std::endl
-			<< std::string(depth + 2, '\t') << "--color-prettylights-syntax-entity-tag: #116329;" << std::endl
-			<< std::string(depth + 2, '\t') << "--color-prettylights-syntax-keyword: #cf222e;" << std::endl
-			<< std::string(depth + 2, '\t') << "--color-prettylights-syntax-string: #116329;" << std::endl
-			//<< std::string(depth + 2, '\t') << "--color-prettylights-syntax-string: #0a3069;" << std::endl
-			<< std::string(depth + 2, '\t') << "--color-prettylights-syntax-variable: #953800;" << std::endl
-			<< std::string(depth + 2, '\t') << "--color-prettylights-syntax-brackethighlighter-unmatched: #82071e;" << std::endl
-			<< std::string(depth + 1, '\t') << "}" << std::endl
-
-			<< std::string(depth + 1, '\t') << ".docc-key {" << std::endl
-			<< std::string(depth + 1, '\t') << "    color: var(--color-prettylights-syntax-keyword);" << std::endl
-			<< std::string(depth + 1, '\t') << "}" << std::endl
-			<< std::string(depth + 1, '\t') << ".docc-string {" << std::endl
-			<< std::string(depth + 1, '\t') << "    color: var(--color-prettylights-syntax-string);" << std::endl
-			<< std::string(depth + 1, '\t') << "}" << std::endl
 
 			<< std::string(depth, '\t') << "</style>" << std::endl;
 	}

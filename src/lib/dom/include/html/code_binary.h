@@ -18,7 +18,7 @@
 
 namespace dom
 {
-	void binary_to_html(std::ostream&, std::ifstream& ifs, bool numbers);
+	void binary_to_html(std::ostream& os, std::istream_iterator<char> start, std::istream_iterator<char> end, bool numbers);
 }
 
 #endif

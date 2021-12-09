@@ -20,6 +20,7 @@ namespace dom
 			if (boost::algorithm::iequals(lang, "json")) {
 				//	JSON
 				std::ifstream  ifs(p.string());
+				//	doesn't work for UTF-8
 				auto start = std::istream_iterator<char>(ifs);
 				auto end = std::istream_iterator<char>();
 				if (ifs.is_open()) json_to_html(os, start, end, numbers);
@@ -32,7 +33,7 @@ namespace dom
 				ifs.close();
 			}
 			else if (boost::algorithm::iequals(lang, "docscript")) {
-				//	source lanaguage
+				//	source language
 				std::ifstream  ifs(p.string());
 				if (ifs.is_open()) docscript_to_html(os, ifs, numbers);
 				ifs.close();
@@ -40,7 +41,9 @@ namespace dom
 			else if (boost::algorithm::iequals(lang, "bin") || boost::algorithm::iequals(lang, "binary")) {
 				//	hex listing
 				std::ifstream  ifs(p.string(), std::ios::binary);
-				if (ifs.is_open()) binary_to_html(os, ifs, numbers);
+				auto start = std::istream_iterator<char>(ifs);
+				auto end = std::istream_iterator<char>();
+				if (ifs.is_open()) binary_to_html(os, start, end, numbers);
 				ifs.close();
 			}
 			else {
