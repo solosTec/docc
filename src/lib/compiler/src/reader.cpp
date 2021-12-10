@@ -2,7 +2,8 @@
 #include <docc/reader.h>
 #include <docc/utils.h>
 
-#include <cyng/io/parser/utf-8.h>
+//#include <cyng/io/parser/utf-8.hpp>
+#include <cyng/io/parser/stream.hpp>
 #include <cyng/task/registry.h>
 
 #include <fmt/core.h>
@@ -43,36 +44,11 @@ namespace docscript {
 		//
 		if (ctx_.push(p))
 		{
-			//ctl_.get_registry().dispatch("ruler", "open", std::filesystem::path(p), channel_.lock()->get_id());
-
 
 			auto [a, b] = ctx_.get_stream_range();
 			BOOST_ASSERT(a != b);
 
-			//  test BOM
-			switch (*a & 0xFF) {
-			case 0xEF:
-				if (((*++a & 0xFF) == 0xBB) && ((*++a & 0xFF) == 0xBF)) {
-					++a;
-				}
-				else {
-					//  error
-				}
-				break;
-			case 0xFE:
-				//  error: utf-16 BE
-				BOOST_ASSERT_MSG(false, "utf-16 BE");
-				break;
-			case 0xFF:
-				//  error: utf-16 LE
-				BOOST_ASSERT_MSG(false, "utf-16 LE");
-				break;
-			default:
-				break;
-			}
-
-			cyng::utf8::u8_to_u32_iterator pos(a);
-			cyng::utf8::u8_to_u32_iterator end(b);
+			auto [pos, end] = cyng::utf8::get_utf8_range(a, b);
 
 			std::size_t line{ 1 };
 			for (; pos != end; ++pos)

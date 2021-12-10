@@ -3,6 +3,8 @@
 
 #include <iterator>
 
+#include <boost/assert.hpp>
+
 namespace docruntime
 {
 	std::pair<cyng::buffer_t, std::streamsize> prepare_buffer(std::istream& is) {

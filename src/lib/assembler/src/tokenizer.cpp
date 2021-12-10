@@ -1,6 +1,6 @@
 ﻿#include <asm/tokenizer.h>
 
-#include <cyng/io/parser/utf-8.h>
+#include <cyng/io/parser/stream.hpp>
 
 #ifdef _DEBUG
 #include <iostream>

@@ -280,6 +280,9 @@ namespace docruntime {
 			<< std::string(depth + 1, '\t') << ".docc-string {" << std::endl
 			<< std::string(depth + 1, '\t') << "    color: var(--color-code-string);" << std::endl
 			<< std::string(depth + 1, '\t') << "}" << std::endl
+			<< std::string(depth + 1, '\t') << ".docc-comment {" << std::endl
+			<< std::string(depth + 1, '\t') << "    color: var(--color-code-comment);" << std::endl
+			<< std::string(depth + 1, '\t') << "}" << std::endl
 
 			<< std::string(depth + 1, '\t') << "body { " << std::endl
 			//	Georgia,Cambria,serif;

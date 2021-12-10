@@ -8,12 +8,14 @@
 #define DOCC_RUNTIME_FILE_H
 
 #include <cyng/obj/intrinsics/buffer.h>
+#include <cyng/io/parser/stream.hpp>
 
 #include <string>
 #include <cstdio>
 #include <fstream>
 #include <utility>
 #include <filesystem>
+#include <iterator>
 
 namespace docruntime
 {
@@ -27,6 +29,7 @@ namespace docruntime
 	 * @return extension without the '.'
 	 */
 	std::string get_extension(std::filesystem::path const& p);
+
 }
 
 #endif

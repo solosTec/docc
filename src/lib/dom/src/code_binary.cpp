@@ -19,8 +19,8 @@ namespace dom
 
 		os << "<table style=\"tab-size: 2;\" class=\"docc-code\" >" << std::endl << "<tbody style=\"white-space: pre;\">" << std::endl;
 
-
-		for (; pos != last; ++pos, ++count)
+		//	There is an upper limit of 65.535 lines
+		for (; pos != last && count < 0xFFFF; ++pos, ++count)
 		{
 			//	detect start of a new line
 			if ((count % width) == 0)
@@ -89,7 +89,9 @@ namespace dom
 				gap = true;
 
 				os
+					<< "<span class=\"docc-comment\">"
 					<< ascii_values.str()
+					<< "</span>"
 					<< "</td>"
 					<< "</tr>"
 					<< std::endl
@@ -119,6 +121,32 @@ namespace dom
 			<< r
 			<< std::endl
 			;
+
+		//	incomplete
+		if (pos != last) {
+			os << "<tr>";
+			if (numbers) {
+				os
+					<< "<td class=\"docc-num\" data-line-number=\""
+					<< "["
+					<< std::setw(4)
+					<< std::setfill('0')
+					<< std::hex
+					<< count
+					<< "]\"></td>"
+					;
+			}
+
+			os 
+				<< "<td class=\"docc-string\">"
+				<< "  Content was truncated"
+				<< "</td>"
+				<< "</tr>"
+				<< std::endl
+				;
+
+
+		}
 
 		os << "</tbody>" << std::endl << "</table>" << std::endl;
 

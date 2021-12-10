@@ -7,6 +7,8 @@
 #include <html/code_generic.h>
 #include <html/code_binary.h>
 
+#include <cyng/io/parser/stream.hpp>
+
 #include <sstream>
 #include <iomanip>
 
@@ -20,16 +22,16 @@ namespace dom
 			if (boost::algorithm::iequals(lang, "json")) {
 				//	JSON
 				std::ifstream  ifs(p.string());
-				//	doesn't work for UTF-8
-				auto start = std::istream_iterator<char>(ifs);
-				auto end = std::istream_iterator<char>();
+				auto [start, end] = cyng::get_stream_range<std::istream_iterator<char>>(ifs);
+				//	JSON parser is UTF-8 capable
 				if (ifs.is_open()) json_to_html(os, start, end, numbers);
 				ifs.close();
 			}
 			else if (boost::algorithm::equals(lang, "C++") || boost::algorithm::iequals(lang, "cpp") || boost::algorithm::iequals(lang, "h")) {
 				//	C++ - curly braced language
 				std::ifstream  ifs(p.string());
-				if (ifs.is_open()) curly_to_html(os, ifs, numbers, lang);
+				auto [start, end] = cyng::utf8::get_utf8_range<std::istream_iterator<char>>(ifs);
+				if (ifs.is_open()) curly_to_html(os, start, end, numbers, lang);
 				ifs.close();
 			}
 			else if (boost::algorithm::iequals(lang, "docscript")) {

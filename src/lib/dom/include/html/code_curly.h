@@ -10,6 +10,7 @@
 
 #include <cyng/obj/object.h>
 #include <cyng/obj/intrinsics/container.h>
+#include <cyng/io/parser/stream.hpp>
 
 #include <filesystem>
 #include <iostream>
@@ -18,7 +19,11 @@
 
 namespace dom
 {
-	void curly_to_html(std::ostream&, std::ifstream& ifs, bool numbers, std::string const& lang);
+	void curly_to_html(std::ostream&
+		, cyng::utf8::u8_to_u32_iterator<std::istream_iterator<char>>
+		, cyng::utf8::u8_to_u32_iterator<std::istream_iterator<char>>
+		, bool numbers
+		, std::string const& lang);
 }
 
 #endif
