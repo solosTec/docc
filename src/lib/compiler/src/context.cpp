@@ -162,6 +162,7 @@ namespace docscript {
 		insert_method(table, method("h6", parameter_type::VECTOR, false));
 
 		insert_method(table, method("figure", parameter_type::MAP, false, { "caption", "source" }));
+		insert_method(table, method("toc", parameter_type::MAP, false, {}));
 
 		//	 pilgrow (¶) = paragraph
 		insert_method(table, method(std::string("\xc2\xb6"), parameter_type::VECTOR, false));

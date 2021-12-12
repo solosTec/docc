@@ -34,7 +34,7 @@ namespace docruntime {
 			, boost::uuids::uuid tag
 			, bool generate_body_only
 			, bool generate_meta
-			, bool generate_index
+			, std::string const& index_file
 			, std::string type);
 
 	private:

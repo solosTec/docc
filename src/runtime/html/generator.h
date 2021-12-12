@@ -28,6 +28,7 @@ namespace docruntime {
 	public:
 		generator(std::istream&
 			, std::ostream&
+			, std::string const& index_file
 			, cyng::mesh& fabric
 			, boost::uuids::uuid tag
 			, docscript::context&);
@@ -66,6 +67,8 @@ namespace docruntime {
 			, std::string const& ext
 			, double scale);
 
+		void table_of_content(cyng::param_map_t);
+
 		void code(cyng::param_map_t);
 
 		void resource(cyng::param_map_t);
@@ -82,6 +85,8 @@ namespace docruntime {
 		std::string currency(cyng::param_map_t pm);
 
 		void emit_header(std::size_t level, boost::uuids::uuid tag, std::string const& num, std::string const& title);
+		void emit_toc(cyng::vector_t, std::size_t depth);
+
 
 	private:
 		std::function<std::string(cyng::vector_t)> f_quote();
@@ -103,6 +108,7 @@ namespace docruntime {
 		std::function<void(cyng::vector_t)> f_h6();
 		std::function<void(cyng::param_map_t)> f_header();
 		std::function<void(cyng::param_map_t)> f_figure();
+		std::function<void(cyng::param_map_t)> f_toc();
 		std::function<void(cyng::param_map_t)> f_resource();
 		std::function<std::chrono::system_clock::time_point(cyng::param_map_t)> f_now();
 		std::function<boost::uuids::uuid(cyng::param_map_t)> f_uuid();
@@ -122,6 +128,7 @@ namespace docruntime {
 	private:
 		std::istream& is_;
 		std::ostream& os_;
+		std::string const& index_file_;
 		cyng::param_map_t vars_;
 		cyng::param_map_t meta_;
 		toc toc_;
@@ -133,6 +140,7 @@ namespace docruntime {
 		cyng::vm_proxy vm_;
 		docscript::context& ctx_;
 	};
+
 
 }
 

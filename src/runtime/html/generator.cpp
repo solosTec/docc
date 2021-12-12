@@ -16,6 +16,7 @@
 #include <cyng/obj/container_cast.hpp>
 #include <cyng/xml/node.h>
 #include <cyng/sys/locale.h>
+#include <cyng/parse/json.h>
 
 #include <smfsec/hash/base64.h>
 
@@ -31,18 +32,15 @@
 
 namespace docruntime {
 
-	//void show(std::string str) {
-	//	std::cout << str << std::endl;
-	//}
-
-
 	generator::generator(std::istream& is
 		, std::ostream& os
+		, std::string const& index_file
 		, cyng::mesh& fabric
 		, boost::uuids::uuid tag
 		, docscript::context& ctx)
 	: is_(is)
 		, os_(os)
+		, index_file_(index_file)
 		, vars_()
 		, meta_()
 		, toc_()
@@ -70,6 +68,7 @@ namespace docruntime {
 			, cyng::make_description("h6", f_h6())
 			, cyng::make_description("header", f_header())
 			, cyng::make_description("figure", f_figure())
+			, cyng::make_description("toc", f_toc())
 			, cyng::make_description("resource", f_resource())
 			, cyng::make_description("now", f_now())
 			, cyng::make_description("uuid", f_uuid())
@@ -157,7 +156,6 @@ namespace docruntime {
 		//	https://dbaron.org/www/quotes
 		//
 		ss << "&bdquo;";
-		bool init = false;
 		dom::to_html(ss, vec, " ");
 		ss << "&ldquo;";
 		return ss.str();
@@ -315,7 +313,6 @@ namespace docruntime {
 			<< num
 			<< "&nbsp;"
 			<< title
-			//<a id="fb8cb774-6981-4727-8c16-d3e9913012d7" aria-hidden="true" href="fb8cb774-6981-4727-8c16-d3e9913012d7" style="margin-right: 6px;" class="oction">
 			<< "<a id=\""
 			<< tag
 			<< "\" aria-hidden=\"true\" "
@@ -335,10 +332,10 @@ namespace docruntime {
 
 		auto const reader = cyng::make_reader(pm);
 		//	no HTML code allowed
-		auto const tag = cyng::value_cast(reader.get("tag"), uuid_gen_());
+		std::filesystem::path const source = cyng::value_cast(reader.get("source"), "");
+		auto const tag = cyng::value_cast(reader.get("tag"), name_gen_(source.string()));
 		auto const caption = cyng::value_cast(reader.get("caption"), boost::uuids::to_string(tag));
 		auto const alt = cyng::value_cast(reader.get("alt"), caption);
-		std::filesystem::path const source = cyng::value_cast(reader.get("source"), "");
 		auto const r = ctx_.lookup(source, "png");
 		if (r.second) {
 
@@ -441,6 +438,86 @@ namespace docruntime {
 		auto const figure = dom::figure(dom::id_(id), dom::img(dom::alt_(alt), dom::title_(caption), dom::class_("docscript-img"), dom::style_("max-width: " + max_width), dom::src_("data:image/" + ext + ";base64," + cyng::crypto::base64_encode(buffer.data(), buffer.size()))), dom::figcaption(title));
 		figure.serialize(os_);
 	}
+
+	void generator::table_of_content(cyng::param_map_t) {
+		os_
+			<< "<details>"
+			<< std::endl
+			<< "\t<summary>"
+			<< get_name(get_language_code(), i18n::TOC)
+			<< "</summary>"
+			<< std::endl
+			;
+
+		//
+		//	read toc file generated during the last run.
+		//
+		auto vec = cyng::container_cast<cyng::vector_t>(cyng::json::parse_file(index_file_));
+		emit_toc(vec, 0);
+
+		os_
+			<< "</details>"
+			<< std::endl
+			;
+	}
+
+	void generator::emit_toc(cyng::vector_t vec, std::size_t level) {
+
+		os_
+			<< std::string(level + 1, '\t')
+			<< "<ul toclevel-"
+			<< level
+			<< ">"
+			<< std::endl
+			;
+
+		for (auto const& obj : vec) {
+
+			auto const reader = cyng::make_reader(obj);
+			auto const title = reader.get("title", "title");
+			auto const number = reader.get("number", "1");
+			auto const tag = reader.get("tag", "");
+			auto const href = "#" + tag;
+
+			auto const a = dom::a(dom::href_(href), dom::title_("section " + number), number + "&nbsp;" + title);
+			auto const sub = reader.get("sub");
+			if (sub) {
+				os_
+					<< std::string(level + 1, '\t')
+					<< "<li>"
+					<< a(0)
+					<< std::endl
+					;
+
+				emit_toc(cyng::container_cast<cyng::vector_t>(sub), level + 1);
+
+				os_
+					<< std::string(level + 1, '\t')
+					<< "</li>"
+					<< std::endl;
+
+			}
+			else {
+				os_
+					<< std::string(level + 1, '\t')
+					<< "<li>"
+					<< a(0)
+					<< "</li>"
+					<< std::endl
+					;
+
+			}
+
+		}
+
+		os_
+			<< std::string(level + 1, '\t')
+			<< "</ul>"
+			<< std::endl
+			;
+
+	}
+
 
 	void generator::code(cyng::param_map_t pm) {
 		//std::cout << "CODE(" << pm << ")" << std::endl;
@@ -565,6 +642,9 @@ namespace docruntime {
 	}
 	std::function<void(cyng::param_map_t)> generator::f_figure() {
 		return std::bind(&generator::figure, this, std::placeholders::_1);
+	}
+	std::function<void(cyng::param_map_t)> generator::f_toc() {
+		return std::bind(&generator::table_of_content, this, std::placeholders::_1);
 	}
 	std::function<void(cyng::param_map_t)> generator::f_resource() {
 		return std::bind(&generator::resource, this, std::placeholders::_1);

@@ -29,7 +29,8 @@ namespace docruntime {
 	controller::controller(std::filesystem::path out
 		, std::vector<std::filesystem::path> inc
 		, std::filesystem::path const& tmp_asm
-		, std::filesystem::path const& tmp_html, int verbose)
+		, std::filesystem::path const& tmp_html
+		, int verbose)
 	: ofs_(out.string(), std::ios::trunc)
 		, tmp_html_(tmp_html.string(), std::ios::trunc)
 		, tmp_html_path_(tmp_html)
@@ -45,8 +46,8 @@ namespace docruntime {
 		, boost::uuids::uuid tag
 		, bool generate_body_only
 		, bool generate_meta
-		, bool generate_index
-		, std::string type) {
+		, std::string const& index_file
+		, std::string) {
 
 		//
 		//	check output file
@@ -118,7 +119,7 @@ namespace docruntime {
 			cyng::controller ctl(pool_size);
 			cyng::mesh fabric(ctl);
 
-			generator gen(ifs, tmp_html_, fabric, tag, ctx_);
+			generator gen(ifs, tmp_html_, index_file, fabric, tag, ctx_);
 			gen.run();
 
 			//
@@ -159,11 +160,18 @@ namespace docruntime {
 				std::cout << gen.get_toc() << std::endl;
 			}
 
-			//	JSON
-			if (generate_index) {
+			//	JSON index file
+			std::ofstream ofs_index(index_file, std::ios::trunc);
+			if (ofs_index.is_open()) {
 				auto const vec = to_vector(gen.get_toc());
-				std::cout << cyng::io::to_json_pretty(cyng::make_object(vec))
+				ofs_index << cyng::io::to_json_pretty(cyng::make_object(vec))
 					<< std::endl;
+			}
+			else {
+				fmt::print(stderr,
+					fg(fmt::color::dark_orange) | fmt::emphasis::bold,
+					"***info : cannot generate index file [{}]\n", index_file);
+
 			}
 
 		}

@@ -20,13 +20,12 @@
 
 int main(int argc, char* argv[]) {
 
-    auto tag = boost::uuids::random_generator()();	//	basic_random_generator<mt19937>
-
 	std::string config_file = std::string("doc2html-") + std::string(docc::version_string) + ".cfg";
 	auto const here = std::filesystem::current_path();
     std::string inp_file = "main.docscript";
 	std::string out_file = (here / "out.html").string();    
-    std::string stag = boost::uuids::to_string(tag);
+    std::string stag = "ef008e59-810f-427f-800b-d121c1b12deb";  //  stable toc IDs
+    std::string index_file = (here / "index.json").string();
     std::size_t pool_size = std::min<std::size_t>(std::thread::hardware_concurrency(), 4) * 2ul;
 
     //
@@ -59,7 +58,7 @@ int main(int argc, char* argv[]) {
     gen.add_options()
         ("generator.body", boost::program_options::bool_switch()->default_value(false), "generate (HTML) body only")
         ("generator.meta", boost::program_options::bool_switch()->default_value(true), "generate a JSON file with meta data")
-        ("generator.index", boost::program_options::bool_switch()->default_value(true), "generate an index file \"index.json\"")
+        ("generator.index", boost::program_options::value(&index_file)->default_value(index_file), "index file")
         ("generator.type,Y", boost::program_options::value<std::string>()->default_value("report"), "og:type (article/report/blog/...)")
         ;
 
@@ -153,7 +152,7 @@ int main(int argc, char* argv[]) {
     //
     //	get VM tag
     //
-    tag = boost::uuids::string_generator()(stag);
+    auto const tag = boost::uuids::string_generator()(stag);
 
     //
     //	generate some temporary file names for intermediate files
@@ -187,6 +186,6 @@ int main(int argc, char* argv[]) {
         , tag
         , vm["generator.body"].as< bool >()
         , vm["generator.meta"].as< bool >()
-        , vm["generator.index"].as< bool >()
+        , index_file
         , vm["generator.type"].as< std::string >());
 }
