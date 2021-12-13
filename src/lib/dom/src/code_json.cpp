@@ -20,7 +20,7 @@ namespace dom
 			: os_(os)
 			, line_numbers_(line_numbers)
 			, nl_(true)
-			, line_(0)
+			, line_(1)
 		{
 			open_row();
 		}

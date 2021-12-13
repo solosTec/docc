@@ -13,7 +13,7 @@
 
 namespace docscript {
 
-	reader::reader(	context& ctx)
+	reader::reader(context& ctx)
 		: ctx_(ctx)
 		, prev_('\n')
 		, tokenizer_([this](symbol&& sym) {

@@ -8,14 +8,7 @@
 #ifndef HTML_CODE_CURLY_H
 #define HTML_CODE_CURLY_H
 
-#include <cyng/obj/object.h>
-#include <cyng/obj/intrinsics/container.h>
 #include <cyng/io/parser/stream.hpp>
-
-#include <filesystem>
-#include <iostream>
-#include <chrono>
-#include <fstream>
 
 namespace dom
 {

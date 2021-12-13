@@ -266,8 +266,9 @@ namespace docruntime {
 			<< std::string(depth + 2, '\t') << "--color-code-label: #000000;" << std::endl
 			<< std::string(depth + 2, '\t') << "--color-code-variable: #1F377F;" << std::endl	//	local variable
 			<< std::string(depth + 2, '\t') << "--color-code-macro: #8A1BFF;" << std::endl
-			<< std::string(depth + 2, '\t') << "--color-code-member-function: #74531F;" << std::endl
-			<< std::string(depth + 2, '\t') << "--color-code-operator-function: #008080;" << std::endl
+			//<< std::string(depth + 2, '\t') << "--color-code-class: #74531F;" << std::endl
+			<< std::string(depth + 2, '\t') << "--color-code-class: #009999;" << std::endl		
+			<< std::string(depth + 2, '\t') << "--color-code-operator: #008080;" << std::endl
 			<< std::string(depth + 2, '\t') << "--color-code-namespace: #000000;" << std::endl
 			<< std::string(depth + 2, '\t') << "--color-code-new-delete: #0000FF;" << std::endl
 			<< std::string(depth + 2, '\t') << "--color-code-parameter: #808080;" << std::endl
@@ -290,6 +291,15 @@ namespace docruntime {
 			<< std::string(depth + 1, '\t') << "}" << std::endl
 			<< std::string(depth + 1, '\t') << ".docc-comment {" << std::endl
 			<< std::string(depth + 1, '\t') << "    color: var(--color-code-comment);" << std::endl
+			<< std::string(depth + 1, '\t') << "}" << std::endl
+			<< std::string(depth + 1, '\t') << ".docc-macro {" << std::endl
+			<< std::string(depth + 1, '\t') << "    color: var(--color-code-macro);" << std::endl
+			<< std::string(depth + 1, '\t') << "}" << std::endl
+			<< std::string(depth + 1, '\t') << ".docc-operator {" << std::endl
+			<< std::string(depth + 1, '\t') << "    color: var(--color-code-operator);" << std::endl
+			<< std::string(depth + 1, '\t') << "}" << std::endl
+			<< std::string(depth + 1, '\t') << ".docc-class {" << std::endl
+			<< std::string(depth + 1, '\t') << "    color: var(--color-code-class);" << std::endl
 			<< std::string(depth + 1, '\t') << "}" << std::endl
 
 			<< std::string(depth + 1, '\t') << "body { " << std::endl

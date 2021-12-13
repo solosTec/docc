@@ -116,4 +116,30 @@ namespace dom
 		return ss.str();
 	}
 
+	void esc_html(std::ostream& os, std::string const& s) {
+		for (auto c : s) {
+			switch (c) {
+			case '"': os << "&quot;"; break;
+			case '&': os << "&amp;"; break;
+			case '/': os << "&sol;"; break;
+			case '<': os << "&lt;"; break;
+			case '>': os << "&gt;"; break;
+			case '‚': os << "&sbquo;"; break;	//	single low quote
+			case '„': os << "&bdquo;"; break;	//	double low quote
+			case '†': os << "&dagger;"; break;	//	dagger
+			case '‡': os << "&Dagger;"; break;	//	double dagger
+			case '‰': os << "&permil;"; break;	//	per mill sign
+			case '‹': os << "&lsaquo;"; break;	//	single left angle quote
+			case '›': os << "&rsaquo;"; break;	//	single right angle quote
+			case '‘': os << "&lsquo;"; break;	//	left single quote
+			case '’': os << "&rsquo;"; break;	//	right single quote
+			case '“': os << "&ldquo;"; break;	//	left double quote
+			case '”': os << "&rdquo;"; break;	//	right double quote
+			default:
+				os << c;
+				break;
+			}
+		}
+	}
+
 }

@@ -26,6 +26,11 @@ namespace dom
 	void to_html(std::ostream& os, cyng::vector_t const& vec, std::string sep);
 	std::string to_html(cyng::vector_t const& vec, std::string sep);
 
+	/**
+	 * substitite HTML entities
+	 */
+	void esc_html(std::ostream&, std::string const&);
+
 }
 
 #endif
