@@ -265,6 +265,7 @@ namespace docruntime {
 			<< std::string(depth + 2, '\t') << "--color-code-function: #74531F;" << std::endl	//	function and function templates
 			<< std::string(depth + 2, '\t') << "--color-code-label: #000000;" << std::endl
 			<< std::string(depth + 2, '\t') << "--color-code-variable: #1F377F;" << std::endl	//	local variable
+			<< std::string(depth + 2, '\t') << "--color-code-reference: #008800;" << std::endl	//	${...} 
 			<< std::string(depth + 2, '\t') << "--color-code-macro: #8A1BFF;" << std::endl
 			//<< std::string(depth + 2, '\t') << "--color-code-class: #74531F;" << std::endl
 			<< std::string(depth + 2, '\t') << "--color-code-class: #009999;" << std::endl		
@@ -272,7 +273,8 @@ namespace docruntime {
 			<< std::string(depth + 2, '\t') << "--color-code-namespace: #000000;" << std::endl
 			<< std::string(depth + 2, '\t') << "--color-code-new-delete: #0000FF;" << std::endl
 			<< std::string(depth + 2, '\t') << "--color-code-parameter: #808080;" << std::endl
-			<< std::string(depth + 2, '\t') << "--color-code-string: #E21F1F;" << std::endl
+			//<< std::string(depth + 2, '\t') << "--color-code-string: #E21F1F;" << std::endl
+			<< std::string(depth + 2, '\t') << "--color-code-string: #BD2315;" << std::endl			
 			<< std::string(depth + 2, '\t') << "--color-code-escape: #B776FB;" << std::endl	//	string escape \n\t
 			<< std::string(depth + 2, '\t') << "--color-code-comment: #008000;" << std::endl
 			<< std::string(depth + 2, '\t') << "--color-code-bg-selected: #0078D7;" << std::endl
@@ -284,22 +286,29 @@ namespace docruntime {
 			<< std::string(depth + 1, '\t') << "}" << std::endl
 
 			<< std::string(depth + 1, '\t') << ".docc-keyword {" << std::endl
-			<< std::string(depth + 1, '\t') << "    color: var(--color-code-keyword);" << std::endl
+			<< std::string(depth + 2, '\t') << "color: var(--color-code-keyword);" << std::endl
+			<< std::string(depth + 1, '\t') << "}" << std::endl
+			<< std::string(depth + 1, '\t') << ".docc-control {" << std::endl	//	conditional
+			<< std::string(depth + 2, '\t') << "color: var(--color-code-control);" << std::endl
 			<< std::string(depth + 1, '\t') << "}" << std::endl
 			<< std::string(depth + 1, '\t') << ".docc-string {" << std::endl
-			<< std::string(depth + 1, '\t') << "    color: var(--color-code-string);" << std::endl
+			<< std::string(depth + 2, '\t') << "color: var(--color-code-string);" << std::endl
 			<< std::string(depth + 1, '\t') << "}" << std::endl
 			<< std::string(depth + 1, '\t') << ".docc-comment {" << std::endl
-			<< std::string(depth + 1, '\t') << "    color: var(--color-code-comment);" << std::endl
+			<< std::string(depth + 2, '\t') << "color: var(--color-code-comment);" << std::endl
 			<< std::string(depth + 1, '\t') << "}" << std::endl
 			<< std::string(depth + 1, '\t') << ".docc-macro {" << std::endl
-			<< std::string(depth + 1, '\t') << "    color: var(--color-code-macro);" << std::endl
+			<< std::string(depth + 2, '\t') << "color: var(--color-code-macro);" << std::endl
 			<< std::string(depth + 1, '\t') << "}" << std::endl
 			<< std::string(depth + 1, '\t') << ".docc-operator {" << std::endl
-			<< std::string(depth + 1, '\t') << "    color: var(--color-code-operator);" << std::endl
+			<< std::string(depth + 2, '\t') << "color: var(--color-code-operator);" << std::endl
 			<< std::string(depth + 1, '\t') << "}" << std::endl
 			<< std::string(depth + 1, '\t') << ".docc-class {" << std::endl
-			<< std::string(depth + 1, '\t') << "    color: var(--color-code-class);" << std::endl
+			<< std::string(depth + 2, '\t') << "color: var(--color-code-class);" << std::endl
+			<< std::string(depth + 1, '\t') << "}" << std::endl
+			<< std::string(depth + 1, '\t') << ".docc-ref {" << std::endl
+			<< std::string(depth + 2, '\t') << "color: var(--color-code-reference);" << std::endl
+			<< std::string(depth + 1, '\t') << "font-weight: bolder;" << std::endl
 			<< std::string(depth + 1, '\t') << "}" << std::endl
 
 			<< std::string(depth + 1, '\t') << "body { " << std::endl
@@ -564,11 +573,12 @@ namespace docruntime {
 			<< std::string(depth + 1, '\t') << ".docc-code {" << std::endl
 			<< std::string(depth + 2, '\t') << "overflow: visible;" << std::endl
 			<< std::string(depth + 2, '\t') << "font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;" << std::endl
-			<< std::string(depth + 2, '\t') << "font-size: 12px;" << std::endl
+			<< std::string(depth + 2, '\t') << "font-size: 16px;" << std::endl
 			<< std::string(depth + 2, '\t') << "line-height: 18px;" << std::endl
 			<< std::string(depth + 2, '\t') << "color: var(--color-fg-default);" << std::endl
 			<< std::string(depth + 2, '\t') << "word-wrap: normal;" << std::endl
 			<< std::string(depth + 2, '\t') << "white-space: pre;" << std::endl
+			<< std::string(depth + 2, '\t') << "padding-left: 5px;" << std::endl
 			<< std::string(depth + 1, '\t') << "}" << std::endl
 
 			<< std::string(depth + 1, '\t') << ".docc-code tr:hover {" << std::endl

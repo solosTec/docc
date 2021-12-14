@@ -65,8 +65,11 @@ namespace dom
 			} state_;
 
 		public:
-			tokenizer(std::function<void(std::size_t, symbol&&)> emit, std::initializer_list<std::string> key_words, std::initializer_list<std::string> ops, std::initializer_list<std::string> known_classes)
-				: state_(state::INITIAL)
+			tokenizer(std::function<void(std::size_t, symbol&&)> emit
+				, std::initializer_list<std::string> key_words
+				, std::initializer_list<std::string> ops
+				, std::initializer_list<std::string> known_classes)
+			: state_(state::INITIAL)
 				, line_number_(1)
 				, emit_(emit)
 				, key_words_(key_words.begin(), key_words.end())

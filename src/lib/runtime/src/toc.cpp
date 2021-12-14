@@ -64,16 +64,26 @@ namespace docruntime
 	std::pair<std::string, bool> toc::add(std::size_t level, boost::uuids::uuid tag, std::string title, std::vector<std::size_t> index) {
 
 		if (level == 0) {
+			//
 			//	complete
+			//	append at end of list
+			//
 			headings_.emplace_back(tag, title);
 			index.back() = headings_.size();
 		}
 		else {
-			//
-			//	missing level
-			//
-			if (headings_.empty()) return { get_numbering(index), false };
 
+			if (headings_.empty()) {
+				//
+				//	no sub-levels available.
+				//	take what you get
+				//
+				return { get_numbering(index), false };
+			}
+
+			//
+			//	take sub-level
+			//
 			if (!headings_.back().sub_) {
 				BOOST_ASSERT_MSG(level == 1, "missing toc level");
 				headings_.back().sub_ = std::make_shared<toc>(tag, title);
@@ -82,7 +92,8 @@ namespace docruntime
 				return { get_numbering(inc(index)), true };
 			}
 			else {
-				headings_.back().sub_->add(level - 1, tag, title, inc(index));
+				index.back() = headings_.size();
+				return headings_.back().sub_->add(level - 1, tag, title, inc(index));
 			}
 
 			//++index.back();
