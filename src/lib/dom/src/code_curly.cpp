@@ -52,6 +52,7 @@ namespace dom
 			enum class state {
 				INITIAL,
 				QUOTE,
+				QUOTE_ESC,	//	\...
 				CHAR,
 				OP,	//	operator
 				WS,	//	whitespace
@@ -86,6 +87,9 @@ namespace dom
 					break;
 				case state::QUOTE:
 					std::tie(state_, advance) = state_quote(c);
+					break;
+				case state::QUOTE_ESC:
+					std::tie(state_, advance) = state_quote_esc(c);
 					break;
 				case state::CHAR:
 					std::tie(state_, advance) = state_char(c);
@@ -165,13 +169,34 @@ namespace dom
 			}
 
 			std::pair<state, bool> state_quote(std::uint32_t c) {
-				if (c == '"') {
+				switch (c) {
+				case '"':
 					emit(symbol_type::STRING);
 					return std::make_pair(state::INITIAL, true);
+				case '\\':
+					return std::make_pair(state::QUOTE_ESC, true);
+				default:
+					break;
 				}
 				token_.push_back(c);
 				return std::make_pair(state_, true);
 			}
+
+			//	only simple escapes
+			std::pair<state, bool> state_quote_esc(std::uint32_t c) {
+				switch (c) {
+				case '\n':
+					//	quoted_continuation
+					token_.push_back('»'); break;
+					break;
+				default:
+					token_.push_back('\\');
+					token_.push_back(c);
+					break;
+				}
+				return std::make_pair(state::QUOTE, true);
+			}
+
 			std::pair<state, bool> state_char(std::uint32_t c) {
 				if (c == '\'') {
 					emit(symbol_type::CHAR);
