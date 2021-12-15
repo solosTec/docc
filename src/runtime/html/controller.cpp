@@ -1,4 +1,4 @@
-
+﻿
 #include "controller.h"
 #include "generator.h"
 
@@ -607,7 +607,12 @@ namespace docruntime {
 			<< std::string(depth + 2, '\t') << "content: attr(data-line-number);" << std::endl
 			<< std::string(depth + 1, '\t') << "}" << std::endl
 
-
+			<< std::string(depth + 1, '\t') << ".doc-file {" << std::endl
+			<< std::string(depth + 2, '\t') << "list-style-type: \"\\1F4C4 \"; " << std::endl
+			<< std::string(depth + 1, '\t') << "}" << std::endl
+			<< std::string(depth + 1, '\t') << ".doc-dir {" << std::endl
+			<< std::string(depth + 2, '\t') << "list-style-type: \"\\1F4C2 \"; " << std::endl
+			<< std::string(depth + 1, '\t') << "}" << std::endl
 
 			<< std::string(depth, '\t') << "</style>" << std::endl;
 	}

@@ -70,6 +70,8 @@ namespace docruntime {
 		void table_of_content(cyng::param_map_t);
 
 		void code(cyng::param_map_t);
+		void tree(cyng::param_map_t);
+		void table(cyng::param_map_t);
 
 		void resource(cyng::param_map_t);
 		std::chrono::system_clock::time_point now(cyng::param_map_t);
@@ -119,6 +121,8 @@ namespace docruntime {
 		std::function<std::string(cyng::param_map_t)> f_currency();
 		//std::function<void(std::string)> f_show();
 		std::function<void(cyng::param_map_t)> f_code();
+		std::function<void(cyng::param_map_t)> f_tree();
+		std::function<void(cyng::param_map_t)> f_table();
 
 		std::string compute_title_figure(boost::uuids::uuid tag, std::string caption);
 		std::string compute_title_table(boost::uuids::uuid tag, std::string caption);

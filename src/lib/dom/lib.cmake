@@ -6,11 +6,15 @@ set (dom_lib)
 set (dom_cpp
      ${PROJECT_SOURCE_DIR}/src/dom.cpp
      ${PROJECT_SOURCE_DIR}/src/formatting.cpp
+     ${PROJECT_SOURCE_DIR}/src/tree.cpp
+     ${PROJECT_SOURCE_DIR}/src/table.cpp
 )
     
 set (dom_h
      ${PROJECT_SOURCE_DIR}/include/html/dom.hpp
      ${PROJECT_SOURCE_DIR}/include/html/formatting.h
+     ${PROJECT_SOURCE_DIR}/include/html/tree.h
+     ${PROJECT_SOURCE_DIR}/include/html/table.h
 )
 
 set (dom_code

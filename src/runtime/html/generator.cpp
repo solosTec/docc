@@ -6,6 +6,8 @@
 #include <html/formatting.h>
 #include <html/dom.hpp>
 #include <html/code.h>
+#include <html/tree.h>
+#include <html/table.h>
 
 #include <cyng/vm/vm.h>
 #include <cyng/io/parser/parser.h>
@@ -79,6 +81,8 @@ namespace docruntime {
 			, cyng::make_description("currency", f_currency())
 			//, cyng::make_description("show", f_show())
 			, cyng::make_description("code", f_code())
+			, cyng::make_description("tree", f_tree())
+			, cyng::make_description("table", f_table())
 		))
 		, ctx_(ctx)
 	{
@@ -541,6 +545,14 @@ namespace docruntime {
 		}
 	}
 
+	void generator::tree(cyng::param_map_t pm) {
+		auto const reader = cyng::make_reader(pm);
+		auto const root = reader.get("root", ".");
+		dom::render_tree(os_, root);
+	}
+
+	void generator::table(cyng::param_map_t pm) {
+	}
 
 	void generator::resource(cyng::param_map_t pm) {
 		std::cout << "RESOURCE(" << pm << ")" << std::endl;
@@ -680,6 +692,13 @@ namespace docruntime {
 		return std::bind(&generator::code, this, std::placeholders::_1);
 	}
 
+	std::function<void(cyng::param_map_t)> generator::f_tree() {
+		return std::bind(&generator::tree, this, std::placeholders::_1);
+	}
+
+	std::function<void(cyng::param_map_t)> generator::f_table() {
+		return std::bind(&generator::table, this, std::placeholders::_1);
+	}
 
 	std::string generator::compute_title_figure(boost::uuids::uuid tag, std::string caption) {
 		//

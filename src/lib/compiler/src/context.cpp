@@ -197,6 +197,8 @@ namespace docscript {
 
 		//	linenumber is optional (block)
 		insert_method(table, method("code", parameter_type::MAP, false, { "language", "source" }));
+		insert_method(table, method("table", parameter_type::MAP, false, { "source", "title" }));
+		insert_method(table, method("tree", parameter_type::MAP, false, { "root" }));
 
 	}
 
