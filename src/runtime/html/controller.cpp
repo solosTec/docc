@@ -607,11 +607,27 @@ namespace docruntime {
 			<< std::string(depth + 2, '\t') << "content: attr(data-line-number);" << std::endl
 			<< std::string(depth + 1, '\t') << "}" << std::endl
 
-			<< std::string(depth + 1, '\t') << ".doc-file {" << std::endl
+			<< std::string(depth + 1, '\t') << ".docc-file {" << std::endl
 			<< std::string(depth + 2, '\t') << "list-style-type: \"\\1F4C4 \"; " << std::endl
 			<< std::string(depth + 1, '\t') << "}" << std::endl
-			<< std::string(depth + 1, '\t') << ".doc-dir {" << std::endl
+			<< std::string(depth + 1, '\t') << ".docc-dir {" << std::endl
 			<< std::string(depth + 2, '\t') << "list-style-type: \"\\1F4C2 \"; " << std::endl
+			<< std::string(depth + 1, '\t') << "}" << std::endl
+
+			//
+			//	tables
+			//
+			<< std::string(depth + 1, '\t') << ".docc-table td {" << std::endl
+			<< std::string(depth + 2, '\t') << "padding: 5px;" << std::endl
+			<< std::string(depth + 2, '\t') << "border: 1px solid black;" << std::endl
+			<< std::string(depth + 1, '\t') << "}" << std::endl
+
+			<< std::string(depth + 1, '\t') << ".docc-table thead {" << std::endl
+			<< std::string(depth + 2, '\t') << "background-color: #e6e6e6;" << std::endl
+			<< std::string(depth + 1, '\t') << "}" << std::endl
+
+			<< std::string(depth + 1, '\t') << "tr.docc-tr:nth-child(even) {" << std::endl
+			<< std::string(depth + 2, '\t') << "background-color: #f2f2f2;" << std::endl
 			<< std::string(depth + 1, '\t') << "}" << std::endl
 
 			<< std::string(depth, '\t') << "</style>" << std::endl;

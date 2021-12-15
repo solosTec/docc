@@ -5,8 +5,8 @@
  *
  */
 
-#ifndef HTML_CODE_H
-#define HTML_CODE_H
+#ifndef HTML_TABLE_H
+#define HTML_TABLE_H
 
 #include <filesystem>
 #include <iostream>
@@ -14,7 +14,7 @@
 
 namespace dom
 {
-	void render_table(std::ostream&, std::filesystem::path const&);
+	void render_table(std::ostream&, std::filesystem::path const&, bool header);
 }
 
 #endif

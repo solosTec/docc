@@ -552,6 +552,10 @@ namespace docruntime {
 	}
 
 	void generator::table(cyng::param_map_t pm) {
+		auto const reader = cyng::make_reader(pm);
+		auto const source = reader.get("source", "table.csv");
+		auto const header = reader.get("title", true);
+		dom::render_table(os_, source, header);
 	}
 
 	void generator::resource(cyng::param_map_t pm) {

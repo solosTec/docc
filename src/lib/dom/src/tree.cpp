@@ -36,8 +36,12 @@ namespace dom
 
 		for (auto const& p : files) {
 			os << std::string(depth, ' ')
-				<< "<li class=\"doc-file\">"
-				<< p.filename().string()
+				<< "<li class=\"docc-file\">"
+				;
+
+			esc_html(os, p.filename().string());
+
+			os
 				<< " ("
 				<< std::filesystem::file_size(p)
 				<< " bytes)</li>"
@@ -50,8 +54,12 @@ namespace dom
 		//os << "<li>" << dirs.size() << " DIRECTORIES:</li>" << std::endl;
 		for (auto const& p : dirs) {
 			os << std::string(depth, ' ')
-				<< "<li class=\"doc-dir\">"
-				<< p.filename().string()
+				<< "<li class=\"docc-dir\">"
+				;
+
+			esc_html(os, p.filename().string());
+			//<< p.filename().string()
+			os
 				<< "</li>"
 				<< std::endl;
 			render_tree(os, p, depth + 1);
