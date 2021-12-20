@@ -403,6 +403,7 @@ target_compile_definitions(doc2LaTeX
 target_link_libraries(doc2LaTeX 
 	PRIVATE 
 		docscript
+		docasm
 		docruntime
         fmt::fmt
 		${CYNG_LIBRARIES}

@@ -10,7 +10,7 @@
 #include <boost/program_options.hpp>
 #include <boost/predef.h>
 #include <boost/uuid/string_generator.hpp>
-#include <boost/uuid/random_generator.hpp>
+//#include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
 #include <fmt/core.h>
@@ -21,12 +21,11 @@ int main(int argc, char* argv[]) {
 #ifdef _DEBUG
 #endif
 
-    auto tag = boost::uuids::random_generator()();	//	basic_random_generator<mt19937>
-    std::string config_file = std::string("do2html-") + std::string(docc::version_string) + ".cfg";
+    std::string config_file = std::string("doc2LaTeX-") + std::string(docc::version_string) + ".cfg";
 	auto const here = std::filesystem::current_path();
-    std::string inp_file = "main.cyng";
-	std::string out_file = (here / "out.html").string();    
-    std::string stag = boost::uuids::to_string(tag);
+    std::string inp_file = "main.docscript";
+	std::string out_file = (here / "out.tex").string();    
+    std::string stag = "cfff61a7-0d55-467e-b68d-4cd409484cfe";  //  stable toc IDs
     std::size_t pool_size = std::min<std::size_t>(std::thread::hardware_concurrency(), 4) * 2ul;
 
     //
@@ -146,15 +145,34 @@ int main(int argc, char* argv[]) {
     //
     //	get VM tag
     //
-    tag = boost::uuids::string_generator()(stag);
+    auto const tag = boost::uuids::string_generator()(stag);
+
+    //
+    //	generate some temporary file names for intermediate files
+    //
+    std::filesystem::path const tmp_asm = std::filesystem::temp_directory_path() / ("doc2LaTex-" + std::filesystem::path(inp_file).filename().string() + ".docs");
+    std::filesystem::path const tmp_latex = std::filesystem::temp_directory_path() / ("doc2LaTex-" + stag + ".tex");
+    if (verbose > 2) {
+        fmt::print(
+            stdout,
+            fg(fmt::color::gray),
+            "***info : temporary files {}\n", tmp_asm.string());
+        fmt::print(
+            stdout,
+            fg(fmt::color::gray),
+            "***info : temporary files {}\n", tmp_latex.string());
+    }
 
     //
     //  start tasks
     //
     
     docruntime::controller ctl(
-        out_file,
+        out_file.empty() ? std::filesystem::path(inp_file).replace_extension("tex") : std::filesystem::path(out_file),
+        inc_paths,
+        tmp_asm,
+        tmp_latex,
         verbose
     );
-    return ctl.run(docruntime::verify_extension(inp_file, "cyng"), pool_size, tag);
+    return ctl.run(docasm::verify_extension(inp_file, "docscript"), pool_size, tag);
 }

@@ -241,14 +241,6 @@ namespace docruntime {
 		ofs_ << "</head>" << std::endl;
 	}
 
-	std::filesystem::path verify_extension(std::filesystem::path p,
-		std::string const& ext) {
-		if (!p.has_extension()) {
-			p.replace_extension(ext);
-		}
-		return p;
-	}
-
 	void emit_styles(std::size_t depth, std::ostream& ofs) {
 
 		ofs << std::string(depth, '\t') << "<style>" << std::endl

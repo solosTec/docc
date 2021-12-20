@@ -48,7 +48,7 @@ namespace docruntime {
 		docasm::reader	assembler_;
 	};
 
-	std::filesystem::path verify_extension(std::filesystem::path p, std::string const& ext);
+	//std::filesystem::path verify_extension(std::filesystem::path p, std::string const& ext);
 
 	void emit_styles(std::size_t depth, std::ostream& ofs);
 

@@ -7,10 +7,12 @@ set (doc2LaTeX_cpp
     
     ${PROJECT_SOURCE_DIR}/src/runtime/LaTeX/main.cpp
     ${PROJECT_SOURCE_DIR}/src/runtime/LaTeX/controller.cpp
+    ${PROJECT_SOURCE_DIR}/src/runtime/LaTeX/generator.cpp
 )
     
 set (doc2LaTeX_h
     ${PROJECT_SOURCE_DIR}/src/runtime/LaTeX/controller.h
+    ${PROJECT_SOURCE_DIR}/src/runtime/LaTeX/generator.h
 )
 
 set (doc2LaTeX_prg

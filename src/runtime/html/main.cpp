@@ -11,7 +11,7 @@
 #include <boost/program_options.hpp>
 #include <boost/predef.h>
 #include <boost/uuid/string_generator.hpp>
-#include <boost/uuid/random_generator.hpp>
+//#include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
 #include <fmt/core.h>
@@ -181,7 +181,7 @@ int main(int argc, char* argv[]) {
         tmp_html,
         verbose
     );
-    return ctl.run(docruntime::verify_extension(inp_file, "docscript")
+    return ctl.run(docasm::verify_extension(inp_file, "docscript")
         , pool_size
         , tag
         , vm["generator.body"].as< bool >()
