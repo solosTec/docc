@@ -24,12 +24,12 @@ namespace docasm {
 		enum class state : std::uint32_t
 		{
 			ERROR_,
-			START_,
-			COMMENT_,
-			DOT_,
-			DIRECTIVE_,	//!<	function name
+			START,
+			COMMENT,
+			DOT,
+			DIRECTIVE,	//!<	function name
 			TIMESTAMP_,	//!<	starts with @
-			COLOR_,		//!<	starts with #
+			COLOR,		//!<	starts with #
 			NUMBER_,	//!<	number
 			INTEGER_,	//!<	signed
 			UNSIGNED_,	//!<	unsigned
@@ -38,8 +38,8 @@ namespace docasm {
 			EXPONENT_,	//!<	scientific notation: n.nnn[+|-]En
 			STRING_,	//!<	"..."
 			STRING_ESC_,	//!<	"..\?."
-			QUOTE_,		//!<	'...'
-			QUOTE_TRAIL_,	//!<	'....'aaa	QUOTE trailer
+			TYPE,		//!<	'type:value'
+			VALUE,		//!<	'....:value'	TYPE trailer
 			TEXT_,		//!<	anything else including numbers
 			INSTRUCTION_,	//!<	instruction name
 			NEWLINE_,	//!<	multiple NL
@@ -68,14 +68,15 @@ namespace docasm {
 		[[nodiscard]] std::pair<state, bool> directive(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> timestamp(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> color(token const& tok, token const& prev);
+		//[[nodiscard]] std::pair<state, bool> type(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> number(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> signed_int(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> unsigned_int(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> floating_point(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> sign(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> exponent(token const& tok, token const& prev);
-		[[nodiscard]] std::pair<state, bool> quote(token const& tok, token const& prev);
-		[[nodiscard]] std::pair<state, bool> quote_trail(token const& tok, token const& prev);
+		[[nodiscard]] std::pair<state, bool> type(token const& tok, token const& prev);
+		[[nodiscard]] std::pair<state, bool> value(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> string(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> string_esc(token const& tok, token const& prev);
 		[[nodiscard]] std::pair<state, bool> text(token const& tok, token const& prev);

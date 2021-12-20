@@ -50,6 +50,7 @@ namespace docscript {
 		bool state_svm(symbol const& sym);
 		bool state_params(symbol const& sym);
 		bool state_terminal(symbol const& sym);
+		bool state_type(symbol const& sym);
 
 		/**
 		 * @return true if a MAP is expected

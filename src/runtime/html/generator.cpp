@@ -233,27 +233,39 @@ namespace docruntime {
 
 		std::stringstream ss;
 		dom::to_html(ss, vec, ":");
+		auto const name = ss.str();	//	label name
 
-		auto const id = name_gen_(ss.str());
+		auto const id = name_gen_(name);
 
 		os_ 
 			<< "<a id=\""
 			<< boost::uuids::to_string(id)
 			<< "\" style = \"display:inline;\" href=\""
-			<< ss.str()
+			<< name
 			<< "\"></a>";
-		//auto const href = ss.str();
 
-		//auto const anchor = dom::a(dom::href_(href));
-		//anchor.serialize(os_);
+		//
+		//	update reference list
+		// 
+		//if (!refs_.emplace(name, id).second) {
+		//	//
+		//	//	duplicate label name
+		//	//
+		//	fmt::print(
+		//		fg(fmt::color::dark_orange) | fmt::emphasis::bold,
+		//		"***error: duplicate label [{}]\n", name);
+
+		//}
 	}
 
 	std::string generator::ref(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
 		std::stringstream ss;
-		ss << "REF(" << vec << ")";
-		std::cout << ss.str() << std::endl;
-		return ss.str();
+		dom::to_html(ss, vec, ":");
+		auto const name = ss.str();	//	label name
+		auto const id = name_gen_(name);
+
+		return name;
 	}
 	void generator::h1(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
@@ -301,7 +313,8 @@ namespace docruntime {
 		//	"level":0000000000000001),("tag":<uuid>'79bf3ba0-2362-4ea5-bcb5-ed93844ac59a'),("title":[Basics]))
 		auto const reader = cyng::make_reader(pm);
 		auto const level = cyng::numeric_cast<std::size_t>(reader.get("level"), 0);
-		auto const vec = cyng::container_cast<cyng::vector_t>(reader.get("title"));
+		auto vec = cyng::container_cast<cyng::vector_t>(reader.get("title"));
+		std::reverse(std::begin(vec), std::end(vec));
 		auto const title = dom::to_html(vec, " ");
 		auto const tag = cyng::value_cast(reader.get("tag"), name_gen_(title));
 		auto const r = toc_.add(level - 1, tag, title);
@@ -445,12 +458,10 @@ namespace docruntime {
 
 	void generator::table_of_content(cyng::param_map_t) {
 		os_
-			<< "<details>"
-			<< std::endl
+			<< "<details>\n"
 			<< "\t<summary>"
 			<< get_name(get_language_code(), i18n::TOC)
-			<< "</summary>"
-			<< std::endl
+			<< "</summary>\n"
 			;
 
 		//
@@ -460,8 +471,7 @@ namespace docruntime {
 		emit_toc(vec, 0);
 
 		os_
-			<< "</details>"
-			<< std::endl
+			<< "</details>\n"
 			;
 	}
 

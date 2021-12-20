@@ -3,6 +3,7 @@
 
 #include <cyng/io/ostream.h>
 #include <cyng/parse/timestamp.h>
+#include <cyng/parse/string.h>
 #include <cyng/obj/factory.hpp>
 
 #include <fmt/core.h>
@@ -13,6 +14,7 @@
 #include <boost/assert.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/uuid/string_generator.hpp>
+#include <boost/uuid/nil_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
 namespace docasm {
@@ -48,9 +50,10 @@ namespace docasm {
 					auto const val = std::get<8>(semantic_stack_.top());
 					semantic_stack_.pop();
 					switch (semantic_stack_.top().index()) {
-					case 5: {	//	forward expects uuid
-						auto f = std::get<5>(semantic_stack_.top()).finish(std::get<boost::uuids::uuid>(val.val_));
-						asts_.push_back(f);
+					case 5: {	//	forward expects cyng::raw
+						//auto f = std::get<5>(semantic_stack_.top()).finish(std::get<cyng::raw>(val.val_));
+						//asts_.push_back(f);
+						BOOST_ASSERT_MSG(false, "to implement");
 						semantic_stack_.pop();
 					}
 						  break;
@@ -101,10 +104,15 @@ namespace docasm {
 					semantic_stack_.push(j);
 				},
 				[&](literal& top) {
+					BOOST_ASSERT_MSG(semantic_stack_.top().index() == 7, "literal expected");
+					auto const type = std::get<7>(semantic_stack_.top()).value_;
 					semantic_stack_.pop();
-					BOOST_ASSERT(sym.type_ == symbol_type::TYP);
-					if (boost::algorithm::equals(sym.value_, "uuid")) {
-						semantic_stack_.push(value::factory(uuidgen_(top.value_)));
+					BOOST_ASSERT(sym.type_ == symbol_type::LIT);
+					//	compare this to the docc parser.
+					//	build a raw type				
+					if (cyng::type_code_exists(type)) {
+						semantic_stack_.pop();
+						semantic_stack_.push(value::factory(cyng::raw(sym.value_, type)));
 					}
 					else {
 						fmt::print(

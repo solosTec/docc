@@ -20,12 +20,12 @@
 #include <docc/method.h>
 #include <docc/symbol.h>
 
-
 #include <docc/ast/constant.h>
 #include <docc/ast/value.h>
 #include <docc/ast/params.h>
 #include <docc/ast/method.h>
 
+#include <boost/uuid/uuid.hpp>
 
 namespace docscript {
 
@@ -49,6 +49,8 @@ namespace docscript {
 			 * Move current term to program
 			 */
 			void finalize_param(symbol const& sym);
+			void finalize_param(cyng::raw const& r);
+			//void finalize_param(boost::uuids::uuid tag);
 
 			/**
 			 * initialize top term with a function

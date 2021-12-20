@@ -113,6 +113,10 @@ namespace docruntime {
 			ifs.unsetf(std::ios::skipws);
 
 			//
+			//	ToDo: read reference file from last run
+			// 
+
+			//
 			//	Create an scheduler with specified size
 			//	of the thread pool.
 			//
@@ -133,21 +137,21 @@ namespace docruntime {
 			tmp_html_.close();
 
 			if (!generate_body_only) {
-				ofs_ << "<html>" << std::endl;
+				ofs_ << "<!DOCTYPE html>\n";
+				ofs_ << "<html lang=\"" << gen.get_language() << "\">\n";
 				
 				emit_header(gen.get_meta());
-				ofs_ << "<body>" << std::endl;
+				ofs_ << "<body>\n";
 
-				tmp_html_.open(tmp_html_path_.string(),
-					std::ios::in | std::ios::binary);
+				tmp_html_.open(tmp_html_path_.string(), std::ios::in);
 				ofs_ << tmp_html_.rdbuf();
 				tmp_html_.close();
 
-				ofs_ << "</body>" << std::endl << "</html>" << std::endl;
+				ofs_ << "</body>\n";
+				ofs_ << "</html>\n";
 			}
 			else {
-				tmp_html_.open(tmp_html_path_.string(),
-					std::ios::in | std::ios::binary);
+				tmp_html_.open(tmp_html_path_.string(),	std::ios::in);
 				ofs_ << tmp_html_.rdbuf();
 				tmp_html_.close();
 			}
@@ -197,9 +201,7 @@ namespace docruntime {
 	void controller::emit_header(cyng::param_map_t& meta) {
 		ofs_ << "<head>" << std::endl;
 		ofs_ << "\t<meta charset = \"utf-8\"/> " << std::endl;
-		ofs_ << "\t<meta name=\"viewport\"content=\"width=device-width, "
-			"initial-scale=1\"/>"
-			<< std::endl;
+		ofs_ << "\t<meta name=\"viewport\"content=\"width=device-width, initial-scale=1\"/>\n";
 
 		//
 		//	title first

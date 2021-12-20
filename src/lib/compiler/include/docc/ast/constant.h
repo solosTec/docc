@@ -10,6 +10,7 @@
 #include <docc/symbol.h>
 
 #include <cyng/obj/intrinsics/color.hpp>
+#include <cyng/obj/intrinsics/raw.h>
 
 #include <limits>
 #include <chrono>
@@ -19,6 +20,7 @@
 #include <fmt/color.h>
 #include <fmt/ostream.h>
 
+//#include <boost/uuid/uuid.hpp>
 
 namespace docscript {
 	class context;
@@ -29,13 +31,22 @@ namespace docscript {
 		 */
 		struct constant {
 			std::string const value_;
-			std::variant<std::string, std::chrono::system_clock::time_point, bool, std::uint64_t, std::int64_t, double, cyng::color_8> node_;
+			std::variant<std::string
+				, std::chrono::system_clock::time_point
+				, bool
+				, std::uint64_t
+				, std::int64_t
+				, double
+				, cyng::color_8
+				, cyng::raw
+			> node_;
 
 			void compile(std::function<void(std::string const&)>, std::size_t depth, std::size_t index) const;
 			void transform(context const&);
 
 			[[nodiscard]] static constant factory(symbol const&);
 			[[nodiscard]] static constant factory(std::string const&);
+			[[nodiscard]] static constant factory(cyng::raw const&);
 
 			friend std::ostream& operator<<(std::ostream& os, constant const& c);
 		};

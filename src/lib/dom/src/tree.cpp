@@ -44,8 +44,8 @@ namespace dom
 			os
 				<< " ("
 				<< std::filesystem::file_size(p)
-				<< " bytes)</li>"
-				<< std::endl;
+				<< " bytes)</li>\n"
+				;
 		}
 
 		//
@@ -58,13 +58,12 @@ namespace dom
 				;
 
 			esc_html(os, p.filename().string());
-			//<< p.filename().string()
 			os
-				<< "</li>"
-				<< std::endl;
+				<< "</li>\n"
+				;
 			render_tree(os, p, depth + 1);
 		}
-		os << std::string(depth, ' ') << "</ul>" << std::endl;
+		os << std::string(depth, ' ') << "</ul>\n";
 	}
 
 	void render_tree(std::ostream& os, std::filesystem::path const& root) {

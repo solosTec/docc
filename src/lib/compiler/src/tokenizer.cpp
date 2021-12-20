@@ -136,9 +136,6 @@ namespace docscript {
 		case '#':
 			return { state::COLOR_, true };
 
-		case '<':
-			return { state::TYPE_, true };
-
 		case '\'':
 			return { state::QUOTE_, true };
 
@@ -193,6 +190,10 @@ namespace docscript {
 		case '-':
 			value_ += tok;
 			return { state::NUMBER_, true };
+
+		case '<':
+			//	syntax: <TYPE>LITERAL
+			return { state::TYPE_, true };
 
 		default:
 			//  "." as escape symbol - following character remains unchanged
@@ -373,7 +374,7 @@ namespace docscript {
 	{	// <type-name>
 		if (static_cast<std::uint32_t>(tok) == '>') {
 			emit(symbol_type::TYP);
-			return { state::START_, false };
+			return { state::START_, true };
 		}
 		value_ += tok;
 		return { state_, true };

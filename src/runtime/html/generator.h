@@ -39,13 +39,13 @@ namespace docruntime {
 		cyng::param_map_t& get_meta();
 		docruntime::toc& get_toc();
 
+		std::string get_language() const;
 
 	private:
 		std::string quote(cyng::vector_t);
 		std::string italic(cyng::vector_t);
 		std::string bold(cyng::vector_t);
 		std::string typewriter(cyng::vector_t);
-		// std::string number(cyng::vector_t);
 		std::string paragraph(cyng::vector_t);
 
 		void label(cyng::vector_t);
@@ -127,7 +127,6 @@ namespace docruntime {
 		std::string compute_title_figure(boost::uuids::uuid tag, std::string caption);
 		std::string compute_title_table(boost::uuids::uuid tag, std::string caption);
 		cyng::io::language_codes get_language_code() const;
-		std::string get_language() const;
 
 	private:
 		std::istream& is_;

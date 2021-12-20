@@ -11,11 +11,12 @@
 #include <asm/symbol.h>
 
 #include <cyng/obj/intrinsics/color.hpp>
+#include <cyng/obj/intrinsics/raw.h>
 
 #include <variant>
 #include <chrono>
 
-#include <boost/uuid/uuid.hpp>
+//#include <boost/uuid/uuid.hpp>
 
 namespace docasm {
 	class context;
@@ -36,11 +37,11 @@ namespace docasm {
 				std::uint64_t,		//	[5]
 				std::int64_t,		//	[6]
 				double,				//	[7]
-				boost::uuids::uuid	//	[8]
+				cyng::raw			//	[8]
 			> val_;
 
 			[[nodiscard]] static value factory(symbol const&);
-			[[nodiscard]] static value factory(boost::uuids::uuid);
+			[[nodiscard]] static value factory(cyng::raw);
 
 			friend std::ostream& operator<<(std::ostream& os, value const& c);
 

@@ -51,11 +51,12 @@
  * <method> ::= "fun" <value> | "fun" "(" <vector> ")" | "fun" "(" <map> ")"
  * <section> ::= "par" <vector>
  * <value> ::= <word> | <method>
- * <word> ::= "txt" | "tst"
+ * <word> ::= "txt" | "tst" | "col" | "bol" | "num" | "flt" | "exp" | <type>
  * <vector> ::= <value> <vector> | E
  * <map> ::= <pair> | "," <pair>
  * <pair> ::= <key> <value>
  * <key> ::= "txt" ":"
+ * <type> ::= [uuid | ip:address | ip:tcp:ep | mac48] "txt"
  */
 
 #include <docc/symbol.h>
@@ -73,6 +74,7 @@ namespace docscript {
 		SVM,	//	same as value for Single Value Methods
 		PARAMS,
 		TERMINAL,	//	any symbol
+		TYPE,	//	[uuid | ip:address | ip:tcp:ep | mac48]
 	};
 
 	/**

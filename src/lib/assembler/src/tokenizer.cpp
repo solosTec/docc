@@ -11,7 +11,7 @@
 namespace docasm {
 
 	tokenizer::tokenizer(emit_symbol_f cb)
-		: state_(state::START_)
+		: state_(state::START)
 		, cb_(cb)
 		, value_()
 		, prev_sym_type_(symbol_type::EOD)
@@ -38,24 +38,27 @@ namespace docasm {
 
 		bool advance{ true };
 		switch (state_) {
-		case state::START_:
+		case state::START:
 			std::tie(state_, advance) = start(tok, prev);
 			break;
-		case state::COMMENT_:
+		case state::COMMENT:
 			std::tie(state_, advance) = comment(tok, prev);
 			break;
-		case state::DOT_:
+		case state::DOT:
 			std::tie(state_, advance) = dot(tok, prev);
 			break;
-		case state::DIRECTIVE_:
+		case state::DIRECTIVE:
 			std::tie(state_, advance) = directive(tok, prev);
 			break;
 		case state::TIMESTAMP_:
 			std::tie(state_, advance) = timestamp(tok, prev);
 			break;
-		case state::COLOR_:
+		case state::COLOR:
 			std::tie(state_, advance) = color(tok, prev);
 			break;
+		//case state::TYPE:
+		//	std::tie(state_, advance) = type(tok, prev);
+		//	break;
 		case state::NUMBER_:
 			std::tie(state_, advance) = number(tok, prev);
 			break;
@@ -83,11 +86,11 @@ namespace docasm {
 		case state::STRING_ESC_:
 			std::tie(state_, advance) = string_esc(tok, prev);
 			break;
-		case state::QUOTE_:
-			std::tie(state_, advance) = quote(tok, prev);
+		case state::TYPE:
+			std::tie(state_, advance) = type(tok, prev);
 			break;
-		case state::QUOTE_TRAIL_:
-			std::tie(state_, advance) = quote_trail(tok, prev);
+		case state::VALUE:
+			std::tie(state_, advance) = value(tok, prev);
 			break;
 		case state::NEWLINE_:
 			std::tie(state_, advance) = newline(tok, prev);
@@ -116,12 +119,12 @@ namespace docasm {
 		switch (static_cast<std::uint32_t>(tok))
 		{
 		case ';':
-			return { state::COMMENT_, true };
-			//if (prev.is_nl()) return { state::COMMENT_, true };
+			return { state::COMMENT, true };
+			//if (prev.is_nl()) return { state::COMMENT, true };
 			break;
 
 		case '.':
-			return { state::DOT_, true };
+			return { state::DOT, true };
 
 		case ' ':   case '\t':
 			//	ommit white spaces
@@ -145,10 +148,10 @@ namespace docasm {
 			return { state::TIMESTAMP_, true };
 
 		case '#':
-			return { state::COLOR_, true };
+			return { state::COLOR, true };
 
 		case '\'':
-			return { state::QUOTE_, true };
+			return { state::TYPE, true };
 
 		case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': case '0':
 			return { state::NUMBER_, false };
@@ -171,7 +174,7 @@ namespace docasm {
 
 	std::pair<tokenizer::state, bool> tokenizer::comment(token const& tok, token const& prev)
 	{
-		if (tok.is_nl())    return { state::START_, false };
+		if (tok.is_nl())    return { state::START, false };
 		return { state_, true };
 	}
 
@@ -182,7 +185,7 @@ namespace docasm {
 			//  '.' is the escape symbol
 			if ('.' == prev) {
 				emit(symbol_type::TXT);
-				return { state::START_, true };
+				return { state::START, true };
 			}
 			break;
 
@@ -193,25 +196,25 @@ namespace docasm {
 		case '_':
 			//  only lower case characters allowed, no numbers
 			value_ += tok;
-			return { state::DIRECTIVE_, true };
+			return { state::DIRECTIVE, true };
 
 		case ' ':
 			// no-break space: 0xC2 0xA0
 			value_ += 0xC2A0;
-			return { state::START_, true };
+			return { state::START, true };
 
 		case '\t':
 			//  arrow: ↦
 			value_ += 0x21A6;
 			emit(symbol_type::TXT);
-			return { state::START_, true };
+			return { state::START, true };
 
 		default:
 			//  "." as escape symbol - following character remains unchanged
 			value_ += tok;
 			break;
 		}
-		return { state::START_, true };
+		return { state::START, true };
 	}
 
 	std::pair<tokenizer::state, bool> tokenizer::directive(token const& tok, token const& prev)
@@ -247,7 +250,7 @@ namespace docasm {
 		else [[likely]] {
 			emit(symbol_type::DIR);
 		}
-		return { state::START_, false };
+		return { state::START, false };
 	}
 
 	std::pair<tokenizer::state, bool> tokenizer::timestamp(token const& tok, token const& prev)
@@ -261,7 +264,7 @@ namespace docasm {
 		case 'T':
 			if (value_.size() != 10) {
 				//	this is not a timestamp
-				return { state::START_, true };
+				return { state::START, true };
 			}
 			value_ += tok;
 			break;
@@ -273,7 +276,7 @@ namespace docasm {
 				break;
 			default:
 				//	this is not a timestamp
-				return { state::START_, true };
+				return { state::START, true };
 				break;
 			}
 			value_ += tok;
@@ -286,7 +289,7 @@ namespace docasm {
 				break;
 			default:
 				//	this is not a timestamp
-				return { state::START_, true };
+				return { state::START, true };
 				break;
 			}
 			value_ += tok;
@@ -294,7 +297,7 @@ namespace docasm {
 
 		case 'Z':
 			if (value_.size() != 19) {
-				return { state::START_, false };
+				return { state::START, false };
 			}
 			value_ += tok;
 			break;
@@ -303,25 +306,25 @@ namespace docasm {
 			if (value_.size() == 10) {
 				complete_ts();
 				emit(symbol_type::TST);
-				return { state::START_, false };
+				return { state::START, false };
 			}
 			else if (value_.size() == 19) {
 				complete_ts();
 				emit(symbol_type::TST);
-				return { state::START_, false };
+				return { state::START, false };
 			}
 			else {
 				//  
 				//  do not interrupt the word
 				//
-				return { state::START_, false };
+				return { state::START, false };
 			}
 			break;
 		}
 
 		if (value_.size() == 22) {
 			emit(symbol_type::TST);
-			return { state::START_, true };
+			return { state::START, true };
 		}
 		return { state_, true };
 	}
@@ -349,15 +352,20 @@ namespace docasm {
 			value_ += tok;
 			if (value_.size() == 8) {
 				emit(symbol_type::COL);
-				return { state::START_, false };
+				return { state::START, false };
 			}
 			return { state_, true };
 		default:
 			break;
 		}
 		emit(symbol_type::COL);
-		return { state::START_, false };
+		return { state::START, false };
 	}
+
+	//std::pair<tokenizer::state, bool> tokenizer::type(token const& tok, token const& prev) {
+	//	BOOST_ASSERT_MSG(false, "to implement");
+	//	return { state::START, false };
+	//}
 
 	std::pair<tokenizer::state, bool> tokenizer::number(token const& tok, token const& prev) {
 
@@ -389,7 +397,7 @@ namespace docasm {
 		}
 
 		emit(symbol_type::NUM);
-		return { state::START_, false };
+		return { state::START, false };
 	}
 
 	std::pair<tokenizer::state, bool> tokenizer::signed_int(token const& tok, token const& prev) {
@@ -402,7 +410,7 @@ namespace docasm {
 		}
 
 		emit(symbol_type::INT);
-		return { state::START_, false };
+		return { state::START, false };
 	}
 
 	std::pair<tokenizer::state, bool> tokenizer::unsigned_int(token const& tok, token const& prev) {
@@ -415,7 +423,7 @@ namespace docasm {
 		}
 
 		emit(symbol_type::NUM);
-		return { state::START_, false };
+		return { state::START, false };
 	}
 
 	std::pair<tokenizer::state, bool> tokenizer::floating_point(token const& tok, token const& prev) {
@@ -432,7 +440,7 @@ namespace docasm {
 		}
 
 		emit(symbol_type::EXP);
-		return { state::START_, false };
+		return { state::START, false };
 	}
 
 	std::pair<tokenizer::state, bool> tokenizer::sign(token const& tok, token const& prev) {
@@ -447,7 +455,7 @@ namespace docasm {
 
 		//	not a number
 		emit(symbol_type::EXP);
-		return { state::START_, false };
+		return { state::START, false };
 	}
 
 	std::pair<tokenizer::state, bool> tokenizer::exponent(token const& tok, token const& prev) {
@@ -460,7 +468,7 @@ namespace docasm {
 		}
 
 		emit(symbol_type::EXP);
-		return { state::START_, false };
+		return { state::START, false };
 	}
 
 	std::pair<tokenizer::state, bool> tokenizer::string(token const& tok, token const& prev)
@@ -497,16 +505,21 @@ namespace docasm {
 			break;
 		}
 		emit(symbol_type::TXT);
-		return { state::START_, false };
+		return { state::START, false };
 
 	}
 
-	std::pair<tokenizer::state, bool> tokenizer::quote(token const& tok, token const& prev)
+	std::pair<tokenizer::state, bool> tokenizer::type(token const& tok, token const& prev)
 	{
 		switch (static_cast<std::uint32_t>(tok)) {
+		case ':':
+			emit(symbol_type::TYP);
+			return { state::VALUE, true };
+
 		case '\'':
+			//	no value - use it as LITERAL
 			emit(symbol_type::LIT);
-			return { state::QUOTE_TRAIL_, true };
+			return { state::START, true };
 
 		default:
 			break;
@@ -516,19 +529,18 @@ namespace docasm {
 		return { state_, true };
 	}
 
-	std::pair<tokenizer::state, bool> tokenizer::quote_trail(token const& tok, token const& prev)
+	std::pair<tokenizer::state, bool> tokenizer::value(token const& tok, token const& prev)
 	{
 		switch (static_cast<std::uint32_t>(tok)) {
-		case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g': case 'h': case 'i': case 'j': case 'k': case 'l': case 'm':
-		case 'n': case 'o': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'x': case 'y': case 'z':
-			value_ += tok;
-			return { state_, true };
+		case '\'':
+			//	value specified
+			emit(symbol_type::LIT);
+			return { state::START, true };
 		default:
 			break;
 		}
-		//	type specified
-		emit(symbol_type::TYP);
-		return { state::START_, false };
+		value_ += tok;
+		return { state_, true };
 	}
 
 	std::pair<tokenizer::state, bool> tokenizer::text(token const& tok, token const& prev)
@@ -536,30 +548,30 @@ namespace docasm {
 		switch (static_cast<std::uint32_t>(tok)) {
 		case '\n':
 			emit(symbol_type::TXT);
-			return { state::START_, false };
+			return { state::START, false };
 		case ' ':
 		case '\t':
 			emit(symbol_type::TXT);
-			return { state::START_, true };
+			return { state::START, true };
 
 		case ':':
 			emit(symbol_type::LBL);
-			return { state::START_, true };
+			return { state::START, true };
 
 		case '.':
 		case '!':   case '?':
 			value_ += tok;
 			emit(symbol_type::TXT);
-			return { state::START_, true };
+			return { state::START, true };
 
 		case ';':	
 		case ',':
 			emit(symbol_type::TXT);
-			return { state::START_, false };
+			return { state::START, false };
 
 		case '"':
 			emit(symbol_type::TXT);
-			return { state::START_, false };
+			return { state::START, false };
 
 		default:
 			break;
@@ -582,13 +594,13 @@ namespace docasm {
 
 		case ':':
 			emit(symbol_type::LBL);
-			return { state::START_, true };
+			return { state::START, true };
 		default:
 			break;
 		}
 
 		emit(symbol_type::INS);
-		return { state::START_, false };
+		return { state::START, false };
 
 	}
 
@@ -608,7 +620,7 @@ namespace docasm {
 		value_.append({ 0xb6 });
 
 		emit(symbol_type::EOL);
-		return { state::START_, false };
+		return { state::START, false };
 	}
 
 	void tokenizer::emit(symbol_type type)

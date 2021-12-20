@@ -42,8 +42,8 @@ namespace docasm {
 		case nonterminal_type::EOL:
 			os << "EOL";
 			break;
-		case nonterminal_type::UUID:
-			os << "UUID";
+		case nonterminal_type::TYPE:
+			os << "TYPE";
 			break;
 		case nonterminal_type::IDENT:
 			os << "IDENT";

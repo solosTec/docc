@@ -23,16 +23,15 @@ namespace dom
 			//
 			cyng::csv::parser csvp(',', [&](cyng::csv::line_t&& line) {
 				if (header) {
-					os << "<thead>" << std::endl;
+					os << "<thead>\n";
 					os << "<tr>";
 					for (auto const& cell : line) {
 						os << "<td>";
 						esc_html(os, cell);
-						os << "</td>" << std::endl;
-
+						os << "</td>";
 					}
-					os << "</tr>" << std::endl;
-					os << "</thead>" << std::endl;
+					os << "</tr>\n";
+					os << "</thead>\n";
 					header = false;
 				}
 				else {
@@ -40,15 +39,14 @@ namespace dom
 					for (auto const& cell : line) {
 						os << "<td>";
 						esc_html(os, cell);
-						os << "</td>" << std::endl;
-
+						os << "</td>";
 					}
-					os << "</tr>" << std::endl;
+					os << "</tr>\n";
 				}
 			});
 
 
-			os << "<table class=\"docc-table\">" << std::endl;
+			os << "<table class=\"docc-table\">\n";
 			std::ifstream  ifs(p.string());
 			if (ifs.is_open()) {
 				ifs >> std::noskipws;
@@ -56,15 +54,15 @@ namespace dom
 				auto [start, end] = cyng::get_stream_range<std::istream_iterator<char>>(ifs);
 				csvp.read(start, end);
 			}
-			os << "</table>" << std::endl;
+			os << "</table>\n";
 		}
 		else {
 			os
 				<< "<div>"
 				<< p.string()
 				<< " not found"
-				<< "</div>"
-				<< std::endl;
+				<< "</div>\n"
+				;
 		}
 	}
 

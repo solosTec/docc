@@ -2,6 +2,9 @@
 #include <docc/context.h>
 #include <docc/ast/root.h>
 
+#include <cyng/parse/string.h>
+#include <cyng/obj/intrinsics/raw.h>
+
 #ifdef _DEBUG
 #include <iostream>
 #endif
@@ -55,6 +58,8 @@ namespace docscript {
 			return state_svm(sym);
 		case nonterminal_type::TERMINAL:
 			return state_terminal(sym);
+		case nonterminal_type::TYPE:
+			return state_type(sym);
 		default:
 			BOOST_ASSERT_MSG(false, "internal error: unknown state");
 			break;
@@ -315,6 +320,13 @@ namespace docscript {
 			prg_.init_function(sym.value_);
 
 			return true;   //  advance
+		case symbol_type::TYP:
+			//	supported data types are:
+			//	* uuid
+			//	* ip:address, ip:tcp:ep
+			//	* mac48
+			state_.push({ sym, nonterminal_type::TYPE });
+			return true;
 		default:
 			fmt::print(
 				stdout,
@@ -377,6 +389,33 @@ namespace docscript {
 				fg(fmt::color::crimson) | fmt::emphasis::bold,
 				"{}: error: expected [{}] but found [{}]\n", ctx_.get_position(), state_.top().sym_.value_, sym.value_);
 		}
+		return true;
+	}
+
+	bool parser::state_type(symbol const& sym) {
+		//
+		//	expected syntax:
+		// <type> literal
+		//
+
+		BOOST_ASSERT(state_.top().nttype_ == nonterminal_type::TYPE);
+		auto const type = state_.top().sym_.value_;
+		state_.pop();
+
+		//
+		//	make a raw (unparsed) data type
+		//
+		if (cyng::type_code_exists(type)) {
+			cyng::raw const r(sym.value_, type);
+			prg_.finalize_param(r);
+		}
+		else {
+			fmt::print(
+				stdout,
+				fg(fmt::color::crimson) | fmt::emphasis::bold,
+				"{}: error: data type [{}] is not supported\n", ctx_.get_position(), type);
+		}
+
 		return true;
 	}
 

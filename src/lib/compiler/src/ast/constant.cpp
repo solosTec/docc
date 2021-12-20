@@ -9,6 +9,7 @@
 
 #include <boost/assert.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 namespace docscript {
 	namespace ast {
@@ -60,12 +61,21 @@ namespace docscript {
 			return constant{ s, s };
 		}
 
+		constant constant::factory(cyng::raw const& r) {
+			return constant{ r.get_literal(), r};
+		}
 
 		void constant::compile(std::function<void(std::string const&)> emit, std::size_t depth, std::size_t index) const {
 			//std::cout << "constant::compile()" << std::endl;
 			std::stringstream ss;
 			ss << *this;
 
+#ifdef _DEBUG
+			auto const s = ss.str();
+			if (!s.empty() && s.at(0) == '+') {
+				std::cout << "constant::compile(" << s << ")" << std::endl;
+			}
+#endif
 			emit("push ");
 			emit(ss.str());
 			emit("\n");
@@ -83,7 +93,7 @@ namespace docscript {
 					os << std::dec << (arg > 0 ? "+" : "") << arg << "i64";
 				},
 			[&](std::uint64_t arg) { 
-					os << std::dec << '+' << arg << "u64"; 
+					os << std::dec << arg << "u64"; 
 				},
 			[&](std::string const& arg) { 
 					//os << std::quoted(arg) << "\t; " << arg.size() << " bytes";
@@ -96,7 +106,11 @@ namespace docscript {
 			[&](bool arg) { 
 					os << (arg ? "true" : "false"); 
 				},
-			[&](cyng::color_8 const& arg) { 
+			[&](cyng::raw const& arg) {
+					//	'type:literal'
+					os << '\'' << arg.get_code_name() << ':' << arg.get_literal() << '\'';
+				},
+			[&](cyng::color_8 const& arg) {
 					os << arg << "\t; color";
 				},
 			}, c.node_);

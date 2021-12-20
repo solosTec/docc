@@ -28,7 +28,12 @@ namespace docscript {
 		void program::finalize_param(symbol const& sym) {
 
 			BOOST_ASSERT_MSG(top().index() == 2, "param expected");
-			append(std::get<2>(top()).finish(ast::value::factory(sym)));
+			append(std::get<2>(top()).finish(value::factory(sym)));
+		}
+
+		void program::finalize_param(cyng::raw const& r) {
+			BOOST_ASSERT_MSG(top().index() == 2, "param expected");
+			append(std::get<2>(top()).finish(value::factory(constant::factory(r))));
 		}
 
 		void program::append(param&& p) {

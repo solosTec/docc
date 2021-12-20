@@ -37,9 +37,9 @@
  *			| col	; color
  *			| bol	; boolean
  *			| num	; number
- *			| UUID	; uuid
+ *			| TYPE	; data type 
  * 
- * UUID		: lit typ 'uuid'
+ * TYPE		: type lit
  * 
  * IDENT	: txt
  *			| lit
@@ -55,7 +55,8 @@ namespace docasm {
 		PROGRAM,	//	
 		LINE,		//	
 		VALUE,
-		UUID,		//	LIT TYP 'uuid'
+		TYPE,		//	TYPE LIT
+//		UUID,		//	LIT TYP 'uuid'
 		IDENT,		//	any identifier
 		EOL,		//	end of line
 		TERMINAL

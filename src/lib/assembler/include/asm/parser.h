@@ -41,12 +41,13 @@ namespace docasm {
 		bool state_program(symbol const& sym);
 		bool state_line(symbol const& sym);
 		bool state_eol(symbol const& sym);
-		bool state_uuid(symbol const& sym);
 		bool state_ident(symbol const& sym);
 		bool state_value(symbol const& sym);
 		bool state_terminal(symbol const& sym);
+		bool state_type(symbol const& sym);
 
 		void statement(symbol const& sym);
+
 
 	private:
 		context& ctx_;

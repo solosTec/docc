@@ -4,6 +4,7 @@
 #include <cyng/io/ostream.h>
 #include <cyng/parse/timestamp.h>
 #include <cyng/obj/factory.hpp>
+#include <cyng/parse/raw.h>
 
 #include <boost/assert.hpp>
 #include <boost/algorithm/string.hpp>
@@ -72,8 +73,8 @@ namespace docasm {
 			return { sym.value_ };
 		}
 
-		value value::factory(boost::uuids::uuid oid) {
-			return { oid };
+		value value::factory(cyng::raw r) {
+			return { r };
 		}
 
 		std::ostream& operator<<(std::ostream& os, value const& v) {
@@ -101,8 +102,8 @@ namespace docasm {
 				[&](double val) {
 					os << std::scientific << val;
 					},
-				[&](boost::uuids::uuid val) {
-					os << val;
+				[&](cyng::raw val) {
+					os << '\'' << val << '\'';
 					}
 				}, v.val_);
 
@@ -113,9 +114,18 @@ namespace docasm {
 			return 1;
 		}
 		void value::generate(context& ctx, label_list_t const&) const {
-			std::visit([&](auto&& arg) {
-				ctx.emit(cyng::make_object(arg));
-				}, val_);
+
+			//
+			//	"raw" values need a different handling
+			//
+			std::visit(overloaded {
+				[&](auto&& arg) {
+					ctx.emit(cyng::make_object(arg));
+				},
+				[&](cyng::raw val) {
+					ctx.emit(cyng::construct_object(val));
+				}
+			}, val_);
 		}
 
 
