@@ -28,10 +28,10 @@ namespace docruntime {
 	public:
 		generator(std::istream&
 			, std::ostream&
-			//, std::string const& index_file
 			, cyng::mesh& fabric
 			, boost::uuids::uuid tag
-			, docscript::context&);
+			, docscript::context&
+			, std::string type);
 
 		int run();
 
@@ -45,7 +45,7 @@ namespace docruntime {
 		std::string italic(cyng::vector_t);
 		std::string bold(cyng::vector_t);
 		std::string typewriter(cyng::vector_t);
-		std::string paragraph(cyng::vector_t);
+		void paragraph(cyng::vector_t);
 
 		void label(cyng::vector_t);
 		std::string ref(cyng::vector_t);
@@ -85,7 +85,7 @@ namespace docruntime {
 		std::string repeat(cyng::param_map_t pm);
 		std::string currency(cyng::param_map_t pm);
 
-		void emit_header(std::size_t level, boost::uuids::uuid tag, std::string const& num, std::string const& title);
+		void emit_header(std::size_t level, boost::uuids::uuid tag, std::string const& title);
 		void emit_toc(cyng::vector_t, std::size_t depth);
 
 
@@ -94,7 +94,7 @@ namespace docruntime {
 		std::function<void(cyng::param_map_t)> f_set();
 		std::function<cyng::vector_t(cyng::vector_t)> f_get();
 		std::function<void(cyng::param_map_t)> f_meta();
-		std::function<std::string(cyng::vector_t)> f_paragraph();
+		std::function<void(cyng::vector_t)> f_paragraph();
 		std::function<std::string(cyng::vector_t)> f_italic();
 		std::function<std::string(cyng::vector_t)> f_bold();
 		std::function<std::string(cyng::vector_t)> f_typewriter();
@@ -128,17 +128,13 @@ namespace docruntime {
 	private:
 		std::istream& is_;
 		std::ostream& os_;
-		//std::string const& index_file_;
 		cyng::param_map_t vars_;
 		cyng::param_map_t meta_;
-		//toc toc_;
-		//footnotes_t footnotes_;
-		//figures_t figures_;
-		//tables_t tables_;
 		boost::uuids::random_generator uuid_gen_; //	basic_random_generator<mt19937>
 		boost::uuids::name_generator_latest name_gen_;	//	basic_name_generator<detail::sha1>
 		cyng::vm_proxy vm_;
 		docscript::context& ctx_;
+		int const struct_offset_;
 	};
 
 

@@ -31,10 +31,12 @@ namespace docruntime {
 			, int verbose);
 
 		int run(std::filesystem::path&& inp, std::size_t pool_size
-			, boost::uuids::uuid tag);
+			, boost::uuids::uuid tag
+			, bool generate_body_only
+			, std::string type);
 
 	private:
-		void emit_header(cyng::param_map_t& meta);
+		void emit_header(cyng::param_map_t& meta, std::string const& type);
 
 	private:
 		std::ofstream ofs_;
@@ -44,7 +46,7 @@ namespace docruntime {
 		docasm::reader	assembler_;
 	};
 
-
+	bool is_class_suported(std::string const&);
 }
 
 #endif

@@ -43,19 +43,28 @@ namespace docruntime {
 
 	int controller::run(std::filesystem::path&& inp
 		, std::size_t pool_size
-		, boost::uuids::uuid tag) {
+		, boost::uuids::uuid tag
+		, bool generate_body_only
+		, std::string type) {
 
 		//
 		//	check output file
 		//
 		if (!ofs_.is_open() || !tmp_tex_.is_open()) {
 			fmt::print(stdout,
-				fg(fmt::color::dark_orange) | fmt::emphasis::bold,
-				"***info : cannot open output file\n");
+				fg(fmt::color::dark_red) | fmt::emphasis::bold,
+				"***error: cannot open output file\n");
 			return EXIT_FAILURE;
 		}
 
 		auto const now = std::chrono::high_resolution_clock::now();
+
+		if (!is_class_suported(type)) {
+			fmt::print(
+				stdout,
+				fg(fmt::color::dark_orange) | fmt::emphasis::bold,
+				"***warn : LaTeX class [{}] not supported\n", type);
+		}
 
 		//
 		//	check input file
@@ -115,7 +124,7 @@ namespace docruntime {
 			cyng::controller ctl(pool_size);
 			cyng::mesh fabric(ctl);
 
-			generator gen(ifs, tmp_tex_, fabric, tag, ctx_);
+			generator gen(ifs, tmp_tex_, fabric, tag, ctx_, type);
 			gen.run();
 
 			//
@@ -128,17 +137,25 @@ namespace docruntime {
 
 			tmp_tex_.close();
 
-			emit_header(gen.get_meta());
-			ofs_ << "% body\n";
-			ofs_ << "\\begin{document}\n";
-			ofs_ << "\\maketitle\n";
+			if (!generate_body_only) {
 
-			tmp_tex_.open(tmp_tex_path_.string(), std::ios::in);
-			ofs_ << tmp_tex_.rdbuf();
-			tmp_tex_.close();
+				emit_header(gen.get_meta(), type);
+				ofs_ << "% body\n";
+				ofs_ << "\\begin{document}\n";
+				ofs_ << "\\maketitle\n";
 
-			ofs_ << "\\end{document}\n";
-			ofs_ << "% end\n";
+				tmp_tex_.open(tmp_tex_path_.string(), std::ios::in);
+				ofs_ << tmp_tex_.rdbuf();
+				tmp_tex_.close();
+
+				ofs_ << "% end\n";
+				ofs_ << "\\end{document}\n";
+			}
+			else {
+				tmp_tex_.open(tmp_tex_path_.string(), std::ios::in);
+				ofs_ << tmp_tex_.rdbuf();
+				tmp_tex_.close();
+			}
 
 		}
 		else {
@@ -159,10 +176,19 @@ namespace docruntime {
 		return EXIT_SUCCESS;
 	}
 
-	void controller::emit_header(cyng::param_map_t& meta) {
+	void controller::emit_header(cyng::param_map_t& meta, std::string const& type) {
+
+		
 		ofs_ << "% header\n";
-		ofs_ << "\\documentclass[12pt]{report}\n";
+		ofs_ << "\\documentclass[12pt,a4paper]{" << type << "}\n";
 		ofs_ << "\\usepackage[utf8]{inputenc}\n";
+		//ofs_ << "\\usepackage[" << get_babel_language() << "]{babel}\n";
+		ofs_ << "\\usepackage[official]{eurosym}\n";
+		ofs_ << "\\usepackage{hyperref}\n";
+		ofs_ << "\\hypersetup{colorlinks=true, linkcolor=blue, filecolor=magenta, urlcolor=brown}\n";
+		ofs_ << "\\usepackage{longtable}\n";
+		ofs_ << "\\usepackage{listings}\n";
+		ofs_ << "\\lstset{basicstyle=\\small\\ttfamily,breaklines=true}\n";
 
 		for (auto const& param : meta) {
 			if (boost::algorithm::equals(param.first, "title")) {
@@ -176,4 +202,16 @@ namespace docruntime {
 		ofs_ << "\\date{\\today}\n";
 
 	}
+
+	bool is_class_suported(std::string const& type) {
+		return (boost::algorithm::equals(type, "article")
+			|| boost::algorithm::equals(type, "report")
+			|| boost::algorithm::equals(type, "book")
+			|| boost::algorithm::equals(type, "beamer")
+			|| boost::algorithm::equals(type, "scrbook")
+			|| boost::algorithm::equals(type, "scrreprt")
+			|| boost::algorithm::equals(type, "scrartcl"));
+	}
+
+
 }

@@ -113,10 +113,6 @@ namespace docruntime {
 			ifs.unsetf(std::ios::skipws);
 
 			//
-			//	ToDo: read reference file from last run
-			// 
-
-			//
 			//	Create an scheduler with specified size
 			//	of the thread pool.
 			//

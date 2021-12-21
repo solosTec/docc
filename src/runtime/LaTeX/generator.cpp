@@ -1,13 +1,12 @@
 
 #include "generator.h"
+
 #include <rt/currency.h>
 #include <rt/stream.h>
 #include <rt/i18n.h>
-//#include <html/formatting.h>
-//#include <html/dom.hpp>
-//#include <html/code.h>
-//#include <html/tree.h>
-//#include <html/table.h>
+
+#include <tex/formatting.h>
+#include <tex/tex.hpp>
 
 #include <cyng/vm/vm.h>
 #include <cyng/io/parser/parser.h>
@@ -36,19 +35,14 @@ namespace docruntime {
 
 	generator::generator(std::istream& is
 		, std::ostream& os
-		//, std::string const& index_file
 		, cyng::mesh& fabric
 		, boost::uuids::uuid tag
-		, docscript::context& ctx)
+		, docscript::context& ctx
+		, std::string type)
 	: is_(is)
 		, os_(os)
-		//, index_file_(index_file)
 		, vars_()
 		, meta_()
-		//, toc_()
-		//, footnotes_()
-		//, figures_()
-		//, tables_()
 		, uuid_gen_()
 		, name_gen_(tag)
 		, vm_(fabric.make_proxy(tag
@@ -84,6 +78,7 @@ namespace docruntime {
 			, cyng::make_description("table", f_table())
 		))
 		, ctx_(ctx)
+		, struct_offset_(tex::class_structure_offset(type))
 	{
 		meta_.emplace("build", cyng::make_object(std::chrono::system_clock::now()));
 
@@ -164,32 +159,29 @@ namespace docruntime {
 
 	std::string generator::italic(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
-		//std::stringstream ss;
-		//ss << "<span style=\"font-style: italic;\">";
-		////dom::to_html(ss, vec, " ");
-		//ss << "</span>";
-		//return ss.str();
-		return "italic";
+		std::stringstream ss;
+		ss << "\\emph{";
+		tex::to_tex(ss, vec, " ");
+		ss << "}";
+		return ss.str();
 	}
 
 	std::string generator::bold(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
 		std::stringstream ss;
-		//ss << "<span style=\"font-weight: bold;\">";
-		//dom::to_html(ss, vec, " ");
-		//ss << "</span>";
-		//return ss.str();
-		return "bold";
+		ss << "\\textbf{";
+		tex::to_tex(ss, vec, " ");
+		ss << "}";
+		return ss.str();
 	}
 
 	std::string generator::typewriter(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
-		//std::stringstream ss;
-		//ss << "<span style=\"font-family: monospace;\">";
-		//dom::to_html(ss, vec, " ");
-		//ss << "</span>";
-		//return ss.str();
-		return "typewriter";
+		std::stringstream ss;
+		ss << "\\texttt{";
+		tex::to_tex(ss, vec, " ");
+		ss << "}";
+		return ss.str();
 	}
 
 	void generator::set(cyng::param_map_t pm) {
@@ -214,12 +206,13 @@ namespace docruntime {
 		return res;
 	}
 
-	std::string generator::paragraph(cyng::vector_t vec) {
+	void generator::paragraph(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
-		os_ << vec << std::endl;
-		//dom::to_html(os_, vec, " ");
-		//os_ << "</p>" << std::endl;
-		return "";
+		if (!vec.empty()) {
+			os_ << "% " << vec.size() << " tokens" << std::endl;
+			tex::to_tex(os_, vec, " ");
+			os_ << std::endl;
+		}
 	}
 
 	void generator::label(cyng::vector_t vec) {
@@ -270,45 +263,39 @@ namespace docruntime {
 	}
 	void generator::h1(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
-		//auto const title = dom::to_html(vec, " ");
-		//auto const id = name_gen_(title);
-		//auto const r = toc_.add(0, id, title);
-		//emit_header(0, id, r.first, title);
+		auto const title = tex::to_tex(vec, " ");
+		auto const id = name_gen_(title);
+		emit_header(0, id, title);
 	}
 	void generator::h2(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
-		//auto const title = dom::to_html(vec, " ");
-		//auto const id = name_gen_(title);
-		//auto const r = toc_.add(1, id, title);
-		//emit_header(1, id, r.first, title);
+		auto const title = tex::to_tex(vec, " ");
+		auto const id = name_gen_(title);
+		emit_header(1, id, title);
 	}
 	void generator::h3(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
-		//auto const title = dom::to_html(vec, " ");
-		//auto const id = name_gen_(title);
-		//auto const r = toc_.add(2, id, title);
-		//emit_header(2, id, r.first, title);
+		auto const title = tex::to_tex(vec, " ");
+		auto const id = name_gen_(title);
+		emit_header(2, id, title);
 	}
 	void generator::h4(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
-		//auto const title = dom::to_html(vec, " ");
-		//auto const id = name_gen_(title);
-		//auto const r = toc_.add(3, id, title);
-		//emit_header(3, id, r.first, title);
+		auto const title = tex::to_tex(vec, " ");
+		auto const id = name_gen_(title);
+		emit_header(3, id, title);
 	}
 	void generator::h5(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
-		//auto const title = dom::to_html(vec, " ");
-		//auto const id = name_gen_(title);
-		//auto const r = toc_.add(4, id, title);
-		//emit_header(4, id, r.first, title);
+		auto const title = tex::to_tex(vec, " ");
+		auto const id = name_gen_(title);
+		emit_header(4, id, title);
 	}
 	void generator::h6(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
-		//auto const title = dom::to_html(vec, " ");
-		//auto const id = name_gen_(title);
-		//auto const r = toc_.add(5, id, title);
-		//emit_header(5, id, r.first, title);
+		auto const title = tex::to_tex(vec, " ");
+		auto const id = name_gen_(title);
+		emit_header(5, id, title);
 	}
 	void generator::header(cyng::param_map_t pm) {
 		//	"level":0000000000000001),("tag":<uuid>'79bf3ba0-2362-4ea5-bcb5-ed93844ac59a'),("title":[Basics]))
@@ -316,33 +303,38 @@ namespace docruntime {
 		auto const level = cyng::numeric_cast<std::size_t>(reader.get("level"), 0);
 		auto vec = cyng::container_cast<cyng::vector_t>(reader.get("title"));
 		std::reverse(std::begin(vec), std::end(vec));
-		//auto const title = dom::to_html(vec, " ");
-		//auto const tag = cyng::value_cast(reader.get("tag"), name_gen_(title));
-		//auto const r = toc_.add(level - 1, tag, title);
-		//emit_header(level - 1, tag, r.first, title);
+		auto const title = tex::to_tex(vec, " ");
+		auto const tag = cyng::value_cast(reader.get("tag"), name_gen_(title));
+		emit_header(level - 1, tag, title);
 	}
 
-	void generator::emit_header(std::size_t level, boost::uuids::uuid tag, std::string const& num, std::string const& title) {
+	void generator::emit_header(std::size_t level, boost::uuids::uuid tag, std::string const& title) {
 
-		//os_
-		//	<< "<h"
-		//	<< level + 1
-		//	<< ">"
-		//	<< num
-		//	<< "&nbsp;"
-		//	<< title
-		//	<< "<a id=\""
-		//	<< tag
-		//	<< "\" aria-hidden=\"true\" "
-		//	<< "href=\"#" << tag << "\""
-		//	<< "class=\"oction\">"
-		//	<< "<svg viewBox=\"0 0 16 16\" version=\"1.1\" width=\"16\" height=\"16\" aria-hidden=\"true\"><path fill-rule=\"evenodd\" d=\"M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z\"></path></svg>"
-		//	<< "</a>"
-		//	<< "</h"
-		//	<< level + 1
-		//	<< ">"
-		//	<< std::endl
-		//	;
+		switch (level) {
+		case -1:
+			os_ << "\\part{" << title << "}\n\\label{" << boost::uuids::to_string(tag) << "}\n";
+			break;
+		case 0:
+			os_ << "\\chapter{" << title << "}\n\\label{" << boost::uuids::to_string(tag) << "}\n";
+			break;
+		case 1:
+			os_ << "\\section{" << title << "}\n\\label{" << boost::uuids::to_string(tag) << "}\n";
+			break;
+		case 2:
+			os_ << "\\subsection{" << title << "}\n\\label{" << boost::uuids::to_string(tag) << "}\n";
+			break;
+		case 3:
+			os_ << "\\subsubsection{" << title << "}\n\\label{" << boost::uuids::to_string(tag) << "}\n";
+			break;
+		case 4:
+			os_ << "\\paragraph{" << title << "}\n\\label{" << boost::uuids::to_string(tag) << "}\n";
+			break;
+		case 5:
+			os_ << "\\subparagraph{" << title << "}\n\\label{" << boost::uuids::to_string(tag) << "}\n";
+			break;
+		default:
+			break;
+		}
 	}
 
 	void generator::figure(cyng::param_map_t pm) {
@@ -527,9 +519,8 @@ namespace docruntime {
 	std::string generator::fuse(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
 		std::stringstream ss;
-		//dom::to_html(ss, vec, "");	//	empty separator here
-		//return ss.str();
-		return "FUSE";
+		tex::to_tex(ss, vec, "");	//	empty separator here
+		return ss.str();
 	}
 	std::string generator::cat(cyng::param_map_t pm) {
 		//std::reverse(std::begin(vec), std::end(vec));
@@ -570,7 +561,7 @@ namespace docruntime {
 		return std::bind(&generator::meta, this, std::placeholders::_1);
 	}
 
-	std::function<std::string(cyng::vector_t)> generator::f_paragraph() {
+	std::function<void(cyng::vector_t)> generator::f_paragraph() {
 		return std::bind(&generator::paragraph, this, std::placeholders::_1);
 	}
 	std::function<std::string(cyng::vector_t)> generator::f_italic() {

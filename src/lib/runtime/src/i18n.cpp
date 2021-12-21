@@ -96,7 +96,7 @@ namespace docruntime
 			case cyng::io::LC_SV: return "Innehållsförteckning";
 			case cyng::io::LC_PT: return "Índice";	//	Portuguese
 			case cyng::io::LC_DE: return "Inhaltsverzeichnis";
-				//case cyng::io::LC_BG: return "Съдържание";
+			//case cyng::io::LC_BG: return "Съдържание";
 				//case cyng::io::LC_RU: return "Оглавление";
 			case cyng::io::LC_UK: return "Table of Contents";
 				//			case cyng::io::LC_CS: return "czech";

@@ -90,13 +90,13 @@ namespace dom
 					;
 				break;
 			case cyng::TC_DOUBLE:
-				dom::to_html(os, cyng::numeric_cast<double>(obj, 0.0));
+				to_html(os, cyng::numeric_cast<double>(obj, 0.0));
 				break;
 			case cyng::TC_STRING:
 				os << obj;
 				break;
 			case cyng::TC_TIME_POINT:
-				dom::to_html(os, cyng::value_cast(obj, std::chrono::system_clock::now()));
+				to_html(os, cyng::value_cast(obj, std::chrono::system_clock::now()));
 				//os << obj;
 				break;
 			case cyng::TC_FS_PATH:

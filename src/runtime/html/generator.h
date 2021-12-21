@@ -46,7 +46,7 @@ namespace docruntime {
 		std::string italic(cyng::vector_t);
 		std::string bold(cyng::vector_t);
 		std::string typewriter(cyng::vector_t);
-		std::string paragraph(cyng::vector_t);
+		void paragraph(cyng::vector_t);
 
 		void label(cyng::vector_t);
 		std::string ref(cyng::vector_t);
@@ -95,7 +95,7 @@ namespace docruntime {
 		std::function<void(cyng::param_map_t)> f_set();
 		std::function<cyng::vector_t(cyng::vector_t)> f_get();
 		std::function<void(cyng::param_map_t)> f_meta();
-		std::function<std::string(cyng::vector_t)> f_paragraph();
+		std::function<void(cyng::vector_t)> f_paragraph();
 		std::function<std::string(cyng::vector_t)> f_italic();
 		std::function<std::string(cyng::vector_t)> f_bold();
 		std::function<std::string(cyng::vector_t)> f_typewriter();

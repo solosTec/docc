@@ -37,7 +37,6 @@ int main(int argc, char* argv[]) {
         ("help,h", "print usage message")
         ("version,v", "print version string")
         ("config,C", boost::program_options::value<std::string>(&config_file)->default_value(config_file), "configuration file")
-
         ;
 
     //
@@ -54,11 +53,17 @@ int main(int argc, char* argv[]) {
         ("verbose,V", boost::program_options::value<int>()->default_value(0)->implicit_value(1), "verbose level")
         ;
 
+    boost::program_options::options_description gen("generator");
+    gen.add_options()
+        ("generator.body", boost::program_options::bool_switch()->default_value(false), "generate body only")
+        ("generator.type,Y", boost::program_options::value<std::string>()->default_value("report"), "article, report, book, beamer, scrbook, scrreprt, scrartcl, ...")
+        ;
+
     //
     //	all you can grab from the command line
     //
     boost::program_options::options_description cmdline_options;
-    cmdline_options.add(generic).add(compiler);
+    cmdline_options.add(generic).add(compiler).add(gen);
 
     //
     //	positional arguments
@@ -174,5 +179,9 @@ int main(int argc, char* argv[]) {
         tmp_latex,
         verbose
     );
-    return ctl.run(docasm::verify_extension(inp_file, "docscript"), pool_size, tag);
+    return ctl.run(docasm::verify_extension(inp_file, "docscript")
+        , pool_size
+        , tag
+        , vm["generator.body"].as< bool >()
+        , vm["generator.type"].as< std::string >());
 }

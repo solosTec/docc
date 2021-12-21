@@ -37,7 +37,6 @@ int main(int argc, char* argv[]) {
         ("help,h", "print usage message")
         ("version,v", "print version string")
         ("config,C", boost::program_options::value<std::string>(&config_file)->default_value(config_file), "configuration file")
-
         ;
 
     //

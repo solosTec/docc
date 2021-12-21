@@ -215,12 +215,13 @@ namespace docruntime {
 		return res;
 	}
 
-	std::string generator::paragraph(cyng::vector_t vec) {
+	void generator::paragraph(cyng::vector_t vec) {
 		std::reverse(std::begin(vec), std::end(vec));
-		os_ << "<p>";
-		dom::to_html(os_, vec, " ");
-		os_ << "</p>" << std::endl;
-		return "";
+		if (!vec.empty()) {
+			os_ << "<p>";
+			dom::to_html(os_, vec, " ");
+			os_ << "</p>" << std::endl;
+		}
 	}
 
 	void generator::label(cyng::vector_t vec) {
@@ -626,7 +627,7 @@ namespace docruntime {
 		return std::bind(&generator::meta, this, std::placeholders::_1);
 	}
 
-	std::function<std::string(cyng::vector_t)> generator::f_paragraph() {
+	std::function<void(cyng::vector_t)> generator::f_paragraph() {
 		return std::bind(&generator::paragraph, this, std::placeholders::_1);
 	}
 	std::function<std::string(cyng::vector_t)> generator::f_italic() {

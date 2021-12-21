@@ -202,6 +202,7 @@ if (IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src/lib)
 	add_subdirectory(src/lib/assembler)
 	add_subdirectory(src/lib/runtime)
 	add_subdirectory(src/lib/dom)
+	add_subdirectory(src/lib/tex)
 endif()
 
 #
@@ -405,6 +406,7 @@ target_link_libraries(doc2LaTeX
 		docscript
 		docasm
 		docruntime
+		tex
         fmt::fmt
 		${CYNG_LIBRARIES}
 		${OPENSSL_LIBRARIES}
