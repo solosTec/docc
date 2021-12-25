@@ -92,7 +92,6 @@ target_include_directories(docscript
 		${CMAKE_CURRENT_SOURCE_DIR}/include
 	PRIVATE
 		${CMAKE_CURRENT_SOURCE_DIR}/include
-#		${CYNG_INCLUDE_DIRS}
 		${OPENSSL_INCLUDE_DIR}
 		${Boost_INCLUDE_DIRS}
 )

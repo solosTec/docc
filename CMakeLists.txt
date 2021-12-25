@@ -51,6 +51,7 @@ message(STATUS "  ***                   *****      *****    ")
 message(STATUS "**")                                        
 
 string(TIMESTAMP CURRENT_YEAR "%Y")
+string(TIMESTAMP LOCAL_TIME "%Y-%m-%dT%H:%M:%S")
 
 message(STATUS "** CMake              : v${CMAKE_VERSION}")
 message(STATUS "** Generator          : ${CMAKE_GENERATOR}")
@@ -288,46 +289,6 @@ install(TARGETS doca
     RUNTIME
     DESTINATION bin)
 
-#
-# generic docScript runtime
-#
-include (src/runtime/prg.cmake)
-
-add_executable(docrt ${runtime_prg})
-
-target_include_directories(docrt
-	PUBLIC
-		${CMAKE_SOURCE_DIR}/src/runtime
-        ${CYNG_INCLUDE_DIRS}
-		${PROJECT_BINARY_DIR}/include
- 		${OPENSSL_INCLUDE_DIR}
- 		${Boost_INCLUDE_DIRS}
-)
-
-target_compile_features(docrt PRIVATE cxx_std_20)
-
-target_compile_options(docrt 
-    PRIVATE "$<$<CXX_COMPILER_ID:GNU,Clang>:-Wall;-Wextra;-pedantic>"
-	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/MP>"
-	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/W2>"
-)
-
-target_compile_definitions(docrt
-	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:_WIN32_WINNT=0x0601>")
-
-target_link_libraries(docrt 
-	PUBLIC 
-		docruntime
-		docscript
-        fmt::fmt
-		${CYNG_LIBRARIES}
-		${OPENSSL_LIBRARIES}
-		"$<$<PLATFORM_ID:Linux>:pthread;${Boost_LIBRARIES}>"
-)
-
-install(TARGETS docrt
-    RUNTIME
-    DESTINATION bin)
 
 #
 # HTML doc2html generator
@@ -456,6 +417,13 @@ target_link_libraries(doc2md
 
 install(TARGETS doc2md
     RUNTIME DESTINATION bin)
+
+#
+#	projects
+#
+if (IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src/runtime/site)
+	add_subdirectory(src/runtime/site)
+endif()
 
 #
 # batch files

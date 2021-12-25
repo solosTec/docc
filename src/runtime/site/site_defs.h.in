@@ -1,0 +1,23 @@
+/*
+ * don't modify. 
+ * generated automatically
+ */
+
+#ifndef ${PROJECT_NAME}_DEFS_H
+#define ${PROJECT_NAME}_DEFS_H
+
+#include <filesystem>
+
+namespace docscript {
+
+	std::filesystem::path const hidden = ".doc2site";
+	constexpr char cfg_file_name[] = "doc2site-${docc_VERSION_MAJOR}.${docc_VERSION_MINOR}.cfg";
+	constexpr char control_file_name[] = "site-${docc_VERSION_MAJOR}.${docc_VERSION_MINOR}.json";
+	std::filesystem::path const subdir_src = "src";
+	std::filesystem::path const subdir_build = "build";
+
+	constexpr char bootstrap_version[] = "5.0.2";
+	constexpr char build_time[] = "${LOCAL_TIME}";
+	
+}
+#endif	// ${PROJECT_NAME}_DEFS_H
