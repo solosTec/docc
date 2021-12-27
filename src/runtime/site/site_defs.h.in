@@ -14,7 +14,7 @@ namespace docscript {
 	constexpr char cfg_file_name[] = "doc2site-${docc_VERSION_MAJOR}.${docc_VERSION_MINOR}.cfg";
 	constexpr char control_file_name[] = "site-${docc_VERSION_MAJOR}.${docc_VERSION_MINOR}.json";
 	std::filesystem::path const subdir_src = "src";
-	std::filesystem::path const subdir_build = "build";
+	std::filesystem::path const subdir_out = "out";
 
 	constexpr char bootstrap_version[] = "5.0.2";
 	constexpr char build_time[] = "${LOCAL_TIME}";

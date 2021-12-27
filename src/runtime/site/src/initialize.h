@@ -12,6 +12,7 @@
 
 #include <filesystem>
 #include <vector>
+#include <chrono>
 
 namespace docscript {
 
@@ -24,9 +25,15 @@ namespace docscript {
 		int run(std::filesystem::path working_dir);
 
 	private:
-		cyng::tuple_t generate_control() const;
+		cyng::tuple_t generate_control(std::tm const& tm) const;
 		cyng::tuple_t generate_page_home() const;
-		cyng::tuple_t generate_menu_main() const;
+		cyng::tuple_t generate_navbar_main() const;
+		cyng::tuple_t generate_footer_main(std::tm const& tm) const;
+		cyng::tuple_t generate_downloads() const;
+
+		void generate_logo(std::filesystem::path);
+
+		void download_bootstrap(std::filesystem::path, std::string v) const;
 
 	private:
 		std::vector<std::filesystem::path> const inc_;
