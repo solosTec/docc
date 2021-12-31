@@ -13,6 +13,11 @@
 namespace docscript {
 	namespace ast {
 
+		template < class... Ts > struct overloaded : Ts... {
+			using Ts::operator()...;
+		};
+		// explicit deduction guide (not needed as of C++20)
+		template < class... Ts > overloaded(Ts...)->overloaded< Ts... >;
 
 		program::program(context& ctx)
 			: ctx_(ctx)
@@ -115,6 +120,35 @@ namespace docscript {
 
 		void program::merge_ast() {
 
+			//	proposal (doesn't compile yet)
+			//std::visit(
+			//	overloaded{
+			//		[&] (constant arg) {},
+			//		[&](value arg) {},
+			//		[&](param arg) {
+			//			BOOST_ASSERT(semantic_stack_.size() > 1);
+			//			//
+			//			//	There is a parameter list on the stack that is complete.
+			//			//	This list will be added to the associated function.
+			//			//
+			//			merge_ast_param(std::move(arg));
+			//			},
+			//		[&](map_method arg) {
+			//			BOOST_ASSERT(semantic_stack_.size() > 1);
+			//			//
+			//			//  map method is complete.
+			//			//
+			//			merge_ast_map_method(std::move(arg));
+			//		},
+			//		[&](vec_method arg) {
+			//			//
+			//			//  vec method is complete
+			//			//	
+			//			merge_ast_vec_method(std::move(arg));
+			//		}
+			//	},
+			//top());
+
 			switch (top().index()) {
 			case 2:
 				BOOST_ASSERT(semantic_stack_.size() > 1);
@@ -148,13 +182,22 @@ namespace docscript {
 		}
 
 		bool program::append(symbol const& sym) {
-			if (top().index() == 4) {
-				auto const count = std::get<4>(top()).append(value::factory(sym));
-				if (ctx_.get_verbosity(16)) {
-					fmt::print(
-						stdout,
-						fg(fmt::color::dim_gray),
-						"{}: add parameter {}#{} to the \"{}\" vec-method\n", ctx_.get_position(), sym.value_, count, std::get<4>(top()).get_name());
+			if (top().index() == 4) {	//	vec_method
+				if (symbol_type::TXT == sym.type_) {
+					//	use the esc() method
+					init_function("esc");
+					auto const count = std::get<4>(top()).append(value::factory(sym));
+					BOOST_ASSERT(count == 1);
+					merge_ast_vec_method();
+				}
+				else {
+					auto const count = std::get<4>(top()).append(value::factory(sym));
+					if (ctx_.get_verbosity(16)) {
+						fmt::print(
+							stdout,
+							fg(fmt::color::dim_gray),
+							"{}: add parameter '{}'#{} to the \"{}\" vec-method\n", ctx_.get_position(), sym.value_, count, std::get<4>(top()).get_name());
+					}
 				}
 				return true;
 			}
@@ -297,7 +340,7 @@ namespace docscript {
 			BOOST_ASSERT_MSG(top().index() == 4, "vec method expected");
 
 			auto m = std::move(std::get<4>(top()));
-			auto const name = std::get<4>(top()).get_name();	//	function name
+			auto const name = m.get_name();	//	function name
 			semantic_stack_.pop();
 
 			if (ctx_.get_verbosity(12)) {
@@ -305,7 +348,7 @@ namespace docscript {
 				fmt::print(
 					stdout,
 					fg(fmt::color::light_gray),
-					"{}: vec function \"{}\" is complete. {} parameter(s) specified\n", ctx_.get_position(), m.get_name(), m.param_count());
+					"{}: vec function \"{}\" is complete. {} parameter(s) specified\n", ctx_.get_position(), name, m.param_count());
 
 			}
 

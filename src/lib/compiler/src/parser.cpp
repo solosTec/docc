@@ -256,6 +256,11 @@ namespace docscript {
 		state_.pop();
 		switch (sym.type_) {
 		case symbol_type::TXT:
+			//	use the esc() method
+			//prg_.init_function("esc");
+			//prg_.append(sym);
+			//prg_.merge();
+			//break;
 		case symbol_type::TST:
 		case symbol_type::COL:
 		case symbol_type::BOL:

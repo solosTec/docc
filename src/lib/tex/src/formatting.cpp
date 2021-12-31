@@ -88,7 +88,7 @@ namespace tex
 		return ss.str();
 	}
 
-	void esc_html(std::ostream& os, std::string const& s) {
+	void esc_tex(std::ostream& os, std::string const& s) {
 		for (auto c : s) {
 			switch (c) {
 			case '&': os << "\\&"; break;

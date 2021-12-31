@@ -41,6 +41,7 @@ namespace docruntime {
 		std::string get_language() const;
 
 	private:
+		std::string esc(cyng::vector_t);
 		std::string quote(cyng::vector_t);
 		std::string italic(cyng::vector_t);
 		std::string bold(cyng::vector_t);
@@ -90,6 +91,7 @@ namespace docruntime {
 
 
 	private:
+		std::function<std::string(cyng::vector_t)> f_esc();
 		std::function<std::string(cyng::vector_t)> f_quote();
 		std::function<void(cyng::param_map_t)> f_set();
 		std::function<cyng::vector_t(cyng::vector_t)> f_get();

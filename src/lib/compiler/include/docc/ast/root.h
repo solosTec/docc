@@ -50,7 +50,6 @@ namespace docscript {
 			 */
 			void finalize_param(symbol const& sym);
 			void finalize_param(cyng::raw const& r);
-			//void finalize_param(boost::uuids::uuid tag);
 
 			/**
 			 * initialize top term with a function
@@ -96,7 +95,7 @@ namespace docscript {
 			void merge_ast_param();
 			void merge_ast_map_method();
 			void merge_ast_vec_method();
-			void merge_ast_value(value&&);
+			void merge_ast_value(value&& v);
 
 		private:
 			context& ctx_;

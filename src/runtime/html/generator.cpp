@@ -52,6 +52,7 @@ namespace docruntime {
 		, uuid_gen_()
 		, name_gen_(tag)
 		, vm_(fabric.make_proxy(tag
+			, cyng::make_description("esc", f_esc())
 			, cyng::make_description("quote", f_quote())
 			, cyng::make_description("set", f_set())
 			, cyng::make_description("get", f_get())
@@ -162,6 +163,19 @@ namespace docruntime {
 		ss << "&bdquo;";
 		dom::to_html(ss, vec, " ");
 		ss << "&ldquo;";
+		return ss.str();
+	}
+
+	std::string generator::esc(cyng::vector_t vec) {
+		std::reverse(std::begin(vec), std::end(vec));
+		BOOST_ASSERT_MSG(vec.size() == 1, "single string expected");
+		//
+		//	only strings allowed
+		//
+		auto const s = dom::to_html(vec, " ");
+		//	slow
+		std::stringstream ss;
+		dom::esc_html(ss, s);
 		return ss.str();
 	}
 
@@ -611,6 +625,10 @@ namespace docruntime {
 		auto const name = cyng::value_cast<std::string>(reader.get("name"), "euro");
 
 		return docruntime::currency_html(value, name);
+	}
+
+	std::function<std::string(cyng::vector_t)> generator::f_esc() {
+		return std::bind(&generator::esc, this, std::placeholders::_1);
 	}
 
 	std::function<std::string(cyng::vector_t)> generator::f_quote() {

@@ -180,6 +180,7 @@ namespace docscript {
 		insert_method(table, method("tt", parameter_type::VECTOR, true));	//	mono font
 		//insert_method(table, method("number", parameter_type::VECTOR, true));	//	<number>
 
+		insert_method(table, method("esc", parameter_type::VECTOR, true));	//	represent certain special characters in the target language (HTML, LaTeX, ...)
 		insert_method(table, method("quote", parameter_type::VECTOR, true));	//	same as "..."
 		insert_method(table, method("range", parameter_type::VECTOR, true));	//	collect a vector
 		insert_method(table, method("fuse", parameter_type::VECTOR, true));		//	concatenate without spaces

@@ -311,8 +311,8 @@ target_compile_features(doc2html PRIVATE cxx_std_20)
 
 target_compile_options(doc2html 
     PRIVATE "$<$<CXX_COMPILER_ID:GNU,Clang>:-Wall;-Wextra;-pedantic>"
-	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/MP>"
-	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/W2>"
+	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/MP;/W2>"
+#	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/W2>"
 )
 
 target_compile_definitions(doc2html
@@ -355,8 +355,7 @@ target_compile_features(doc2LaTeX PRIVATE cxx_std_20)
 
 target_compile_options(doc2LaTeX 
     PRIVATE "$<$<CXX_COMPILER_ID:GNU,Clang>:-Wall;-Wextra;-pedantic>"
-	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/MP>"
-	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/W2>"
+	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/MP;/W2>"
 )
 
 target_compile_definitions(doc2LaTeX
