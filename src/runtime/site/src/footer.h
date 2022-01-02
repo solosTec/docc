@@ -19,7 +19,7 @@ namespace docscript {
 	struct footer {
 		footer(std::string, std::string, bool);
 
-		std::string const color_scheme_;
+		std::string const bg_color_;
 		std::string const content_;
 		bool const enabled_;
 	};

@@ -5,8 +5,8 @@
 #include <cyng/obj/algorithm/reader.hpp>
 
 namespace docscript {
-	footer::footer(std::string color_scheme, std::string content, bool enabled)
-		: color_scheme_(color_scheme)
+	footer::footer(std::string bg_color, std::string content, bool enabled)
+		: bg_color_(bg_color)
 		, content_(content)
 		, enabled_(enabled)
 	{}
@@ -17,7 +17,7 @@ namespace docscript {
 			auto const reader = cyng::make_reader(cyng::container_cast<cyng::param_map_t>(obj));
 			r.emplace(std::piecewise_construct
 				, std::forward_as_tuple(reader.get("name", ""))
-				, std::forward_as_tuple(reader.get("color-scheme", "")
+				, std::forward_as_tuple(reader.get("bg-color", "bg-primary")
 					, reader.get("content", "")
 					, reader.get("enabled", false)));
 		}

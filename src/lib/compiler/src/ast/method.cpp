@@ -129,37 +129,56 @@ namespace docscript {
 				emit("; skip empty paragraph\n");	//	
 			}
 			else {
-				emit("esba");
-				emit("\t; ");
-				emit(this->get_name());
-				emit("\n");
-
-				//
-				//	generate assembler code
-				//
-				for (auto const& p : vlist_) {
-					BOOST_ASSERT(!!p);
-					if (p) (*p).compile(emit, depth + 1, index);
-				}
-
-				emit("frm\n");
-				emit("make_vector\t; ");
-				emit(std::to_string(vlist_.size()));
-				emit("\n");
-				emit("push 1\t; one vector\n");	//	make tuple with one vector
-				emit("invoke_r ");
-				emit(this->get_name());
-				emit("\n");
-				//
-				//	range produces a vector that should be splitted
-				//	
-				//if (boost::algorithm::equals(this->get_name(), "range")) {
-				//	emit("split\t; dissect vector\n");
-				//	emit("pop\t; remove size info\n");
+				//if (vlist_.empty()) {
+				//	emit("push 0\t; no elements\n");
+				//	emit("make_vector\n");
+				//	emit("push 1\t; one empty vector\n");	//	make tuple with one vector
+				//	emit("invoke_r ");
+				//	emit(this->get_name());
+				//	emit("\n");
 				//}
-				emit("pull\n");
-				emit("\n");
+				if ((vlist_.size() == 1) && vlist_.front()->is_constant_txt().second) {
+					//	optimized for one string element
+					vlist_.front()->compile(emit, depth + 1, index);
+					emit("push 1\t; one string element\n");
+					emit("make_vector\n");
+					emit("push 1\t; one vector\n");	//	make tuple with one vector
+					emit("invoke_r ");
+					emit(this->get_name());
+					emit("\n");
+				}
+				else {
+					emit("esba");
+					emit("\t; ");
+					emit(this->get_name());
+					emit(" method\n");
 
+					//
+					//	generate assembler code
+					//
+					for (auto const& p : vlist_) {
+						BOOST_ASSERT(!!p);
+						if (p) (*p).compile(emit, depth + 1, index);
+					}
+
+					emit("frm\n");
+					emit("make_vector\t; ");
+					emit(std::to_string(vlist_.size()));
+					emit("\n");
+					emit("push 1\t; one vector\n");	//	make tuple with one vector
+					emit("invoke_r ");
+					emit(this->get_name());
+					emit("\n");
+					//
+					//	range produces a vector that should be splitted
+					//	
+					//if (boost::algorithm::equals(this->get_name(), "range")) {
+					//	emit("split\t; dissect vector\n");
+					//	emit("pop\t; remove size info\n");
+					//}
+					emit("pull\n");
+					emit("\n");
+				}
 			}
 		}
 

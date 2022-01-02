@@ -229,7 +229,7 @@ namespace docscript {
 		ss << std::put_time(&tm, "Copyright (c) %Y");
 		return cyng::make_tuple(
 			cyng::make_param("name", "main"),
-			cyng::make_param("color-scheme", "success"),
+			cyng::make_param("bg-color", "bg-light"),
 			cyng::make_param("enabled", true),
 			cyng::make_param("content", ss.str())
 		);

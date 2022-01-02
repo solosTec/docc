@@ -6,7 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <thread>
-//#include <locale>
+#include <cstdlib>
 
 #include <boost/program_options.hpp>
 #include <boost/predef.h>
@@ -26,6 +26,12 @@ int main(int argc, char* argv[]) {
     std::string stag = "ef008e59-810f-427f-800b-d121c1b12deb";  //  stable toc IDs
     std::string index_file = (here / "index.json").string();
     std::size_t pool_size = std::min<std::size_t>(std::thread::hardware_concurrency(), 4) * 2ul;
+
+#ifdef _DEBUG
+    std::atexit([]() {
+        std::cout << "exit" << std::endl;
+        });
+#endif
 
     //
     //	generic options

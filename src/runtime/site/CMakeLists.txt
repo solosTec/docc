@@ -166,6 +166,7 @@ target_compile_definitions(doc2site
 target_link_libraries(doc2site 
 	PUBLIC 
 		docscript
+		docasm
         fmt::fmt
 		${CYNG_LIBRARIES}
 		${OPENSSL_LIBRARIES}
