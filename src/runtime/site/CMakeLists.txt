@@ -148,6 +148,7 @@ target_include_directories(doc2site
 	PUBLIC
 		${CMAKE_BINARY_DIR}/include
 		${CMAKE_CURRENT_SOURCE_DIR}/src
+		${SMFSEC_INCLUDE_DIRS}
  		${OPENSSL_INCLUDE_DIR}
  		${Boost_INCLUDE_DIRS}
 )
@@ -167,7 +168,10 @@ target_link_libraries(doc2site
 	PUBLIC 
 		docscript
 		docasm
+		docruntime
+		dom
         fmt::fmt
+		SMFSEC::SMFSEC
 		${CYNG_LIBRARIES}
 		${OPENSSL_LIBRARIES}
 		"$<$<PLATFORM_ID:Linux>:pthread;${Boost_LIBRARIES}>"

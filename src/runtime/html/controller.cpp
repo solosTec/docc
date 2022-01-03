@@ -207,9 +207,12 @@ namespace docruntime {
 			ofs_ << "\t<title>" << pos->second << "</title>" << std::endl;
 		}
 
+		//	see https://css-tricks.com/essential-meta-tags-social-media/
 		for (auto const& param : meta) {
 			if (boost::algorithm::equals(param.first, "title")) {
 				ofs_ << "\t<meta name=\"og:title\" content=\"" << pos->second
+					<< "\" />" << std::endl;
+				ofs_ << "\t<meta name=\"twitter:title\" content=\"" << pos->second
 					<< "\" />" << std::endl;
 			}
 			else if (boost::algorithm::equals(param.first, "description")) {

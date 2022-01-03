@@ -14,6 +14,9 @@
 #include <vector>
 #include <chrono>
 
+#include <boost/uuid/uuid.hpp>
+
+
 namespace cyng {
 	class mesh;
 }
@@ -26,7 +29,8 @@ namespace docscript {
 	class build
 	{
 	public:
-		build(std::vector<std::filesystem::path> inc
+		build(boost::uuids::uuid tag
+			, std::vector<std::filesystem::path> inc
 			, std::filesystem::path out
 			, std::filesystem::path cache
 			, std::filesystem::path bs
@@ -48,10 +52,11 @@ namespace docscript {
 			std::vector<std::string> languages);
 
 		void generate_page(cyng::mesh&, std::string const& name, page const&, footer const&, navbar const&);
-		void emit_navbar(std::ostream&, navbar const&, page const&);
-		void emit_footer(std::ostream&, footer const&);
+		void finalize_page(std::string const& name, std::string const& file_name, cyng::param_map_t& meta);
+		void emit_header(std::ostream&, cyng::param_map_t& meta);
 
 	private:
+		boost::uuids::uuid const tag_;
 		std::vector<std::filesystem::path> const inc_;
 		std::filesystem::path out_dir_;
 		std::filesystem::path cache_dir_;

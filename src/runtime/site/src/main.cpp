@@ -185,7 +185,7 @@ int main(int argc, char* argv[]) {
 	}
 	else if (boost::algorithm::equals(cmd, "build")) {
 
-		docscript::build build(inc_paths, out_dir, cache_dir, bs_dir, verbose, def_locale, def_country, def_lang, def_enc);
+		docscript::build build(tag, inc_paths, out_dir, cache_dir, bs_dir, verbose, def_locale, def_country, def_lang, def_enc);
 		return build.run(pool_size, control_file);
 	}
 

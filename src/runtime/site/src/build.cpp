@@ -4,6 +4,7 @@
 #include <page.h>
 #include <footer.h>
 #include <navbar.h>
+#include <generator.h>
 
 #include <docc/context.h>
 #include <docc/utils.h>
@@ -33,7 +34,8 @@
 
 
 namespace docscript {
-	build::build(std::vector<std::filesystem::path> inc
+	build::build(boost::uuids::uuid tag
+		, std::vector<std::filesystem::path> inc
 		, std::filesystem::path out
 		, std::filesystem::path cache
 		, std::filesystem::path bs
@@ -42,7 +44,8 @@ namespace docscript {
 		, std::string const& country
 		, std::string const& language
 		, std::string const& encoding)
-	: inc_(inc)
+	: tag_(tag)
+		, inc_(inc)
 		, out_dir_(out)
 		, cache_dir_(cache)
 		, bs_dir_(bs)
@@ -202,26 +205,33 @@ namespace docscript {
 				ifs.unsetf(std::ios::skipws);
 
 				//
-				//	open output file
+				//	open temporary output file
 				// 
-				auto const output_file = verify_extension(out_dir_ / name, "html").string();
+				auto const output_file = verify_extension(cache_dir_ / name, "html").string();
 				std::ofstream ofs(output_file, std::ios::trunc);
 				if (ofs.is_open()) {
 
-					//
-					//	navbar
-					// 
-					emit_navbar(ofs, cfg_navbar, cfg_page);
+					generator gen(ifs
+						, ofs
+						, ctx
+						, fabric
+						, tag_
+						, name
+						, cfg_page
+						, cfg_navbar
+						, cfg_footer
+						, locale_
+						, country_
+						, language_
+						, encoding_);
+					gen.run();
+					ofs.close();
 
 					//
-					//	content
+					//	generate final page
 					// 
-					//emit_page(ofs, fabric, cfg_page);
+					finalize_page(name, output_file, gen.get_meta());
 
-					//
-					//	footer
-					// 
-					emit_footer(ofs, cfg_footer);
 				}
 				else {
 					fmt::print(stdout,
@@ -243,17 +253,80 @@ namespace docscript {
 		}
 	}
 
-	void build::emit_navbar(std::ostream& os, navbar const& nb, page const& p) {
-		os << "<nav class = \"navbar navbar-dark bg-dark\">\n";
-		os << "</nav>\n";
+	void build::finalize_page(std::string const& name, std::string const& file_name, cyng::param_map_t& meta) {
+		auto const output_file = verify_extension(out_dir_ / name, "html").string();
+		std::ofstream ofs(output_file, std::ios::trunc);
+		if (ofs.is_open()) {
+
+			ofs << "<!DOCTYPE html>\n";
+			ofs << "<html lang=\"" << language_ << "\">\n";
+
+			emit_header(ofs, meta);
+			ofs << "<body>\n";
+
+			std::ifstream tmp;
+			tmp.open(file_name);
+			ofs << tmp.rdbuf();
+			tmp.close();
+
+			ofs << "</body>\n";
+			ofs << "</html>\n";
+
+		}
+		else {
+			fmt::print(stdout,
+				fg(fmt::color::dark_orange) | fmt::emphasis::bold,
+				"***info : cannot open output file [{}]\n", output_file);
+		}
 	}
 
-	void build::emit_footer(std::ostream& os, footer const& f) {
-		os << "<footer class=\"footer mt-auto py-3 " << f.bg_color_ << "\">\n";
-		os << "\t<div class=\"container\">\n";
-		os << "\t\t<span class=\"text-muted\">" << f.content_ << "</span>\n";
-		os << "\t</div>\n";
-		os << "</footer>\n";
+	void build::emit_header(std::ostream& os, cyng::param_map_t& meta) {
+		os << "<head>" << std::endl;
+		os << "\t<meta charset = \"utf-8\"/> " << std::endl;
+		os << "\t<meta name=\"viewport\"content=\"width=device-width, initial-scale=1\"/>\n";
+
+		os << "\t<!-- Bootstrap CSS -->\n";
+		os << "\t<link href=\"https://cdn.jsdelivr.net/npm/bootstrap@" 
+			<< bootstrap_version << "/dist/css/bootstrap.min.css\" rel=\"stylesheet\" integrity=\""
+			<< integrity
+			<< "\" crossorigin=\"anonymous\">\n";
+
+		//
+		//	title first
+		//
+		auto const pos = meta.find("title");
+		if (pos != meta.end()) {
+			os << "\t<title>" << pos->second << "</title>" << std::endl;
+		}
+
+		for (auto const& param : meta) {
+			if (boost::algorithm::equals(param.first, "title")) {
+				os << "\t<meta name=\"og:title\" content=\"" << pos->second
+					<< "\" />" << std::endl;
+			}
+			else if (boost::algorithm::equals(param.first, "description")) {
+				os << "\t<meta name=\"og:description\" content=\""
+					<< param.second << "\" />" << std::endl;
+			}
+			else if (boost::algorithm::equals(param.first, "type")) {
+				os << "\t<meta name=\"og:type\" content=\"" << param.second
+					<< "\" />" << std::endl;
+			}
+			else if (boost::algorithm::equals(param.first, "url")) {
+				os << "\t<meta name=\"og:url\" content=\"" << param.second
+					<< "\" />" << std::endl;
+			}
+			else if (boost::algorithm::equals(param.first, "site_name")) {
+				os << "\t<meta name=\"og:site_name\" content=\""
+					<< param.second << "\" />" << std::endl;
+			}
+			else {
+				os << "\t<meta name=\"" << param.first << "\" content=\""
+					<< param.second << "\" />" << std::endl;
+			}
+		}
+		//emit_styles(1, os);
+		os << "</head>" << std::endl;
 	}
 
 }

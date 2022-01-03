@@ -252,7 +252,7 @@ namespace docscript {
 		std::ofstream img(p.string(), std::ios::trunc);
 		if (img.is_open()) {
 			img << "<svg width=\"800\" height=\"600\" xmlns=\"http://www.w3.org/2000/svg\">" << std::endl;
-			img << "<ellipse stroke-width=\"2\" ry=\"179\" rx=\"184\" id=\"logo\" cy=\"300\" cx=\"400\" stroke=\"#AAA\" fill=\"#003f7f\"/>" << std::endl;
+			img << R"svg("<ellipse fill="#003f7f" stroke="#000" cx="16" cy="16" id="logo" rx="16" ry="16" stroke-width="2"/>)svg";
 			img << "</svg>" << std::endl;
 		}
 		else {

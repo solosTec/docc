@@ -11,6 +11,7 @@ set (doc2site_cpp
     ${PROJECT_SOURCE_DIR}/src/page.cpp
     ${PROJECT_SOURCE_DIR}/src/footer.cpp
     ${PROJECT_SOURCE_DIR}/src/navbar.cpp
+    ${PROJECT_SOURCE_DIR}/src/generator.cpp
 )
     
 set (doc2site_h
@@ -20,6 +21,7 @@ set (doc2site_h
     ${PROJECT_SOURCE_DIR}/src/page.h
     ${PROJECT_SOURCE_DIR}/src/footer.h
     ${PROJECT_SOURCE_DIR}/src/navbar.h
+    ${PROJECT_SOURCE_DIR}/src/generator.h
 )
 
 set (doc2site_prg
