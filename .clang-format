@@ -1,24 +1,18 @@
 # Format Style Options - Created with Clang Power Tools
 ---
 AlignAfterOpenBracket: AlwaysBreak
-AlignTrailingComments: false
-AllowShortBlocksOnASingleLine: Empty
-AllowShortCaseLabelsOnASingleLine: true
-AllowShortEnumsOnASingleLine: true
-AllowShortIfStatementsOnASingleLine: WithoutElse
-BasedOnStyle: LLVM
-BreakBeforeBraces: Stroustrup
+AllowAllArgumentsOnNextLine: true
+AllowAllConstructorInitializersOnNextLine: true
+AllowAllParametersOfDeclarationOnNextLine: false
+BinPackArguments: false
+BinPackParameters: false
+BreakConstructorInitializersBeforeComma: true
 BreakConstructorInitializers: BeforeComma
-ColumnLimit: 140
-Cpp11BracedListStyle: false
-DerivePointerAlignment: true
-FixNamespaceComments: false
-IncludeBlocks: Merge
-IndentRequires: true
+BreakStringLiterals: false
+ColumnLimit: 132
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
 IndentWidth: 4
+Language: Cpp
 NamespaceIndentation: All
-SpaceInEmptyBlock: true
-SpacesInAngles: true
-Standard: Latest
-UseTab: ForIndentation
+ObjCBlockIndentWidth: 4
 ...

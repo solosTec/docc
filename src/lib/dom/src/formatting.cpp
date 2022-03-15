@@ -69,7 +69,7 @@ namespace dom
 				init = true;
 			}
 
-			switch (obj.rtti().tag()) {
+			switch (obj.tag()) {
 			case cyng::TC_VECTOR:
 				to_html(os, cyng::container_cast<cyng::vector_t>(obj), " ");
 				break;
