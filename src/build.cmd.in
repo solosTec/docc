@@ -3,9 +3,10 @@ REM compile, assemble and build the main example document
 REM
 @echo off
 @cls
+cd /d ${PROJECT_BINARY_DIR}
 ${PROJECT_BINARY_DIR}/Debug/docc -V 10 -S main -O main
 ${PROJECT_BINARY_DIR}/Debug/doca -V 10 -S main -O main
 ${PROJECT_BINARY_DIR}/Debug/docrt -S main.cyng
 ${PROJECT_BINARY_DIR}/Debug/doc2html -V 20 -S main -O main.html
-${PROJECT_BINARY_DIR}/src/runtime/site/Debug/doc2site init
+REM ${PROJECT_BINARY_DIR}/src/runtime/site/Debug/doc2site init
 @echo on

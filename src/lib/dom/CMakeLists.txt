@@ -63,6 +63,7 @@ endif()
 
 include (lib.cmake)
 add_library(dom ${GLOBAL_LIBRARY_TYPE} ${dom_lib})
+add_library(Docc::dom ALIAS dom)
 
 target_include_directories(dom
     INTERFACE

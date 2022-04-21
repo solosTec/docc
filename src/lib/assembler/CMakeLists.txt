@@ -81,6 +81,7 @@ endif()
 
 include (lib.cmake)
 add_library(docasm ${GLOBAL_LIBRARY_TYPE} ${docasm_lib})
+add_library(Docc::asm ALIAS docasm)
 
 target_include_directories(docasm
     INTERFACE

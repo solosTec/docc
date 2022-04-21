@@ -86,6 +86,7 @@ endif()
 
 include (lib.cmake)
 add_library(docscript ${GLOBAL_LIBRARY_TYPE} ${docscript_lib})
+add_library(Docc::script ALIAS docscript)
 
 target_include_directories(docscript
     INTERFACE

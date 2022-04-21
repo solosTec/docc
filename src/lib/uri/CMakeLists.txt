@@ -6,31 +6,31 @@ cmake_minimum_required (VERSION 3.16)
 #
 # set project name/properties
 #
-project(docScript 
+project(docURI 
 	VERSION 0.2
 	LANGUAGES CXX
-	DESCRIPTION "DocScript Library"
+	DESCRIPTION "DocURI Library"
 	HOMEPAGE_URL "https://solostec.ch")
 
 
-message(STATUS "**")                                   
-message(STATUS "     ***** ***    ****           * ")
-message(STATUS "  ******  * **   *  *************  ")
-message(STATUS " **   *  *  **  *     *********    ")
-message(STATUS "*    *  *   **  *     *  *         ")
-message(STATUS "    *  *    *    **  *  **         ")
-message(STATUS "   ** **   *        *  ***         ")
-message(STATUS "   ** **  *        **   **         ")
-message(STATUS "   ** ****         **   **         ")
-message(STATUS "   ** **  ***      **   **         ")
-message(STATUS "   ** **    **     **   **         ")
-message(STATUS "   *  **    **      **  **         ")
-message(STATUS "      *     **       ** *      *   ")
-message(STATUS "  ****      ***       ***     *    ")
-message(STATUS " *  ****    **         *******     ")
-message(STATUS "*    **     *            ***       ")
-message(STATUS "*                                  ")
-message(STATUS " **                                ")
+message(STATUS "**")
+message(STATUS "     ***** *    **        ***** ***          *****  * ")
+message(STATUS "  ******  *  *****     ******  * **       ******  *   ")
+message(STATUS " **   *  *     *****  **   *  *  **      **   *  *    ")
+message(STATUS "*    *  **     * **  *    *  *   **     *    *  *     ")
+message(STATUS "    *  ***     *         *  *    *          *  *      ")
+message(STATUS "   **   **     *        ** **   *          ** **      ")
+message(STATUS "   **   **     *        ** **  *           ** **      ")
+message(STATUS "   **   **     *        ** ****          **** **      ")
+message(STATUS "   **   **     *        ** **  ***      * *** **      ")
+message(STATUS "   **   **     *        ** **    **        ** **      ")
+message(STATUS "    **  **     *        *  **    **   **   ** **      ")
+message(STATUS "     ** *      *           *     **  ***   *  *       ")
+message(STATUS "      ***      *       ****      ***  ***    *        ")
+message(STATUS "       ********       *  ****    **    ******         ")
+message(STATUS "         ****        *    **     *       ***          ")
+message(STATUS "                     *                                ")
+message(STATUS "                      **                              ")
 message(STATUS "**")                                   
                                    
 
@@ -64,17 +64,6 @@ if(NOT Boost_FOUND)
 
 endif()
 
-#
-#	setup SSL library
-#
-find_package(OpenSSL)
-if(NOT OPENSSL_FOUND)
-
- 	message(ERROR "OpenSSL library not found")
-          
-endif()
-
-#configure_file(src/version.hpp.in "${PROJECT_BINARY_DIR}/version.hpp")
 
 if(MSVC)
 	set(GLOBAL_LIBRARY_TYPE STATIC)
@@ -83,28 +72,26 @@ else()
 endif()
 
 include (lib.cmake)
-add_library(docruntime ${GLOBAL_LIBRARY_TYPE} ${docruntime_lib})
-add_library(Docc::runtime ALIAS docruntime)
+add_library(docuri ${GLOBAL_LIBRARY_TYPE} ${docuri_lib})
+add_library(Docc::uri ALIAS docuri)
 
-target_include_directories(docruntime
+target_include_directories(docuri
     INTERFACE
 		${CMAKE_CURRENT_SOURCE_DIR}/include
 	PRIVATE
 		${CMAKE_CURRENT_SOURCE_DIR}/include
-		${OPENSSL_INCLUDE_DIR}
 		${Boost_INCLUDE_DIRS}
 )
 
-target_link_libraries(docruntime 
+target_link_libraries(docuri 
 	CYNG::CYNG
-#	SMFSEC::SMFSEC
     fmt::fmt
 )
 
-target_compile_definitions(docruntime
+target_compile_definitions(docuri
 	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:_WIN32_WINNT=0x0601>")
 
-install(TARGETS docruntime
+install(TARGETS docuri
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib/static)
     

@@ -63,6 +63,7 @@ endif()
 
 include (lib.cmake)
 add_library(tex ${GLOBAL_LIBRARY_TYPE} ${tex_lib})
+add_library(Docc::tex ALIAS tex)
 
 target_include_directories(tex
     INTERFACE

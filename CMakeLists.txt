@@ -62,7 +62,7 @@ message(STATUS "** PROJECT_SOURCE_DIR : ${PROJECT_SOURCE_DIR}")
 message(STATUS "** PROJECT_BINARY_DIR : ${PROJECT_BINARY_DIR}")
 message(STATUS "** ${PROJECT_NAME}_SOURCE_DIR    : ${${PROJECT_NAME}_SOURCE_DIR}")
 message(STATUS "** ${PROJECT_NAME}_BINARY_DIR    : ${${PROJECT_NAME}_BINARY_DIR}")
-message(STATUS "** Home                          : $ENV{HOME}")
+#message(STATUS "** Home               : $ENV{HOME}")
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 20)
@@ -87,7 +87,7 @@ endif()
 #	boost library
 #
 find_package(Boost 1.76
-	REQUIRED COMPONENTS filesystem program_options system)
+	REQUIRED COMPONENTS filesystem program_options system locale)
 if(Boost_FOUND)
 
     message(STATUS "** Boost Version         : ${Boost_VERSION}")
@@ -118,6 +118,7 @@ else()
 	message(ERROR "OpenSSL library not found")
 	
 endif()
+
 
 # FetchContent added in CMake 3.11, downloads during the configure step
 include(FetchContent)
@@ -204,6 +205,7 @@ if (IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src/lib)
 	add_subdirectory(src/lib/runtime)
 	add_subdirectory(src/lib/dom)
 	add_subdirectory(src/lib/tex)
+	add_subdirectory(src/lib/uri)
 endif()
 
 #
@@ -425,13 +427,30 @@ if (IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src/runtime/site)
 endif()
 
 #
+# manage unit test: DOCC_UNIT_TEST
+# default is OFF
+#
+if(NOT DEFINED DOCC_UNIT_TEST)
+	set(DOCC_UNIT_TEST OFF CACHE BOOL "build unit test")
+endif()
+
+if(DOCC_UNIT_TEST)
+
+    add_subdirectory(unit_test)
+
+endif()
+
+#
 # batch files
 #
 if(WIN32)
     configure_file (
 		    "${CMAKE_CURRENT_SOURCE_DIR}/src/build.cmd.in"
 		    "${PROJECT_BINARY_DIR}/build.cmd")
-
+else()
+    configure_file (
+		    "${CMAKE_CURRENT_SOURCE_DIR}/src/build.sh.in"
+		    "${PROJECT_BINARY_DIR}/build.sh")
 endif(WIN32)
 
 
