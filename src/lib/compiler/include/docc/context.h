@@ -7,100 +7,106 @@
 #ifndef DOCC_SCRIPT_CONTEXT_H
 #define DOCC_SCRIPT_CONTEXT_H
 
-#include <docc/parser.h>
 #include <docc/method.h>
+#include <docc/parser.h>
 
 #include <cstdlib>
 #include <filesystem>
-#include <vector>
-#include <stack>
-#include <map>
 #include <fstream>
+#include <map>
 #include <optional>
+#include <stack>
+#include <vector>
 
 namespace docscript {
 
-	class sanitizer;
-	class context
-	{
-	private:
-		struct position {
-			std::filesystem::path file_;
-			std::size_t line_;
-			std::fstream stream_;
-		};
+    class sanitizer;
+    class context {
+      private:
+        struct position {
+            std::filesystem::path file_;
+            std::size_t line_;
+            std::fstream stream_;
+        };
 
-	public:
-		context(std::filesystem::path out
-			, std::vector<std::filesystem::path> inc
-			, int verbose);
-		context(context const&) = default;
-		context(context &&) = delete;
+      public:
+        context(std::filesystem::path out, std::vector<std::filesystem::path> inc, int verbose);
+        context(context const &) = default;
+        context(context &&) = delete;
 
-		/**
-		 * start new file
-		 */
-		bool push(std::filesystem::path const&);
+        /**
+         * start new file
+         */
+        bool push(std::filesystem::path const &);
 
-		/**
-		 * @return stream iterator of file on the top of the
-		 * position stack.
-		 */
-		std::pair<std::istream_iterator<char>, std::istream_iterator<char>> get_stream_range();
+        /**
+         * @return stream iterator of file on the top of the
+         * position stack.
+         */
+        std::pair<std::istream_iterator<char>, std::istream_iterator<char>> get_stream_range();
 
-		/**
-		 * @return true if EOF is reached (no more data)
-		 */
-		void pop(sanitizer&);
+        /**
+         * @return true if EOF is reached (no more data)
+         */
+        void pop(sanitizer &);
 
-		/**
-		 * update line counter of current file
-		 */
-		void nl(std::size_t);
+        /**
+         * update line counter of current file
+         */
+        void nl(std::size_t);
 
-		bool get_verbosity(int) const;
+        bool get_verbosity(int) const;
 
-		/**
-		 * search for the specified filename in all include
-		 * directories.
-		 */
-		std::pair<std::filesystem::path, bool> lookup(std::filesystem::path const&, std::string ext) const;
+        /**
+         * search for the specified filename in all include
+         * directories.
+         */
+        std::pair<std::filesystem::path, bool> lookup(std::filesystem::path const &, std::string ext) const;
 
-		/**
-		 * feed the parser
-		 */
-		void put(symbol const& sym);
+        /**
+         * feed the parser
+         */
+        void put(symbol const &sym);
 
-		/**
-		 * @return filename and line number
-		 */
-		std::string get_position() const;
+        /**
+         * @return filename and line number
+         */
+        std::string get_position() const;
 
-		/**
-		 * write to the temp file
-		 */
-		void emit(std::string const&);
+        /**
+         * write to the temp file
+         */
+        void emit(std::string const &);
 
-		/**
-		 * @return method with the specified name
-		 */
-		std::optional<method> lookup_method(std::string const&) const;
+        /**
+         * @return method with the specified name
+         */
+        std::optional<method> lookup_method(std::string const &) const;
 
-		std::filesystem::path const& get_output_path() const;
+        std::filesystem::path const &get_output_path() const;
 
-	private:
-		std::filesystem::path const out_file_;
-		std::ofstream ostream_;	//	stream of temp file
-		std::vector<std::filesystem::path> inc_;
-		int const verbose_;
-		std::stack<position>    position_;
-		std::map<std::string, method> method_table_;
-		parser parser_;
-	};
+        /**
+         * @return accumulated statistics
+         */
+        std::map<symbol_type, std::size_t> const &get_stats() const;
 
-	void write_bom(std::ostream&);
-	void init_method_table(std::map<std::string, method>&);
-	bool insert_method(std::map<std::string, method>& table, method&&);
-}
+      private:
+        std::filesystem::path const out_file_;
+        std::ofstream ostream_; //	stream of temp file
+        std::vector<std::filesystem::path> inc_;
+        int const verbose_;
+        std::stack<position> position_;
+        std::map<std::string, method> method_table_;
+        parser parser_;
+        /**
+         * statistics
+         */
+        std::map<symbol_type, std::size_t> stats_;
+    };
 
-#endif  //  DOCC_SCRIPT_CONTEXT_H
+    void write_bom(std::ostream &);
+    void init_method_table(std::map<std::string, method> &);
+    bool insert_method(std::map<std::string, method> &table, method &&);
+} // namespace docscript
+
+#endif //  DOCC_SCRIPT_CONTEXT_H
