@@ -3,7 +3,7 @@
 #endif
 
 #include "root_certificates.hpp"
-//#include <uri.hpp>
+#include <boost/url.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -55,13 +55,13 @@ class session : public std::enable_shared_from_this<session> {
     boost::beast::flat_buffer buffer_; // (Must persist between reads)
     boost::beast::http::request<boost::beast::http::empty_body> req_;
     boost::beast::http::response<boost::beast::http::string_body> res_;
-    boost::beast::http::request_parser<boost::beast::http::string_body> header_parser_;
+    // boost::beast::http::request_parser<boost::beast::http::string_body> header_parser_;
     boost::beast::http::response_parser<boost::beast::http::file_body> file_parser_;
     response_call_type response_call;
     boost::system::error_code file_open_ec;
     //
-    std::size_t file_pos = 0;
-    std::size_t file_size = 0;
+    std::size_t file_pos_ = 0;
+    std::size_t file_size_ = 0;
 
   public:
     explicit session(boost::asio::io_context &ioc, boost::asio::ssl::context &ctx, const char *filename)
@@ -135,38 +135,63 @@ class session : public std::enable_shared_from_this<session> {
                 file_parser_,
                 std::bind(&session::on_read, shared_from_this(), std::placeholders::_1, std::placeholders::_2));
     }
+
     std::size_t on_startup(boost::system::error_code ec, std::size_t bytes_transferred) {
         std::cout << "on_startup: " << bytes_transferred << " bytes" << std::endl;
-        std::string_view view((const char *)buffer_.data().data(), bytes_transferred);
-        auto pos = view.find("Content-Length:");
-        if (pos == std::string_view::npos) {
-            std::cerr << "missing content length" << std::endl;
-            assert(true); // error
+
+        auto const cl = file_parser_.content_length();
+        auto const clr = file_parser_.content_length_remaining();
+
+        if (cl) {
+            std::cout << "content length: " << *cl << std::endl;
+            file_size_ = *cl;
+        }
+        if (clr) {
+            std::cout << "remaining content length: " << *clr << std::endl;
         }
 
-        file_size = std::stoi(view.substr(pos + sizeof("Content-Length:")).data());
-        if (!file_size)
-            assert(true); // error
-        std::cout << "filesize: " << file_size << std::endl;
-        boost::beast::http::async_read_some(
-            stream_,
-            buffer_,
-            file_parser_,
-            std::bind(&session::on_read_some, shared_from_this(), std::placeholders::_1, std::placeholders::_2));
-        return buffer_.size();
+        // for (auto pos = file_parser_.get().begin(); pos != file_parser_.get().end(); ++pos) {
+        //     std::cout << "on header (" << pos->name() << ": " << pos->value() << ")" << std::endl;
+        // };
+
+        BOOST_ASSERT(file_parser_.is_header_done());
+
+        if (file_size_ != 0) {
+            boost::beast::http::async_read_some(
+                stream_,
+                buffer_,
+                file_parser_,
+                std::bind(&session::on_read_some, shared_from_this(), std::placeholders::_1, std::placeholders::_2));
+            return buffer_.size();
+        }
+
+        on_shutdown(ec);
+        return 0u;
     }
+
     std::size_t on_read_some(boost::system::error_code ec, std::size_t bytes_transferred) {
-        // std::cout << "on_read_some" << std::endl;
+        // std::cout << "on_read_some " << bytes_transferred << " bytes" << std::endl;
         if (ec) {
             session_fail(ec, "on_read_some");
             return 0;
         }
-        file_pos += bytes_transferred;
-        if (!bytes_transferred && file_pos) {
+        file_pos_ += bytes_transferred;
+        // if (!bytes_transferred && file_pos_) {
+        if (file_size_ == file_pos_) {
             on_shutdown(ec);
             return 0;
         }
-        response_call(resp_ok, file_pos);
+        // auto const clr = file_parser_.content_length_remaining();
+        // if (clr) {
+        //     std::cout << "on_read_some remaining " << *clr << " bytes" << std::endl;
+        //     if (*clr == 0) {
+        //         std::cout << "on_read_some complete" << std::endl;
+        //         on_shutdown(ec);
+        //         return 0;
+        //     }
+        // }
+
+        response_call(resp_ok, file_pos_);
 
         // std::cout << "session::on_read_some: " << file_pos << std::endl;
         boost::beast::http::async_read_some(
@@ -177,12 +202,14 @@ class session : public std::enable_shared_from_this<session> {
         return buffer_.size();
     }
     std::size_t on_read(boost::system::error_code ec, std::size_t bytes_transferred) {
-        file_pos += bytes_transferred;
-        if (!bytes_transferred && file_pos) {
+        file_pos_ += bytes_transferred;
+        // if (!bytes_transferred && file_pos_) {
+        if (file_size_ == file_pos_) {
             on_shutdown(ec);
             return 0;
         }
-        std::cout << "on_read: " << bytes_transferred << std::endl;
+        std::cout << "on_read: " << bytes_transferred << " bytes" << std::endl;
+
         boost::beast::http::async_read(
             stream_,
             buffer_,
@@ -190,6 +217,7 @@ class session : public std::enable_shared_from_this<session> {
             std::bind(&session::on_read, shared_from_this(), std::placeholders::_1, std::placeholders::_2));
         return buffer_.size();
     }
+
     void on_shutdown(boost::system::error_code ec) {
         std::cout << "on_shutdown" << std::endl;
         if (ec == boost::asio::error::eof) {
@@ -197,34 +225,61 @@ class session : public std::enable_shared_from_this<session> {
             // http://stackoverflow.com/questions/25587403/boost-asio-ssl-async-shutdown-always-finishes-with-an-error
             ec.assign(0, ec.category());
         }
-        if (response_call)
+
+        if (response_call) {
             response_call(resp_done, 0);
+        }
+
+        auto body = file_parser_.release();
+        body.body().file().close(ec);
+
+        switch (body.result()) {
+        case boost::beast::http::status::moved_permanently: // 301
+            std::cout << "HTTP status code            : 301 - moved permanently" << std::endl;
+            break;
+        case boost::beast::http::status::found: // 302
+            std::cout << "HTTP status code            : 302 - found" << std::endl;
+            {
+                auto const pos = body.find("Location");
+                if (pos != body.end()) {
+                    std::cout << "download                    : " << pos->value() << std::endl;
+                    // download(ec, pos->value());
+                }
+            }
+            break;
+        default:
+            std::cout << "HTTP status code            : " << body.result_int() << std::endl;
+            for (auto pos = body.begin(); pos != body.end(); ++pos) {
+                std::cout << "fields (" << pos->name() << ": " << pos->value() << ")" << std::endl;
+            };
+            break;
+        }
+
         if (ec)
             return session_fail(ec, "shutdown");
     }
+
     auto get_file_status() const { return file_open_ec; }
     void set_response_call(response_call_type the_call) { response_call = the_call; }
-    std::size_t get_download_size() const { return file_size; }
+    std::size_t get_download_size() const { return file_size_; }
     // std::string get_content() const { return "test"; }// return response;}
 };
 
 BOOST_AUTO_TEST_CASE(download) {
     // in a UI app you will need to keep a persistant thread/pool;
     std::thread reader_thread;
+
     // for an application where this never changes, this can just be put in the session class
-    // https://solostec.ch/SMF-v7-product-sheet.pdf
-    // https://www.openssl.org/source/openssl-3.0.2.tar.gz
-    // filename=bootstrap-5.0.2-dist.zip&response-content-type=application/octet-stream auto const host = "reserveanalyst.com";
-    // auto const host = "solostec.ch";
-    auto const host = "www.openssl.org";
+
+    // auto const host = "www.openssl.org";
+    // auto const port = "443";
+    // auto const target = "/source/openssl-3.0.2.tar.gz";
+
+    //  https://github.com/twbs/bootstrap/releases/download/v5.0.2/bootstrap-5.0.2-dist.zip
+    auto const host = "github.com";
     auto const port = "443";
-#ifdef NO_BLOCKING // the large file
-    // auto const target = "/SMF-v7-product-sheet.pdf";
-    auto const target = "/source/openssl-3.0.2.tar.gz";
-    // auto const target = "/downloads/demo.msi";
-#else // the small file
-    auto const target = "/server.xml";
-#endif
+    auto const target = "/twbs/bootstrap/releases/download/v5.0.2/bootstrap-5.0.2-dist.zip";
+
     boost::asio::io_context ioc;
     boost::asio::ssl::context ctx{boost::asio::ssl::context::sslv23_client};
     //  see https://stackoverflow.com/a/49511782
@@ -269,8 +324,9 @@ BOOST_AUTO_TEST_CASE(download) {
             std::cout << "from sendmessage: done" << std::endl;
         } // switch
         glb_response = session::responses::resp_null;
-        if (!(i % 10))
+        if (!(i % 10)) {
             std::cout << "in message pump, stopped: " << std::boolalpha << ioc.stopped() << std::endl;
+        }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
         if (quit && i == 10) // the cancel message
@@ -278,8 +334,9 @@ BOOST_AUTO_TEST_CASE(download) {
         if (ioc.stopped()) // just quit to test join.
             break;
     }
-    if (reader_thread.joinable()) // in the case a thread was never started
+    if (reader_thread.joinable()) { // in the case a thread was never started
         reader_thread.join();
+    }
     std::cout << "exiting, program was quit" << std::endl;
 
     // return EXIT_SUCCESS;
@@ -456,19 +513,40 @@ class client : public std::enable_shared_from_this<client> {
         std::cout << "continue download:" << std::endl;
         on_shutdown(ec);
 
-        std::vector<std::string> parts;
-        boost::split(parts, url, boost::is_any_of("/"), boost::token_compress_on);
-#ifdef _DEBUG
-        for (auto const &part : parts) {
-            std::cout << part << std::endl;
+        auto const uv = boost::urls::parse_uri(url).value();
+        std::cout << "scheme   : " << uv.scheme() << ", " << boost::urls::to_string(uv.scheme_id()) << std::endl;
+        std::cout << "scheme id: " << +static_cast<std::uint8_t>(uv.scheme_id()) << std::endl;
+        std::cout << "host     : " << uv.encoded_host() << std::endl;
+        std::cout << "host+port: " << uv.encoded_host_and_port() << std::endl;
+        std::cout << "port     : " << uv.port_number() << std::endl;
+        std::cout << "path     : " << uv.encoded_path() << std::endl;
+        std::cout << "segments : " << uv.encoded_segments() << std::endl;
+        std::cout << "query    : " << uv.query() << std::endl;
+        for (auto v : uv.params()) {
+            std::cout << "\t" << v.key << ": " << v.value << std::endl;
         }
-#endif
-        if (parts.size() > 3) {
-            auto const host = parts.at(1);
-            auto const target =
-                "/github-production-release-asset-2e65be/2126244/45d95b00-d3a1-11eb-9c4b-0c7347ba205f?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20220320%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20220320T190554Z&X-Amz-Expires=300&X-Amz-Signature=f4d076355f6b8651f88b971016db599e2ad4a3ab787ad6577fae9a8170f6f1d1&X-Amz-SignedHeaders=host&actor_id=0&key_id=0&repo_id=2126244&response-content-disposition=attachment%3B%20filename%3Dbootstrap-5.0.2-dist.zip&response-content-type=application%2Foctet-stream";
-            run(host.c_str(), "443", target, 11);
-        }
+
+        // run("github.com", "443", "/twbs/bootstrap/releases/download/v5.0.2/bootstrap-5.0.2-dist.zip", 11);
+        std::string const host = uv.encoded_host();
+        std::string target = uv.encoded_path();
+        target += "&";
+        target += uv.query();
+        std::cout << "target   : " << target << std::endl;
+        run(host.c_str(), "443", target.c_str(), 11);
+
+        //        std::vector<std::string> parts;
+        //        boost::split(parts, url, boost::is_any_of("/"), boost::token_compress_on);
+        //#ifdef _DEBUG
+        //        for (auto const &part : parts) {
+        //            std::cout << part << std::endl;
+        //        }
+        //#endif
+        //        if (parts.size() > 3) {
+        //            auto const host = parts.at(1);
+        //            auto const target =
+        //                "/github-production-release-asset-2e65be/2126244/45d95b00-d3a1-11eb-9c4b-0c7347ba205f?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20220320%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20220320T190554Z&X-Amz-Expires=300&X-Amz-Signature=f4d076355f6b8651f88b971016db599e2ad4a3ab787ad6577fae9a8170f6f1d1&X-Amz-SignedHeaders=host&actor_id=0&key_id=0&repo_id=2126244&response-content-disposition=attachment%3B%20filename%3Dbootstrap-5.0.2-dist.zip&response-content-type=application%2Foctet-stream";
+        //            run(host.c_str(), "443", target, 11);
+        //        }
     }
 
     void on_read_header(boost::beast::error_code ec, std::size_t bytes_transferred) {
@@ -526,14 +604,25 @@ BOOST_AUTO_TEST_CASE(sslclient) {
     // Verify the remote server's certificate
     ctx.set_verify_mode(ssl::verify_peer);
 
+    //
+    // (1) Contains a redirect
+    //
+    // https://github.com/twbs/bootstrap/releases/download/v5.0.2/bootstrap-5.0.2-dist.zip
+    std::make_shared<client>(boost::asio::make_strand(ioc), ctx, "bootstrap-5.0.2-dist.zip")
+        ->run("github.com", "443", "/twbs/bootstrap/releases/download/v5.0.2/bootstrap-5.0.2-dist.zip", 11);
+
+    //
+    //  (2) Simple download
+    //
+    // https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css
+    // std::make_shared<client>(boost::asio::make_strand(ioc), ctx, "bootstrap.min.css")
+    //    ->run("cdn.jsdelivr.net", "443", "/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css", 11);
+
     // https://www.openssl.org/source/openssl-3.0.2.tar.gz
 
     // std::make_shared<client>(boost::asio::make_strand(ioc), ctx)->run("www.boost.org", "443", "/", 11);
     // std::make_shared<client>(boost::asio::make_strand(ioc), ctx)->run("www.openssl.org", "443", "/source/openssl-3.0.2.tar.gz",
     // 11);
-    // https://github.com/twbs/bootstrap/releases/download/v5.0.2/bootstrap-5.0.2-dist.zip
-    std::make_shared<client>(boost::asio::make_strand(ioc), ctx, "bootstrap-5.0.2-dist.zip")
-        ->run("github.com", "443", "/twbs/bootstrap/releases/download/v5.0.2/bootstrap-5.0.2-dist.zip", 11);
 
     // https://objects.githubusercontent.com/github-production-release-asset-2e65be/2126244/45d95b00-d3a1-11eb-9c4b-0c7347ba205f?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20220318%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20220318T124225Z&X-Amz-Expires=300&X-Amz-Signature=5973b7f5f75b79b7e5e6cb82ab290b267d694b4d044d0c59d6e43f01eec04f01&X-Amz-SignedHeaders=host&actor_id=0&key_id=0&repo_id=2126244&response-content-disposition=attachment%3B%20filename%3Dbootstrap-5.0.2-dist.zip&response-content-type=application%2Foctet-stream
     // std::make_shared<client>(boost::asio::make_strand(ioc), ctx)
@@ -543,9 +632,8 @@ BOOST_AUTO_TEST_CASE(sslclient) {
     //       "/github-production-release-asset-2e65be/2126244/45d95b00-d3a1-11eb-9c4b-0c7347ba205f?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20220318%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20220318T124225Z&X-Amz-Expires=300&X-Amz-Signature=5973b7f5f75b79b7e5e6cb82ab290b267d694b4d044d0c59d6e43f01eec04f01&X-Amz-SignedHeaders=host&actor_id=0&key_id=0&repo_id=2126244&response-content-disposition=attachment%3B%20filename%3Dbootstrap-5.0.2-dist.zip&response-content-type=application%2Foctet-stream",
     //       11);
 
-    // https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css
-    // std::make_shared<client>(boost::asio::make_strand(ioc), ctx, "bootstrap.min.css")
-    //    ->run("cdn.jsdelivr.net", "443", "/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css", 11);
+    // https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.css
+    // https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.js
 
     //  will return when the get operation is complete.
     ioc.run();

@@ -91,7 +91,7 @@ find_package(Boost 1.76
 if(Boost_FOUND)
 
     message(STATUS "** Boost Version         : ${Boost_VERSION}")
-    message(STATUS "** Boost libaries        : ${Boost_LIBRARIES}")
+    message(STATUS "** Boost Libraries       : ${Boost_LIBRARIES}")
 
 	link_directories(${Boost_LIBRARY_DIRS})
 
@@ -155,6 +155,14 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(date_src)
 # Adds date 
 
+# Boost.URL
+#
+FetchContent_Declare(
+  boost_url  
+  GIT_REPOSITORY https://github.com/solosTec/url.git
+  GIT_TAG bugfix)
+FetchContent_MakeAvailable(boost_url )
+
 # cyng library
 #
 #FetchContent_Declare(
@@ -205,7 +213,6 @@ if (IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src/lib)
 	add_subdirectory(src/lib/runtime)
 	add_subdirectory(src/lib/dom)
 	add_subdirectory(src/lib/tex)
-	add_subdirectory(src/lib/uri)
 endif()
 
 #

@@ -43,7 +43,7 @@ message(STATUS "** Boost_UNIT_TEST_FRAMEWORK_LIBRARY      : ${Boost_UNIT_TEST_FR
 
 target_link_directories(unit_test
     PRIVATE
-        Docc::uri
+        Boost::url
         ${Boost_LIBRARY_DIRS}
 )
 
@@ -52,7 +52,7 @@ target_link_directories(unit_test
 #
 target_link_libraries(unit_test 
     PRIVATE
-        Docc::uri
+        Boost::url
         ${CYNG_LIBRARIES}
         ${OPENSSL_LIBRARIES}
         "$<$<PLATFORM_ID:Linux>:pthread;${CMAKE_DL_LIBS}>"
