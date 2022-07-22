@@ -98,7 +98,7 @@ target_include_directories(docscript
 )
 
 target_link_libraries(docscript 
-	CYNG::CYNG
+	cyng::cyng
     fmt::fmt
 )
 

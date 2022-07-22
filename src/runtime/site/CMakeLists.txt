@@ -173,6 +173,7 @@ target_link_libraries(doc2site
         fmt::fmt
 		SMFSEC::SMFSEC
 		${CYNG_LIBRARIES}
+		pugixml
 		${OPENSSL_LIBRARIES}
 		"$<$<PLATFORM_ID:Linux>:pthread;${Boost_LIBRARIES}>"
 )

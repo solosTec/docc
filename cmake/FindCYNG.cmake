@@ -5,13 +5,29 @@
 # This will define the following variables
 #
 #   CYNG_FOUND          - system has cyng
-#   CYNG_INCLUDE_DIR    - the cyng include directories
+#   CYNG_INCLUDE_DIRS   - the cyng include directories
 #   CYNG_LIBRARIES      - cyng libraries directories
 #
 # and the following imported targets
 #
-#     CYNG::CYNG
+#   cyng::cyng
+#	cyng::db
+#	cyng::io
+#	cyng::log
+#	cyng::obj
+#	cyng::parse
+#	cyng::rnd
+#	cyng::sql
+#	cyng::store
+#	cyng::sys
+#	cyng::task
+#	cyng::vm
+#	cyng::net
+#	cyng::sqlite3
 #
+
+# mostly [build]
+message(STATUS "** CYNG build tree          : [${SMF_BUILD_TREE_STEM}]")
 
 #
 #	try PkgConfig
@@ -19,155 +35,151 @@
 find_package(PkgConfig)
 pkg_check_modules(PC_CYNG QUIET CYNG)
 
-if(CYNG_PKG_FOUND)
-
+if(PC_CYNG_FOUND)
+    # the library was already found by pkgconfig
     set(CYNG_VERSION ${PC_CYNG_VERSION})
-    set(CYNG_INCLUDE_DIRS ${CYNG_PKG_INCLUDE_DIRS})
-    set(CYNG_LIBRARIES ${CYNG_PKG_LIBRARIES})
-       
-endif(CYNG_PKG_FOUND)
+    set(CYNG_INCLUDE_DIRS ${PC_CYNG_INCLUDE_DIRS})
+    set(CYNG_LIBRARIES ${PC_CYNG_LIBRARIES})
+     
+    if(NOT PC_CYNG_QUIETLY)
+        message(STATUS "** CYNG_PKG_FOUND: BEGIN")
+        message(STATUS "** CYNG_VERSION: ${CYNG_VERSION}")
+        message(STATUS "** CYNG_INCLUDE_DIRS: ${CYNG_INCLUDE_DIRS}")
+        message(STATUS "** CYNG_LIBRARIES: ${CYNG_LIBRARIES}")
+        message(STATUS "** CYNG_PKG_FOUND: END")
+    endif(NOT PC_CYNG_QUIETLY)
 
-set(CYNG_LIBS "cyng_db;cyng_io;cyng_log;cyng_obj;cyng_parse;cyng_rnd;cyng_sql;cyng_store;cyng_sys;cyng_task;cyng_vm;cyng_xml;cyng_sqlite3")
-if(WIN32)
-	list(APPEND CYNG_LIBS "cyng_scm")
-endif()
-
-if(NOT CYNG_FOUND)
+else(PC_CYNG_FOUND)
 
 	#
-	#	cyng header files
+	#	cyng header files, which are included in the form cyng/xx.h
 	#
+	file(GLOB CYNG_SEARCH_PATH "${CMAKE_PREFIX_PATH}/cyng*" "${PROJECT_SOURCE_DIR}/../cyng*" "${PROJECT_SOURCE_DIR}/../../sysroot-target")
     find_path(CYNG_INCLUDE_DIR_SRC
         NAMES 
-            cyng/version.hpp
+			cyng/meta.hpp
             cyng/obj/object.h
         PATH_SUFFIXES
-            cyng
-        HINTS
-            "${PROJECT_SOURCE_DIR}/../cyng/include"
+            include
         PATHS
-            /usr/include/
-            /usr/local/include/
+            ${CYNG_SEARCH_PATH}
         DOC 
             "CYNG headers"
+		NO_CMAKE_FIND_ROOT_PATH
     )
     
-	message(STATUS "** CYNG_INCLUDE_DIR_SRC: ${CYNG_INCLUDE_DIR_SRC}")
-
 	#
 	#	cyng generated header files
 	#
-   find_path(CYNG_INCLUDE_DIR_BUILD
-		NAMES 
+    find_path(CYNG_INCLUDE_DIR_BUILD
+        NAMES 
             cyng.h
-        HINTS
-			"${PROJECT_SOURCE_DIR}/../cyng/build/include"
-			"${PROJECT_SOURCE_DIR}/../cyng/v5te/include"
-            "${PROJECT_SOURCE_DIR}/../cyng/build/x64/include"
-            "${PROJECT_SOURCE_DIR}/../cyng/build/v5te/include"
+        PATH_SUFFIXES
+			include
+			${SMF_BUILD_TREE_STEM}/include
+			build/include
         PATHS
-            /usr/include/
-            /usr/local/include/
+			${CYNG_SEARCH_PATH}
         DOC 
             "CYNG headers"
+		NO_CMAKE_FIND_ROOT_PATH
     )
 
-	message(STATUS "** CYNG_INCLUDE_DIR_BUILD: ${CYNG_INCLUDE_DIR_BUILD}")
-
-	if (WIN32)
-
 	#
-	#	search cyng libraries on windows
+	#	Search cyng libraries.
+    #   In a multiplatform environment the OECP(1) builds are located in the "v5te" directory
+    #   and this directory is preferred.
+	#	On Windows the Debug build is preferred.
 	#
-	foreach(__CYNG_LIB ${CYNG_LIBS})
+    set(REQUESTED_LIBS "db;io;log;obj;parse;rnd;sql;store;sys;task;vm;net;xml;sqlite3")
+    
+	if(WIN32)
+        list(APPEND REQUESTED_LIBS "scm")
+    endif(WIN32)
 
-#		message(STATUS "** hint : ${__CYNG_LIB}")
+	# D:/reboot/node/../cyng
+	message(STATUS "** CYNG_SEARCH_PATH         : ${CYNG_SEARCH_PATH}")
 
-		find_library("${__CYNG_LIB}" ${__CYNG_LIB}
-			NAMES
-				${__CYNG_BUILD}
-			HINTS
-				"${CYNG_INCLUDE_DIR_BUILD}/../Debug"
-				"${CYNG_INCLUDE_DIR_BUILD}/../Release"
-			PATHS
-				/usr/lib/
-				/usr/local/lib
+	foreach(__LIB ${REQUESTED_LIBS})
+
+#		message(STATUS "** find         : cyng_${__LIB}")
+#		message(STATUS "** here         : ${SMF_BUILD_TREE_STEM}/src/${__LIB}")
+
+		find_library("__CYNG_${__LIB}" 
+			NAME
+				"cyng_${__LIB}"
+            PATHS
+                ${CYNG_SEARCH_PATH}
+            PATH_SUFFIXES
+				"lib"
+                "usr/lib/"
+				"${SMF_BUILD_TREE_STEM}"
+                "${SMF_BUILD_TREE_STEM}/src/${__LIB}"
+				"build/src/${__LIB}"
+                "${SMF_BUILD_TREE_STEM}/src/${__LIB}/Debug"
+                "${SMF_BUILD_TREE_STEM}/src/${__LIB}/Release"
+				"${SMF_BUILD_TREE_STEM}/Debug"
+				"${SMF_BUILD_TREE_STEM}/Release"
+				"build/Debug"
+				"build/Release"
 			DOC 
 				"CYNG libraries"
 		)
-#		message(STATUS "** found : ${${__CYNG_LIB}}")
-		list(APPEND CYNG_LIBRARIES ${${__CYNG_LIB}})
-#		message(STATUS "** CYNG_LIBRARIES    : ${CYNG_LIBRARIES}")
 
+#		message(STATUS "** add library cyng::${__LIB}: ${__CYNG_${__LIB}}")
+		add_library("cyng::${__LIB}" INTERFACE IMPORTED)
+		set_target_properties("cyng::${__LIB}" 
+				PROPERTIES
+					INTERFACE_INCLUDE_DIRECTORIES 
+						"${CYNG_INCLUDE_DIRS}"
+					INTERFACE_LINK_LIBRARIES 
+						"${__CYNG_${__LIB}}"
+			)
+
+		# append the found library to the list of all libraries
+		list(APPEND CYNG_LIBRARIES ${__CYNG_${__LIB}})
+
+		# this creates a variable with the name of the searched library, so that it can be included more easily
+		#unset(__LIB_UPPERCASE_NAME)
+		string(TOUPPER "cyng_${__LIB}" __LIB_UPPERCASE_NAME)
+#		message(STATUS "** lib name  : ${__LIB_UPPERCASE_NAME}: ${__CYNG_${__LIB}}")
+		set(${__LIB_UPPERCASE_NAME} ${__CYNG_${__LIB}})
 	endforeach()
-
-	else(UNIX)
-
-	#
-	#	search cyng libraries on linux
-	#
-	foreach(__CYNG_LIB ${CYNG_LIBS})
-
-		#message(STATUS "** hint : lib${__CYNG_LIB}")
-		find_library("${__CYNG_LIB}" ${__CYNG_LIB}
-			NAMES
-				${__CYNG_BUILD}
-			HINTS
-				"${CYNG_INCLUDE_DIR_BUILD}/.."
-			PATHS
-				/usr/lib/
-				/usr/local/lib
-			DOC 
-				"CYNG libraries"
-		)
-		#message(STATUS "** found : ${${__CYNG_LIB}}")
-		list(APPEND CYNG_LIBRARIES ${${__CYNG_LIB}})
-#		message(STATUS "** CYNG_LIBRARIES    : ${CYNG_LIBRARIES}")
-
-	endforeach()
-
-	endif()
-
+endif(PC_CYNG_FOUND)
     
-	set(CYNG_INCLUDE_DIRS "${CYNG_INCLUDE_DIR_SRC};${CYNG_INCLUDE_DIR_BUILD}")
-    
-
-	if (CYNG_INCLUDE_DIRS AND CYNG_LIBRARIES)
-		set(CYNG_FOUND ON)
-		set(CYNG_SQLITE3 "${CYNG_INCLUDE_DIR_BUILD}/../sqlite3")
-		message(STATUS "** CYNG_LIBRARIES        : ${CYNG_LIBRARIES}")
-		message(STATUS "** CYNG_INCLUDE_DIRS     : ${CYNG_INCLUDE_DIRS}")
-		message(STATUS "** CYNG_SQLITE3          : ${CYNG_SQLITE3}")
-	endif()
-    
-	unset(CYNG_INCLUDE_DIR_SRC CACHE)
+# check if both the header and the libraries have been found
+if (CYNG_INCLUDE_DIR_SRC AND CYNG_INCLUDE_DIR_BUILD AND CYNG_LIBRARIES)
+    set(CYNG_INCLUDE_DIRS "${CYNG_INCLUDE_DIR_SRC};${CYNG_INCLUDE_DIR_BUILD}")
+    set(CYNG_FOUND ON)
+    unset(CYNG_INCLUDE_DIR_SRC CACHE)
 	unset(CYNG_INCLUDE_DIR_BUILD CACHE)
-
-endif(NOT CYNG_FOUND)
-
+	if(NOT CYNG_FIND_QUIETLY)
+		message(STATUS "** CYNG_LIBRARIES           : ${CYNG_LIBRARIES}")
+		message(STATUS "** CYNG_INCLUDE_DIRS        : ${CYNG_INCLUDE_DIRS}")
+	endif(NOT CYNG_FIND_QUIETLY)
+endif(CYNG_INCLUDE_DIR_SRC AND CYNG_INCLUDE_DIR_BUILD AND CYNG_LIBRARIES)
 
 mark_as_advanced(CYNG_FOUND CYNG_INCLUDE_DIRS CYNG_LIBRARIES)
 
+if(UNIX)
+	include(FindPackageHandleStandardArgs)
+	find_package_handle_standard_args(CYNG
+		REQUIRED_VARS 
+			CYNG_INCLUDE_DIRS
+			CYNG_LIBRARIES
+		VERSION_VAR 
+			CYNG_VERSION
+		FAIL_MESSAGE
+			"Cannot provide CYNG library"
+	)
+endif(UNIX)
 
-if(CYNG_FOUND AND NOT TARGET CYNG::CYNG)
+if(CYNG_FOUND AND NOT TARGET cyng::cyng)
 
-	if(UNIX)
-		include(FindPackageHandleStandardArgs)
-		find_package_handle_standard_args(CYNG
-			REQUIRED_VARS 
-				CYNG_INCLUDE_DIRS
-				CYNG_LIBRARIES
-			VERSION_VAR 
-				CYNG_VERSION
-			FAIL_MESSAGE
-				"Cannot provide CYNG library"
-		)
-	endif(UNIX)
-
-    add_library(CYNG::CYNG INTERFACE IMPORTED)
+    add_library(cyng::cyng INTERFACE IMPORTED)
 
 #	define a target
-   	set_target_properties(CYNG::CYNG 
+   	set_target_properties(cyng::cyng 
 		PROPERTIES
 			INTERFACE_INCLUDE_DIRECTORIES 
 				"${CYNG_INCLUDE_DIRS}"
@@ -175,4 +187,4 @@ if(CYNG_FOUND AND NOT TARGET CYNG::CYNG)
 				"${CYNG_LIBRARIES}"
     )
 
-endif()
+endif(CYNG_FOUND AND NOT TARGET cyng::cyng)

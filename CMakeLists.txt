@@ -83,6 +83,11 @@ else()
 	set(GLOBAL_LIBRARY_TYPE SHARED)
 endif()
 
+# root name of build tree
+set(path_build_tree ${CMAKE_BINARY_DIR})
+cmake_path(GET path_build_tree STEM SMF_BUILD_TREE_STEM)
+message(STATUS "** Build Tree Path    : ${CMAKE_BINARY_DIR}")
+
 #
 #	boost library
 #
@@ -290,6 +295,7 @@ target_link_libraries(doca
 		docscript
         fmt::fmt
 		${CYNG_LIBRARIES}
+		pugixml
 		${OPENSSL_LIBRARIES}
 		"$<$<PLATFORM_ID:Linux>:pthread;${Boost_LIBRARIES}>"
 )
@@ -335,6 +341,7 @@ target_link_libraries(doc2html
 		dom
         fmt::fmt
 		SMFSEC::SMFSEC
+		pugixml
 		${CYNG_LIBRARIES}
 		${OPENSSL_LIBRARIES}
 		"$<$<PLATFORM_ID:Linux>:pthread;${Boost_LIBRARIES}>"
@@ -378,6 +385,7 @@ target_link_libraries(doc2LaTeX
 		tex
         fmt::fmt
 		${CYNG_LIBRARIES}
+		pugixml
 		${OPENSSL_LIBRARIES}
 		"$<$<PLATFORM_ID:Linux>:pthread;${Boost_LIBRARIES}>"
 )
@@ -419,6 +427,7 @@ target_link_libraries(doc2md
 		docruntime
         fmt::fmt
 		${CYNG_LIBRARIES}
+		pugixml
 		${OPENSSL_LIBRARIES}
 		"$<$<PLATFORM_ID:Linux>:pthread;${Boost_LIBRARIES}>"
 )

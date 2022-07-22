@@ -138,7 +138,7 @@ namespace dom {
                 os_ << ' ';
 
             os_ << "<span class=\"docc-keyword\">"
-                << "\"" << cyng::to_str(code) << "\""
+                << "\"" << cyng::to_string(code) << "\""
                 << "</span>"
                 << ": ";
             nl_ = false;

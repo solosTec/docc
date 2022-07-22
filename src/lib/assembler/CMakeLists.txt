@@ -94,7 +94,7 @@ target_include_directories(docasm
 )
 
 target_link_libraries(docasm 
-	CYNG::CYNG
+	cyng::cyng
     fmt::fmt
 )
 

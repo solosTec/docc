@@ -412,7 +412,7 @@ namespace docruntime {
             svg.set_attribute("height", "100%");
             //	remove private data
             svg.del_attribute("inkscape:export-filename");
-            auto const src = doc.to_str();
+            auto const src = doc.to_string();
             auto const title = compute_title_figure(tag, caption);
             auto const figure = dom::figure(dom::id_(id), dom::div(dom::class_("smf-svg"), src), dom::figcaption(title));
             figure.serialize(os_);
