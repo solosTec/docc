@@ -137,6 +137,13 @@ else()
     message(FATAL_ERROR "** SMFSEC library not found")
 endif()
 
+if (MSVC)
+    # support for large object files
+    add_compile_options(/bigobj)
+    add_compile_options(/MP)
+    # __cplusplus is 199711L otherwise
+    add_compile_options("/Zc:__cplusplus") 
+endif(MSVC)
 
 #
 # docSite generator
@@ -171,6 +178,7 @@ target_link_libraries(doc2site
 		docruntime
 		dom
         fmt::fmt
+        Boost::url
 		SMFSEC::SMFSEC
 		${CYNG_LIBRARIES}
 		pugixml

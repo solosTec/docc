@@ -15,6 +15,7 @@ namespace docscript {
 	constexpr char control_file_name[] = "site-${docc_VERSION_MAJOR}.${docc_VERSION_MINOR}.json";
 	std::filesystem::path const subdir_src = "src";
 	std::filesystem::path const subdir_out = "out";
+	std::filesystem::path const subdir_css = "css";
 
 	constexpr char bootstrap_version[] = "5.0.2";
 	constexpr char integrity[] = "sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC";

@@ -1,5 +1,8 @@
 ﻿
 #include <initialize.h>
+
+#include <details/root_certificates.hpp>
+#include <download.h>
 #include <site_defs.h>
 
 #include <cyng/io/serialize.h>
@@ -13,6 +16,8 @@
 #include <fmt/color.h>
 #include <fmt/core.h>
 
+#include <boost/asio.hpp>
+#include <boost/asio/ssl.hpp>
 #include <boost/beast.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/uuid/random_generator.hpp>
@@ -39,7 +44,7 @@ namespace docscript {
         //
 
         //	1. check for .doc2site subdirectory
-        if (std::filesystem::exists(hidden)) {
+        if (std::filesystem::exists(working_dir / hidden)) {
             fmt::print(
                 stdout,
                 fg(fmt::color::dark_orange) | fmt::emphasis::bold,
@@ -54,8 +59,9 @@ namespace docscript {
             fmt::print(
                 stdout,
                 fg(fmt::color::dark_orange) | fmt::emphasis::bold,
-                "***warn  : cannot create [{}]\n",
-                (working_dir / hidden).string());
+                "***warn  : cannot create [{}] - {}\n",
+                (working_dir / hidden / "cache").string(),
+                ec.message());
             return EXIT_FAILURE;
         }
 
@@ -63,8 +69,9 @@ namespace docscript {
             fmt::print(
                 stdout,
                 fg(fmt::color::dark_orange) | fmt::emphasis::bold,
-                "***warn  : cannot create [{}]\n",
-                (working_dir / "bootstrap" / bootstrap_version).string());
+                "***warn  : cannot create [{}] - {}\n",
+                (working_dir / "bootstrap" / bootstrap_version).string(),
+                ec.message());
             return EXIT_FAILURE;
         }
 
@@ -80,8 +87,8 @@ namespace docscript {
             cfg << "verbose\t= 2" << std::endl;
             cfg << "tag\t= " << boost::uuids::to_string(uuid_gen()) << std::endl;
             cfg << "[generator]" << std::endl;
-            cfg << "include-path\t= " << (working_dir / subdir_src / "include").string() << std::endl;
             cfg << "include-path\t= " << (working_dir / subdir_src).string() << std::endl;
+            cfg << "include-path\t= " << (working_dir / subdir_src / "include").string() << std::endl;
             cfg << "out\t= " << (working_dir / subdir_out).string() << std::endl;
             cfg << "cache\t= " << (working_dir / hidden / "cache").string() << std::endl;
             cfg << "bs\t= " << (working_dir / hidden / "bootstrap" / bootstrap_version).string() << std::endl;
@@ -125,7 +132,7 @@ namespace docscript {
                 stdout,
                 fg(fmt::color::dark_orange) | fmt::emphasis::bold,
                 "***warn  : cannot create [{}]: {}\n",
-                (working_dir / subdir_src).string(),
+                (working_dir / subdir_src / "include" / "images").string(),
                 ec.message());
             return EXIT_FAILURE;
         }
@@ -184,7 +191,7 @@ namespace docscript {
                 cyng::make_tuple(
                     cyng::make_param("name", "example.com"),
                     cyng::make_param("index", "home"),
-                    cyng::make_param("css", "css/style.css"),
+                    cyng::make_param("css", (subdir_css / "style.css").string()),
                     cyng::make_param("pages", cyng::make_vector({"home"})))));
     }
 
@@ -233,9 +240,57 @@ namespace docscript {
             cyng::make_param("enabled", true));
     }
 
-    void initialize::download_bootstrap(std::filesystem::path, std::string version) const {
+    void initialize::download_bootstrap(std::filesystem::path, std::string version) {
 
+        //
         //  https://github.com/twbs/bootstrap/releases/download/v5.1.3/bootstrap-5.1.3-dist.zip
+        //
+        boost::asio::io_context ioc;
+        boost::asio::ssl::context ctx{boost::asio::ssl::context::tlsv12_client};
+        //  see https://stackoverflow.com/a/49511782
+        //  not really required but helps
+        load_root_certificates(ctx);
+        // Verify the remote server's certificate
+        ctx.set_verify_mode(boost::asio::ssl::verify_peer);
+
+        //
+        //  local function to handle redirects
+        //
+        std::function<void(std::string)> redirector;
+        redirector = [&, this](std::string location) {
+            //
+            //  redirect
+            //
+            fmt::print(stdout, fg(fmt::color::gray), "***info : redirect to {}\n", location);
+
+            //
+            //  create new downloader
+            //
+            auto const url = boost::urls::parse_uri(location).value();
+            auto downloader = std::make_shared<net::download>(
+                boost::asio::make_strand(ioc), ctx, "bootstrap-5.0.2-dist.zip", []() {}, redirector);
+            downloader->start(url);
+        };
+
+        auto downloader = std::make_shared<net::download>(
+            boost::asio::make_strand(ioc), ctx, "bootstrap-5.0.2-dist.zip", []() {}, redirector);
+
+        boost::urls::url url;
+        url.set_scheme("https");
+        url.set_host("github.com");
+        // url.set_port(433);
+        url.set_path("/twbs/bootstrap/releases/download/v5.1.3/bootstrap-5.1.3-dist.zip");
+        downloader->start(url);
+
+        ioc.run();
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        // download d(
+        //     boost::asio::any_io_executor ex,
+        //     boost::asio::ssl::context & ctx,
+        //     char const* path,
+        //     std::function<void()> complete,
+        //     std::function<void()> redirect);
+
         // boost::asio::io_context io;
         // boost::asio::ip::tcp::tcp::socket s(io);
         // s.connect({boost::asio::ip::address::from_string("140.82.121.4"), 80});

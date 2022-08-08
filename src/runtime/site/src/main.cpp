@@ -54,8 +54,8 @@ int main(int argc, char *argv[]) {
     boost::program_options::options_description general("general");
     general.add_options()
 
-        ("command,c", boost::program_options::value(&cmd)->default_value(cmd), "command") // --command
-        ("tag,T", boost::program_options::value(&stag)->default_value(stag), "VM tag")    // --tag
+        ("command,c", boost::program_options::value(&cmd)->default_value(cmd), "command [init|build]") // --command
+        ("tag,T", boost::program_options::value(&stag)->default_value(stag), "VM tag")                 // --tag
         //	verbose level
         ("verbose,V", boost::program_options::value<int>()->default_value(0)->implicit_value(1), "verbose level");
 
