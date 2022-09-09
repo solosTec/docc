@@ -97,7 +97,6 @@ target_include_directories(docruntime
 
 target_link_libraries(docruntime 
 	cyng::cyng
-#	SMFSEC::SMFSEC
     fmt::fmt
 )
 

@@ -68,6 +68,7 @@ message(STATUS "** CMAKE_BINARY_DIR   : ${CMAKE_BINARY_DIR}")
 message(STATUS "** CURRENT_SOURCE_DIR : ${CMAKE_CURRENT_SOURCE_DIR}")
 message(STATUS "** ${PROJECT_NAME}_SOURCE_DIR : ${${PROJECT_NAME}_SOURCE_DIR}")
 message(STATUS "** ${PROJECT_NAME}_BINARY_DIR : ${${PROJECT_NAME}_BINARY_DIR}")
+message(STATUS "** Boost_LIBRARIES    : ${Boost_LIBRARIES}")
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 20)
@@ -183,7 +184,7 @@ target_link_libraries(doc2site
 		${CYNG_LIBRARIES}
 		pugixml
 		${OPENSSL_LIBRARIES}
-		"$<$<PLATFORM_ID:Linux>:pthread;${Boost_LIBRARIES}>"
+		"$<$<PLATFORM_ID:Linux>:pthread;Boost::boost>"
 )
 
 install(TARGETS doc2site

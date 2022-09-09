@@ -255,7 +255,7 @@ target_link_libraries(docc
         fmt::fmt
 		${CYNG_LIBRARIES}
 		${OPENSSL_LIBRARIES}
-		"$<$<PLATFORM_ID:Linux>:pthread;${Boost_LIBRARIES}>"
+		"$<$<PLATFORM_ID:Linux>:pthread;Boost::boost>"
 )
 
 install(TARGETS docc
@@ -297,7 +297,7 @@ target_link_libraries(doca
 		${CYNG_LIBRARIES}
 		pugixml
 		${OPENSSL_LIBRARIES}
-		"$<$<PLATFORM_ID:Linux>:pthread;${Boost_LIBRARIES}>"
+		"$<$<PLATFORM_ID:Linux>:pthread;Boost::boost>"
 )
 
 install(TARGETS doca
@@ -344,7 +344,7 @@ target_link_libraries(doc2html
 		pugixml
 		${CYNG_LIBRARIES}
 		${OPENSSL_LIBRARIES}
-		"$<$<PLATFORM_ID:Linux>:pthread;${Boost_LIBRARIES}>"
+		"$<$<PLATFORM_ID:Linux>:pthread;Boost::boost>"
 )
 
 install(TARGETS doc2html
@@ -387,7 +387,7 @@ target_link_libraries(doc2LaTeX
 		${CYNG_LIBRARIES}
 		pugixml
 		${OPENSSL_LIBRARIES}
-		"$<$<PLATFORM_ID:Linux>:pthread;${Boost_LIBRARIES}>"
+		"$<$<PLATFORM_ID:Linux>:pthread;Boost::boost>"
 )
 
 install(TARGETS doc2LaTeX
@@ -429,7 +429,7 @@ target_link_libraries(doc2md
 		${CYNG_LIBRARIES}
 		pugixml
 		${OPENSSL_LIBRARIES}
-		"$<$<PLATFORM_ID:Linux>:pthread;${Boost_LIBRARIES}>"
+		"$<$<PLATFORM_ID:Linux>:pthread;Boost::boost>"
 )
 
 install(TARGETS doc2md

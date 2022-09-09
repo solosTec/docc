@@ -75,8 +75,9 @@ target_include_directories(tex
 )
 
 target_link_libraries(tex 
-	${CYNG_LIBRARIES}
-	"$<$<PLATFORM_ID:Linux>:pthread;${Boost_LIBRARIES}>"
+	PRIVATE
+		${CYNG_LIBRARIES}
+		"$<$<PLATFORM_ID:Linux>:pthread;Boost::boost>"
 )
 
 target_compile_definitions(tex

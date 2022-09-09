@@ -47,6 +47,7 @@ message(STATUS "** CMAKE_SOURCE_DIR         : ${CMAKE_SOURCE_DIR}")
 message(STATUS "** CMAKE_CURRENT_SOURCE_DIR : ${CMAKE_CURRENT_SOURCE_DIR}")
 message(STATUS "** CYNG_INCLUDE_DIRS        : ${CYNG_INCLUDE_DIRS}")
 message(STATUS "** CYNG_LIBRARIES           : ${CYNG_LIBRARIES}")
+message(STATUS "** Boost_LIBRARIES          : ${Boost_LIBRARIES}")
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -75,9 +76,11 @@ target_include_directories(dom
 )
 
 target_link_libraries(dom 
-	${CYNG_LIBRARIES}
-	"$<$<PLATFORM_ID:Linux>:pthread;${Boost_LIBRARIES}>"
+	PRIVATE
+		cyng::cyng
+		"$<$<PLATFORM_ID:Linux>:pthread;Boost::boost>"
 )
+
 
 target_compile_definitions(dom
 	PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:_WIN32_WINNT=0x0601>")
